@@ -117,7 +117,15 @@ public final class PolicyDecisionPoint extends AbstractPDP {
 
     @Override
     public PDPEvaluation evaluate( RequestWrapper request ) {
-        log.severe( "Error evaluate( request ) not implemented" );
+        try {
+            PolicyFinder policyFinder = getPolicyFinder();
+            ResponseCtx responseCtx = evaluate( request.getRequest(), policyFinder );
+            journalInterface.logMultipleStrings( request.getRequest(), responseCtx.encode() );
+            ResponseType responseType = getResponseType( responseCtx.encode() );
+            return new PDPResponse( responseType );
+        } catch( Exception e ) {
+            log.severe( "Error in evaluation : " + e.getMessage() );
+        }
         return null;
     }
 
@@ -130,6 +138,17 @@ public final class PolicyDecisionPoint extends AbstractPDP {
         policyFinder.init();
         return policyFinder;
     }
+
+    private PolicyFinder getPolicyFinder() {
+        PolicyFinder policyFinder = new PolicyFinder();
+        Set<PolicyFinderModule> policyFinderModulesSet = new HashSet<>();
+        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder() );
+        policyFinderModulesSet.add( finderModule );
+        policyFinder.setModules( policyFinderModulesSet );
+        policyFinder.init();
+        return policyFinder;
+    }
+
 
     /**
      * Attempts to evaluate the request against the policies known to this PDP.

@@ -138,4 +138,9 @@ public class PolicyAdministrationPoint implements PAPInterface {
             .collect( Collectors.toList() );
     }
 
+    @Override
+    public String getPath() {
+        return properties.getPath();
+    }
+
 }

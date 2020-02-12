@@ -61,6 +61,10 @@ public abstract class AbstractPDP implements PDPInterface {
         return pap;
     }
 
+    protected final String getPolicyFolder() {
+        return pap.getPath();
+    }
+
     @Override
     public final void setPap( PAPInterface pap ) {
         Reject.ifNull( pap );

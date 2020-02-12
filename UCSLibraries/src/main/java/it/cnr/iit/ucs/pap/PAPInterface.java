@@ -45,6 +45,14 @@ public interface PAPInterface {
      */
     public String addPolicy( String policy );
 
+
+    /**
+     * Retrieves the path of policy folder storage
+     *
+     * @return String path of policy folder storage
+     */
+    public String getPath();
+
     /**
      * List all the policies stored in the table
      *
