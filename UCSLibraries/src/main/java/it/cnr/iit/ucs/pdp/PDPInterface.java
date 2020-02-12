@@ -71,6 +71,14 @@ public interface PDPInterface {
      * @param request
      * @return
      */
+    public PDPEvaluation evaluate( RequestWrapper request, STATUS status );
+
+    /**
+     * Evaluate the request
+     *
+     * @param request
+     * @return
+     */
     public PDPEvaluation evaluate( RequestWrapper request );
 
     public void setPap( PAPInterface pap );

@@ -75,7 +75,7 @@ public final class ContextHandler extends AbstractContextHandler {
         log.log( Level.INFO, "TryAccess received at {0}", new Object[] { System.currentTimeMillis() } );
         Reject.ifNull( message, "TryAccessMessage is null" );
 
-        PolicyWrapper policy = PolicyWrapper.build( getPap(), message );
+        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null ? PolicyWrapper.build( getPap(), message ) : null;
         RequestWrapper request = RequestWrapper.build( message.getRequest(), getPipRegistry() );
         request.fatten( false );
         log.info( "TryAccess fattened request contents : \n" + request.getRequest() );

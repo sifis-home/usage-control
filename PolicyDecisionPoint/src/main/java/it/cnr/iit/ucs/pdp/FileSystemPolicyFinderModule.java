@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -50,7 +51,9 @@ import org.wso2.balana.finder.PolicyFinder;
 import org.wso2.balana.finder.PolicyFinderModule;
 import org.wso2.balana.finder.PolicyFinderResult;
 
+import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.utility.FileUtility;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 
 /**
  * This is a filesystem policy repository.
@@ -74,7 +77,7 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
     public static final String POLICY_REPOSITORY_DB_PROPERTY = "com.huawei.policy.decision.PolicyRepository";
 
-    public FileSystemPolicyFinderModule(String policyFolderPath) {
+    public FileSystemPolicyFinderModule(String policyFolderPath, String status) {
         policies = new HashMap<URI, AbstractPolicy>();
         POLICY_FILE_FOLDER = policyFolderPath;
         try {
@@ -87,7 +90,7 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
             log.severe( e.getMessage() );
             throw new IllegalStateException( "Unable to protect against XXE" );
         }
-        loadPolicies();
+        loadPolicies(status);
     }
 
     @Override
@@ -182,7 +185,7 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
      * 
      * @return
      */
-    public Integer loadPolicies() {
+    public Integer loadPolicies(String status) {
         // Load all policy from fs folder
         policies.clear();
         if (POLICY_FILE_FOLDER == null) {
@@ -193,7 +196,13 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
             .filter(Files::isRegularFile)
             .map(Path::toString)
             .filter(path -> path.endsWith( POLICY_FILE_EXTENSION ))
-            .map(FileUtility::readFileAsString)
+            .map(policy -> {
+                try {
+                    return PolicyWrapper.build(FileUtility.readFileAsString(policy))
+                            .getPolicyForCondition(status).getPolicy();
+                } catch (PolicyException e) { return null; }
+            })
+            .filter(Objects::nonNull)
             .forEach(policy -> loadPolicy(policy, finder));
         } catch (IOException e) {
             throw new IllegalStateException( "Unable to read policies from filesystem" );

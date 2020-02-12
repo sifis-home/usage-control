@@ -87,6 +87,9 @@ public final class PolicyDecisionPoint extends AbstractPDP {
 
     @Override
     public PDPEvaluation evaluate( RequestWrapper request, PolicyWrapper policy, STATUS status ) {
+        if (policy == null) {
+            return evaluate(request, status);
+        }
         String conditionName = PolicyTags.getCondition( status );
         PolicyWrapper policyForCondition;
         try {
@@ -116,9 +119,9 @@ public final class PolicyDecisionPoint extends AbstractPDP {
     }
 
     @Override
-    public PDPEvaluation evaluate( RequestWrapper request ) {
+    public PDPEvaluation evaluate( RequestWrapper request, STATUS status ) {
         try {
-            PolicyFinder policyFinder = getPolicyFinder();
+            PolicyFinder policyFinder = getPolicyFinder( status );
             ResponseCtx responseCtx = evaluate( request.getRequest(), policyFinder );
             journalInterface.logMultipleStrings( request.getRequest(), responseCtx.encode() );
             ResponseType responseType = getResponseType( responseCtx.encode() );
@@ -126,6 +129,12 @@ public final class PolicyDecisionPoint extends AbstractPDP {
         } catch( Exception e ) {
             log.severe( "Error in evaluation : " + e.getMessage() );
         }
+        return null;
+    }
+
+    @Override
+    public PDPEvaluation evaluate( RequestWrapper request ) {
+        log.severe( "Error evaluate( request ) not implemented" );
         return null;
     }
 
@@ -139,10 +148,10 @@ public final class PolicyDecisionPoint extends AbstractPDP {
         return policyFinder;
     }
 
-    private PolicyFinder getPolicyFinder() {
+    private PolicyFinder getPolicyFinder(STATUS status) {
         PolicyFinder policyFinder = new PolicyFinder();
         Set<PolicyFinderModule> policyFinderModulesSet = new HashSet<>();
-        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder() );
+        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder(), PolicyTags.getCondition( status ) );
         policyFinderModulesSet.add( finderModule );
         policyFinder.setModules( policyFinderModulesSet );
         policyFinder.init();
