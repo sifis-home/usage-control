@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -51,12 +50,19 @@ import org.wso2.balana.finder.PolicyFinder;
 import org.wso2.balana.finder.PolicyFinderModule;
 import org.wso2.balana.finder.PolicyFinderResult;
 
+import it.cnr.iit.ucs.constants.STATUS;
 import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.utility.FileUtility;
+import it.cnr.iit.xacml.PolicyTags;
 import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 
 /**
- * This is a filesystem policy repository.
+ * This is file based policy repository. Policies can be inside the directory in
+ * a file system. Then you can set directory location using
+ * "ucs.policy-administration-point.path" JAVA property
+ *
+ * @author Gabriele Baldi
+ *
  */
 
 public class FileSystemPolicyFinderModule extends PolicyFinderModule {
@@ -75,22 +81,27 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
     private DocumentBuilderFactory documentBuilderFactory;
 
-    public static final String POLICY_REPOSITORY_DB_PROPERTY = "com.huawei.policy.decision.PolicyRepository";
+    private String policyCondition;
 
-    public FileSystemPolicyFinderModule(String policyFolderPath, String status) {
+    public FileSystemPolicyFinderModule(String policyFolderPath) {
         policies = new HashMap<URI, AbstractPolicy>();
         POLICY_FILE_FOLDER = policyFolderPath;
         try {
             documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
-            documentBuilderFactory.setIgnoringComments( true );
-            documentBuilderFactory.setNamespaceAware( true );
-            documentBuilderFactory.setValidating( false );
-        } catch( Exception e ) {
-            log.severe( e.getMessage() );
-            throw new IllegalStateException( "Unable to protect against XXE" );
+            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            documentBuilderFactory.setIgnoringComments(true);
+            documentBuilderFactory.setNamespaceAware(true);
+            documentBuilderFactory.setValidating(false);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+            throw new IllegalStateException("Unable to protect against XXE");
         }
-        loadPolicies(status);
+        loadPolicies();
+    }
+
+    public FileSystemPolicyFinderModule(String policyFolderPath, STATUS status) {
+        this(policyFolderPath);
+        this.policyCondition = PolicyTags.getCondition(status);
     }
 
     @Override
@@ -185,29 +196,20 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
      * 
      * @return
      */
-    public Integer loadPolicies(String status) {
+    public Integer loadPolicies() {
         // Load all policy from fs folder
         policies.clear();
         if (POLICY_FILE_FOLDER == null) {
-            throw new IllegalStateException( "Policy folder path not set." );            
+            throw new IllegalStateException("Policy folder path not set.");
         }
         try {
-            Files.walk(Paths.get( POLICY_FILE_FOLDER ))
-            .filter(Files::isRegularFile)
-            .map(Path::toString)
-            .filter(path -> path.endsWith( POLICY_FILE_EXTENSION ))
-            .map(policy -> {
-                try {
-                    return PolicyWrapper.build(FileUtility.readFileAsString(policy))
-                            .getPolicyForCondition(status).getPolicy();
-                } catch (PolicyException e) { return null; }
-            })
-            .filter(Objects::nonNull)
-            .forEach(policy -> loadPolicy(policy, finder));
+            Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
+                    .filter(path -> path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
+                    .forEach(policy -> loadPolicy(policy, finder));
         } catch (IOException e) {
-            throw new IllegalStateException( "Unable to read policies from filesystem" );
+            throw new IllegalStateException("Unable to read policies from filesystem");
         }
-        
+
         return policies.size();
     }
 
@@ -221,6 +223,13 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
      */
     protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
         AbstractPolicy abstractPolicy = null;
+
+        try {
+            policy = policyCondition == null ? policy
+                    : PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();
+        } catch (PolicyException e) {
+            return abstractPolicy;
+        }
 
         try (InputStream stream = new ByteArrayInputStream( policy.getBytes() )) {
             DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();

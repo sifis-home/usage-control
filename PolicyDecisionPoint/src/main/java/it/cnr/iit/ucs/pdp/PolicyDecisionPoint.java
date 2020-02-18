@@ -100,6 +100,21 @@ public final class PolicyDecisionPoint extends AbstractPDP {
         return evaluate( request, policyForCondition );
     }
 
+
+    public PolicyWrapper findPolicy( RequestWrapper request ) {
+        try {
+            PolicyFinder policyFinder = getPolicyFinder();
+            AbstractRequestCtx requestCtx = RequestCtxFactory.getFactory().getRequestCtx( request.getRequest().replaceAll( ">\\s+<", "><" ) );
+            pdpConfig = pdpConfig == null ? Balana.getInstance().getPdpConfig() : pdpConfig;
+            EvaluationCtx evalContext = EvaluationCtxFactory.getFactory().getEvaluationCtx( requestCtx, pdpConfig );
+            PolicyFinderResult policyFinderResult = policyFinder.findPolicy( evalContext );
+            return PolicyWrapper.build(getPAP().retrievePolicy( policyFinderResult.getPolicy().getId().getPath() ));
+        } catch (PolicyException | ParsingException e) {
+            return null;
+        }
+    }
+
+
     @Override
     public PDPEvaluation evaluate( RequestWrapper request, PolicyWrapper policy ) {
         try {
@@ -148,10 +163,20 @@ public final class PolicyDecisionPoint extends AbstractPDP {
         return policyFinder;
     }
 
-    private PolicyFinder getPolicyFinder(STATUS status) {
+    private PolicyFinder getPolicyFinder( STATUS status ) {
         PolicyFinder policyFinder = new PolicyFinder();
         Set<PolicyFinderModule> policyFinderModulesSet = new HashSet<>();
-        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder(), PolicyTags.getCondition( status ) );
+        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder(), status );
+        policyFinderModulesSet.add( finderModule );
+        policyFinder.setModules( policyFinderModulesSet );
+        policyFinder.init();
+        return policyFinder;
+    }
+
+    private PolicyFinder getPolicyFinder() {
+        PolicyFinder policyFinder = new PolicyFinder();
+        Set<PolicyFinderModule> policyFinderModulesSet = new HashSet<>();
+        FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule( getPolicyFolder() );
         policyFinderModulesSet.add( finderModule );
         policyFinder.setModules( policyFinderModulesSet );
         policyFinder.init();
@@ -264,7 +289,7 @@ public final class PolicyDecisionPoint extends AbstractPDP {
      */
     private AbstractResult evaluateContext( EvaluationCtx context, PolicyFinder policyFinder ) {
         PolicyFinderResult finderResult = policyFinder.findPolicy( context );
-
+        
         if( finderResult.notApplicable() ) {
             return ResultFactory.getFactory().getResult( AbstractResult.DECISION_NOT_APPLICABLE, context );
         } else if( finderResult.indeterminate() ) {

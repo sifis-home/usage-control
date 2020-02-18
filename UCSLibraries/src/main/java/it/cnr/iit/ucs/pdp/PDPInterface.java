@@ -81,6 +81,8 @@ public interface PDPInterface {
      */
     public PDPEvaluation evaluate( RequestWrapper request );
 
+    public PolicyWrapper findPolicy( RequestWrapper request );
+
     public void setPap( PAPInterface pap );
 
     public void setObligationManager( ObligationManagerInterface obligationManager );

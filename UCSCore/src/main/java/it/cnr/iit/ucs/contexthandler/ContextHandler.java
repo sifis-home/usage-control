@@ -75,8 +75,8 @@ public final class ContextHandler extends AbstractContextHandler {
         log.log( Level.INFO, "TryAccess received at {0}", new Object[] { System.currentTimeMillis() } );
         Reject.ifNull( message, "TryAccessMessage is null" );
 
-        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null ? PolicyWrapper.build( getPap(), message ) : null;
         RequestWrapper request = RequestWrapper.build( message.getRequest(), getPipRegistry() );
+        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null ? PolicyWrapper.build( getPap(), message ) : getPdp().findPolicy( request );
         request.fatten( false );
         log.info( "TryAccess fattened request contents : \n" + request.getRequest() );
 
@@ -126,6 +126,7 @@ public final class ContextHandler extends AbstractContextHandler {
      *            the sessionId
      */
     private void createSession( TryAccessMessage message, RequestWrapper request, PolicyWrapper policy, String sessionId ) {
+        policy = policy == null ? getPdp().findPolicy( request ) : policy;
         log.log( Level.INFO, "Creating a new session : {0} ", sessionId );
 
         String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();
@@ -405,7 +406,7 @@ public final class ContextHandler extends AbstractContextHandler {
 
     public synchronized void reevaluate( SessionInterface session ) throws PolicyException, RequestException {
         log.log( Level.INFO, "Reevaluation begins at {0}", System.currentTimeMillis() );
-
+        
         PolicyWrapper policy = PolicyWrapper.build( session.getPolicySet() );
         RequestWrapper request = RequestWrapper.build( session.getOriginalRequest(), getPipRegistry() );
         request.fatten( false );
