@@ -139,7 +139,10 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
                 }
 
                 // this is the first match we've found, so remember it
-                selectedPolicies.add(policy);
+                if (selectedPolicies.size() == 0) {
+                    // sort of hack to prevent policyset
+                    selectedPolicies.add(policy);
+                }
             }
         }
 
