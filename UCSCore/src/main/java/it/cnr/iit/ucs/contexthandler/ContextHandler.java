@@ -80,6 +80,7 @@ public final class ContextHandler extends AbstractContextHandler {
         request.fatten( false );
         log.info( "TryAccess fattened request contents : \n" + request.getRequest() );
         PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null ? PolicyWrapper.build( getPap(), message ) : getPdp().findPolicy( request );
+        log.info(policy == null || policy.getPolicy() == null ? "No policy found." : "Policy found: \n" + policy.getPolicy());
         
         PDPEvaluation evaluation = getPdp().evaluate( request, policy, STATUS.TRY );
 
