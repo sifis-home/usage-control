@@ -122,9 +122,12 @@ public final class PIPReader extends PIPBase {
 
         Attribute attribute = getAttributes().get( 0 );
         addAdditionalInformation( request, attribute );
-        String value = retrieve( attribute );
-
-        request.addAttribute( attribute, value );
+        try {
+            String value = retrieve( attribute );
+            request.addAttribute( attribute, value );
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
     }
 
     /**
