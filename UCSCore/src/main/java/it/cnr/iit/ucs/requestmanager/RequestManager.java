@@ -38,101 +38,102 @@ import it.cnr.iit.utility.errorhandling.Reject;
  */
 public class RequestManager extends AbstractRequestManager {
 
-    private static final Logger log = Logger.getLogger( RequestManager.class.getName() );
-    private boolean active = false;
+	private static final Logger log = Logger.getLogger(RequestManager.class.getName());
+	private boolean active = false;
 
-    private ExecutorService inquirers;
+	private ExecutorService inquirers;
 
-    public RequestManager( RequestManagerProperties properties ) {
-        super( properties );
-        this.active = properties.isActive();
-        initializeInquirers();
-    }
+	public RequestManager(RequestManagerProperties properties) {
+		super(properties);
+		this.active = properties.isActive();
+		initializeInquirers();
+	}
 
-    /**
-     * Initialises the request manager with a pool of threads
-     *
-     * @return true if everything goes fine, false in case of exceptions
-    */
-    private void initializeInquirers() {
-        try {
-            inquirers = Executors.newFixedThreadPool( 1 );
-        } catch( Exception e ) {
-            log.severe( "Error initialising the RequestManager inquirers : " + e.getMessage() );
-        }
-    }
+	/**
+	 * Initialises the request manager with a pool of threads
+	 *
+	 * @return true if everything goes fine, false in case of exceptions
+	 */
+	private void initializeInquirers() {
+		try {
+			inquirers = Executors.newFixedThreadPool(1);
+		} catch (Exception e) {
+			log.severe("Error initialising the RequestManager inquirers : " + e.getMessage());
+		}
+	}
 
-    @Override
-    public synchronized void sendReevaluation( ReevaluationResponseMessage reevaluation ) {
-        Reject.ifNull( reevaluation, "Null message" );
-        log.info( "Sending on going reevaluation." );
-        getPEPMap().get( ( reevaluation ).getPepId() )
-            .onGoingEvaluation( reevaluation );
-    }
+	@Override
+	public synchronized void sendReevaluation(ReevaluationResponseMessage reevaluation) {
+		Reject.ifNull(reevaluation, "Null message");
+		log.info("Sending on going reevaluation.");
+		getPEPMap().get((reevaluation).getPepId()).onGoingEvaluation(reevaluation);
+	}
 
-    /**
-     * Handles the case of a message received from outside
-     * Once a message coming from outside is received from the request manager, it
-     * puts it in the priority queue of messages
-     */
-    @Override
-    public synchronized boolean sendMessage( Message message ) {
-        Reject.ifNull( message, "Null message" );
-        try {
-            if( !active ) {
-                handleMessage( message );
-            } else {
-                getQueueOutput().put( message );
-            }
-            return true;
-        } catch( Exception e ) {
-            log.severe( e.getLocalizedMessage() );
-            Thread.currentThread().interrupt();
-            return false;
-        }
-    }
+	/**
+	 * Handles the case of a message received from outside Once a message coming
+	 * from outside is received from the request manager, it puts it in the priority
+	 * queue of messages
+	 */
+	@Override
+	public synchronized Message sendMessage(Message message) {
+		Reject.ifNull(message, "Null message");
+		try {
+//			if (!active) {
+			return handleMessage(message);
+//			} else {
+//				getQueueOutput().put(message);
+//			}
+//			return true;
+		} catch (Exception e) {
+			log.severe(e.getLocalizedMessage());
+			Thread.currentThread().interrupt();
+			return null;
+		}
+	}
 
-    /**
-     * The context handler inquirers perform an infinite loop in order to retrieve
-     * the messages coming to the request manager and sends them to the context handler.
-    */
-    private class ContextHandlerInquirer implements Callable<Message> {
+	/**
+	 * The context handler inquirers perform an infinite loop in order to retrieve
+	 * the messages coming to the request manager and sends them to the context
+	 * handler.
+	 */
+	private class ContextHandlerInquirer implements Callable<Message> {
 
-        @Override
-        public Message call() {
-            Message message;
-            try {
-                while( ( message = getQueueOutput().take() ) != null ) {
-                    handleMessage( message );
-                }
-            } catch( Exception e ) {
-                log.severe( e.getMessage() );
-                Thread.currentThread().interrupt();
-            }
-            return null;
-        }
-    }
+		@Override
+		public Message call() {
+			Message message;
+			try {
+				while ((message = getQueueOutput().take()) != null) {
+					handleMessage(message);
+				}
+			} catch (Exception e) {
+				log.severe(e.getMessage());
+				Thread.currentThread().interrupt();
+			}
+			return null;
+		}
+	}
 
-    private void handleMessage( Message message ) throws Exception {
-        Message responseMessage = null;
-        if( message instanceof AttributeChangeMessage ) {
-            getContextHandler().attributeChanged( (AttributeChangeMessage) message );
-            return;
-        } else if( message.getPurpose() == PURPOSE.TRY ) {
-            responseMessage = getContextHandler().tryAccess( (TryAccessMessage) message );
-        } else if( message.getPurpose() == PURPOSE.START ) {
-            responseMessage = getContextHandler().startAccess( (StartAccessMessage) message );
-        } else if( message.getPurpose() == PURPOSE.END ) {
-            responseMessage = getContextHandler().endAccess( (EndAccessMessage) message );
-        } else {
-            throw new IllegalArgumentException( "Invalid message arrived" );
-        }
-        getPEPMap().get( responseMessage.getDestination() ).receiveResponse( responseMessage );
-    }
+	private Message handleMessage(Message message) throws Exception {
+		Message responseMessage = null;
+		if (message instanceof AttributeChangeMessage) {
+			getContextHandler().attributeChanged((AttributeChangeMessage) message);
+			return null;
+		} else if (message.getPurpose() == PURPOSE.TRY) {
+			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);
+		} else if (message.getPurpose() == PURPOSE.START) {
+			responseMessage = getContextHandler().startAccess((StartAccessMessage) message);
+		} else if (message.getPurpose() == PURPOSE.END) {
+			responseMessage = getContextHandler().endAccess((EndAccessMessage) message);
+		} else {
+			throw new IllegalArgumentException("Invalid message arrived");
+		}
+		getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);
+		return responseMessage;
+	}
 
-    @Override
-    public void startMonitoring() {
-        inquirers.submit( new ContextHandlerInquirer() );
-    }
+	@Override
+	public void startMonitoring() {
+		inquirers.submit(new ContextHandlerInquirer());
+	}
 
 }

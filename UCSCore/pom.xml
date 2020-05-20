@@ -9,7 +9,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>it.cnr.iit.secgroup.ucscore</groupId>
+	<groupId>it.cnr.iit.ucscore</groupId>
 	<artifactId>UCSCore</artifactId>
 	<version>0.2.0-SNAPSHOT</version>
 
@@ -200,6 +200,29 @@
 
 		</plugins>
 	</build>
+	
+	<repositories>
+		<repository>
+	        <id>nexus.snapshots</id>
+	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>
+	        <releases>
+	            <enabled>false</enabled>
+	        </releases>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+		</repository>
+		<repository>
+	        <id>nexus.releases</id>
+	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>
+	        <releases>
+	            <enabled>true</enabled>
+	        </releases>
+	        <snapshots>
+	            <enabled>false</enabled>
+	        </snapshots>
+		</repository>
+	</repositories>	
 
 	<reporting>
 		<plugins>
@@ -220,14 +243,16 @@
 	</reporting>
 
 	<distributionManagement>
-        <snapshotRepository>
-        <id>ossrh</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		<snapshotRepository>
+            <id>nexus</id>
+            <name>maven-snapshots</name>
+            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
         <repository>
-        <id>ossrh</id>
-        <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/
-        </url>
+            <id>nexus</id>
+            <name>maven-releases</name>
+            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>
         </repository>
-        </distributionManagement>
+	</distributionManagement>
+
 </project>

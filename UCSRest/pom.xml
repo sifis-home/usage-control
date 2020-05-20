@@ -27,7 +27,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>it.cnr.iit.ucscore</groupId>
+			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>UCSCore</artifactId>
 			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
@@ -236,6 +236,29 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+	        <id>nexus.snapshots</id>
+	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>
+	        <releases>
+	            <enabled>false</enabled>
+	        </releases>
+	        <snapshots>
+	            <enabled>true</enabled>
+	        </snapshots>
+		</repository>
+		<repository>
+	        <id>nexus.releases</id>
+	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>
+	        <releases>
+	            <enabled>true</enabled>
+	        </releases>
+	        <snapshots>
+	            <enabled>false</enabled>
+	        </snapshots>
+		</repository>
+	</repositories>
+	
 	<reporting>
 		<plugins>
 			<!-- CheckStyle plugin -->
@@ -253,4 +276,18 @@
 			</plugin>
 		</plugins>
 	</reporting>
+	
+	<distributionManagement>
+		<snapshotRepository>
+            <id>nexus</id>
+            <name>maven-snapshots</name>
+            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>nexus</id>
+            <name>maven-releases</name>
+            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>
+        </repository>
+	</distributionManagement>
+		
 </project>
