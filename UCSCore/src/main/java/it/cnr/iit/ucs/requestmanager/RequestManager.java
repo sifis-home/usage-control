@@ -78,17 +78,19 @@ public class RequestManager extends AbstractRequestManager {
 	public synchronized Message sendMessage(Message message) {
 		Reject.ifNull(message, "Null message");
 		try {
-//			if (!active) {
-			return handleMessage(message);
-//			} else {
-//				getQueueOutput().put(message);
-//			}
-//			return true;
+			if (!active) {
+				System.out.println("\n\n\n NOT ACTIVE \n\n\n");
+				return handleMessage(message);
+			} else {
+				System.out.println("\n\n\n ACTIVE \n\n\n");
+				getQueueOutput().put(message);
+			}
 		} catch (Exception e) {
-			log.severe(e.getLocalizedMessage());
+			e.printStackTrace();
+			log.severe("e.getLocalizedMessage()=" + e.getLocalizedMessage());
 			Thread.currentThread().interrupt();
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -117,17 +119,26 @@ public class RequestManager extends AbstractRequestManager {
 		Message responseMessage = null;
 		if (message instanceof AttributeChangeMessage) {
 			getContextHandler().attributeChanged((AttributeChangeMessage) message);
+			System.out.println("\n\n\n first if \n\n\n");
 			return null;
 		} else if (message.getPurpose() == PURPOSE.TRY) {
+			System.out.println("\n\n\n try if \n\n\n");
 			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);
 		} else if (message.getPurpose() == PURPOSE.START) {
+			System.out.println("\n\n\n start if \n\n\n");
 			responseMessage = getContextHandler().startAccess((StartAccessMessage) message);
 		} else if (message.getPurpose() == PURPOSE.END) {
+			System.out.println("\n\n\n end if \n\n\n");
 			responseMessage = getContextHandler().endAccess((EndAccessMessage) message);
 		} else {
+			System.out.println("\n\n\n catch if \n\n\n");
 			throw new IllegalArgumentException("Invalid message arrived");
 		}
-		getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);
+		if (active) {
+			getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);
+		}
+
+		System.out.println("responseMessage.getDestination()=" + responseMessage.getDestination());
 		return responseMessage;
 	}
 

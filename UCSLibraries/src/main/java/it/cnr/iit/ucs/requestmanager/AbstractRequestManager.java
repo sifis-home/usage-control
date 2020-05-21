@@ -29,8 +29,8 @@ import it.cnr.iit.ucs.properties.components.RequestManagerProperties;
 import it.cnr.iit.utility.errorhandling.Reject;
 
 /**
- * This is the abstract class representing the request manager.
- * Since we may have different flavours of the request manager, each with its own
+ * This is the abstract class representing the request manager. Since we may
+ * have different flavours of the request manager, each with its own
  * characteristics (single thread or multiple threads, algorithms used to
  * prioritise the queue and so on), this is a way to provide all the
  * RequestManagers the same basics characteristics
@@ -40,53 +40,53 @@ import it.cnr.iit.utility.errorhandling.Reject;
  */
 public abstract class AbstractRequestManager implements RequestManagerToCHInterface, RequestManagerInterface {
 
-    protected static final Logger log = Logger.getLogger( AbstractRequestManager.class.getName() );
+	protected static final Logger log = Logger.getLogger(AbstractRequestManager.class.getName());
 
-    private final BlockingQueue<Message> queueInput = new LinkedBlockingQueue<>();
-    private final BlockingQueue<Message> queueOutput = new LinkedBlockingQueue<>();
-    private final BlockingQueue<AttributeChangeMessage> retrieveRequests = new LinkedBlockingQueue<>();
+	private final BlockingQueue<Message> queueInput = new LinkedBlockingQueue<>();
+	private final BlockingQueue<Message> queueOutput = new LinkedBlockingQueue<>();
+	private final BlockingQueue<AttributeChangeMessage> retrieveRequests = new LinkedBlockingQueue<>();
 
-    private ContextHandlerInterface contextHandler;
-    private HashMap<String, PEPInterface> pepMap;
+	private ContextHandlerInterface contextHandler;
+	private HashMap<String, PEPInterface> pepMap;
 
-    protected RequestManagerProperties properties;
+	protected RequestManagerProperties properties;
 
-    protected AbstractRequestManager( RequestManagerProperties properties ) {
-        Reject.ifNull( properties );
-        this.properties = properties;
-        pepMap = new HashMap<>();
-    }
+	protected AbstractRequestManager(RequestManagerProperties properties) {
+		Reject.ifNull(properties);
+		this.properties = properties;
+		pepMap = new HashMap<>();
+	}
 
-    public final void setContextHandler( ContextHandlerInterface contextHandler ) {
-        Reject.ifNull( contextHandler );
-        this.contextHandler = contextHandler;
-    }
+	public final void setContextHandler(ContextHandlerInterface contextHandler) {
+		Reject.ifNull(contextHandler);
+		this.contextHandler = contextHandler;
+	}
 
-    protected ContextHandlerInterface getContextHandler() {
-        return contextHandler;
-    }
+	protected ContextHandlerInterface getContextHandler() {
+		return contextHandler;
+	}
 
-    public final void setPEPMap( Map<String, PEPInterface> pepMap ) {
-        Reject.ifNull( pepMap );
-        this.pepMap.putAll( pepMap );
-    }
+	public final void setPEPMap(Map<String, PEPInterface> pepMap) {
+		Reject.ifNull(pepMap);
+		this.pepMap.putAll(pepMap);
+	}
 
-    protected HashMap<String, PEPInterface> getPEPMap() {
-        return pepMap;
-    }
+	protected HashMap<String, PEPInterface> getPEPMap() {
+		return pepMap;
+	}
 
-    protected BlockingQueue<Message> getQueueInput() {
-        return queueInput;
-    }
+	protected BlockingQueue<Message> getQueueInput() {
+		return queueInput;
+	}
 
-    protected BlockingQueue<Message> getQueueOutput() {
-        return queueOutput;
-    }
+	protected BlockingQueue<Message> getQueueOutput() {
+		return queueOutput;
+	}
 
-    protected final BlockingQueue<AttributeChangeMessage> getRetrieveRequestsQueue() {
-        return retrieveRequests;
-    }
+	protected final BlockingQueue<AttributeChangeMessage> getRetrieveRequestsQueue() {
+		return retrieveRequests;
+	}
 
-    public abstract void startMonitoring();
+	public abstract void startMonitoring();
 
 }

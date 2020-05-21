@@ -33,6 +33,7 @@ import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.requestmanager.AbstractRequestManager;
 import it.cnr.iit.ucs.sessionmanager.SessionManagerInterface;
 import it.cnr.iit.ucs.ucs.UCSInterface;
+import it.cnr.iit.utility.errorhandling.Reject;
 
 /**
  * This class contains all the components
@@ -52,7 +53,10 @@ public class UCSCoreService implements UCSInterface {
 
 	@Override
 	public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
-		return (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
+		Reject.ifNull(tryAccessMessage);
+		TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
+		Reject.ifNull(response);
+		return response;
 	}
 
 	@Override
