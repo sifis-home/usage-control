@@ -124,6 +124,9 @@ public class RequestManager extends AbstractRequestManager {
 		} else if (message.getPurpose() == PURPOSE.TRY) {
 			System.out.println("\n\n\n try if \n\n\n");
 			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);
+			if (responseMessage == null) {
+				log.severe("\n\n\nresponseMessage is null\n\n\n");
+			}
 		} else if (message.getPurpose() == PURPOSE.START) {
 			System.out.println("\n\n\n start if \n\n\n");
 			responseMessage = getContextHandler().startAccess((StartAccessMessage) message);
@@ -138,7 +141,7 @@ public class RequestManager extends AbstractRequestManager {
 			getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);
 		}
 
-		System.out.println("responseMessage.getDestination()=" + responseMessage.getDestination());
+		System.out.println("responseMessage.toString()=" + responseMessage.toString());
 		return responseMessage;
 	}
 
