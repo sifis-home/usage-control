@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.tngtech.jgiven.annotation.AfterScenario;
 
 import it.cnr.iit.ucs.exceptions.PIPException;
-import it.cnr.iit.ucs.pipreader.PIPReader;
+import it.cnr.iit.ucs.pipjdbc.PIPJdbc;
 import it.cnr.iit.ucs.properties.UCFPipProperties;
 import it.cnr.iit.ucs.requestmanager.RequestManagerInterface;
 import it.cnr.iit.utility.JAXBUtility;
@@ -89,11 +89,11 @@ public class CoverageTest {
     private String malformedInput;
 
     private RequestType requestType = new RequestType();
-    private PIPReader subjectAttributePip;
-    private PIPReader resourceAttributePip;
-    private PIPReader actionAttributePip;
-    private PIPReader environmentAttributePip;
-    private PIPReader fault;
+    private PIPJdbc subjectAttributePip;
+    private PIPJdbc resourceAttributePip;
+    private PIPJdbc actionAttributePip;
+    private PIPJdbc environmentAttributePip;
+    private PIPJdbc fault;
     private Attribute subjectAttribute = new Attribute();
     private Attribute resourceAttribute = new Attribute();
     private Attribute actionAttribute = new Attribute();
@@ -105,10 +105,10 @@ public class CoverageTest {
         try {
             resetRequest();
             requestManager = Mockito.mock( RequestManagerInterface.class );
-            subjectAttributePip = new PIPReader( getPropertiesFromString( subjectPip ) );
-            resourceAttributePip = new PIPReader( getPropertiesFromString( resourcePip ) );
-            actionAttributePip = new PIPReader( getPropertiesFromString( actionPip ) );
-            environmentAttributePip = new PIPReader( getPropertiesFromString( environmentPip ) );
+            subjectAttributePip = new PIPJdbc( getPropertiesFromString( subjectPip ) );
+            resourceAttributePip = new PIPJdbc( getPropertiesFromString( resourcePip ) );
+            actionAttributePip = new PIPJdbc( getPropertiesFromString( actionPip ) );
+            environmentAttributePip = new PIPJdbc( getPropertiesFromString( environmentPip ) );
             initAttributes();
             subjectAttributePip.setRequestManager( requestManager );
             resourceAttributePip.setRequestManager( requestManager );
@@ -174,32 +174,32 @@ public class CoverageTest {
 
     @Test( expected = PreconditionException.class )
     public void testMissingCategory() throws PIPException {
-        PIPReader missingCatPIP = new PIPReader( getPropertiesFromString( missingCategory ) );
+        PIPJdbc missingCatPIP = new PIPJdbc( getPropertiesFromString( missingCategory ) );
     }
 
     @Test( expected = PreconditionException.class )
     public void testMissingAttributeId() throws PIPException {
-        PIPReader missingAttIdPIP = new PIPReader( getPropertiesFromString( missingAttributeId ) );
+        PIPJdbc missingAttIdPIP = new PIPJdbc( getPropertiesFromString( missingAttributeId ) );
     }
 
     @Test( expected = PreconditionException.class )
     public void testMissingExpCat() throws PIPException {
-        PIPReader missingExpCatPIP = new PIPReader( getPropertiesFromString( missingExpectedCategory ) );
+        PIPJdbc missingExpCatPIP = new PIPJdbc( getPropertiesFromString( missingExpectedCategory ) );
     }
 
     @Test( expected = PreconditionException.class )
     public void testMissingDataType() throws PIPException {
-        PIPReader missingDataTypePIP = new PIPReader( getPropertiesFromString( missingDataType ) );
+        PIPJdbc missingDataTypePIP = new PIPJdbc( getPropertiesFromString( missingDataType ) );
     }
 
     @Test( expected = PreconditionException.class )
     public void testMissingFilePath() throws PIPException {
-        PIPReader missingDataTypePIP = new PIPReader( getPropertiesFromString( missingFilePath ) );
+        PIPJdbc missingDataTypePIP = new PIPJdbc( getPropertiesFromString( missingFilePath ) );
     }
 
     @Test( expected = PreconditionException.class )
     public void testNull() throws PIPException {
-        PIPReader nullPIP = new PIPReader( null );
+        PIPJdbc nullPIP = new PIPJdbc( null );
     }
 
     public void testRetrieve() {
@@ -226,7 +226,7 @@ public class CoverageTest {
         assertTrue( value.equals( "30.0" ) );
     }
 
-    private String testRetrieveAttribute( Attribute attribute, PIPReader pipReader ) {
+    private String testRetrieveAttribute( Attribute attribute, PIPJdbc pipReader ) {
         try {
             String value = pipReader.retrieve( attribute );
             return value;
@@ -257,7 +257,7 @@ public class CoverageTest {
         log.info( "-------END RETRIEVE TEST-------" );
     }
 
-    private void testRetrieveAndEnrichment( RequestType requestType, PIPReader pipReader ) {
+    private void testRetrieveAndEnrichment( RequestType requestType, PIPJdbc pipReader ) {
         try {
             pipReader.retrieve( requestType );
         } catch( Exception e ) {}
@@ -295,7 +295,7 @@ public class CoverageTest {
         log.info( "-------END SUBSCRIBE TEST-------" );
     }
 
-    private void testSubscribeAndEnrichment( RequestType requestType, PIPReader pipReader ) {
+    private void testSubscribeAndEnrichment( RequestType requestType, PIPJdbc pipReader ) {
         try {
             pipReader.subscribe( requestType );
         } catch( Exception e ) {
@@ -314,7 +314,7 @@ public class CoverageTest {
         assertTrue( value.equals( "30.0" ) );
     }
 
-    private String testSubscribeAttribute( Attribute attribute, PIPReader pipReader ) {
+    private String testSubscribeAttribute( Attribute attribute, PIPJdbc pipReader ) {
         try {
             return pipReader.subscribe( attribute );
         } catch( Exception e ) {
@@ -364,7 +364,7 @@ public class CoverageTest {
         }
     }
 
-    private boolean testUnsubscribeAttribute( Attribute attribute, PIPReader pipReader ) {
+    private boolean testUnsubscribeAttribute( Attribute attribute, PIPJdbc pipReader ) {
         ArrayList<Attribute> list = new ArrayList<>();
         try {
             list.add( attribute );

@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package it.cnr.iit.ucs.pipreader;
+package it.cnr.iit.ucs.pipjdbc;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -25,14 +25,14 @@ import java.util.TimerTask;
  *
  * @author Antonio La Marra, Alessandro Rosetti
  */
-final class PIPReaderSubscriberTimer extends TimerTask {
+final class PIPJdbcSubscriberTimer extends TimerTask {
     private Timer timer;
-    PIPReader pip;
+    PIPJdbc pip;
 
     private static final long DEFAULT_RATE = 1L * 1000;
     private long rate = DEFAULT_RATE;
 
-    PIPReaderSubscriberTimer( PIPReader pip ) {
+    PIPJdbcSubscriberTimer( PIPJdbc pip ) {
         this.timer = new Timer();
         this.pip = pip;
     }

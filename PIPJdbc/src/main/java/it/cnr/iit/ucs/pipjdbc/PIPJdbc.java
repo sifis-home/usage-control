@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
-package it.cnr.iit.ucs.pipreader;
+package it.cnr.iit.ucs.pipjdbc;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -53,9 +53,9 @@ import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
  * @author Antonio La Marra, Alessandro Rosetti
  *
  */
-public final class PIPReader extends PIPBase {
+public final class PIPJdbc extends PIPBase {
 
-	private static Logger log = Logger.getLogger(PIPReader.class.getName());
+	private static Logger log = Logger.getLogger(PIPJdbc.class.getName());
 	private JournalingInterface journal;
 
 	// list that stores the attributes on which a subscribe has been performed
@@ -75,7 +75,7 @@ public final class PIPReader extends PIPBase {
 	public static final String FILE_PATH = "FILE_PATH";
 	private String filePath;
 
-	public PIPReader(PipProperties properties) {
+	public PIPJdbc(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
 	}
@@ -98,7 +98,7 @@ public final class PIPReader extends PIPBase {
 			addAttribute(attribute);
 			journal = JournalBuilder.build(properties);
 
-			PIPReaderSubscriberTimer subscriberTimer = new PIPReaderSubscriberTimer(this);
+			PIPJdbcSubscriberTimer subscriberTimer = new PIPJdbcSubscriberTimer(this);
 			subscriberTimer.start();
 			return true;
 		} catch (Exception e) {
