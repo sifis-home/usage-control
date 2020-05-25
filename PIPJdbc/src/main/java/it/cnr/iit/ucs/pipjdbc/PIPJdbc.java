@@ -41,6 +41,7 @@ import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.pip.PIPKeywords;
 import it.cnr.iit.ucs.pipjdbc.db.DBInfoStorage;
+import it.cnr.iit.ucs.pipjdbc.pipmysql.tables.UserAttributes;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.FileUtility;
 import it.cnr.iit.utility.errorhandling.Reject;
@@ -88,28 +89,27 @@ public final class PIPJdbc extends PIPBase {
 
 	private boolean init(PipProperties properties) {
 		try {
-			Map<String, String> attributeMap = properties.getAttributes().get(0);
-			Attribute attribute = new Attribute();
-			attribute.setAttributeId(attributeMap.get(PIPKeywords.ATTRIBUTE_ID));
-			Category category = Category.toCATEGORY(attributeMap.get(PIPKeywords.CATEGORY));
-			attribute.setCategory(category);
-			DataType dataType = DataType.toDATATYPE(attributeMap.get(PIPKeywords.DATA_TYPE));
-			attribute.setDataType(dataType);
-			if (attribute.getCategory() != Category.ENVIRONMENT) {
-				expectedCategory = Category.toCATEGORY(attributeMap.get(PIPKeywords.EXPECTED_CATEGORY));
-				Reject.ifNull(expectedCategory, "missing expected category");
-			}
-			Reject.ifFalse(attributeMap.containsKey(DB_URI), "missing database uri");
-			dbInfoStorage.setDbUrl(attributeMap.get(DB_URI));
-			addAttribute(attribute);
+			List<Map<String, String>> pipProperties = properties.getAttributes();
+			Reject.ifFalse(pipProperties.get(0).containsKey(DB_URI), "missing database uri");
+			dbInfoStorage.setDbUrl(pipProperties.get(0).get(DB_URI));
+			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
-
 			PIPJdbcSubscriberTimer subscriberTimer = new PIPJdbcSubscriberTimer(this);
 			subscriberTimer.start();
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	private void addAttributes(Map<String, String> pip) {
+		Attribute attribute = new Attribute();
+		attribute.setAttributeId(pip.get(PIPKeywords.ATTRIBUTE_ID));
+		Category category = Category.toCATEGORY(pip.get(PIPKeywords.CATEGORY));
+		attribute.setCategory(category);
+		DataType dataType = DataType.toDATATYPE(pip.get(PIPKeywords.DATA_TYPE));
+		attribute.setDataType(dataType);
+		addAttribute(attribute);
 	}
 
 	/**
@@ -138,12 +138,12 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		log.severe("\n\n\nin PIPReader.retrieve, attribute = " + attribute + "\n\n\n");
-		if (isEnvironmentCategory(attribute)) {
-			return read();
-		} else {
-			return read(attribute.getAdditionalInformations());
-		}
+		attribute.getAttributeValueMap().get(attribute.getAttributeId()).stream()
+				.forEach(a -> System.out.println("PRINTING STUFF: " + a));
+		UserAttributes userAttributes = dbInfoStorage.getField(attribute.getAttributeId(),
+				attribute.getAttributeValues(attribute.getDataType()).get(0), UserAttributes.class);
+		userAttributes.toString();
+		return read(attribute.getAdditionalInformations());
 	}
 
 	/**
@@ -219,24 +219,6 @@ public final class PIPJdbc extends PIPBase {
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
 		return attribute.getCategory() == Category.ENVIRONMENT;
-	}
-
-	/**
-	 * Effective retrieval of the monitored value.
-	 *
-	 * @return the requested value
-	 * @throws PIPException
-	 */
-	private String read() throws PIPException {
-		try {
-			Path path = Paths.get(filePath);
-			// TODO UCS-33 NOSONAR
-			String value = new String(Files.readAllBytes(path));
-			journal.logString(formatJournaling(value));
-			return value;
-		} catch (IOException e) {
-			throw new PIPException("Attribute Manager error : " + e.getMessage());
-		}
 	}
 
 	/**

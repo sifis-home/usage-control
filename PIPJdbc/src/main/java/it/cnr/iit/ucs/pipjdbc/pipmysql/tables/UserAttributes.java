@@ -1,5 +1,7 @@
 package it.cnr.iit.ucs.pipjdbc.pipmysql.tables;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -136,6 +138,10 @@ public class UserAttributes {
 
 	public void setSalt(String salt) {
 		this.salt = salt;
+	}
+
+	public void toString(UserAttributes ua) throws JsonProcessingException {
+		System.out.println(new ObjectMapper().writeValueAsString(ua));
 	}
 
 }
