@@ -1,168 +1,141 @@
 package it.cnr.iit.ucs.pipjdbc.pipmysql.tables;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(
-    tableName = "users")
+@DatabaseTable(tableName = "users")
 public class UserAttributes {
+	public static final String USERNAME_FIELD = "username";
+	public static final String NAME_FIELD = "name";
+	public static final String SURNAME_FIELD = "surname";
+	public static final String COUNTRY_FIELD = "country";
+	public static final String ORGNAME_FIELD = "orgname";
+	public static final String MEMBER_FIELD = "member";
+	public static final String ROLE_FIELD = "role";
+	public static final String EMAIL_FIELD = "email";
+	public static final String PASSWORD_FIELD = "password";
+	public static final String USERSCOL_FIELD = "userscol";
+	public static final String SALT_FIELD = "salt";
 
-  @DatabaseField(
-      id = true,
-      columnName = "username")
-  private String username;
+	@DatabaseField(generatedId = true, columnName = USERNAME_FIELD, canBeNull = false)
+	private String username;
 
-  @DatabaseField(
-      id = false,
-      columnName = "name")
-  private String name;
+	@DatabaseField(columnName = NAME_FIELD)
+	private String name;
 
-  @DatabaseField(
-      id = false,
-      columnName = "surname")
-  private String surname;
+	@DatabaseField(columnName = SURNAME_FIELD)
+	private String surname;
 
-  @DatabaseField(
-      id = false,
-      columnName = "orgname")
-  private String organizationName;
-  
-  @DatabaseField(
-	      id = false,
-	      columnName = "member")
-	  private String group;
+	@DatabaseField(columnName = COUNTRY_FIELD, canBeNull = false)
+	private String country;
 
-  @DatabaseField(
-      id = false,
-      columnName = "role")
-  private String role;
-  
+	@DatabaseField(columnName = ORGNAME_FIELD, canBeNull = false)
+	private String orgname;
 
-  @DatabaseField(
-      id = false,
-      columnName = "email")
-  private String email;
+	@DatabaseField(columnName = MEMBER_FIELD, canBeNull = false)
+	private String member;
 
-  @DatabaseField(
-      id = false,
-      columnName = "password")
-  private String password;
+	@DatabaseField(columnName = ROLE_FIELD, canBeNull = false)
+	private String role;
 
-  @DatabaseField(
-      id = false,
-      columnName = "salt")
-  private String salt;
-  
-  @DatabaseField(
-	      id = false,
-	      columnName = "country")
-  private String country;
+	@DatabaseField(columnName = EMAIL_FIELD)
+	private String email;
 
-  @DatabaseField(
-      id = false,
-      columnName = "userscol")
-  private String col;
+	@DatabaseField(columnName = PASSWORD_FIELD, canBeNull = false)
+	private String password;
 
-  public String getUsername() {
-    return username;
-  }
+	@DatabaseField(columnName = USERSCOL_FIELD)
+	private String userscol;
 
-  
-  public void setUsername(String username) {
-    this.username = username;
-  }
+	@DatabaseField(columnName = SALT_FIELD)
+	private String salt;
 
-  public String getName() {
-    return name;
-  }
+	public String getUsername() {
+		return username;
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-  public String getSurname() {
-    return surname;
-  }
+	public String getName() {
+		return name;
+	}
 
-  public void setSurname(String surname) {
-    this.surname = surname;
-  }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public String getOrganizationName() {
-    return organizationName;
-  }
+	public String getSurname() {
+		return surname;
+	}
 
-  public void setOrganizationName(String organizationName) {
-    this.organizationName = organizationName;
-  }
+	public void setSurname(String surname) {
+		this.surname = surname;
+	}
 
-  public String getRole() {
-    return role;
-  }
-  
+	public String getCountry() {
+		return country;
+	}
 
-  public void setRole(String role) {
-    this.role = role;
-  }
+	public void setCountry(String country) {
+		this.country = country;
+	}
 
-  public String getEmail() {
-    return email;
-  }
+	public String getOrgname() {
+		return orgname;
+	}
 
-  public void setEmail(String email) {
-    this.email = email;
-  }
+	public void setOrgname(String orgname) {
+		this.orgname = orgname;
+	}
 
-  public String getPassword() {
-    return password;
-  }
+	public String getMember() {
+		return member;
+	}
 
-  public void setPassword(String password) {
-    this.password = password;
-  }
+	public void setMember(String member) {
+		this.member = member;
+	}
 
-  public String getSalt() {
-    return salt;
-  }
+	public String getRole() {
+		return role;
+	}
 
-  public void setSalt(String salt) {
-    this.salt = salt;
-  }
+	public void setRole(String role) {
+		this.role = role;
+	}
 
-  public String getCol() {
-    return col;
-  }
+	public String getEmail() {
+		return email;
+	}
 
-  public void setCol(String col) {
-    this.col = col;
-  }
-  
-  public String getCountry() {
-	  return country;
-  }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-  public void setCountry(String country) {
-	  this.country = country;
-  }
-  
-  public String getGroup() {
-	  return group;
-  }
+	public String getPassword() {
+		return password;
+	}
 
-  public void setGroup(String group) {
-	  this.group = group;
-  }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-  @Override
-  public String toString() {
-    try {
-      return new ObjectMapper().writeValueAsString(this);
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    }
+	public String getUserscol() {
+		return userscol;
+	}
 
-  }
+	public void setUserscol(String userscol) {
+		this.userscol = userscol;
+	}
+
+	public String getSalt() {
+		return salt;
+	}
+
+	public void setSalt(String salt) {
+		this.salt = salt;
+	}
 
 }

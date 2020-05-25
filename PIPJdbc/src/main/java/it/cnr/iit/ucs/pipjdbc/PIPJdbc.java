@@ -30,6 +30,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -38,6 +40,7 @@ import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
 import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.pip.PIPKeywords;
+import it.cnr.iit.ucs.pipjdbc.db.DBInfoStorage;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.FileUtility;
 import it.cnr.iit.utility.errorhandling.Reject;
@@ -72,8 +75,11 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	private Category expectedCategory;
 
-	public static final String FILE_PATH = "FILE_PATH";
-	private String filePath;
+	public static final String DB_URI = "DB_URI";
+	private String dbUri;
+
+	@Autowired
+	private DBInfoStorage dbInfoStorage;
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
@@ -93,8 +99,8 @@ public final class PIPJdbc extends PIPBase {
 				expectedCategory = Category.toCATEGORY(attributeMap.get(PIPKeywords.EXPECTED_CATEGORY));
 				Reject.ifNull(expectedCategory, "missing expected category");
 			}
-			Reject.ifFalse(attributeMap.containsKey(FILE_PATH), "missing file path");
-			setFilePath(attributeMap.get(FILE_PATH));
+			Reject.ifFalse(attributeMap.containsKey(DB_URI), "missing database uri");
+			dbInfoStorage.setDbUrl(attributeMap.get(DB_URI));
 			addAttribute(attribute);
 			journal = JournalBuilder.build(properties);
 
