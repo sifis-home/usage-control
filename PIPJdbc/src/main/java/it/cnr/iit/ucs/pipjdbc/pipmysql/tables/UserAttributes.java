@@ -140,8 +140,8 @@ public class UserAttributes {
 		this.salt = salt;
 	}
 
-	public void toString(UserAttributes ua) throws JsonProcessingException {
-		System.out.println(new ObjectMapper().writeValueAsString(ua));
+	public String toString(UserAttributes ua) throws JsonProcessingException {
+		return new ObjectMapper().writeValueAsString(ua);
 	}
 
 }

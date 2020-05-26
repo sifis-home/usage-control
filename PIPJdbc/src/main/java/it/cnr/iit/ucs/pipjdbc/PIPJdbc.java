@@ -97,6 +97,8 @@ public final class PIPJdbc extends PIPBase {
 		attribute.setCategory(category);
 		DataType dataType = DataType.toDATATYPE(pip.get(PIPKeywords.DATA_TYPE));
 		attribute.setDataType(dataType);
+		expectedCategory = Category.toCATEGORY(pip.get(PIPKeywords.EXPECTED_CATEGORY));
+		Reject.ifNull(expectedCategory, "missing expected category");
 		addAttribute(attribute);
 	}
 
@@ -117,8 +119,10 @@ public final class PIPJdbc extends PIPBase {
 		log.severe("\n\n\ngetAttributes.size = " + getAttributes().size() + "\n\n\n");
 		Attribute attribute = getAttributes().get(0);
 		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
+		log.severe("\n\n\nattribute.getAdditionalInformations(): " + attribute.getAdditionalInformations() + "\n\n\n");
 		addAdditionalInformation(request, attribute);
 		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
+		log.severe("\n\n\nattribute.getAdditionalInformations(): " + attribute.getAdditionalInformations() + "\n\n\n");
 		String value = retrieve(attribute);
 		log.severe("\n\n\nin PIPReader.retrieve value = " + value + "\n\n\n");
 
@@ -136,6 +140,7 @@ public final class PIPJdbc extends PIPBase {
 				.forEach(a -> System.out.println("PRINTING STUFF: " + a));
 		UserAttributes userAttributes = DBInfoStorage.getField(attribute.getAttributeId(),
 				attribute.getAttributeValues(attribute.getDataType()).get(0), UserAttributes.class);
+		log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
 		return userAttributes.toString();
 //		TODO: fix return
 //		 return read(attribute.getAdditionalInformations());
@@ -210,6 +215,8 @@ public final class PIPJdbc extends PIPBase {
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute) {
 		String filter = request.getAttributeValue(expectedCategory);
+		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
+		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, filter = " + filter + "\n\n\n");
 		attribute.setAdditionalInformations(filter);
 	}
 
