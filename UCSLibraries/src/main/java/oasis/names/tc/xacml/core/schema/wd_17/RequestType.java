@@ -116,7 +116,7 @@ public final class RequestType {
 	public String getAttribute(String category, String attributeId) {
 		String res = null;
 
-		AttributesType attbs = attributes.stream().filter(a -> a.getCategory().endsWith(category)).findFirst()
+		AttributesType attbs = attributes.stream().filter(a -> a.getCategory().equals(category)).findFirst()
 				.orElse(null);
 
 		if (attbs != null) {

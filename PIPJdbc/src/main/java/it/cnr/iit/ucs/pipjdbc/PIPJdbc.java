@@ -136,9 +136,11 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
 		log.severe("\n\n\nretrieve(attribute)\n\n\n");
-		attribute.getAttributeValueMap().get(attribute.getAttributeId()).stream()
-				.forEach(a -> System.out.println("PRINTING STUFF: " + a));
-		UserAttributes userAttributes = DBInfoStorage.getField(attribute.getAttributeId(),
+
+		List<String> attributes = attribute.getAdditionalInformations();
+		attributes.stream().forEach(a -> System.out.println("attribute: " + a));
+
+		UserAttributes userAttributes = DBInfoStorage.getField(attributes.get(0),
 				attribute.getAttributeValues(attribute.getDataType()).get(0), UserAttributes.class);
 		log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
 		return userAttributes.toString();
@@ -214,10 +216,16 @@ public final class PIPJdbc extends PIPBase {
 	}
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute) {
-		String filter = request.getAttributeValue(expectedCategory);
+		int index = request.getAttributes().get(0).getAttribute().size();
+		List<String> filters = new ArrayList<>();
+		for (int i = 0; i < index; i++) {
+			filters.add(request.getAttribute(Category.SUBJECT.toString(), attribute.getAttributeId()));
+		}
+
+		filters.stream().forEach(f -> System.out.println("filter = " + f));
+
 		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
-		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, filter = " + filter + "\n\n\n");
-		attribute.setAdditionalInformations(filter);
+		attribute.setAdditionalInformations(filters);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
