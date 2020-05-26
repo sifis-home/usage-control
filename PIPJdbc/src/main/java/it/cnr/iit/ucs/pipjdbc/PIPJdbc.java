@@ -23,6 +23,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
@@ -137,7 +138,9 @@ public final class PIPJdbc extends PIPBase {
 	public String retrieve(Attribute attribute) throws PIPException {
 		log.severe("\n\n\nretrieve(attribute)\n\n\n");
 
-		List<String> attributes = attribute.getAdditionalInformations();
+		List<String> attributes = new ArrayList<String>(
+				Arrays.asList(attribute.getAdditionalInformations().split(",")));
+
 		attributes.stream().forEach(a -> System.out.println("attribute: " + a));
 
 		UserAttributes userAttributes = DBInfoStorage.getField(attributes.get(0),
@@ -225,7 +228,7 @@ public final class PIPJdbc extends PIPBase {
 		filters.stream().forEach(f -> System.out.println("filter = " + f));
 
 		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
-		attribute.setAdditionalInformations(filters);
+		attribute.setAdditionalInformations(filters.stream().map(Object::toString).collect(Collectors.joining(",")));
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
