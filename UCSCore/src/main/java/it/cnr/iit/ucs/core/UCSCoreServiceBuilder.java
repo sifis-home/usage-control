@@ -140,16 +140,17 @@ public class UCSCoreServiceBuilder {
 
 	private void buildPIPList() {
 		for (PipProperties pipProp : properties.getPipList()) {
+			log.severe("\n\n\npipProp.getAttributes.size: " + pipProp.getAttributes().size() + "\n\n\n");
 			Optional<PIPBase> pip = buildComponent(pipProp, PIPBase.class);
 			ucsCore.pipList.add(pip.get()); // NOSONAR
 		}
 	}
 
 	private <T> Optional<T> buildComponent(CommonProperties property, Class<T> clazz) {
-		log.info("[BUILD] " + property.getName());
+		log.severe("[BUILD] " + property.getName());
 		Optional<T> component = ReflectionsUtility.buildComponent(property, clazz);
 		Reject.ifAbsent(component, "Error building " + property.getName());
-		log.info("\n\n\nbuildComponent returning " + component + "\n\n\n");
+		log.severe("\n\n\nbuildComponent returning " + component + "\n\n\n");
 		return component;
 	}
 

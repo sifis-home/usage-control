@@ -15,12 +15,6 @@
  ******************************************************************************/
 package it.cnr.iit.ucs.pipjdbc;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,8 +23,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
@@ -43,7 +35,6 @@ import it.cnr.iit.ucs.pip.PIPKeywords;
 import it.cnr.iit.ucs.pipjdbc.db.DBInfoStorage;
 import it.cnr.iit.ucs.pipjdbc.pipmysql.tables.UserAttributes;
 import it.cnr.iit.ucs.properties.components.PipProperties;
-import it.cnr.iit.utility.FileUtility;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
@@ -77,10 +68,6 @@ public final class PIPJdbc extends PIPBase {
 	private Category expectedCategory;
 
 	public static final String DB_URI = "DB_URI";
-	private String dbUri;
-
-	@Autowired
-	private DBInfoStorage dbInfoStorage;
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
@@ -89,9 +76,10 @@ public final class PIPJdbc extends PIPBase {
 
 	private boolean init(PipProperties properties) {
 		try {
+			log.severe("\n\n\nPIPJdbc.init()\n\n\n");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(pipProperties.get(0).containsKey(DB_URI), "missing database uri");
-			dbInfoStorage.setDbUrl(pipProperties.get(0).get(DB_URI));
+			DBInfoStorage.start(pipProperties.get(0).get(DB_URI));
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPJdbcSubscriberTimer subscriberTimer = new PIPJdbcSubscriberTimer(this);
@@ -122,10 +110,15 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
+		log.severe("\n\n\nPIPJdbc.retrieve\n\n\n");
 		Reject.ifNull(request);
+		log.severe("\n\n\nrequest: " + request.toString());
 
+		log.severe("\n\n\ngetAttributes.size = " + getAttributes().size() + "\n\n\n");
 		Attribute attribute = getAttributes().get(0);
+		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
 		addAdditionalInformation(request, attribute);
+		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
 		String value = retrieve(attribute);
 		log.severe("\n\n\nin PIPReader.retrieve value = " + value + "\n\n\n");
 
@@ -138,12 +131,15 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
+		log.severe("\n\n\nretrieve(attribute)\n\n\n");
 		attribute.getAttributeValueMap().get(attribute.getAttributeId()).stream()
 				.forEach(a -> System.out.println("PRINTING STUFF: " + a));
-		UserAttributes userAttributes = dbInfoStorage.getField(attribute.getAttributeId(),
+		UserAttributes userAttributes = DBInfoStorage.getField(attribute.getAttributeId(),
 				attribute.getAttributeValues(attribute.getDataType()).get(0), UserAttributes.class);
-		userAttributes.toString();
-		return read(attribute.getAdditionalInformations());
+		return userAttributes.toString();
+//		TODO: fix return
+//		 return read(attribute.getAdditionalInformations());
+
 	}
 
 	/**
@@ -221,46 +217,6 @@ public final class PIPJdbc extends PIPBase {
 		return attribute.getCategory() == Category.ENVIRONMENT;
 	}
 
-	/**
-	 * Effective retrieval of the monitored value looking for the line containing a
-	 * filter. NOTE we suppose that in the file each line has the following
-	 * structure: filter\tattribute.
-	 *
-	 * @param filter the string to be used to search for the item we're interested
-	 *               into
-	 * @return the requested value
-	 * @throws PIPException
-	 */
-	private String read(String filter) throws PIPException {
-		// TODO UCS-33 NOSONAR
-		log.severe("\n\n\nin read(filter), filter = " + filter + "\nfilePath = " + filePath + "\n\n");
-		try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-			for (String line; (line = br.readLine()) != null;) {
-				log.severe("for...");
-				if (line.contains(filter)) {
-					log.severe("\n\n\nin if\n\n\n");
-					String value = line.split("\\s+")[1];
-					journal.logString(formatJournaling(value, filter));
-					return value;
-				}
-			}
-		} catch (Exception e) {
-			throw new PIPException("Attribute Manager error : " + e.getMessage());
-		}
-		log.severe("\n\n\nexit without success\n\n\n");
-		throw new PIPException("Attribute Manager error : no value for this filter : " + filter);
-	}
-
-	private final void setFilePath(String filePath) {
-		String absFilePath = FileUtility.findFileAbsPathUsingClassLoader(filePath);
-		if (absFilePath != null) {
-			this.filePath = absFilePath;
-		} else {
-			this.filePath = filePath;
-		}
-		Reject.ifBlank(this.filePath);
-	}
-
 	private String formatJournaling(String... strings) {
 		StringBuilder logStringBuilder = new StringBuilder();
 		logStringBuilder.append("VALUE READ: " + strings[0]);
@@ -273,12 +229,12 @@ public final class PIPJdbc extends PIPBase {
 
 	@Override
 	public void update(String data) throws PIPException {
-		try {
-			Path path = Paths.get(filePath);
-			Files.write(path, data.getBytes());
-		} catch (IOException e) {
-			log.severe("Error updating attribute : " + e.getMessage());
-		}
+//		try {
+//			Path path = Paths.get(filePath);
+//			Files.write(path, data.getBytes());
+//		} catch (IOException e) {
+//			log.severe("Error updating attribute : " + e.getMessage());
+//		}
 	}
 
 	@Override
