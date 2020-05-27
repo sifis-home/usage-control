@@ -65,6 +65,7 @@ public final class PIPJdbc extends PIPBase {
 
 	// list that stores the attributes on which a subscribe has been performed
 	protected final BlockingQueue<Attribute> subscriptions = new LinkedBlockingQueue<>();
+	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
 
 	/**
 	 * Whenever a PIP has to retrieve some informations related to an attribute that
@@ -174,7 +175,7 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		log.severe("\n\n\nretrieve(attribute)\n\n\n");
+		log.severe("\n\n\nretrieve(attributeeeeeeeeeeeeeeeeeee)\n\n\n");
 		Map<String, String> attributesToValues = new HashMap<>();
 		log.severe("\n\n\nattribute.getAdditionalInformations = " + attribute.getAdditionalInformations() + "\n\n\n");
 		try {
@@ -183,7 +184,7 @@ public final class PIPJdbc extends PIPBase {
 					});
 
 			log.severe("\n\n\ndatabase query...\n\n\n");
-			UserAttributes userAttributes = DBInfoStorage.getField("username", Category.SUBJECT.toString(),
+			UserAttributes userAttributes = DBInfoStorage.getField("username", attributesToValues.get(SUBJECT_ID),
 					UserAttributes.class);
 
 			log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
@@ -192,8 +193,6 @@ public final class PIPJdbc extends PIPBase {
 			e.printStackTrace();
 		}
 		return null;
-//		TODO: fix return
-//		 return read(attribute.getAdditionalInformations());
 
 	}
 
@@ -277,38 +276,50 @@ public final class PIPJdbc extends PIPBase {
 			}
 		});
 
+		List<String> attrIdsLambda = attrstype.stream()
+				.flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId())).collect(Collectors.toList());
+
+		List<String> attrValuesLambda = attrstype.stream()
+				.flatMap(a -> a.getAttribute().stream()
+						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
+				.collect(Collectors.toList());
+
 		List<String> attrIds = new ArrayList<>();
 		List<String> attrValues = new ArrayList<>();
 		for (AttributesType attrtype : attrstype) {
 			List<AttributeType> attypeList = attrtype.getAttribute();
 			for (AttributeType attype : attypeList) {
 				attrIds.add(attype.getAttributeId());
-				for (AttributeValueType attvalue : attype.getAttributeValue()) {
-					attrValues.add(attvalue.getContent().get(0).toString());
+				for (AttributeValueType value : attype.getAttributeValue()) {
+					attrValues.add(value.getContent().get(0).toString());
 				}
 			}
 		}
 
-//		List<String> attrIds = (List<String>) attypes.stream()
-//				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeId()).collect(Collectors.toList()));
-		attrIds.stream().forEach(a -> System.out.println("attIds element: " + a));
-//		List<String> attValues = (List<String>) attypes.stream()
-//				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeValue().stream().map(c -> c.getContent())));
-		attrValues.stream().forEach(a -> System.out.println("attValues element: " + a));
+		if (attrIds.equals(attrIdsLambda)) {
+			System.out.println("attrIds and attrIdsLambda are the same! :D ");
+		}
 
-		Map<String, String> attributesToValues = IntStream.range(0, attrIds.size()).boxed()
+		if (attrValues.equals(attrValuesLambda)) {
+			System.out.println("attrValues and attrValuesLambda are the same! :D ");
+		}
+
+		attrIds.stream().forEach(a -> System.out.println("attrIds element: " + a));
+		attrValues.stream().forEach(a -> System.out.println("attrValues element: " + a));
+		attrIdsLambda.stream().forEach(a -> System.out.println("attrIdsLambda element: " + a));
+		attrValuesLambda.stream().forEach(a -> System.out.println("attrValuesLambda element: " + a));
+
+		Map<String, String> idsToValues = new HashMap<String, String>();
+		idsToValues = IntStream.range(0, attrIds.size()).boxed()
 				.collect(Collectors.toMap(attrIds::get, attrValues::get));
-
-		attributesToValues.entrySet()
-				.forEach(a -> System.out.println("key: " + a.getKey() + ", value: " + a.getValue()));
 
 		String filters = null;
 		try {
-			filters = new ObjectMapper().writeValueAsString(attributesToValues);
+			filters = new ObjectMapper().writeValueAsString(idsToValues);
+			System.out.println("filters = " + filters);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
 		attribute.setAdditionalInformations(filters);
 	}
 
