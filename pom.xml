@@ -20,7 +20,7 @@
 	<modules>
 		<module>UCSLibraries</module>
 		<module>ObligationManager</module>
-		<module>PIPReader</module>
+		<!--<module>PIPReader</module>-->
 		<module>PIPJdbc</module>
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>

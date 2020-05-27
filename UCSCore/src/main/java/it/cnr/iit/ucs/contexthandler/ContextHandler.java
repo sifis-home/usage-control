@@ -74,12 +74,12 @@ public final class ContextHandler extends AbstractContextHandler {
 		log.log(Level.SEVERE, "TryAccess received at {0}", new Object[] { System.currentTimeMillis() });
 		Reject.ifNull(message, "TryAccessMessage is null");
 
-		log.severe("\n\n\nin ContextHandler.tryAccess 1\n\n\n");
 		PolicyWrapper policy = PolicyWrapper.build(getPap(), message);
-		log.severe("\n\n\n2\n\n\n");
+		log.severe("\n\n\nmessage.getPolicy() = " + policy + "\n\n\n");
+		log.severe("\n\n\nmessage.getRequest() = " + message.getRequest() + "\n\n\n");
 		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
 		log.severe("\n\n\n3\n\n\n");
-		request.fatten(false);
+		request.fatten(false); // not working
 		log.severe("TryAccess fattened request contents : \n" + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);

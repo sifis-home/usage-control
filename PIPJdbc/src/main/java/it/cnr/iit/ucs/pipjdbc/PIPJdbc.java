@@ -29,6 +29,9 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -120,7 +123,11 @@ public final class PIPJdbc extends PIPBase {
 	public void retrieve(RequestType request) throws PIPException {
 		log.severe("\n\n\nPIPJdbc.retrieve\n\n\n");
 		Reject.ifNull(request);
-		log.severe("\n\n\nrequest: " + request.toString());
+		try {
+			log.severe("\n\n\nrequestType: " + new ObjectMapper().writeValueAsString(request));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 
 		log.severe("\n\n\ngetAttributes.size = " + getAttributes().size() + "\n\n\n");
 		Attribute attribute = getAttributes().get(0);
