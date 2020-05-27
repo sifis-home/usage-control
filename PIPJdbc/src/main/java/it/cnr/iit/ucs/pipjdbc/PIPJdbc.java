@@ -24,6 +24,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
@@ -40,6 +44,7 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
@@ -219,16 +224,35 @@ public final class PIPJdbc extends PIPBase {
 	}
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute) {
-		int index = request.getAttributes().get(0).getAttribute().size();
-		List<String> filters = new ArrayList<>();
-		for (int i = 0; i < index; i++) {
-			filters.add(request.getAttribute(Category.SUBJECT.toString(), attribute.getAttributeId()));
-		}
 
-		filters.stream().forEach(f -> System.out.println("filter = " + f));
+		List<AttributesType> attypes = request.getAttributes().stream()
+				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
 
+		attypes.stream().forEach(a -> {
+			try {
+				System.out.println("List<AttributesType>: " + new ObjectMapper().writeValueAsString(a));
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+
+		List<String> attrIds = (List<String>) attypes.stream()
+				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeId()).collect(Collectors.toList()));
+		attrIds.stream().forEach(a -> System.out.println("attIds element: " + a));
+		List<String> attValues = (List<String>) attypes.stream()
+				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeValue().stream().map(c -> c.getContent())));
+		attValues.stream().forEach(a -> System.out.println("attValues element: " + a));
+
+		Map<String, String> attributesToValues = IntStream.range(0, attrIds.size()).boxed()
+				.collect(Collectors.toMap(attrIds::get, attValues::get));
+
+		attributesToValues.entrySet()
+				.forEach(a -> System.out.println("key: " + a.getKey() + ", value: " + a.getValue()));
+
+		String filters = attributesToValues.entrySet().stream().map(Object::toString).collect(Collectors.joining(","));
 		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
-		attribute.setAdditionalInformations(filters.stream().map(Object::toString).collect(Collectors.joining(",")));
+		attribute.setAdditionalInformations(filters);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
