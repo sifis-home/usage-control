@@ -46,8 +46,6 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
-import oasis.names.tc.xacml.core.schema.wd_17.AttributeType;
-import oasis.names.tc.xacml.core.schema.wd_17.AttributeValueType;
 import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
@@ -123,32 +121,29 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
-		log.severe("\n\n\nPIPJdbc.retrieve\n\n\n");
 		Reject.ifNull(request);
+
 		try {
-			log.severe("\n\n\nrequestType: " + new ObjectMapper().writeValueAsString(request));
+			System.out.println("requestType (json version): " + new ObjectMapper().writeValueAsString(request));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 
-		log.severe("\n\n\ngetAttributes.size = " + getAttributes().size() + "\n\n\n");
 		Attribute attribute = getAttributes().get(0);
-		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
-		log.severe("\n\n\nattribute.getAdditionalInformations(): " + attribute.getAdditionalInformations() + "\n\n\n");
 		addAdditionalInformation(request, attribute);
-		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
-		log.severe("\n\n\nattribute.getAdditionalInformations(): " + attribute.getAdditionalInformations() + "\n\n\n");
 		String value = retrieve(attribute);
 		Reject.ifNull(value);
-		log.severe("\n\n\nreturning from second retrieve with value = " + value + "\n\n\n");
 		UserAttributes userAttr = null;
 		try {
 			userAttr = new ObjectMapper().readValue(value, UserAttributes.class);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		log.severe("\n\n\nin PIPReader.retrieve value = " + value + "\n\n\n");
 
+		addAttributesToRequest(getAttributes(), request, userAttr);
+	}
+
+	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, UserAttributes userAttr) {
 		for (Attribute attr : getAttributes()) {
 			if (attr.getAttributeId().contains("role")) {
 				log.severe("\n\n\nrole\n\n\n");
@@ -167,6 +162,7 @@ public final class PIPJdbc extends PIPBase {
 				request.addAttribute(attr, userAttr.getCountry());
 			}
 		}
+
 	}
 
 	/**
@@ -175,19 +171,16 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		log.severe("\n\n\nretrieve(attributeeeeeeeeeeeeeeeeeee)\n\n\n");
 		Map<String, String> attributesToValues = new HashMap<>();
-		log.severe("\n\n\nattribute.getAdditionalInformations = " + attribute.getAdditionalInformations() + "\n\n\n");
 		try {
 			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformations(),
 					new TypeReference<Map<String, String>>() {
 					});
 
-			log.severe("\n\n\ndatabase query...\n\n\n");
 			UserAttributes userAttributes = DBInfoStorage.getField("username", attributesToValues.get(SUBJECT_ID),
 					UserAttributes.class);
 
-			log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
+			System.out.println("Retrieved the following user attributes: " + userAttributes.toString());
 			return new ObjectMapper().writeValueAsString(userAttributes);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -266,49 +259,12 @@ public final class PIPJdbc extends PIPBase {
 
 		List<AttributesType> attrstype = request.getAttributes().stream()
 				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
-
-		attrstype.stream().forEach(a -> {
-			try {
-				System.out.println("List<AttributesType>: " + new ObjectMapper().writeValueAsString(a));
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
-
-		List<String> attrIdsLambda = attrstype.stream()
-				.flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId())).collect(Collectors.toList());
-
-		List<String> attrValuesLambda = attrstype.stream()
+		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
+				.collect(Collectors.toList());
+		List<String> attrValues = attrstype.stream()
 				.flatMap(a -> a.getAttribute().stream()
 						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
 				.collect(Collectors.toList());
-
-		List<String> attrIds = new ArrayList<>();
-		List<String> attrValues = new ArrayList<>();
-		for (AttributesType attrtype : attrstype) {
-			List<AttributeType> attypeList = attrtype.getAttribute();
-			for (AttributeType attype : attypeList) {
-				attrIds.add(attype.getAttributeId());
-				for (AttributeValueType value : attype.getAttributeValue()) {
-					attrValues.add(value.getContent().get(0).toString());
-				}
-			}
-		}
-
-		if (attrIds.equals(attrIdsLambda)) {
-			System.out.println("attrIds and attrIdsLambda are the same! :D ");
-		}
-
-		if (attrValues.equals(attrValuesLambda)) {
-			System.out.println("attrValues and attrValuesLambda are the same! :D ");
-		}
-
-		attrIds.stream().forEach(a -> System.out.println("attrIds element: " + a));
-		attrValues.stream().forEach(a -> System.out.println("attrValues element: " + a));
-		attrIdsLambda.stream().forEach(a -> System.out.println("attrIdsLambda element: " + a));
-		attrValuesLambda.stream().forEach(a -> System.out.println("attrValuesLambda element: " + a));
-
 		Map<String, String> idsToValues = new HashMap<String, String>();
 		idsToValues = IntStream.range(0, attrIds.size()).boxed()
 				.collect(Collectors.toMap(attrIds::get, attrValues::get));
