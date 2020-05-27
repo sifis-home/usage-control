@@ -17,6 +17,7 @@ package it.cnr.iit.ucs.pipjdbc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.cnr.iit.ucs.constants.ENTITIES;
@@ -136,9 +138,34 @@ public final class PIPJdbc extends PIPBase {
 		log.severe("\n\n\nattribute: " + attribute.toString() + "\n\n\n");
 		log.severe("\n\n\nattribute.getAdditionalInformations(): " + attribute.getAdditionalInformations() + "\n\n\n");
 		String value = retrieve(attribute);
+		Reject.ifNull(value);
+		log.severe("\n\n\nreturning from second retrieve with value = " + value + "\n\n\n");
+		UserAttributes userAttr = null;
+		try {
+			userAttr = new ObjectMapper().readValue(value, UserAttributes.class);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		log.severe("\n\n\nin PIPReader.retrieve value = " + value + "\n\n\n");
 
-		request.addAttribute(attribute, value);
+		for (Attribute attr : getAttributes()) {
+			if (attr.getAttributeId().contains("role")) {
+				log.severe("\n\n\nrole\n\n\n");
+				request.addAttribute(attr, userAttr.getRole());
+			}
+			if (attr.getAttributeId().contains("ismemberof")) {
+				log.severe("\n\n\nismemberof\n\n\n");
+				request.addAttribute(attr, userAttr.getMember());
+			}
+			if (attr.getAttributeId().contains("organisation")) {
+				log.severe("\n\n\norganization\n\n\n");
+				request.addAttribute(attr, userAttr.getOrgname());
+			}
+			if (attr.getAttributeId().contains("country")) {
+				log.severe("\n\n\ncountry\n\n\n");
+				request.addAttribute(attr, userAttr.getCountry());
+			}
+		}
 	}
 
 	/**
@@ -148,16 +175,23 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
 		log.severe("\n\n\nretrieve(attribute)\n\n\n");
+		Map<String, String> attributesToValues = new HashMap<>();
+		log.severe("\n\n\nattribute.getAdditionalInformations = " + attribute.getAdditionalInformations() + "\n\n\n");
+		try {
+			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformations(),
+					new TypeReference<Map<String, String>>() {
+					});
 
-		List<String> attributes = new ArrayList<String>(
-				Arrays.asList(attribute.getAdditionalInformations().split(",")));
+			log.severe("\n\n\ndatabase query...\n\n\n");
+			UserAttributes userAttributes = DBInfoStorage.getField("username", Category.SUBJECT.toString(),
+					UserAttributes.class);
 
-		attributes.stream().forEach(a -> System.out.println("attribute: " + a));
-
-		UserAttributes userAttributes = DBInfoStorage.getField(attributes.get(0),
-				attribute.getAttributeValues(attribute.getDataType()).get(0), UserAttributes.class);
-		log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
-		return userAttributes.toString();
+			log.severe("\n\n\nuserAttributes.toString = " + userAttributes.toString() + "\n\n\n");
+			return new ObjectMapper().writeValueAsString(userAttributes);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 //		TODO: fix return
 //		 return read(attribute.getAdditionalInformations());
 
@@ -268,7 +302,12 @@ public final class PIPJdbc extends PIPBase {
 		attributesToValues.entrySet()
 				.forEach(a -> System.out.println("key: " + a.getKey() + ", value: " + a.getValue()));
 
-		String filters = attributesToValues.entrySet().stream().map(Object::toString).collect(Collectors.joining(","));
+		String filters = null;
+		try {
+			filters = new ObjectMapper().writeValueAsString(attributesToValues);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
 		log.severe("\n\n\nPIPJdbc.addAdditionalInformation, expectedCategory = " + expectedCategory + "\n\n\n");
 		attribute.setAdditionalInformations(filters);
 	}

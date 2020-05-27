@@ -19,7 +19,7 @@ public class UserAttributes {
 	public static final String USERSCOL_FIELD = "userscol";
 	public static final String SALT_FIELD = "salt";
 
-	@DatabaseField(generatedId = true, columnName = USERNAME_FIELD, canBeNull = false)
+	@DatabaseField(id = true, columnName = USERNAME_FIELD, canBeNull = false)
 	private String username;
 
 	@DatabaseField(columnName = NAME_FIELD)
