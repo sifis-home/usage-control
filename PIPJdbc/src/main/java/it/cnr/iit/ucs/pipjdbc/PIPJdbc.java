@@ -29,9 +29,6 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -47,6 +44,8 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeValueType;
 import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
@@ -232,10 +231,10 @@ public final class PIPJdbc extends PIPBase {
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute) {
 
-		List<AttributesType> attypes = request.getAttributes().stream()
+		List<AttributesType> attrstype = request.getAttributes().stream()
 				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
 
-		attypes.stream().forEach(a -> {
+		attrstype.stream().forEach(a -> {
 			try {
 				System.out.println("List<AttributesType>: " + new ObjectMapper().writeValueAsString(a));
 			} catch (JsonProcessingException e) {
@@ -244,15 +243,27 @@ public final class PIPJdbc extends PIPBase {
 			}
 		});
 
-		List<String> attrIds = (List<String>) attypes.stream()
-				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeId()).collect(Collectors.toList()));
+		List<String> attrIds = new ArrayList<>();
+		List<String> attrValues = new ArrayList<>();
+		for (AttributesType attrtype : attrstype) {
+			List<AttributeType> attypeList = attrtype.getAttribute();
+			for (AttributeType attype : attypeList) {
+				attrIds.add(attype.getAttributeId());
+				for (AttributeValueType attvalue : attype.getAttributeValue()) {
+					attrValues.add(attvalue.getContent().get(0).toString());
+				}
+			}
+		}
+
+//		List<String> attrIds = (List<String>) attypes.stream()
+//				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeId()).collect(Collectors.toList()));
 		attrIds.stream().forEach(a -> System.out.println("attIds element: " + a));
-		List<String> attValues = (List<String>) attypes.stream()
-				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeValue().stream().map(c -> c.getContent())));
-		attValues.stream().forEach(a -> System.out.println("attValues element: " + a));
+//		List<String> attValues = (List<String>) attypes.stream()
+//				.map(a -> a.getAttribute().stream().map(b -> b.getAttributeValue().stream().map(c -> c.getContent())));
+		attrValues.stream().forEach(a -> System.out.println("attValues element: " + a));
 
 		Map<String, String> attributesToValues = IntStream.range(0, attrIds.size()).boxed()
-				.collect(Collectors.toMap(attrIds::get, attValues::get));
+				.collect(Collectors.toMap(attrIds::get, attrValues::get));
 
 		attributesToValues.entrySet()
 				.forEach(a -> System.out.println("key: " + a.getKey() + ", value: " + a.getValue()));
