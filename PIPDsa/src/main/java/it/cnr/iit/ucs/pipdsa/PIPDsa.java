@@ -83,6 +83,7 @@ public final class PIPDsa extends PIPBase {
 
 	public static final String DSAMGR_URL = "DSAMGR_URL";
 	public static final String DSA_FILTER = "filter";
+	private String dsamgrUrl = "";
 
 	private String filePath;
 
@@ -95,8 +96,8 @@ public final class PIPDsa extends PIPBase {
 		try {
 			log.severe("\n\n\nPIPDsa.init()\n\n\n");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
-			Reject.ifFalse(pipProperties.get(0).containsKey(DSAMGR_URL), "missing DSA Manager url");
-			String dsamgrUrl = pipProperties.get(0).get(DSAMGR_URL);
+			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_URL), "missing DSA Manager url");
+			dsamgrUrl = properties.getAdditionalProperties().get(DSAMGR_URL);
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPDsaSubscriberTimer subscriberTimer = new PIPDsaSubscriberTimer(this);
