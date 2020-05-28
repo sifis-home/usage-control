@@ -20,4 +20,9 @@ public class Message {
 		this.message = message;
 	}
 
+	@Override
+	public String toString() {
+		return "status: " + status + ", message: " + message;
+	}
+
 }

@@ -1,11 +1,5 @@
 package it.cnr.iit.ucs.pipdsa;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +8,16 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
@@ -28,6 +32,7 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
@@ -81,11 +86,14 @@ public final class PIPDsa extends PIPBase {
 	 */
 	private Category expectedCategory;
 
-	public static final String DSAMGR_URL = "DSAMGR_URL";
-	public static final String DSA_FILTER = "filter";
-	private String dsamgrUrl = "";
+	public static final String DSAMGR_URL = "dsamgr-endpoint";
+	public static final String DSAMGR_STATUS = "status";
+	public static final String DSAMGR_VERSION = "version";
+	public static final String REST_USERNAME = "rest-username";
+	public static final String REST_PASSWORD = "rest-password";
 
-	private String filePath;
+	public static final String DSA_FILTER = "filter";
+	private static final String DSA_ID_ATTRIBUTE = "urn:oasis:names:tc:xacml:3.0:resource:dsa-id";
 
 	public PIPDsa(PipProperties properties) {
 		super(properties);
@@ -97,7 +105,8 @@ public final class PIPDsa extends PIPBase {
 			log.severe("\n\n\nPIPDsa.init()\n\n\n");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_URL), "missing DSA Manager url");
-			dsamgrUrl = properties.getAdditionalProperties().get(DSAMGR_URL);
+			setDsaEndpointMethods(properties);
+			setAuthorizations(properties);
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPDsaSubscriberTimer subscriberTimer = new PIPDsaSubscriberTimer(this);
@@ -106,6 +115,25 @@ public final class PIPDsa extends PIPBase {
 		} catch (Exception e) {
 			return false;
 		}
+	}
+
+	private void setDsaEndpointMethods(PipProperties properties) {
+		DsaUrlMethods.setDsaUrl(properties.getAdditionalProperties().get(DSAMGR_URL));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_STATUS),
+				"missing DSA Manager method to get the Status attribute");
+		DsaUrlMethods.setDsaStatus(properties.getAdditionalProperties().get(DSAMGR_STATUS));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_VERSION),
+				"missing DSA Manager method to get the Version attribute");
+		DsaUrlMethods.setDsaVersion(properties.getAdditionalProperties().get(DSAMGR_VERSION));
+	}
+
+	private void setAuthorizations(PipProperties properties) {
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_USERNAME),
+				"missing RestTemplate suername");
+		HttpAuthorization.setRestUsername(properties.getAdditionalProperties().get(REST_USERNAME));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_PASSWORD),
+				"missing RestTemplate password");
+		HttpAuthorization.setRestPassword(properties.getAdditionalProperties().get(REST_PASSWORD));
 	}
 
 	private void addAttributes(Map<String, String> pip) {
@@ -120,24 +148,48 @@ public final class PIPDsa extends PIPBase {
 		addAttribute(attribute);
 	}
 
-	/**
-	 * Performs the retrieve operation. The retrieve operation is a very basic
-	 * operation in which the PIP simply asks to the AttributeManager the value in
-	 * which it is interested into. Once that value has been retrieved, the PIP will
-	 * fatten the request.
-	 *
-	 * @param request this is an in/out parameter
-	 */
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
-		Reject.ifNull(request);
+		try {
+			Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(0);
-		addAdditionalInformation(request, attribute);
-		String value = retrieve(attribute);
-		log.severe("\n\n\nin PIPReader.retrieve value = " + value + "\n\n\n");
+			String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
 
-		request.addAttribute(attribute, value);
+			System.out.println("requestType (json version): " + new ObjectMapper().writeValueAsString(request));
+
+			Attribute attribute = getAttributes().get(1);
+			System.out.println("attribute: " + new ObjectMapper().writeValueAsString(attribute));
+
+			addAdditionalInformation(request, attribute, dsaId);
+
+			String value = retrieve(attribute);
+			Reject.ifNull(value);
+			System.out.println("value retrieved = " + value);
+
+			Message message = new ObjectMapper().readValue(value, Message.class);
+
+			addAttributesToRequest(getAttributes(), request, message);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, Message message) {
+//		for (Attribute attr : getAttributes()) {
+//			if (attr.getAttributeId().endsWith("version")) {
+//				request.addAttribute(attr, message.getMessage());
+//			}
+//			if (attr.getAttributeId().contains("ismemberof")) {
+//				request.addAttribute(attr, userAttr.getMember());
+//			}
+//			if (attr.getAttributeId().contains("organisation")) {
+//				request.addAttribute(attr, userAttr.getOrgname());
+//			}
+//			if (attr.getAttributeId().contains("country")) {
+//				request.addAttribute(attr, userAttr.getCountry());
+//			}
+//		}
+
 	}
 
 	/**
@@ -146,12 +198,39 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		log.severe("\n\n\nin PIPReader.retrieve, attribute = " + attribute + "\n\n\n");
-		if (isEnvironmentCategory(attribute)) {
-			return read();
-		} else {
-			return read(attribute.getAdditionalInformations());
+		AttributeResource attrRes = null;
+		try {
+			attrRes = new ObjectMapper().readValue(attribute.getAdditionalInformations(), AttributeResource.class);
+
+//			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(dsamgrUrl).queryParam("dsaid",
+//					attrRes.getDsaId());
+//			Message message = restTemplate.postForObject(builder.build().toString(), filter, Message.class);
+
+			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DsaUrlMethods.getDsaUrl());
+			for (String attrId : attrRes.getAttrIds()) {
+				if (attrId.endsWith("status")) {
+					builder.path(DsaUrlMethods.getDsaStatus());
+				}
+				if (attrId.endsWith("version")) {
+					builder.path(DsaUrlMethods.getDsaVersion());
+				}
+			}
+
+			HttpHeaders headers = new HttpHeaders();
+			String credentials = "Basic " + HttpAuthorization.base64();
+			headers.add("Authorization", credentials);
+			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+			HttpEntity<String> entity = new HttpEntity<String>(headers);
+			Message message = new RestTemplate().postForObject(builder.build().toString(), attrRes.getDsaId(),
+					Message.class);
+
+			System.out.println("Retrieved the following message: " + message.toString());
+			return new ObjectMapper().writeValueAsString(message);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return null;
+
 	}
 
 	/**
@@ -166,8 +245,10 @@ public final class PIPDsa extends PIPBase {
 	public void subscribe(RequestType request) throws PIPException {
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(0);
-		addAdditionalInformation(request, attribute);
+		Attribute attribute = getAttributes().get(1);
+
+		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
+		addAdditionalInformation(request, attribute, dsaId);
 
 		String value = subscribe(attribute);
 
@@ -220,62 +301,32 @@ public final class PIPDsa extends PIPBase {
 		return true;
 	}
 
-	private void addAdditionalInformation(RequestType request, Attribute attribute) {
-		String filter = request.getAttributeValue(expectedCategory);
-		attribute.setAdditionalInformations(filter);
+	private void addAdditionalInformation(RequestType request, Attribute attribute, String dsaId) {
+
+		List<AttributesType> attrstype = request.getAttributes().stream()
+				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
+		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
+				.collect(Collectors.toList());
+
+		AttributeResource attrRes = new AttributeResource();
+		attrRes.setAttrIds(attrIds);
+		attrRes.setDsaId(dsaId);
+
+		String filters = "";
+		try {
+			filters = new ObjectMapper().writeValueAsString(attrRes);
+			System.out.println("filters = " + filters);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		attribute.setAdditionalInformations(filters);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
 		return attribute.getCategory() == Category.ENVIRONMENT;
 	}
 
-	/**
-	 * Effective retrieval of the monitored value.
-	 *
-	 * @return the requested value
-	 * @throws PIPException
-	 */
-	private String read() throws PIPException {
-		try {
-			Path path = Paths.get(filePath);
-			// TODO UCS-33 NOSONAR
-			String value = new String(Files.readAllBytes(path));
-			journal.logString(formatJournaling(value));
-			return value;
-		} catch (IOException e) {
-			throw new PIPException("Attribute Manager error : " + e.getMessage());
-		}
-	}
-
-	/**
-	 * Effective retrieval of the monitored value looking for the line containing a
-	 * filter. NOTE we suppose that in the file each line has the following
-	 * structure: filter\tattribute.
-	 *
-	 * @param filter the string to be used to search for the item we're interested
-	 *               into
-	 * @return the requested value
-	 * @throws PIPException
-	 */
-	private String read(String filter) throws PIPException {
-		// TODO UCS-33 NOSONAR
-		log.severe("\n\n\nin read(filter), filter = " + filter + "\nfilePath = " + filePath + "\n\n");
-		try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-			for (String line; (line = br.readLine()) != null;) {
-				log.severe("for...");
-				if (line.contains(filter)) {
-					log.severe("\n\n\nin if\n\n\n");
-					String value = line.split("\\s+")[1];
-					journal.logString(formatJournaling(value, filter));
-					return value;
-				}
-			}
-		} catch (Exception e) {
-			throw new PIPException("Attribute Manager error : " + e.getMessage());
-		}
-		log.severe("\n\n\nexit without success\n\n\n");
-		throw new PIPException("Attribute Manager error : no value for this filter : " + filter);
-	}
+//	journal.logString(formatJournaling(value, filter));
 
 	private String formatJournaling(String... strings) {
 		StringBuilder logStringBuilder = new StringBuilder();
@@ -289,12 +340,7 @@ public final class PIPDsa extends PIPBase {
 
 	@Override
 	public void update(String data) throws PIPException {
-		try {
-			Path path = Paths.get(filePath);
-			Files.write(path, data.getBytes());
-		} catch (IOException e) {
-			log.severe("Error updating attribute : " + e.getMessage());
-		}
+		// TODO
 	}
 
 	@Override
