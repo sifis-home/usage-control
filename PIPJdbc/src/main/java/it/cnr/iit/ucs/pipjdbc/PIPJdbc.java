@@ -146,19 +146,15 @@ public final class PIPJdbc extends PIPBase {
 	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, UserAttributes userAttr) {
 		for (Attribute attr : getAttributes()) {
 			if (attr.getAttributeId().contains("role")) {
-				log.severe("\n\n\nrole\n\n\n");
 				request.addAttribute(attr, userAttr.getRole());
 			}
 			if (attr.getAttributeId().contains("ismemberof")) {
-				log.severe("\n\n\nismemberof\n\n\n");
 				request.addAttribute(attr, userAttr.getMember());
 			}
 			if (attr.getAttributeId().contains("organisation")) {
-				log.severe("\n\n\norganization\n\n\n");
 				request.addAttribute(attr, userAttr.getOrgname());
 			}
 			if (attr.getAttributeId().contains("country")) {
-				log.severe("\n\n\ncountry\n\n\n");
 				request.addAttribute(attr, userAttr.getCountry());
 			}
 		}
