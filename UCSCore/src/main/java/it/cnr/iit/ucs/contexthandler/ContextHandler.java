@@ -96,7 +96,7 @@ public final class ContextHandler extends AbstractContextHandler {
 			RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());
 			createSession(message, origRequest, policy, sessionId);
 		} else {
-			log.severe("\n\n\ndecision is not PERMIT\n\n\n");
+			log.severe("\n\n\ndecision is " + evaluation.getResult() + "\n\n\n");
 		}
 
 		return buildTryAccessResponse(message, evaluation, sessionId);

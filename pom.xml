@@ -22,6 +22,7 @@
 		<module>ObligationManager</module>
 		<!--<module>PIPReader</module>-->
 		<module>PIPJdbc</module>
+		<module>PIPDsa</module>
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>
 		<module>SessionManager</module>

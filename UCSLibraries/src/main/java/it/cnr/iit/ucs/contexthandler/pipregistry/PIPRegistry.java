@@ -62,7 +62,6 @@ public class PIPRegistry implements PIPRegistryInterface {
 
 	@Override
 	public void retrieveAll(RequestType requestType) {
-		log.severe("\n\n\nin PIPRegistry.retrieveAll requestType = " + requestType.toString() + "\n\n\n");
 		try {
 			for (PIPCHInterface pip : pipList) {
 				pip.retrieve(requestType);
