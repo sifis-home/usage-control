@@ -33,7 +33,7 @@
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
-			<artifactId>PIPReader</artifactId>
+			<artifactId>PIPDsa</artifactId>
 			<version>0.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>

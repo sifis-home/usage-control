@@ -85,7 +85,7 @@ public final class PIPJdbc extends PIPBase {
 
 	private boolean init(PipProperties properties) {
 		try {
-			log.severe("\n\n\nPIPJdbc.init()\n\n\n");
+			log.severe("Initializing PIPJdbc...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(pipProperties.get(0).containsKey(DB_URI), "missing database uri");
 			DBInfoStorage.start(pipProperties.get(0).get(DB_URI));
@@ -122,12 +122,6 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
 		Reject.ifNull(request);
-
-		try {
-			System.out.println("requestType (json version): " + new ObjectMapper().writeValueAsString(request));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
 
 		Attribute attribute = getAttributes().get(0);
 		addAdditionalInformation(request, attribute);

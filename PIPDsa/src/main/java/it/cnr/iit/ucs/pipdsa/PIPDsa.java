@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -12,13 +13,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.cnr.iit.common.lambda.exceptions.ThrowingException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -32,7 +35,6 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
-import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
@@ -102,7 +104,7 @@ public final class PIPDsa extends PIPBase {
 
 	private boolean init(PipProperties properties) {
 		try {
-			log.severe("\n\n\nPIPDsa.init()\n\n\n");
+			log.severe("Initializing PIPDsa...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_URL), "missing DSA Manager url");
 			setDsaEndpointMethods(properties);
@@ -129,7 +131,7 @@ public final class PIPDsa extends PIPBase {
 
 	private void setAuthorizations(PipProperties properties) {
 		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_USERNAME),
-				"missing RestTemplate suername");
+				"missing RestTemplate username");
 		HttpAuthorization.setRestUsername(properties.getAdditionalProperties().get(REST_USERNAME));
 		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_PASSWORD),
 				"missing RestTemplate password");
@@ -143,52 +145,40 @@ public final class PIPDsa extends PIPBase {
 		attribute.setCategory(category);
 		DataType dataType = DataType.toDATATYPE(pip.get(PIPKeywords.DATA_TYPE));
 		attribute.setDataType(dataType);
-		expectedCategory = Category.toCATEGORY(pip.get(DSA_FILTER));
-		Reject.ifNull(expectedCategory, "missing filter attribute");
 		addAttribute(attribute);
 	}
 
 	@Override
-	public void retrieve(RequestType request) throws PIPException {
-		try {
-			Reject.ifNull(request);
+	public void retrieve(RequestType request) {
+		Reject.ifNull(request);
+		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
 
-			String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
+		List<Attribute> attributeList = getAttributes();
+		attributeList.stream().forEach(a -> addAdditionalInformation(request, a, dsaId));
 
-			System.out.println("requestType (json version): " + new ObjectMapper().writeValueAsString(request));
+		List<String> dsaAttributeStringList = new ArrayList<String>();
+		attributeList.stream().filter(Objects::nonNull)
+				.map(ThrowingException.unchecked(a -> dsaAttributeStringList.add(retrieve(a)))).filter(Objects::nonNull)
+				.collect(Collectors.toList());
 
-			Attribute attribute = getAttributes().get(1);
-			System.out.println("attribute: " + new ObjectMapper().writeValueAsString(attribute));
+		List<DsaAttribute> dsaAttributeList = dsaAttributeStringList.stream()
+				.map(ThrowingException.unchecked(a -> new ObjectMapper().readValue(a, DsaAttribute.class)))
+				.collect(Collectors.toList());
+		Reject.ifEmpty(dsaAttributeList);
 
-			addAdditionalInformation(request, attribute, dsaId);
+		addAttributesToRequest(request, dsaAttributeList);
 
-			String value = retrieve(attribute);
-			Reject.ifNull(value);
-			System.out.println("value retrieved = " + value);
-
-			Message message = new ObjectMapper().readValue(value, Message.class);
-
-			addAttributesToRequest(getAttributes(), request, message);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
-	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, Message message) {
-//		for (Attribute attr : getAttributes()) {
-//			if (attr.getAttributeId().endsWith("version")) {
-//				request.addAttribute(attr, message.getMessage());
-//			}
-//			if (attr.getAttributeId().contains("ismemberof")) {
-//				request.addAttribute(attr, userAttr.getMember());
-//			}
-//			if (attr.getAttributeId().contains("organisation")) {
-//				request.addAttribute(attr, userAttr.getOrgname());
-//			}
-//			if (attr.getAttributeId().contains("country")) {
-//				request.addAttribute(attr, userAttr.getCountry());
-//			}
-//		}
+	private void addAttributesToRequest(RequestType request, List<DsaAttribute> dsaAttributeList) {
+
+		for (Attribute attr : getAttributes()) {
+			for (DsaAttribute dsaAttr : dsaAttributeList) {
+				if (attr.getAttributeId().equals(dsaAttr.getId())) {
+					request.addAttribute(attr, dsaAttr.getMessage());
+				}
+			}
+		}
 
 	}
 
@@ -198,39 +188,45 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		AttributeResource attrRes = null;
 		try {
-			attrRes = new ObjectMapper().readValue(attribute.getAdditionalInformations(), AttributeResource.class);
 
-//			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(dsamgrUrl).queryParam("dsaid",
-//					attrRes.getDsaId());
-//			Message message = restTemplate.postForObject(builder.build().toString(), filter, Message.class);
-
+			String dsaId = attribute.getAdditionalInformations();
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DsaUrlMethods.getDsaUrl());
-			for (String attrId : attrRes.getAttrIds()) {
-				if (attrId.endsWith("status")) {
-					builder.path(DsaUrlMethods.getDsaStatus());
-				}
-				if (attrId.endsWith("version")) {
-					builder.path(DsaUrlMethods.getDsaVersion());
-				}
+
+			DsaAttribute dsaAttribute = null;
+			if (attribute.getAttributeId().endsWith("status")) {
+				builder.path(DsaUrlMethods.getDsaStatus()).queryParam("dsaid", dsaId);
+				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
+			} else if (attribute.getAttributeId().endsWith("version")) {
+				builder.path(DsaUrlMethods.getDsaVersion()).queryParam("dsaid", dsaId);
+				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
+			} else {
+				return new String();
 			}
 
-			HttpHeaders headers = new HttpHeaders();
-			String credentials = "Basic " + HttpAuthorization.base64();
-			headers.add("Authorization", credentials);
-			headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-			HttpEntity<String> entity = new HttpEntity<String>(headers);
-			Message message = new RestTemplate().postForObject(builder.build().toString(), attrRes.getDsaId(),
-					Message.class);
-
-			System.out.println("Retrieved the following message: " + message.toString());
-			return new ObjectMapper().writeValueAsString(message);
+			return new ObjectMapper().writeValueAsString(dsaAttribute);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 
+	}
+
+	private DsaAttribute idsToMessage(UriComponentsBuilder builder, String id) {
+		HttpHeaders headers = new HttpHeaders();
+		String credentials = "Basic " + HttpAuthorization.base64();
+		headers.add("Authorization", credentials);
+		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+		HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+		String url = builder.build().toString();
+		ResponseEntity<Message> response = new RestTemplate().exchange(url, HttpMethod.POST, entity, Message.class);
+		Reject.ifNull(response);
+
+		DsaAttribute dsaAttr = new DsaAttribute();
+		dsaAttr.setId(id);
+		dsaAttr.setMessage(response.getBody().getMessage());
+		return dsaAttr;
 	}
 
 	/**
@@ -302,24 +298,7 @@ public final class PIPDsa extends PIPBase {
 	}
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute, String dsaId) {
-
-		List<AttributesType> attrstype = request.getAttributes().stream()
-				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
-		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
-				.collect(Collectors.toList());
-
-		AttributeResource attrRes = new AttributeResource();
-		attrRes.setAttrIds(attrIds);
-		attrRes.setDsaId(dsaId);
-
-		String filters = "";
-		try {
-			filters = new ObjectMapper().writeValueAsString(attrRes);
-			System.out.println("filters = " + filters);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		attribute.setAdditionalInformations(filters);
+		attribute.setAdditionalInformations(dsaId);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
