@@ -28,13 +28,12 @@ import it.cnr.iit.ucs.message.Message;
  */
 public interface RequestManagerInterface {
 
-    /**
-     * Receives a message from the external world
-     *
-     * @param message
-     *          the message to be sent
-     * @return the response of the ContextHandler
-     */
-    public boolean sendMessage( Message message );
+	/**
+	 * Receives a message from the external world
+	 *
+	 * @param message the message to be sent
+	 * @return the response of the ContextHandler
+	 */
+	public Message sendMessage(Message message);
 
 }

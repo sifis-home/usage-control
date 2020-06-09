@@ -411,7 +411,7 @@ public final class ContextHandler extends AbstractContextHandler {
 
     public synchronized void reevaluate( SessionInterface session ) throws PolicyException, RequestException {
         log.log( Level.INFO, "Reevaluation begins at {0}", System.currentTimeMillis() );
-        
+
         PolicyWrapper policy = PolicyWrapper.build( session.getPolicySet() );
         RequestWrapper request = RequestWrapper.build( session.getOriginalRequest(), getPipRegistry() );
         request.fatten( false );

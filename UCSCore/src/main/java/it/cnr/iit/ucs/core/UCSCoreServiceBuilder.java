@@ -45,110 +45,113 @@ import it.cnr.iit.utility.errorhandling.exception.PreconditionException;
  */
 public class UCSCoreServiceBuilder {
 
-    private static final Logger log = Logger.getLogger( UCSCoreServiceBuilder.class.getName() );
+	private static final Logger log = Logger.getLogger(UCSCoreServiceBuilder.class.getName());
 
-    private UCSCoreService ucsCore;
-    private UCSProperties properties;
+	private UCSCoreService ucsCore;
+	private UCSProperties properties;
 
-    public UCSCoreServiceBuilder() {
-        ucsCore = new UCSCoreService();
-        ucsCore.pipList = new ArrayList<>();
-        ucsCore.pepMap = new HashMap<>();
-    }
+	public UCSCoreServiceBuilder() {
+		ucsCore = new UCSCoreService();
+		ucsCore.pipList = new ArrayList<>();
+		ucsCore.pepMap = new HashMap<>();
+	}
 
-    public UCSCoreService build() {
-        try {
-            log.info( "[INIT] usage control initialisation ..." );
-            buildComponents();
-            setupConnections();
-            log.info( "[DONE] building components completed" );
-        } catch( PreconditionException e ) {
-            log.severe( "[ERROR] " + e.getMessage() );
-            Thread.currentThread().interrupt();
-        }
-        return ucsCore;
-    }
+	public UCSCoreService build() {
+		try {
+			log.severe("[INIT] usage control initialisation ...");
+			buildComponents();
+			setupConnections();
+			log.severe("[DONE] building components completed");
+		} catch (PreconditionException e) {
+			log.severe("[ERROR] " + e.getMessage());
+			Thread.currentThread().interrupt();
+		}
+		return ucsCore;
+	}
 
-    public UCSCoreServiceBuilder setProperties( UCSProperties properties ) {
-        this.properties = properties;
-        return this;
-    }
+	public UCSCoreServiceBuilder setProperties(UCSProperties properties) {
+		this.properties = properties;
+		return this;
+	}
 
-    private UCSCoreServiceBuilder buildComponents() {
-        buildContextHandler();
-        buildRequestManager();
-        buildSessionManager();
-        buildPolicyDecisionPoint();
-        buildPolicyAdministrationPoint();
-        buildPEPList();
-        buildPIPList();
-        buildObligationManager();
-        return this;
-    }
+	private UCSCoreServiceBuilder buildComponents() {
+		buildContextHandler();
+		buildRequestManager();
+		buildSessionManager();
+		buildPolicyDecisionPoint();
+		buildPolicyAdministrationPoint();
+		// buildPEPList();
+		buildPIPList();
+		buildObligationManager();
+		return this;
+	}
 
-    private UCSCoreServiceBuilder setupConnections() {
-        ucsCore.contextHandler.setSessionManager( ucsCore.sessionManager );
-        ucsCore.contextHandler.setRequestManager( ucsCore.requestManager );
-        ucsCore.contextHandler.setPap( ucsCore.pap );
-        ucsCore.contextHandler.setPdp( ucsCore.pdp );
-        ucsCore.contextHandler.setObligationManager( ucsCore.obligationManager );
-        ucsCore.contextHandler.setPIPs( new ArrayList<PIPCHInterface>( ucsCore.pipList ) );
-        ucsCore.requestManager.setContextHandler( ucsCore.contextHandler );
-        ucsCore.requestManager.setPEPMap( ucsCore.pepMap );
-        for( PIPBase pip : ucsCore.pipList ) {
-            pip.setRequestManager( ucsCore.requestManager );
-        }
-        ucsCore.pdp.setPap( ucsCore.pap );
-        ucsCore.pdp.setObligationManager( ucsCore.obligationManager );
-        ucsCore.obligationManager.setPIPs( new ArrayList<PIPOMInterface>( ucsCore.pipList ) );
-        return this;
-    }
+	private UCSCoreServiceBuilder setupConnections() {
+		ucsCore.contextHandler.setSessionManager(ucsCore.sessionManager);
+		ucsCore.contextHandler.setRequestManager(ucsCore.requestManager);
+		ucsCore.contextHandler.setPap(ucsCore.pap);
+		ucsCore.contextHandler.setPdp(ucsCore.pdp);
+		ucsCore.contextHandler.setObligationManager(ucsCore.obligationManager);
+		ucsCore.contextHandler.setPIPs(new ArrayList<PIPCHInterface>(ucsCore.pipList));
+		ucsCore.requestManager.setContextHandler(ucsCore.contextHandler);
+		// ucsCore.requestManager.setPEPMap(ucsCore.pepMap);
+		for (PIPBase pip : ucsCore.pipList) {
+			pip.setRequestManager(ucsCore.requestManager);
+		}
+		ucsCore.pdp.setPap(ucsCore.pap);
+		ucsCore.pdp.setObligationManager(ucsCore.obligationManager);
+		ucsCore.obligationManager.setPIPs(new ArrayList<PIPOMInterface>(ucsCore.pipList));
+		return this;
+	}
 
-    private void buildContextHandler() {
-        ucsCore.contextHandler = buildComponent( properties.getContextHandler(), AbstractContextHandler.class ).get(); // NOSONAR
-    }
+	private void buildContextHandler() {
+		ucsCore.contextHandler = buildComponent(properties.getContextHandler(), AbstractContextHandler.class).get(); // NOSONAR
+	}
 
-    private void buildRequestManager() {
-        ucsCore.requestManager = buildComponent( properties.getRequestManager(), AbstractRequestManager.class ).get(); // NOSONAR
-        ucsCore.requestManager.startMonitoring();
-    }
+	private void buildRequestManager() {
+		ucsCore.requestManager = buildComponent(properties.getRequestManager(), AbstractRequestManager.class).get(); // NOSONAR
+		ucsCore.requestManager.startMonitoring();
+	}
 
-    private void buildSessionManager() {
-        ucsCore.sessionManager = buildComponent( properties.getSessionManager(), SessionManagerInterface.class ).get(); // NOSONAR
-        ucsCore.sessionManager.start();
-    }
+	private void buildSessionManager() {
+		ucsCore.sessionManager = buildComponent(properties.getSessionManager(), SessionManagerInterface.class).get(); // NOSONAR
+		ucsCore.sessionManager.start();
+	}
 
-    private void buildPolicyDecisionPoint() {
-        ucsCore.pdp = buildComponent( properties.getPolicyDecisionPoint(), PDPInterface.class ).get(); // NOSONAR
-    }
+	private void buildPolicyDecisionPoint() {
+		ucsCore.pdp = buildComponent(properties.getPolicyDecisionPoint(), PDPInterface.class).get(); // NOSONAR
+	}
 
-    private void buildPolicyAdministrationPoint() {
-        ucsCore.pap = buildComponent( properties.getPolicyAdministrationPoint(), PAPInterface.class ).get(); // NOSONAR
-    }
+	private void buildPolicyAdministrationPoint() {
+		ucsCore.pap = buildComponent(properties.getPolicyAdministrationPoint(), PAPInterface.class).get(); // NOSONAR
+	}
 
-    private void buildObligationManager() {
-        ucsCore.obligationManager = buildComponent( properties.getObligationManager(), ObligationManagerInterface.class ).get(); // NOSONAR
-    }
+	private void buildObligationManager() {
+		ucsCore.obligationManager = buildComponent(properties.getObligationManager(), ObligationManagerInterface.class)
+				.get(); // NOSONAR
+	}
 
-    private void buildPEPList() {
-        for( PepProperties pepProp : properties.getPepList() ) {
-            Optional<PEPInterface> pep = buildComponent( pepProp, PEPInterface.class ); // NOSONAR
-            ucsCore.pepMap.put( pepProp.getId(), pep.get() ); // NOSONAR
-        }
-    }
+	private void buildPEPList() {
+		for (PepProperties pepProp : properties.getPepList()) {
+			Optional<PEPInterface> pep = buildComponent(pepProp, PEPInterface.class); // NOSONAR
+			ucsCore.pepMap.put(pepProp.getId(), pep.get()); // NOSONAR
+		}
+	}
 
-    private void buildPIPList() {
-        for( PipProperties pipProp : properties.getPipList() ) {
-            Optional<PIPBase> pip = buildComponent( pipProp, PIPBase.class );
-            ucsCore.pipList.add( pip.get() ); // NOSONAR
-        }
-    }
+	private void buildPIPList() {
+		for (PipProperties pipProp : properties.getPipList()) {
+			log.severe("\n\n\npipProp.getAttributes.size: " + pipProp.getAttributes().size() + "\n\n\n");
+			Optional<PIPBase> pip = buildComponent(pipProp, PIPBase.class);
+			ucsCore.pipList.add(pip.get()); // NOSONAR
+		}
+	}
 
-    private <T> Optional<T> buildComponent( CommonProperties property, Class<T> clazz ) {
-        log.info( "[BUILD] " + property.getName() );
-        Optional<T> component = ReflectionsUtility.buildComponent( property, clazz );
-        Reject.ifAbsent( component, "Error building " + property.getName() );
-        return component;
-    }
+	private <T> Optional<T> buildComponent(CommonProperties property, Class<T> clazz) {
+		log.severe("[BUILD] " + property.getName());
+		Optional<T> component = ReflectionsUtility.buildComponent(property, clazz);
+		Reject.ifAbsent(component, "Error building " + property.getName());
+		log.severe("\n\n\nbuildComponent returning " + component + "\n\n\n");
+		return component;
+	}
 
 }

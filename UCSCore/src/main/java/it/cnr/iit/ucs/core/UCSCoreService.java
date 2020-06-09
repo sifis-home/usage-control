@@ -20,8 +20,11 @@ import java.util.List;
 
 import it.cnr.iit.ucs.contexthandler.AbstractContextHandler;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
 import it.cnr.iit.ucs.message.startaccess.StartAccessMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.obligationmanager.ObligationManagerInterface;
 import it.cnr.iit.ucs.pap.PAPInterface;
 import it.cnr.iit.ucs.pdp.PDPInterface;
@@ -30,6 +33,7 @@ import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.requestmanager.AbstractRequestManager;
 import it.cnr.iit.ucs.sessionmanager.SessionManagerInterface;
 import it.cnr.iit.ucs.ucs.UCSInterface;
+import it.cnr.iit.utility.errorhandling.Reject;
 
 /**
  * This class contains all the components
@@ -38,28 +42,32 @@ import it.cnr.iit.ucs.ucs.UCSInterface;
  */
 public class UCSCoreService implements UCSInterface {
 
-    AbstractContextHandler contextHandler;
-    AbstractRequestManager requestManager;
-    ObligationManagerInterface obligationManager;
-    SessionManagerInterface sessionManager;
-    PDPInterface pdp;
-    PAPInterface pap;
-    List<PIPBase> pipList;
-    HashMap<String, PEPInterface> pepMap;
+	AbstractContextHandler contextHandler;
+	AbstractRequestManager requestManager;
+	ObligationManagerInterface obligationManager;
+	SessionManagerInterface sessionManager;
+	PDPInterface pdp;
+	PAPInterface pap;
+	List<PIPBase> pipList;
+	HashMap<String, PEPInterface> pepMap;
 
-    @Override
-    public Boolean tryAccess( TryAccessMessage tryAccessMessage ) {
-        return requestManager.sendMessage( tryAccessMessage );
-    }
+	@Override
+	public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
+		Reject.ifNull(tryAccessMessage);
+		TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
+		// this is null
+		Reject.ifNull(response);
+		return response;
+	}
 
-    @Override
-    public Boolean startAccess( StartAccessMessage startAccessMessage ) {
-        return requestManager.sendMessage( startAccessMessage );
-    }
+	@Override
+	public StartAccessResponseMessage startAccess(StartAccessMessage startAccessMessage) {
+		return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);
+	}
 
-    @Override
-    public Boolean endAccess( EndAccessMessage endAccessMessage ) {
-        return requestManager.sendMessage( endAccessMessage );
-    }
+	@Override
+	public EndAccessResponseMessage endAccess(EndAccessMessage endAccessMessage) {
+		return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);
+	}
 
 }
