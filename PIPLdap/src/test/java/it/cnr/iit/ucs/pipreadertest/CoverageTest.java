@@ -27,7 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.tngtech.jgiven.annotation.AfterScenario;
 
 import it.cnr.iit.ucs.exceptions.PIPException;
-import it.cnr.iit.ucs.pipreader.PIPLdap;
+import it.cnr.iit.ucs.pipldap.PIPLdap;
 import it.cnr.iit.ucs.properties.UCFPipProperties;
 import it.cnr.iit.ucs.requestmanager.RequestManagerInterface;
 import it.cnr.iit.utility.JAXBUtility;

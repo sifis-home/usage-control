@@ -1,4 +1,4 @@
-package it.cnr.iit.ucs.pipdsa;
+package it.cnr.iit.ucs.pipdsa.statics;
 
 public final class DsaUrlMethods {
 

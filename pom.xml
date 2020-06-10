@@ -23,6 +23,7 @@
 		<!--<module>PIPReader</module>-->
 		<module>PIPJdbc</module>
 		<module>PIPDsa</module>
+		<module>PIPLdap</module>
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>
 		<module>SessionManager</module>

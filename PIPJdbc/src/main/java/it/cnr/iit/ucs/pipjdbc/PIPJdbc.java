@@ -76,7 +76,7 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	private Category expectedCategory;
 
-	public static final String DB_URI = "DB_URI";
+	public static final String DB_URI = "db-uri";
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
@@ -87,14 +87,15 @@ public final class PIPJdbc extends PIPBase {
 		try {
 			log.severe("Initializing PIPJdbc...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
-			Reject.ifFalse(pipProperties.get(0).containsKey(DB_URI), "missing database uri");
-			DBInfoStorage.start(pipProperties.get(0).get(DB_URI));
+			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DB_URI), "missing database URI");
+			DBInfoStorage.start(properties.getAdditionalProperties().get(DB_URI));
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPJdbcSubscriberTimer subscriberTimer = new PIPJdbcSubscriberTimer(this);
 			subscriberTimer.start();
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

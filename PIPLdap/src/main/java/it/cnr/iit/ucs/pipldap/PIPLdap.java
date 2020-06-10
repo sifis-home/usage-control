@@ -1,27 +1,21 @@
-package it.cnr.iit.ucs.pipdsa;
+package it.cnr.iit.ucs.pipldap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import it.cnr.iit.common.lambda.exceptions.ThrowingException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -30,15 +24,13 @@ import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
 import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.pip.PIPKeywords;
-import it.cnr.iit.ucs.pipdsa.statics.DsaUrlMethods;
-import it.cnr.iit.ucs.pipdsa.statics.HttpAuthorization;
-import it.cnr.iit.ucs.pipdsa.types.DsaAttribute;
-import it.cnr.iit.ucs.pipdsa.types.Message;
+import it.cnr.iit.ucs.pipldap.statics.LdapAuthorization;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
@@ -61,7 +53,7 @@ import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
  * @author antonio
  *
  */
-public final class PIPDsa extends PIPBase {
+public final class PIPLdap extends PIPBase {
 
 	// ---------------------------------------------------------------------------
 	// Class attributes
@@ -75,7 +67,7 @@ public final class PIPDsa extends PIPBase {
 	 * otherwise it is not able to retrieve the value of that attribute, hence it
 	 * would not be able to communicate with the AM properly
 	 */
-	private static Logger log = Logger.getLogger(PIPDsa.class.getName());
+	private static Logger log = Logger.getLogger(PIPLdap.class.getName());
 	private JournalingInterface journal;
 
 	// list that stores the attributes on which a subscribe has been performed
@@ -92,54 +84,51 @@ public final class PIPDsa extends PIPBase {
 	 */
 	private Category expectedCategory;
 
-	public static final String DSAMGR_URL = "dsamgr-endpoint";
-	public static final String DSAMGR_STATUS = "status";
-	public static final String DSAMGR_VERSION = "version";
-	public static final String REST_USERNAME = "rest-username";
-	public static final String REST_PASSWORD = "rest-password";
+	public static final String LDAP_HOST = "host";
+	public static final String LDAP_PORT = "port";
+	public static final String LDAP_BNDDN = "bnddn";
+	public static final String LDAP_PASS = "password";
+	public static final String ORG_LIST = "org-list";
 
-	public static final String DSA_FILTER = "filter";
-	private static final String DSA_ID_ATTRIBUTE = "urn:oasis:names:tc:xacml:3.0:resource:dsa-id";
+	private static final String ATTRID_ORG = "urn:oasis:names:tc:xacml:3.0:subject:subject-organisation";
+	private List<String> orgList = new ArrayList<String>();
 
-	public PIPDsa(PipProperties properties) {
+	public PIPLdap(PipProperties properties) {
 		super(properties);
-		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
+		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
 		try {
-			log.severe("Initializing PIPDsa...");
+			log.severe("Initializing PIPLdap...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
-			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_URL), "missing DSA Manager url");
-			setDsaEndpointMethods(properties);
 			setAuthorizations(properties);
+			setOrgList(properties);
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
-			PIPDsaSubscriberTimer subscriberTimer = new PIPDsaSubscriberTimer(this);
+			PIPLdapSubscriberTimer subscriberTimer = new PIPLdapSubscriberTimer(this);
 			subscriberTimer.start();
+			LdapQuery.init();
 			return true;
 		} catch (Exception e) {
 			return false;
 		}
 	}
 
-	private void setDsaEndpointMethods(PipProperties properties) {
-		DsaUrlMethods.setDsaUrl(properties.getAdditionalProperties().get(DSAMGR_URL));
-		Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_STATUS),
-				"missing DSA Manager method to get the Status attribute");
-		DsaUrlMethods.setDsaStatus(properties.getAdditionalProperties().get(DSAMGR_STATUS));
-		Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_VERSION),
-				"missing DSA Manager method to get the Version attribute");
-		DsaUrlMethods.setDsaVersion(properties.getAdditionalProperties().get(DSAMGR_VERSION));
+	private void setAuthorizations(PipProperties properties) {
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(LDAP_HOST), "missing ldap host");
+		LdapAuthorization.setHost(properties.getAdditionalProperties().get(LDAP_HOST));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(LDAP_PORT), "missing ldap port");
+		LdapAuthorization.setPort(properties.getAdditionalProperties().get(LDAP_PORT));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(LDAP_BNDDN), "missing bnddn");
+		LdapAuthorization.setBnddn(properties.getAdditionalProperties().get(LDAP_BNDDN));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(LDAP_PASS), "missing bnddn password");
+		LdapAuthorization.setPassword(properties.getAdditionalProperties().get(LDAP_PASS));
 	}
 
-	private void setAuthorizations(PipProperties properties) {
-		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_USERNAME),
-				"missing RestTemplate username");
-		HttpAuthorization.setRestUsername(properties.getAdditionalProperties().get(REST_USERNAME));
-		Reject.ifFalse(properties.getAdditionalProperties().containsKey(REST_PASSWORD),
-				"missing RestTemplate password");
-		HttpAuthorization.setRestPassword(properties.getAdditionalProperties().get(REST_PASSWORD));
+	private void setOrgList(PipProperties properties) {
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(ORG_LIST), "missing organization list");
+		orgList = Arrays.asList(properties.getAdditionalProperties().get(ORG_LIST).split(","));
 	}
 
 	private void addAttributes(Map<String, String> pip) {
@@ -149,39 +138,37 @@ public final class PIPDsa extends PIPBase {
 		attribute.setCategory(category);
 		DataType dataType = DataType.toDATATYPE(pip.get(PIPKeywords.DATA_TYPE));
 		attribute.setDataType(dataType);
+		expectedCategory = Category.toCATEGORY(pip.get(PIPKeywords.EXPECTED_CATEGORY));
+		Reject.ifNull(expectedCategory, "missing expected category");
 		addAttribute(attribute);
 	}
 
 	@Override
 	public void retrieve(RequestType request) {
 		Reject.ifNull(request);
-		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
 
 		List<Attribute> attributeList = getAttributes();
-		attributeList.stream().forEach(a -> addAdditionalInformation(request, a, dsaId));
+		attributeList.stream().forEach(a -> addAdditionalInformation(request, a));
 
-		List<String> dsaAttributeStringList = new ArrayList<String>();
-		attributeList.stream().filter(Objects::nonNull)
-				.map(ThrowingException.unchecked(a -> dsaAttributeStringList.add(retrieve(a)))).filter(Objects::nonNull)
-				.collect(Collectors.toList());
+		try {
+			Map<String, String> attributesToValues = new HashMap<>();
+			attributesToValues = new ObjectMapper().readValue(attributeList.get(0).getAdditionalInformations(),
+					new TypeReference<Map<String, String>>() {
+					});
+			String organization = attributesToValues.get(ATTRID_ORG).toLowerCase().replace(" ", "");
+			orgList.stream().filter(org -> org.equals(organization)).findFirst().orElseThrow(
+					() -> new PIPException("the organization " + organization + " is not monitored by PIPLdap"));
 
-		List<DsaAttribute> dsaAttributeList = dsaAttributeStringList.stream()
-				.map(ThrowingException.unchecked(a -> new ObjectMapper().readValue(a, DsaAttribute.class)))
-				.collect(Collectors.toList());
-		Reject.ifEmpty(dsaAttributeList);
+			orgList.stream().forEach(el -> log.severe("organization: " + el));
 
-		addAttributesToRequest(request, dsaAttributeList);
-
-	}
-
-	private void addAttributesToRequest(RequestType request, List<DsaAttribute> dsaAttributeList) {
-
-		for (Attribute attr : getAttributes()) {
-			for (DsaAttribute dsaAttr : dsaAttributeList) {
-				if (attr.getAttributeId().equals(dsaAttr.getId())) {
-					request.addAttribute(attr, dsaAttr.getMessage());
-				}
+			if (!orgList.isEmpty()) {
+				retrieve(getAttributes().get(0));
 			}
+
+		} catch (PIPException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}
@@ -192,45 +179,31 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		try {
+		String[] attrsToSearch = { "uid", "o", "cn", "c" };
 
-			String dsaId = attribute.getAdditionalInformations();
-			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DsaUrlMethods.getDsaUrl());
+		String organization = orgList.get(0);
+		String filter = "";
 
-			DsaAttribute dsaAttribute = null;
-			if (attribute.getAttributeId().endsWith("status")) {
-				builder.path(DsaUrlMethods.getDsaStatus()).queryParam("dsaid", dsaId);
-				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
-			} else if (attribute.getAttributeId().endsWith("version")) {
-				builder.path(DsaUrlMethods.getDsaVersion()).queryParam("dsaid", dsaId);
-				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
-			} else {
-				return new String();
-			}
-
-			return new ObjectMapper().writeValueAsString(dsaAttribute);
-		} catch (Exception e) {
-			e.printStackTrace();
+		switch (organization) {
+		case "chino":
+		case "gps":
+		case "3drepo":
+		case "kent":
+			filter = "ou=Pilots,ou=SME,ou=SME Pilot,dc=c3isp,dc=eu";
+			break;
+		case "spartacompany1":
+		case "spartacompany2":
+		case "spartacompany3":
+			filter = "ou=Pilots,ou=SPARTA,ou=Users,dc=c3isp,dc=eu";
+			break;
+		default:
+			filter = "ou=Users,dc=c3isp,dc=eu";
+			break;
 		}
+
+		Map<String, Map<String, String>> userAtrributes = LdapQuery.queryForAll(filter, attrsToSearch);
 		return null;
 
-	}
-
-	private DsaAttribute idsToMessage(UriComponentsBuilder builder, String id) {
-		HttpHeaders headers = new HttpHeaders();
-		String credentials = "Basic " + HttpAuthorization.base64();
-		headers.add("Authorization", credentials);
-		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-		HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-		String url = builder.build().toString();
-		ResponseEntity<Message> response = new RestTemplate().exchange(url, HttpMethod.POST, entity, Message.class);
-		Reject.ifNull(response);
-
-		DsaAttribute dsaAttr = new DsaAttribute();
-		dsaAttr.setId(id);
-		dsaAttr.setMessage(response.getBody().getMessage());
-		return dsaAttr;
 	}
 
 	/**
@@ -247,8 +220,7 @@ public final class PIPDsa extends PIPBase {
 
 		Attribute attribute = getAttributes().get(1);
 
-		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
-		addAdditionalInformation(request, attribute, dsaId);
+		addAdditionalInformation(request, attribute);
 
 		String value = subscribe(attribute);
 
@@ -301,8 +273,29 @@ public final class PIPDsa extends PIPBase {
 		return true;
 	}
 
-	private void addAdditionalInformation(RequestType request, Attribute attribute, String dsaId) {
-		attribute.setAdditionalInformations(dsaId);
+	private void addAdditionalInformation(RequestType request, Attribute attribute) {
+
+		List<AttributesType> attrstype = request.getAttributes().stream()
+				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
+		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
+				.collect(Collectors.toList());
+		List<String> attrValues = attrstype.stream()
+				.flatMap(a -> a.getAttribute().stream()
+						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
+				.collect(Collectors.toList());
+		Map<String, String> idsToValues = new HashMap<String, String>();
+		idsToValues = IntStream.range(0, attrIds.size()).boxed()
+				.collect(Collectors.toMap(attrIds::get, attrValues::get));
+
+		String filters = null;
+		try {
+			filters = new ObjectMapper().writeValueAsString(idsToValues);
+			log.severe("filters = " + filters);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		attribute.setAdditionalInformations(filters);
+
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
