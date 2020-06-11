@@ -113,9 +113,9 @@ public final class LdapQuery {
 			searchCursor.close();
 			connection.close();
 
-//			userAttrs.entrySet().stream().forEach(
-//					entry -> entry.getValue().entrySet().stream().forEach(el -> log.severe("attribute for user "
-//							+ entry.getKey() + ": key -> " + el.getKey() + ", value -> " + el.getValue())));
+			userAttrs.entrySet().stream().forEach(
+					entry -> entry.getValue().entrySet().stream().forEach(el -> log.severe("attribute for user "
+							+ entry.getKey() + ": key -> " + el.getKey() + ", value -> " + el.getValue())));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -90,7 +91,13 @@ public final class PIPLdap extends PIPBase {
 	public static final String LDAP_PASS = "password";
 	public static final String ORG_LIST = "org-list";
 
-	private static final String ATTRID_ORG = "urn:oasis:names:tc:xacml:3.0:subject:subject-organisation";
+	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:3.0:subject:subject-id";
+	private static final String SUBJECT_ORGANIZATION = "urn:oasis:names:tc:xacml:3.0:subject:subject-organisation";
+	private static final String SUBJECT_COUNTRY = "urn:oasis:names:tc:xacml:3.0:subject:subject-country";
+	private final static String RESOURCE_OWNER = "urn:oasis:names:tc:xacml:3.0:resource:resource-owner";
+
+	private final static String NOT_FOUND = "NOT FOUND";
+
 	private List<String> orgList = new ArrayList<String>();
 
 	public PIPLdap(PipProperties properties) {
@@ -129,6 +136,7 @@ public final class PIPLdap extends PIPBase {
 	private void setOrgList(PipProperties properties) {
 		Reject.ifFalse(properties.getAdditionalProperties().containsKey(ORG_LIST), "missing organization list");
 		orgList = Arrays.asList(properties.getAdditionalProperties().get(ORG_LIST).split(","));
+		orgList.stream().forEach(org -> log.severe("orgList: " + org));
 	}
 
 	private void addAttributes(Map<String, String> pip) {
@@ -148,27 +156,64 @@ public final class PIPLdap extends PIPBase {
 		Reject.ifNull(request);
 
 		List<Attribute> attributeList = getAttributes();
-		attributeList.stream().forEach(a -> addAdditionalInformation(request, a));
+		addAdditionalInformation(request, attributeList.get(0));
 
 		try {
+
 			Map<String, String> attributesToValues = new HashMap<>();
 			attributesToValues = new ObjectMapper().readValue(attributeList.get(0).getAdditionalInformations(),
 					new TypeReference<Map<String, String>>() {
 					});
-			String organization = attributesToValues.get(ATTRID_ORG).toLowerCase().replace(" ", "");
-			orgList.stream().filter(org -> org.equals(organization)).findFirst().orElseThrow(
-					() -> new PIPException("the organization " + organization + " is not monitored by PIPLdap"));
 
-			orgList.stream().forEach(el -> log.severe("organization: " + el));
+			String uid = attributesToValues.get(SUBJECT_ID);
+			String organization = attributesToValues.get(RESOURCE_OWNER).toLowerCase().replace(" ", "");
+			orgList = orgList.stream().filter(org -> org.equals(organization)).collect(Collectors.toList());
 
 			if (!orgList.isEmpty()) {
-				retrieve(getAttributes().get(0));
+				Map<String, Map<String, String>> idsToLdapAttributes = new ObjectMapper().readValue(
+						retrieve(getAttributes().get(0)), new TypeReference<Map<String, Map<String, String>>>() {
+						});
+				Map<String, String> ldapUserAttributes = idsToLdapAttributes.get(uid);
+				Map<String, String> userAttributes = mapLdapAttributesToOasis(uid, ldapUserAttributes);
+				addAttributesToRequest(request, userAttributes);
+
+			} else {
+				throw new PIPException("The organization " + organization + " is not monitored by the PIPLdap");
 			}
 
 		} catch (PIPException e) {
-			e.printStackTrace();
+			log.severe(e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+
+	}
+
+	private Map<String, String> mapLdapAttributesToOasis(String uid, Map<String, String> userAttributes) {
+		Map<String, String> oasisMap = new HashMap<String, String>();
+
+		for (String attr : userAttributes.keySet()) {
+			switch (attr) {
+			case "o":
+				oasisMap.put(SUBJECT_ORGANIZATION, userAttributes.get(attr));
+				break;
+			case "c":
+				oasisMap.put(SUBJECT_COUNTRY, userAttributes.get(attr));
+				break;
+			}
+		}
+
+		return oasisMap;
+	}
+
+	private void addAttributesToRequest(RequestType request, Map<String, String> userAttributes) {
+		for (Attribute attr : getAttributes()) {
+			if (attr.getAttributeId().contains("organisation")) {
+				request.addAttribute(attr, userAttributes.get(SUBJECT_ORGANIZATION));
+			}
+			if (attr.getAttributeId().contains("country")) {
+				request.addAttribute(attr, userAttributes.get(SUBJECT_COUNTRY));
+			}
 		}
 
 	}
@@ -189,21 +234,36 @@ public final class PIPLdap extends PIPBase {
 		case "gps":
 		case "3drepo":
 		case "kent":
-			filter = "ou=Pilots,ou=SME,ou=SME Pilot,dc=c3isp,dc=eu";
+			filter = "ou=SME Pilot,ou=SME,ou=Pilots,dc=c3isp,dc=eu";
 			break;
 		case "spartacompany1":
 		case "spartacompany2":
 		case "spartacompany3":
-			filter = "ou=Pilots,ou=SPARTA,ou=Users,dc=c3isp,dc=eu";
+			filter = "ou=Users,ou=SPARTA,ou=Pilots,dc=c3isp,dc=eu";
 			break;
 		default:
 			filter = "ou=Users,dc=c3isp,dc=eu";
 			break;
 		}
 
-		Map<String, Map<String, String>> userAtrributes = LdapQuery.queryForAll(filter, attrsToSearch);
-		return null;
+		Map<String, Map<String, String>> userAttributes = LdapQuery.queryForAll(filter, attrsToSearch);
+		userAttributes = filterForOrganization(userAttributes, organization);
 
+		try {
+			return new ObjectMapper().writeValueAsString(userAttributes);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		return new String();
+
+	}
+
+	private Map<String, Map<String, String>> filterForOrganization(Map<String, Map<String, String>> map,
+			String organization) {
+		return map.entrySet().stream()
+				.filter(uid -> uid.getValue().get("o").toLowerCase().replace(" ", "").equals(organization))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 	}
 
 	/**
@@ -273,10 +333,10 @@ public final class PIPLdap extends PIPBase {
 		return true;
 	}
 
-	private void addAdditionalInformation(RequestType request, Attribute attribute) {
+	private Map<String, String> getAttributesFromCategory(RequestType request, String category) {
 
-		List<AttributesType> attrstype = request.getAttributes().stream()
-				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
+		List<AttributesType> attrstype = request.getAttributes().stream().filter(a -> a.getCategory().equals(category))
+				.collect(Collectors.toList());
 		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
 				.collect(Collectors.toList());
 		List<String> attrValues = attrstype.stream()
@@ -286,6 +346,21 @@ public final class PIPLdap extends PIPBase {
 		Map<String, String> idsToValues = new HashMap<String, String>();
 		idsToValues = IntStream.range(0, attrIds.size()).boxed()
 				.collect(Collectors.toMap(attrIds::get, attrValues::get));
+
+		return idsToValues;
+
+	}
+
+	private void addAdditionalInformation(RequestType request, Attribute attribute) {
+
+		Map<String, String> idsToValuesSubject = getAttributesFromCategory(request, Category.SUBJECT.toString());
+//		Map<String, String> idsToValuesSubject = new HashMap<String, String>();
+//		idsToValuesSubject.put(Category.SUBJECT.toString(), "SPARTAUser3");
+		Map<String, String> idsToValuesResource = getAttributesFromCategory(request, Category.RESOURCE.toString());
+
+		Map<String, String> idsToValues = new HashMap<String, String>();
+		idsToValues.putAll(idsToValuesSubject);
+		idsToValues.putAll(idsToValuesResource);
 
 		String filters = null;
 		try {

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -64,6 +65,9 @@ public final class PIPJdbc extends PIPBase {
 	// list that stores the attributes on which a subscribe has been performed
 	protected final BlockingQueue<Attribute> subscriptions = new LinkedBlockingQueue<>();
 	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
+	private final static String RESOURCE_OWNER = "urn:oasis:names:tc:xacml:3.0:resource:resource-owner";
+
+	private final static String NOT_FOUND = "NOT FOUND";
 
 	/**
 	 * Whenever a PIP has to retrieve some informations related to an attribute that
@@ -80,7 +84,7 @@ public final class PIPJdbc extends PIPBase {
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
-		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
+		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
@@ -124,18 +128,61 @@ public final class PIPJdbc extends PIPBase {
 	public void retrieve(RequestType request) throws PIPException {
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(0);
-		addAdditionalInformation(request, attribute);
-		String value = retrieve(attribute);
-		Reject.ifNull(value);
-		UserAttributes userAttr = null;
 		try {
+			String organization = retrieveOrganization(request);
+			if (!checkIfMonitored(organization)) {
+				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
+			}
+
+			Attribute attribute = getAttributes().get(0);
+			addAdditionalInformation(request, attribute);
+			String value = retrieve(attribute);
+			Reject.ifNull(value);
+			UserAttributes userAttr = null;
 			userAttr = new ObjectMapper().readValue(value, UserAttributes.class);
+			addAttributesToRequest(getAttributes(), request, userAttr);
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		addAttributesToRequest(getAttributes(), request, userAttr);
+	}
+
+	private boolean checkIfMonitored(String organization) {
+
+		organization = organization.toLowerCase().replace(" ", "");
+		switch (organization) {
+		case "isp@cnr":
+		case "iscom-mise":
+			return true;
+		default:
+			return false;
+		}
+
+	}
+
+	private String retrieveOrganization(RequestType request) {
+		Map<String, String> idsToValues = getAttributesFromCategory(request, Category.RESOURCE.toString());
+		return Optional.of(idsToValues.get(RESOURCE_OWNER)).orElse(NOT_FOUND);
+	}
+
+	private Map<String, String> getAttributesFromCategory(RequestType request, String category) {
+
+		List<AttributesType> attrstype = request.getAttributes().stream().filter(a -> a.getCategory().equals(category))
+				.collect(Collectors.toList());
+		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
+				.collect(Collectors.toList());
+		List<String> attrValues = attrstype.stream()
+				.flatMap(a -> a.getAttribute().stream()
+						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
+				.collect(Collectors.toList());
+		Map<String, String> idsToValues = new HashMap<String, String>();
+		idsToValues = IntStream.range(0, attrIds.size()).boxed()
+				.collect(Collectors.toMap(attrIds::get, attrValues::get));
+
+		return idsToValues;
+
 	}
 
 	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, UserAttributes userAttr) {
@@ -248,20 +295,10 @@ public final class PIPJdbc extends PIPBase {
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute) {
 
-		List<AttributesType> attrstype = request.getAttributes().stream()
-				.filter(a -> a.getCategory().equals(attribute.getCategory().toString())).collect(Collectors.toList());
-		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
-				.collect(Collectors.toList());
-		List<String> attrValues = attrstype.stream()
-				.flatMap(a -> a.getAttribute().stream()
-						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
-				.collect(Collectors.toList());
-		Map<String, String> idsToValues = new HashMap<String, String>();
-		idsToValues = IntStream.range(0, attrIds.size()).boxed()
-				.collect(Collectors.toMap(attrIds::get, attrValues::get));
-
+		Map<String, String> idsToValues = getAttributesFromCategory(request, Category.SUBJECT.toString());
 		String filters = null;
 		try {
+			System.out.println("filters from pipjdbc");
 			filters = new ObjectMapper().writeValueAsString(idsToValues);
 			System.out.println("filters = " + filters);
 		} catch (JsonProcessingException e) {
