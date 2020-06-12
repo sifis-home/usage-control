@@ -99,6 +99,8 @@ public final class PIPLdap extends PIPBase {
 	private static final String SUBJECT_COUNTRY = "urn:oasis:names:tc:xacml:3.0:subject:subject-country";
 	private final static String SUBJECT_MEMBEROF = "urn:oasis:names:tc:xacml:3.0:subject:subject-ismemberof";
 
+	private final static String RESOURCE_OWNER = "urn:oasis:names:tc:xacml:3.0:resource:resource-owner";
+
 	private List<String> orgList = new ArrayList<String>();
 
 	public PIPLdap(PipProperties properties) {
@@ -168,10 +170,8 @@ public final class PIPLdap extends PIPBase {
 
 			log.severe("attributesToValues = " + new ObjectMapper().writeValueAsString(attributesToValues));
 
-//			String uid = attributesToValues.get(SUBJECT_ID);
-//			String organization = attributesToValues.get(RESOURCE_OWNER).toLowerCase().replace(" ", "");
-			String uid = "andreachino";
-			String organization = "chino";
+			String uid = attributesToValues.get(SUBJECT_ID);
+			String organization = attributesToValues.get(RESOURCE_OWNER).toLowerCase().replace(" ", "");
 			orgList = orgList.stream().filter(org -> org.equals(organization)).collect(Collectors.toList());
 
 			if (!orgList.isEmpty()) {
@@ -328,8 +328,7 @@ public final class PIPLdap extends PIPBase {
 			attributesToValues = new ObjectMapper().readValue(getAttributes().get(0).getAdditionalInformations(),
 					new TypeReference<Map<String, String>>() {
 					});
-//			String subjectId = attributesToValues.get(SUBJECT_ID);
-			String subjectId = "andreachino";
+			String subjectId = attributesToValues.get(SUBJECT_ID);
 			String uid = uidsToLdapAttributes.entrySet().stream().filter(el -> el.getKey().equals(subjectId))
 					.findFirst().orElseThrow(() -> new PIPException("Impossible to retrieve the uid for user "
 							+ subjectId + " because is different from the subject id"))

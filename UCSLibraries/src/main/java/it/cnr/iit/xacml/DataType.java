@@ -16,50 +16,48 @@
 package it.cnr.iit.xacml;
 
 /**
- * This is enumerate represents the dataType enumerate
- * In UXACML syntax data-types can be many, we list here the ones that we will
- * use.
+ * This is enumerate represents the dataType enumerate In UXACML syntax
+ * data-types can be many, we list here the ones that we will use.
  *
  * @author Antonio La Marra, Alessandro Rosetti
  *
  */
 public enum DataType {
-    INTEGER( "http://www.w3.org/2001/XMLSchema#integer" ),
-    DOUBLE( "http://www.w3.org/2001/XMLSchema#double" ),
-    STRING( "http://www.w3.org/2001/XMLSchema#string" ),
-    ANYURI( "http://www.w3.org/2001/XMLSchema#anyURI" ),
-    DATE( "http://www.w3.org/2001/XMLSchema#date" );
+	INTEGER("http://www.w3.org/2001/XMLSchema#integer"), DOUBLE("http://www.w3.org/2001/XMLSchema#double"),
+	STRING("http://www.w3.org/2001/XMLSchema#string"), ANYURI("http://www.w3.org/2001/XMLSchema#anyURI"),
+	DATE("http://www.w3.org/2001/XMLSchema#date"), TIME("http://www.w3.org/2001/XMLSchema#time");
 
-    private final String payload;
+	private final String payload;
 
-    DataType( String payload ) {
-        this.payload = payload;
-    }
+	DataType(String payload) {
+		this.payload = payload;
+	}
 
-    @Override
-    public String toString() {
-        return payload;
-    }
+	@Override
+	public String toString() {
+		return payload;
+	}
 
-    /**
-     * Convert a string to a dataType
-     *
-     * @param payload
-     *          the string to be converted
-     * @return the dataType object correspondent to the string, null otherwise
-     */
-    public static DataType toDATATYPE( String payload ) {
-        if( payload.equalsIgnoreCase( INTEGER.toString() ) ) {
-            return INTEGER;
-        } else if( payload.equalsIgnoreCase( DOUBLE.toString() ) ) {
-            return DOUBLE;
-        } else if( payload.equalsIgnoreCase( STRING.toString() ) ) {
-            return STRING;
-        } else if( payload.equalsIgnoreCase( ANYURI.toString() ) ) {
-            return ANYURI;
-        } else if( payload.equalsIgnoreCase( DATE.toString() ) ) {
-            return DATE;
-        }
-        return null;
-    }
+	/**
+	 * Convert a string to a dataType
+	 *
+	 * @param payload the string to be converted
+	 * @return the dataType object correspondent to the string, null otherwise
+	 */
+	public static DataType toDATATYPE(String payload) {
+		if (payload.equalsIgnoreCase(INTEGER.toString())) {
+			return INTEGER;
+		} else if (payload.equalsIgnoreCase(DOUBLE.toString())) {
+			return DOUBLE;
+		} else if (payload.equalsIgnoreCase(STRING.toString())) {
+			return STRING;
+		} else if (payload.equalsIgnoreCase(ANYURI.toString())) {
+			return ANYURI;
+		} else if (payload.equalsIgnoreCase(DATE.toString())) {
+			return DATE;
+		} else if (payload.equalsIgnoreCase(TIME.toString())) {
+			return TIME;
+		}
+		return null;
+	}
 }

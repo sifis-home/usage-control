@@ -24,6 +24,7 @@
 		<module>PIPJdbc</module>
 		<module>PIPDsa</module>
 		<module>PIPLdap</module>
+		<module>PIPTime</module>
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>
 		<module>SessionManager</module>

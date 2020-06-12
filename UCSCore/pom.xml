@@ -38,6 +38,11 @@
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
+			<artifactId>PIPTime</artifactId>
+			<version>0.2.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PIPJdbc</artifactId>
 			<version>0.2.1-SNAPSHOT</version>
 		</dependency>
