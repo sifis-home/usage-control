@@ -62,8 +62,9 @@ public final class LdapQuery {
 
 	}
 
-	public static Map<String, Map<String, String>> queryForAll(String filter, String... attributes) {
-		Reject.ifBlank(filter);
+	public static Map<String, Map<String, String>> queryForAll(String baseDn, String filter, SearchScope level,
+			String... attributes) {
+		Reject.ifBlank(baseDn);
 
 		Map<String, Map<String, String>> userAttrs = new HashMap<>();
 		List<String> attrsList = Arrays.asList(attributes);
@@ -72,11 +73,11 @@ public final class LdapQuery {
 		try {
 
 			SearchRequest req = new SearchRequestImpl();
-			req.setScope(SearchScope.ONELEVEL);
+			req.setScope(level);
 			req.addAttributes(attributes);
 			req.setTimeLimit(0);
-			req.setBase(new Dn(filter));
-			req.setFilter("(objectClass=*)");
+			req.setBase(new Dn(baseDn));
+			req.setFilter(filter);
 
 			// Process the request
 			SearchCursor searchCursor = connection.search(req);
@@ -121,6 +122,40 @@ public final class LdapQuery {
 		}
 
 		return userAttrs;
+	}
+
+	public static String queryForMemberOf(String baseDn, String filter, SearchScope level, String... attributes) {
+		Reject.ifBlank(filter);
+
+		try {
+
+			SearchRequest req = new SearchRequestImpl();
+			req.setScope(level);
+			req.addAttributes(attributes);
+			req.setTimeLimit(0);
+			req.setBase(new Dn(baseDn));
+			req.setFilter(filter);
+
+			// Process the request
+			SearchCursor searchCursor = connection.search(req);
+
+			while (searchCursor.next()) {
+				Response response = searchCursor.get();
+				if (response instanceof SearchResultEntry) {
+					Entry resultEntry = ((SearchResultEntry) response).getEntry();
+					if (resultEntry.containsAttribute(attributes)) {
+						String memberOf = resultEntry.getAttributes().stream().findFirst().get().getString();
+						log.severe("role found is " + memberOf + " inside queryForMemberOf");
+						return memberOf;
+					}
+				}
+			}
+			searchCursor.close();
+			connection.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "NOT FOUND";
 	}
 
 	private static String setDc(String searchString) {
