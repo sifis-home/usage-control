@@ -82,12 +82,19 @@ public final class PIPJdbc extends PIPBase {
 
 	public static final String DB_URI = "db-uri";
 
+	private static volatile boolean initialized = false;
+
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
+		if (initialized == true)
+			return false;
+
+		initialized = true;
+
 		try {
 			log.severe("Initializing PIPJdbc...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();

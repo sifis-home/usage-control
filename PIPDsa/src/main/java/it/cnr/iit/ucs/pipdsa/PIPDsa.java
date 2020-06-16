@@ -101,12 +101,19 @@ public final class PIPDsa extends PIPBase {
 	public static final String DSA_FILTER = "filter";
 	private static final String DSA_ID_ATTRIBUTE = "urn:oasis:names:tc:xacml:3.0:resource:dsa-id";
 
+	private static volatile boolean initialized = false;
+
 	public PIPDsa(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
+		if (initialized == true)
+			return false;
+
+		initialized = true;
+
 		try {
 			log.severe("Initializing PIPDsa...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();

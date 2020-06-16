@@ -103,12 +103,19 @@ public final class PIPLdap extends PIPBase {
 
 	private List<String> orgList = new ArrayList<String>();
 
+	private static volatile boolean initialized = false;
+
 	public PIPLdap(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
+		if (initialized == true)
+			return false;
+
+		initialized = true;
+
 		try {
 			log.severe("Initializing PIPLdap...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
