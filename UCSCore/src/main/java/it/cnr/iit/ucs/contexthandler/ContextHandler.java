@@ -38,6 +38,7 @@ import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.pdp.PDPEvaluation;
 import it.cnr.iit.ucs.properties.components.ContextHandlerProperties;
+import it.cnr.iit.ucs.requestmanager.RequestEnricher;
 import it.cnr.iit.ucs.sessionmanager.OnGoingAttributesInterface;
 import it.cnr.iit.ucs.sessionmanager.SessionAttributesBuilder;
 import it.cnr.iit.ucs.sessionmanager.SessionInterface;
@@ -77,9 +78,16 @@ public final class ContextHandler extends AbstractContextHandler {
 		PolicyWrapper policy = PolicyWrapper.build(getPap(), message);
 		log.severe("\n\n\nmessage.getPolicy() = " + policy + "\n\n\n");
 		log.severe("\n\n\nmessage.getRequest() = " + message.getRequest() + "\n\n\n");
-		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
-		log.severe("\n\n\n3\n\n\n");
-		request.fatten(false); // not working
+
+		RequestEnricher enricher = new RequestEnricher();
+		String fullReq = enricher.enrichRequest(message.getRequest(), policy.getPolicy());
+
+		log.severe("\n\n\nenriched request = " + fullReq + "\n\n\n");
+
+		RequestWrapper request = RequestWrapper.build(fullReq, getPipRegistry());
+
+		request.fatten(false);
+
 		log.severe("TryAccess fattened request contents : \n" + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);

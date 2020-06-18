@@ -51,6 +51,70 @@ public class UCSCoreService implements UCSInterface {
 	List<PIPBase> pipList;
 	HashMap<String, PEPInterface> pepMap;
 
+	public AbstractContextHandler getContextHandler() {
+		return contextHandler;
+	}
+
+	public void setContextHandler(AbstractContextHandler contextHandler) {
+		this.contextHandler = contextHandler;
+	}
+
+	public AbstractRequestManager getRequestManager() {
+		return requestManager;
+	}
+
+	public void setRequestManager(AbstractRequestManager requestManager) {
+		this.requestManager = requestManager;
+	}
+
+	public ObligationManagerInterface getObligationManager() {
+		return obligationManager;
+	}
+
+	public void setObligationManager(ObligationManagerInterface obligationManager) {
+		this.obligationManager = obligationManager;
+	}
+
+	public SessionManagerInterface getSessionManager() {
+		return sessionManager;
+	}
+
+	public void setSessionManager(SessionManagerInterface sessionManager) {
+		this.sessionManager = sessionManager;
+	}
+
+	public PDPInterface getPdp() {
+		return pdp;
+	}
+
+	public void setPdp(PDPInterface pdp) {
+		this.pdp = pdp;
+	}
+
+	public PAPInterface getPap() {
+		return pap;
+	}
+
+	public void setPap(PAPInterface pap) {
+		this.pap = pap;
+	}
+
+	public List<PIPBase> getPipList() {
+		return pipList;
+	}
+
+	public void setPipList(List<PIPBase> pipList) {
+		this.pipList = pipList;
+	}
+
+	public HashMap<String, PEPInterface> getPepMap() {
+		return pepMap;
+	}
+
+	public void setPepMap(HashMap<String, PEPInterface> pepMap) {
+		this.pepMap = pepMap;
+	}
+
 	@Override
 	public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
 		Reject.ifNull(tryAccessMessage);
