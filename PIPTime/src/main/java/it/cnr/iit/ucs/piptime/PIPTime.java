@@ -86,19 +86,12 @@ public final class PIPTime extends PIPBase {
 	private final static String CURRENT_DATE = "urn:oasis:names:tc:xacml:1.0:environment:current-date";
 	private final static String CURRENT_TIME = "urn:oasis:names:tc:xacml:1.0:environment:current-time";
 
-	private static volatile boolean initialized = false;
-
 	public PIPTime(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
-		if (initialized == true)
-			return false;
-
-		initialized = true;
-
 		try {
 			log.severe("Initializing PIPTime...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();

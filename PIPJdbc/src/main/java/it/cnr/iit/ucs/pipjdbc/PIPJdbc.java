@@ -82,19 +82,12 @@ public final class PIPJdbc extends PIPBase {
 
 	public static final String DB_URI = "db-uri";
 
-	private static volatile boolean initialized = false;
-
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
-		if (initialized == true)
-			return false;
-
-		initialized = true;
-
 		try {
 			log.severe("Initializing PIPJdbc...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
@@ -134,6 +127,7 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
 		Reject.ifNull(request);
+		log.severe("called void retrieve");
 
 		try {
 			String organization = retrieveOrganization(request);
@@ -176,17 +170,30 @@ public final class PIPJdbc extends PIPBase {
 
 	private Map<String, String> getAttributesFromCategory(RequestType request, String category) {
 
-		List<AttributesType> attrstype = request.getAttributes().stream().filter(a -> a.getCategory().equals(category))
-				.collect(Collectors.toList());
-		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
-				.collect(Collectors.toList());
-		List<String> attrValues = attrstype.stream()
-				.flatMap(a -> a.getAttribute().stream()
-						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
-				.collect(Collectors.toList());
-		Map<String, String> idsToValues = new HashMap<String, String>();
-		idsToValues = IntStream.range(0, attrIds.size()).boxed()
-				.collect(Collectors.toMap(attrIds::get, attrValues::get));
+		Map<String, String> idsToValues = null;
+		try {
+
+			List<AttributesType> attrstype = request.getAttributes().stream()
+					.filter(a -> a.getCategory().equals(category)).collect(Collectors.toList());
+			log.severe("attrsType array is: " + new ObjectMapper().writeValueAsString(attrstype));
+
+			List<String> attrIds = attrstype.stream()
+					.flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId())).collect(Collectors.toList());
+			log.severe("attrIds array is: " + new ObjectMapper().writeValueAsString(attrIds));
+
+			List<String> attrValues = attrstype.stream()
+					.flatMap(a -> a.getAttribute().stream()
+							.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
+					.collect(Collectors.toList());
+			log.severe("attrValues array is: " + new ObjectMapper().writeValueAsString(attrValues));
+
+			idsToValues = IntStream.range(0, attrIds.size()).boxed()
+					.collect(Collectors.toMap(attrIds::get, attrValues::get));
+			log.severe("idsToValues array is: " + new ObjectMapper().writeValueAsString(idsToValues));
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
 
 		return idsToValues;
 
@@ -216,6 +223,7 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
+		log.severe("called string retrieve");
 		Map<String, String> attributesToValues = new HashMap<>();
 		try {
 			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformations(),
