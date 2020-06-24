@@ -38,7 +38,6 @@ import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.pdp.PDPEvaluation;
 import it.cnr.iit.ucs.properties.components.ContextHandlerProperties;
-import it.cnr.iit.ucs.requestmanager.RequestEnricher;
 import it.cnr.iit.ucs.sessionmanager.OnGoingAttributesInterface;
 import it.cnr.iit.ucs.sessionmanager.SessionAttributesBuilder;
 import it.cnr.iit.ucs.sessionmanager.SessionInterface;
@@ -79,12 +78,12 @@ public final class ContextHandler extends AbstractContextHandler {
 		log.severe("\n\n\nmessage.getPolicy() = " + policy + "\n\n\n");
 		log.severe("\n\n\nmessage.getRequest() = " + message.getRequest() + "\n\n\n");
 
-		RequestEnricher enricher = new RequestEnricher();
-		String fullReq = enricher.enrichRequest(message.getRequest(), policy.getPolicy());
+//		RequestEnricher enricher = new RequestEnricher();
+//		String fullReq = enricher.enrichRequest(message.getRequest(), policy.getPolicy());
 
-		log.severe("\n\n\nenriched request = " + fullReq + "\n\n\n");
+		log.severe("\n\n\nenriched request = " + message.getRequest() + "\n\n\n");
 
-		RequestWrapper request = RequestWrapper.build(fullReq, getPipRegistry());
+		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
 
 		request.fatten(false);
 
