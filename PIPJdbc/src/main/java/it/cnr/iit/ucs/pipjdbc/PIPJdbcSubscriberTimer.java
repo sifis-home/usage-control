@@ -19,42 +19,41 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Subscriber timer for the PIPReader.
- * It's in charge of performing the task of refreshing periodically the value
- * of a certain attribute.
+ * Subscriber timer for the PIPReader. It's in charge of performing the task of
+ * refreshing periodically the value of a certain attribute.
  *
  * @author Antonio La Marra, Alessandro Rosetti
  */
 final class PIPJdbcSubscriberTimer extends TimerTask {
-    private Timer timer;
-    PIPJdbc pip;
+	private Timer timer;
+	PIPJdbc pip;
 
-    private static final long DEFAULT_RATE = 1L * 1000;
-    private long rate = DEFAULT_RATE;
+	private static final long DEFAULT_RATE = 1L * 60000;
+	private long rate = DEFAULT_RATE;
 
-    PIPJdbcSubscriberTimer( PIPJdbc pip ) {
-        this.timer = new Timer();
-        this.pip = pip;
-    }
+	PIPJdbcSubscriberTimer(PIPJdbc pip) {
+		this.timer = new Timer();
+		this.pip = pip;
+	}
 
-    @Override
-    public void run() {
-        pip.checkSubscriptions();
-    }
+	@Override
+	public void run() {
+		pip.checkSubscriptions();
+	}
 
-    public void start() {
-        timer.scheduleAtFixedRate( this, 0, rate );
-    }
+	public void start() {
+		timer.scheduleAtFixedRate(this, 0, rate);
+	}
 
-    public long getRate() {
-        return rate;
-    }
+	public long getRate() {
+		return rate;
+	}
 
-    public void setRate( long rate ) {
-        if( rate <= 0 ) {
-            this.rate = DEFAULT_RATE;
-        }
-        this.rate = rate;
-    }
+	public void setRate(long rate) {
+		if (rate <= 0) {
+			this.rate = DEFAULT_RATE;
+		}
+		this.rate = rate;
+	}
 
 }

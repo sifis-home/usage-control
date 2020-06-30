@@ -351,18 +351,18 @@ public final class PIPDsa extends PIPBase {
 	public void checkSubscriptions() {
 		for (Attribute attribute : subscriptions) {
 			String value = "";
-			log.log(Level.INFO, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
+			log.log(Level.SEVERE, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
 
 			try {
 				value = retrieve(attribute);
 			} catch (PIPException e) {
-				log.log(Level.WARNING, "Error reading attribute " + attribute.getAttributeId());
+				log.log(Level.SEVERE, "Error reading attribute " + attribute.getAttributeId());
 				return;
 			}
 
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
 			if (!oldValue.equals(value)) { // if the attribute has changed
-				log.log(Level.INFO, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
+				log.log(Level.SEVERE, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
 						value, attribute.getAdditionalInformations(), System.currentTimeMillis() });
 				attribute.setValue(attribute.getDataType(), value);
 				notifyRequestManager(attribute);
