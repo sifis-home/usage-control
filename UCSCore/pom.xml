@@ -11,7 +11,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.cnr.iit.ucs</groupId>
 	<artifactId>UCSCore</artifactId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.2.1-SNAPSHOT</version>
+	<description>In version 0.2.1 we are now importing the custom balana inside the PDP</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -29,7 +30,7 @@
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PolicyDecisionPoint</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>0.2.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>

@@ -24,6 +24,9 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.cnr.iit.ucs.constants.STATUS;
 import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.ucs.exceptions.RequestException;
@@ -139,12 +142,20 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	private void createSession(TryAccessMessage message, RequestWrapper request, PolicyWrapper policy,
 			String sessionId) {
-		log.log(Level.INFO, "Creating a new session : {0} ", sessionId);
+		log.log(Level.SEVERE, "Creating a new session : {0} ", sessionId);
 
 		String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();
 
 		// retrieve the id of ongoing attributes
+		log.severe("in createSession CH");
 		List<Attribute> onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
+		try {
+			log.severe("list of onGoingAttributes from policy: "
+					+ new ObjectMapper().writeValueAsString(onGoingAttributes));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();
 		sessionAttributeBuilder
 				.setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))
@@ -158,6 +169,14 @@ public final class ContextHandler extends AbstractContextHandler {
 		sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())
 				.setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)
 				.setMyIP(uri.getHost());
+
+		try {
+			log.severe("sessionAttributeBuilder="
+					+ new ObjectMapper().writeValueAsString(sessionAttributeBuilder.build()));
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		// insert all the values inside the session manager
 		if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {
@@ -359,6 +378,7 @@ public final class ContextHandler extends AbstractContextHandler {
 		SessionInterface session = optSession.get(); // NOSONAR
 
 		// Check if the session has the correct status
+		log.severe("session.getStatus()=" + session.getStatus());
 		if (!(session.isStatus(STATUS.START.name()) || session.isStatus(STATUS.REVOKE.name()))) {
 			log.log(Level.INFO, "EndAccess: wrong status for session {0}", message.getSessionId());
 			throw new StatusException("EndAccess: wrong status for session " + message.getSessionId());

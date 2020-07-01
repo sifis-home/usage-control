@@ -244,6 +244,7 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public void subscribe(RequestType request) throws PIPException {
+		log.severe("called void subscribe");
 		Reject.ifNull(request);
 
 		Attribute attribute = getAttributes().get(1);
@@ -262,6 +263,7 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public String subscribe(Attribute attribute) throws PIPException {
+		log.severe("called String subscribe");
 		Reject.ifNull(attribute);
 
 		String value = retrieve(attribute);
