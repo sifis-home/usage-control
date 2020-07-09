@@ -16,8 +16,5 @@
 package it.cnr.iit.ucs.constants;
 
 public enum STATUS {
-    TRY,
-    START,
-    END,
-    REVOKE;
+	TRY, START, END, REVOKE;
 }

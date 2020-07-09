@@ -35,7 +35,7 @@ public final class LdapQuery {
 
 	private static LdapConnection connection;
 
-	private static final String NOT_FOUND = "not found";
+	public static final String NOT_FOUND = "not found";
 
 	private static Logger log = Logger.getLogger(LdapQuery.class.getName());
 
@@ -62,51 +62,47 @@ public final class LdapQuery {
 
 	}
 
-	public static Map<String, Map<String, String>> queryForAll(String baseDn, String filter, SearchScope level,
+	public static Map<String, String> getAttributesByUsername(String username, String baseDn, String filter,
 			String... attributes) {
-		Reject.ifBlank(baseDn);
 
-		Map<String, Map<String, String>> userAttrs = new HashMap<>();
 		List<String> attrsList = Arrays.asList(attributes);
-		attrsList = attrsList.stream().filter(el -> !el.equals("uid")).collect(Collectors.toList());
+		Map<String, String> attrAndValue = new HashMap<>();
 
 		try {
-
 			SearchRequest req = new SearchRequestImpl();
-			req.setScope(level);
-			req.addAttributes(attributes);
+			req.setScope(SearchScope.SUBTREE);
+			req.addAttributes("*");
 			req.setTimeLimit(0);
 			req.setBase(new Dn(baseDn));
 			req.setFilter(filter);
 
-			// Process the request
 			SearchCursor searchCursor = connection.search(req);
 
 			while (searchCursor.next()) {
 				Response response = searchCursor.get();
+				log.severe("in while in LdapQuery");
 
-				// process the SearchResultEntry
 				if (response instanceof SearchResultEntry) {
 					Entry resultEntry = ((SearchResultEntry) response).getEntry();
+					log.severe("in first if in LdapQuery");
 
-					if (resultEntry.containsAttribute(attributes)) {
+					String uid = resultEntry.getAttributes().stream().filter(el -> el.getId().equals("uid"))
+							.map(el -> el.get().getString()).findFirst().orElse(NOT_FOUND);
 
-						String uid = resultEntry.getAttributes().stream().filter(el -> el.getId().contains("uid"))
-								.map(el -> el.get().getString()).findFirst().orElse(NOT_FOUND);
+					log.severe("uid in LdapQuery: " + uid);
 
-						if (uid.equals(NOT_FOUND)) {
-							continue;
-						}
+					if (uid.equals(username)) {
+						log.severe("printing attibutes: ");
+						resultEntry.getAttributes().stream().forEach(el -> log.severe(el.getId()));
 
-						Map<String, String> attrAndValue = new HashMap<>();
 						for (String attr : attrsList) {
-							String value;
-							value = resultEntry.getAttributes().stream().filter(el -> el.getId().contains(attr))
+
+							String value = resultEntry.getAttributes().stream().filter(el -> el.getId().equals(attr))
 									.map(el -> el.get().getString()).findFirst().orElse(NOT_FOUND);
+							log.severe("value in for of LdapQuery=" + value);
 							attrAndValue.put(attr, value);
 						}
-						userAttrs.put(uid, attrAndValue);
-
+						break;
 					}
 				}
 			}
@@ -114,14 +110,14 @@ public final class LdapQuery {
 			searchCursor.close();
 			connection.close();
 
-			userAttrs.entrySet().stream().forEach(
-					entry -> entry.getValue().entrySet().stream().forEach(el -> log.severe("attribute for user "
-							+ entry.getKey() + ": key -> " + el.getKey() + ", value -> " + el.getValue())));
+			attrAndValue.entrySet().stream().forEach(el -> log.severe(
+					"attribute for user " + username + ": key -> " + el.getKey() + ", value -> " + el.getValue()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		return userAttrs;
+		return attrAndValue;
+
 	}
 
 	public static String queryForMemberOf(String baseDn, String filter, SearchScope level, String... attributes) {
@@ -144,6 +140,7 @@ public final class LdapQuery {
 				if (response instanceof SearchResultEntry) {
 					Entry resultEntry = ((SearchResultEntry) response).getEntry();
 					if (resultEntry.containsAttribute(attributes)) {
+//						String memberOf = resultEntry.getAttributes().stream().findFirst().get().getString();
 						String memberOf = resultEntry.getAttributes().stream().findFirst().get().getString();
 						log.severe("role found is " + memberOf + " inside queryForMemberOf");
 						return memberOf;
@@ -155,7 +152,7 @@ public final class LdapQuery {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return "NOT FOUND";
+		return NOT_FOUND;
 	}
 
 	private static String setDc(String searchString) {

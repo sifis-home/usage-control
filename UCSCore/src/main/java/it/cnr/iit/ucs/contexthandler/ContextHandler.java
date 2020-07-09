@@ -207,7 +207,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public StartAccessResponseMessage startAccess(StartAccessMessage message)
 			throws StatusException, PolicyException, RequestException {
-		log.log(Level.INFO, "StartAccess begin scheduling at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "StartAccess begin scheduling at {0}", System.currentTimeMillis());
 
 		Optional<SessionInterface> optSession = getSessionManager().getSessionForId(message.getSessionId());
 		Reject.ifAbsent(optSession, "StartAccess: no session for id " + message.getSessionId());
@@ -222,7 +222,10 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+
+		log.severe("StartAccess request contents : \n" + request.getRequest());
 		request.fatten(true);
+		log.severe("StartAccess fattened request contents : \n" + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
 		Reject.ifNull(evaluation);
@@ -370,7 +373,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public EndAccessResponseMessage endAccess(EndAccessMessage message)
 			throws StatusException, RequestException, PolicyException {
-		log.log(Level.INFO, "EndAccess begins at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "EndAccess begins at {0}", System.currentTimeMillis());
 		Reject.ifNull(message, "EndAccessMessage is null");
 
 		Optional<SessionInterface> optSession = getSessionManager().getSessionForId(message.getSessionId());
@@ -378,28 +381,32 @@ public final class ContextHandler extends AbstractContextHandler {
 		SessionInterface session = optSession.get(); // NOSONAR
 
 		// Check if the session has the correct status
-		log.severe("session.getStatus()=" + session.getStatus());
-		if (!(session.isStatus(STATUS.START.name()) || session.isStatus(STATUS.REVOKE.name()))) {
-			log.log(Level.INFO, "EndAccess: wrong status for session {0}", message.getSessionId());
-			throw new StatusException("EndAccess: wrong status for session " + message.getSessionId());
-		}
+//		log.severe("session.getStatus()=" + session.getStatus());
+//		if (!(session.isStatus(STATUS.START.name()) || session.isStatus(STATUS.REVOKE.name()))) {
+//			log.log(Level.SEVERE, "EndAccess: wrong status for session {0}", message.getSessionId());
+//			throw new StatusException("EndAccess: wrong status for session " + message.getSessionId());
+//		}
 
-		log.log(Level.INFO, "EndAccess evaluation starts at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "EndAccess evaluation starts at {0}", System.currentTimeMillis());
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
 		request.fatten(false);
+		log.severe("fatten request in EndAccess: " + request.getRequest());
+		log.severe("policy in end access: " + policy.getPolicy());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.END);
+		log.severe("evaluation.getResponse():" + evaluation.getResponse());
+
 		Reject.ifNull(evaluation);
-		log.log(Level.INFO, "EndAccess evaluated at {0} pdp response : {1}",
+		log.log(Level.SEVERE, "EndAccess evaluated at {0} pdp response : {1}",
 				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
 
 		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.END);
 
 		// access must be revoked
 		if (revoke(session, policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.END)))) {
-			log.log(Level.INFO, "EndAccess evaluation with revoke ends at {0}", System.currentTimeMillis());
+			log.log(Level.SEVERE, "EndAccess evaluation with revoke ends at {0}", System.currentTimeMillis());
 		}
 
 		return buildEndAccessResponse(message, evaluation);

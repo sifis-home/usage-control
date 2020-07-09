@@ -17,21 +17,17 @@ package it.cnr.iit.ucs.pipjdbc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.j256.ormlite.logger.LocalLog;
 
+import it.cnr.iit.common.attributes.AttributeIds;
+import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -47,7 +43,6 @@ import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
-import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
@@ -64,8 +59,6 @@ public final class PIPJdbc extends PIPBase {
 
 	// list that stores the attributes on which a subscribe has been performed
 	protected final BlockingQueue<Attribute> subscriptions = new LinkedBlockingQueue<>();
-	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
-	private final static String RESOURCE_OWNER = "urn:oasis:names:tc:xacml:3.0:resource:resource-owner";
 
 	private final static String NOT_FOUND = "NOT FOUND";
 
@@ -84,6 +77,7 @@ public final class PIPJdbc extends PIPBase {
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
+		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
@@ -130,18 +124,25 @@ public final class PIPJdbc extends PIPBase {
 		log.severe("called void retrieve");
 
 		try {
-			String organization = retrieveOrganization(request);
+			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
+			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+
 			if (!checkIfMonitored(organization)) {
 				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
 			}
 
-			Attribute attribute = getAttributes().get(0);
-			addAdditionalInformation(request, attribute);
-			String value = retrieve(attribute);
-			Reject.ifNull(value);
-			UserAttributes userAttr = null;
-			userAttr = new ObjectMapper().readValue(value, UserAttributes.class);
-			addAttributesToRequest(getAttributes(), request, userAttr);
+			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
+			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+
+			log.severe("added the following attributes:");
+			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			attrToSubscribe.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
+
 		} catch (PIPException e) {
 			log.severe(e.getMessage());
 		} catch (Exception e) {
@@ -151,7 +152,6 @@ public final class PIPJdbc extends PIPBase {
 	}
 
 	private boolean checkIfMonitored(String organization) {
-
 		organization = organization.toLowerCase().replace(" ", "");
 		switch (organization) {
 		case "isp@cnr":
@@ -160,61 +160,6 @@ public final class PIPJdbc extends PIPBase {
 		default:
 			return false;
 		}
-
-	}
-
-	private String retrieveOrganization(RequestType request) {
-		Map<String, String> idsToValues = getAttributesFromCategory(request, Category.RESOURCE.toString());
-		return Optional.of(idsToValues.get(RESOURCE_OWNER)).orElse(NOT_FOUND);
-	}
-
-	private Map<String, String> getAttributesFromCategory(RequestType request, String category) {
-
-		Map<String, String> idsToValues = null;
-		try {
-
-			List<AttributesType> attrstype = request.getAttributes().stream()
-					.filter(a -> a.getCategory().equals(category)).collect(Collectors.toList());
-			log.severe("attrsType array is: " + new ObjectMapper().writeValueAsString(attrstype));
-
-			List<String> attrIds = attrstype.stream()
-					.flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId())).collect(Collectors.toList());
-			log.severe("attrIds array is: " + new ObjectMapper().writeValueAsString(attrIds));
-
-			List<String> attrValues = attrstype.stream()
-					.flatMap(a -> a.getAttribute().stream()
-							.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
-					.collect(Collectors.toList());
-			log.severe("attrValues array is: " + new ObjectMapper().writeValueAsString(attrValues));
-
-			idsToValues = IntStream.range(0, attrIds.size()).boxed()
-					.collect(Collectors.toMap(attrIds::get, attrValues::get));
-			log.severe("idsToValues array is: " + new ObjectMapper().writeValueAsString(idsToValues));
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		}
-
-		return idsToValues;
-
-	}
-
-	private void addAttributesToRequest(ArrayList<Attribute> attributes, RequestType request, UserAttributes userAttr) {
-		for (Attribute attr : getAttributes()) {
-			if (attr.getAttributeId().contains("role")) {
-				request.addAttribute(attr, userAttr.getRole());
-			}
-			if (attr.getAttributeId().contains("ismemberof")) {
-				request.addAttribute(attr, userAttr.getMember());
-			}
-			if (attr.getAttributeId().contains("organisation")) {
-				request.addAttribute(attr, userAttr.getOrgname());
-			}
-			if (attr.getAttributeId().contains("country")) {
-				request.addAttribute(attr, userAttr.getCountry());
-			}
-		}
-
 	}
 
 	/**
@@ -224,22 +169,24 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
 		log.severe("called string retrieve");
-		Map<String, String> attributesToValues = new HashMap<>();
-		try {
-			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformations(),
-					new TypeReference<Map<String, String>>() {
-					});
+		String username = attribute.getAdditionalInformations();
+		UserAttributes userAttributes = DBInfoStorage.getField("username", username, UserAttributes.class);
 
-			UserAttributes userAttributes = DBInfoStorage.getField("username", attributesToValues.get(SUBJECT_ID),
-					UserAttributes.class);
+		String retrieved = "";
+		if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_ISMEMBEROF)) {
+			retrieved = userAttributes.getMember();
+		} else if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_ROLE)) {
+			retrieved = userAttributes.getRole();
+		} else if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_COUNTRY)) {
+			retrieved = userAttributes.getCountry();
+		} else if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_ORGANIZATION)) {
+			retrieved = userAttributes.getOrgname();
+		} else
+			throw new PIPException(
+					"cannot retrieve attribute " + attribute.getAttributeId() + " from database for user " + username);
 
-			System.out.println("Retrieved the following user attributes: " + userAttributes.toString());
-			return new ObjectMapper().writeValueAsString(userAttributes);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
+		log.severe("retrieved the value " + retrieved + " from PIPJdbc");
+		return retrieved;
 	}
 
 	/**
@@ -251,15 +198,32 @@ public final class PIPJdbc extends PIPBase {
 	 * @param request IN/OUT parameter
 	 */
 	@Override
-	public void subscribe(RequestType request) throws PIPException {
+	public void subscribe(RequestType request) {
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(0);
-		addAdditionalInformation(request, attribute);
+		try {
+			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
+			String username = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
 
-		String value = subscribe(attribute);
+			if (!checkIfMonitored(organization)) {
+				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
+			}
+			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
 
-		request.addAttribute(attribute, value);
+			log.severe("subscribing the following attributes: ");
+			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+
+			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, username));
+
+			attrToSubscribe.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, subscribe(attr))));
+
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
+		}
 	}
 
 	/**
@@ -308,18 +272,9 @@ public final class PIPJdbc extends PIPBase {
 		return true;
 	}
 
-	private void addAdditionalInformation(RequestType request, Attribute attribute) {
-
-		Map<String, String> idsToValues = getAttributesFromCategory(request, Category.SUBJECT.toString());
-		String filters = null;
-		try {
-			System.out.println("filters from pipjdbc");
-			filters = new ObjectMapper().writeValueAsString(idsToValues);
-			System.out.println("filters = " + filters);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		attribute.setAdditionalInformations(filters);
+	private void addAdditionalInformation(Attribute attribute, String filter) {
+		System.out.println("filters from pipjdbc = " + filter);
+		attribute.setAdditionalInformations(filter);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
@@ -395,5 +350,10 @@ public final class PIPJdbc extends PIPBase {
 		ArrayList<Attribute> attrList = new ArrayList<>(Arrays.asList(attribute));
 		attrChangeMessage.setAttributes(attrList);
 		getRequestManager().sendMessage(attrChangeMessage);
+	}
+
+	public Attribute findAttributeById(String id) throws PIPException {
+		return getAttributes().stream().filter(attr -> attr.getAttributeId().equals(id)).findFirst()
+				.orElseThrow(() -> new PIPException("Cannot subscribe " + id + " because is missing in the request"));
 	}
 }

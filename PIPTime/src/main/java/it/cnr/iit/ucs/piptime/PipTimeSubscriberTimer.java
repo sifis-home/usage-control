@@ -28,7 +28,7 @@ final class PIPTimeSubscriberTimer extends TimerTask {
 	private Timer timer;
 	PIPTime pip;
 
-	private static final long DEFAULT_RATE = 1L * 1000;
+	private static final long DEFAULT_RATE = 1L * 600000;
 	private long rate = DEFAULT_RATE;
 
 	PIPTimeSubscriberTimer(PIPTime pip) {

@@ -1,12 +1,10 @@
 package it.cnr.iit.ucs.piptime;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -14,9 +12,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import it.cnr.iit.common.attributes.AttributeIds;
+import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -83,9 +80,6 @@ public final class PIPTime extends PIPBase {
 	 */
 	private Category expectedCategory;
 
-	private final static String CURRENT_DATE = "urn:oasis:names:tc:xacml:1.0:environment:current-date";
-	private final static String CURRENT_TIME = "urn:oasis:names:tc:xacml:1.0:environment:current-time";
-
 	public PIPTime(PipProperties properties) {
 		super(properties);
 		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
@@ -122,25 +116,17 @@ public final class PIPTime extends PIPBase {
 		Reject.ifNull(request);
 
 		try {
-			Map<String, String> retrievedValues = new ObjectMapper().readValue(retrieve(getAttributes().get(0)),
-					new TypeReference<Map<String, String>>() {
-					});
-			addAttributesToRequest(request, retrievedValues);
+			List<Attribute> attrToRetrieve = new ArrayList<Attribute>();
+			attrToRetrieve.add(findAttributeById(AttributeIds.CURRENT_DATE));
+			attrToRetrieve.add(findAttributeById(AttributeIds.CURRENT_TIME));
 
-		} catch (IOException | PIPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+			log.severe("added the following attributes:");
+			attrToRetrieve.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			attrToRetrieve.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
 
-	private void addAttributesToRequest(RequestType request, Map<String, String> retrievedValues) {
-		if (retrievedValues.containsKey("date")) {
-			request.addAttribute(Category.ENVIRONMENT.toString(), DataType.DATE.toString(), CURRENT_DATE,
-					retrievedValues.get("date"));
-		}
-		if (retrievedValues.containsKey("time")) {
-			request.addAttribute(Category.ENVIRONMENT.toString(), DataType.TIME.toString(), CURRENT_TIME,
-					retrievedValues.get("time"));
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
 		}
 	}
 
@@ -150,23 +136,17 @@ public final class PIPTime extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		try {
 
-			Map<String, String> currentTime = new HashMap<String, String>();
+		if (attribute.getAttributeId().equals(AttributeIds.CURRENT_DATE)) {
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 			LocalDateTime now = LocalDateTime.now();
-			currentTime.put("date", dtf.format(now).toString());
-
+			return dtf.format(now).toString();
+		} else if (attribute.getAttributeId().equals(AttributeIds.CURRENT_TIME)) {
 			LocalTime time = LocalTime.now();
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-			currentTime.put("time", time.format(formatter).toString());
-
-			return new ObjectMapper().writeValueAsString(currentTime);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
+			return time.format(formatter).toString();
+		} else
+			throw new PIPException("Cannot retrieve attribute " + attribute.getAttributeId() + " from PIPTime");
 	}
 
 	/**
@@ -181,11 +161,19 @@ public final class PIPTime extends PIPBase {
 	public void subscribe(RequestType request) throws PIPException {
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(1);
+		try {
+			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.CURRENT_DATE));
+			attrToSubscribe.add(findAttributeById(AttributeIds.CURRENT_TIME));
 
-		String value = subscribe(attribute);
+			log.severe("added the following attributes:");
+			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			attrToSubscribe.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, subscribe(attr))));
 
-		request.addAttribute(attribute, value);
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
+		}
 	}
 
 	/**
@@ -304,6 +292,11 @@ public final class PIPTime extends PIPBase {
 		ArrayList<Attribute> attrList = new ArrayList<>(Arrays.asList(attribute));
 		attrChangeMessage.setAttributes(attrList);
 		getRequestManager().sendMessage(attrChangeMessage);
+	}
+
+	public Attribute findAttributeById(String id) throws PIPException {
+		return getAttributes().stream().filter(attr -> attr.getAttributeId().equals(id)).findFirst()
+				.orElseThrow(() -> new PIPException("Cannot subscribe " + id + " because is missing in the request"));
 	}
 
 }

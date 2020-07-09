@@ -1,25 +1,19 @@
 package it.cnr.iit.ucs.pipldap;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.apache.directory.api.ldap.model.message.SearchScope;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import it.cnr.iit.common.attributes.AttributeIds;
+import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -28,12 +22,15 @@ import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
 import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.PIPBase;
 import it.cnr.iit.ucs.pip.PIPKeywords;
+import it.cnr.iit.ucs.pipldap.statics.CachedResult;
 import it.cnr.iit.ucs.pipldap.statics.LdapAuthorization;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeValueType;
 import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
@@ -94,13 +91,6 @@ public final class PIPLdap extends PIPBase {
 	public static final String LDAP_PASS = "password";
 	public static final String ORG_LIST = "org-list";
 
-	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:3.0:subject:subject-id";
-	private static final String SUBJECT_ORGANIZATION = "urn:oasis:names:tc:xacml:3.0:subject:subject-organisation";
-	private static final String SUBJECT_COUNTRY = "urn:oasis:names:tc:xacml:3.0:subject:subject-country";
-	private final static String SUBJECT_MEMBEROF = "urn:oasis:names:tc:xacml:3.0:subject:subject-ismemberof";
-
-	private final static String RESOURCE_OWNER = "urn:oasis:names:tc:xacml:3.0:resource:resource-owner";
-
 	private List<String> orgList = new ArrayList<String>();
 
 	public PIPLdap(PipProperties properties) {
@@ -158,43 +148,59 @@ public final class PIPLdap extends PIPBase {
 	public void retrieve(RequestType request) {
 		Reject.ifNull(request);
 
-		List<Attribute> attributeList = getAttributes();
-		addAdditionalInformation(request, attributeList.get(0));
-
 		try {
+			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
 
-			Map<String, String> attributesToValues = new HashMap<>();
-			attributesToValues = new ObjectMapper().readValue(attributeList.get(0).getAdditionalInformations(),
-					new TypeReference<Map<String, String>>() {
-					});
-
-			log.severe("attributesToValues = " + new ObjectMapper().writeValueAsString(attributesToValues));
-
-			String uid = attributesToValues.get(SUBJECT_ID);
-			String organization = attributesToValues.get(RESOURCE_OWNER).toLowerCase().replace(" ", "");
-			orgList = orgList.stream().filter(org -> org.equals(organization)).collect(Collectors.toList());
-
-			if (!orgList.isEmpty()) {
-				Map<String, String> ldapAttributes = new ObjectMapper().readValue(retrieve(getAttributes().get(0)),
-						new TypeReference<Map<String, String>>() {
-						});
-
-				log.severe("specific ldap user attributes: " + new ObjectMapper().writeValueAsString(ldapAttributes));
-				Map<String, String> userAttributes = mapLdapAttributesToOasis(ldapAttributes);
-				log.severe("specific oasis attributes to fatten the request: "
-						+ new ObjectMapper().writeValueAsString(userAttributes));
-				addAttributesToRequest(request, userAttributes);
-
-			} else {
-				throw new PIPException("The organization " + organization + " is not monitored by the PIPLdap");
+			if (!checkIfMonitored(organization)) {
+				throw new PIPException("The organization " + organization + " is not monitored from PIPLdap");
 			}
+
+			List<Attribute> attrToRetrieve = new ArrayList<Attribute>();
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ORGANIZATION));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
+			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+			attrToRetrieve.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+
+			log.severe("added the following attributes:");
+			attrToRetrieve.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			attrToRetrieve.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
+
+			removeEmptyAttributes(request);
+			CachedResult.setCached(false);
+			CachedResult.getAttributesToValues().clear();
 
 		} catch (PIPException e) {
 			log.severe(e.getMessage());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
 
+	private void removeEmptyAttributes(RequestType request) {
+		boolean toRemove = false;
+		for (AttributesType attrsType : request.getAttributes()) {
+			for (AttributeType attrType : attrsType.getAttribute()) {
+				for (AttributeValueType values : attrType.getAttributeValue()) {
+					if (values.getContent().get(0) == null) {
+						attrType.getAttributeValue().remove(values);
+						toRemove = true;
+						break;
+					}
+				}
+				if (toRemove) {
+					attrsType.getAttribute().remove(attrType);
+					break;
+				}
+			}
+			if (toRemove)
+				break;
+		}
+		if (toRemove)
+			removeEmptyAttributes(request);
 	}
 
 	private Map<String, String> mapLdapAttributesToOasis(Map<String, String> userAttributes) {
@@ -206,35 +212,18 @@ public final class PIPLdap extends PIPBase {
 
 			switch (attr) {
 			case "o":
-				oasisMap.put(SUBJECT_ORGANIZATION, userAttributes.get(attr));
+				oasisMap.put(AttributeIds.SUBJECT_ORGANIZATION, userAttributes.get(attr));
 				break;
 			case "c":
-				oasisMap.put(SUBJECT_COUNTRY, userAttributes.get(attr));
+				oasisMap.put(AttributeIds.SUBJECT_COUNTRY, userAttributes.get(attr));
 				break;
 			case "memberof":
-				oasisMap.put(SUBJECT_MEMBEROF, userAttributes.get(attr));
+				oasisMap.put(AttributeIds.SUBJECT_ISMEMBEROF, userAttributes.get(attr));
 				break;
 			}
 		}
 
 		return oasisMap;
-	}
-
-	private void addAttributesToRequest(RequestType request, Map<String, String> userAttributes) {
-
-		if (userAttributes.containsKey(SUBJECT_ORGANIZATION)) {
-			request.addAttribute(Category.SUBJECT.toString(), DataType.STRING.toString(), SUBJECT_ORGANIZATION,
-					userAttributes.get(SUBJECT_ORGANIZATION));
-		}
-		if (userAttributes.containsKey(SUBJECT_COUNTRY)) {
-			request.addAttribute(Category.SUBJECT.toString(), DataType.STRING.toString(), SUBJECT_COUNTRY,
-					userAttributes.get(SUBJECT_COUNTRY));
-		}
-		if (userAttributes.containsKey(SUBJECT_MEMBEROF)) {
-			request.addAttribute(Category.SUBJECT.toString(), DataType.STRING.toString(), SUBJECT_MEMBEROF,
-					userAttributes.get(SUBJECT_MEMBEROF));
-		}
-
 	}
 
 	/**
@@ -243,107 +232,33 @@ public final class PIPLdap extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		String[] attrsToSearch;
 
-		String organization = orgList.get(0);
-		String memberof = new String();
-		String uid = "andreachino";
-		String filter = "(objectClass=*)";
-		String baseDn = new String();
-		SearchScope level = SearchScope.ONELEVEL;
-
-		switch (organization) {
-		case "chino":
-		case "gps":
-		case "3drepo":
-		case "kent": {
-			Map<String, Map<String, String>> uidsToLdapAttributes = getUidsToLdapAttributesMap(organization);
-			uid = getUid(uidsToLdapAttributes);
-			memberof = getMemberOf(uid);
-			baseDn = "ou=SME Pilot,ou=SME,ou=Pilots,dc=c3isp,dc=eu";
-			String[] attrs = { "uid", "o", "cn" };
-			attrsToSearch = attrs;
-			break;
-		}
-		case "spartacompany1":
-		case "spartacompany2":
-		case "spartacompany3": {
-			baseDn = "ou=Users,ou=SPARTA,ou=Pilots,dc=c3isp,dc=eu";
-			String[] attrs = { "uid", "o", "cn", "c" };
-			attrsToSearch = attrs;
-			break;
-		}
-		default: {
-			baseDn = "ou=Users,dc=c3isp,dc=eu";
-			String[] attrs = { "uid", "o", "cn", "c" };
-			attrsToSearch = attrs;
-			break;
-		}
+		if (CachedResult.isCached()) {
+			return CachedResult.getAttributesToValues().get(attribute.getAttributeId());
 		}
 
-//		log.severe("filter for ldap: " + baseDn);
-//
-		Map<String, Map<String, String>> queriedUsersAttributes = LdapQuery.queryForAll(baseDn, filter, level,
-				attrsToSearch);
+		String subjectId = attribute.getAdditionalInformations();
+		Map<String, String> userAttrMap = LdapQuery.getAttributesByUsername(subjectId, "ou=Pilots,dc=c3isp,dc=eu",
+				"(objectClass=*)", "uid", "o", "cn", "c");
 
-		try {
-			log.severe("userAttributes after query = " + new ObjectMapper().writeValueAsString(queriedUsersAttributes));
-			queriedUsersAttributes = filterForOrganization(queriedUsersAttributes, organization);
-			Map<String, String> userAttributes = queriedUsersAttributes.get(uid);
-			if (!memberof.isEmpty()) {
-				userAttributes.put("memberof", memberof);
-			}
-			log.severe("userAttributes after filtering = " + new ObjectMapper().writeValueAsString(userAttributes));
-			return new ObjectMapper().writeValueAsString(userAttributes);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+		String memberOf = getMemberOf(userAttrMap.get("uid"));
+		userAttrMap.put("memberof", memberOf);
+		userAttrMap.entrySet().stream()
+				.forEach(attr -> log.severe("key: " + attr.getKey() + ", value=" + attr.getValue()));
+		userAttrMap.values().removeIf(el -> el.equals(LdapQuery.NOT_FOUND));
+		userAttrMap.entrySet().stream()
+				.forEach(attr -> log.severe("key: " + attr.getKey() + ", value=" + attr.getValue()));
 
-		return new String();
+		CachedResult.setAttributesToValues(mapLdapAttributesToOasis(userAttrMap));
+		CachedResult.setCached(true);
 
-	}
-
-	private Map<String, Map<String, String>> filterForOrganization(Map<String, Map<String, String>> map,
-			String organization) {
-		return map.entrySet().stream()
-				.filter(uid -> uid.getValue().get("o").toLowerCase().replace(" ", "").equals(organization))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-	}
-
-	private Map<String, Map<String, String>> getUidsToLdapAttributesMap(String organization) {
-		String[] attrsToSearchUser = { "uid", "o", "cn" };
-		String baseDn = "ou=SME Pilot,ou=SME,ou=Pilots,dc=c3isp,dc=eu";
-		SearchScope level = SearchScope.ONELEVEL;
-		String filter = "(objectclass=*)";
-		Map<String, Map<String, String>> userAttributes = LdapQuery.queryForAll(baseDn, filter, level,
-				attrsToSearchUser);
-		userAttributes = filterForOrganization(userAttributes, organization);
-		return userAttributes;
-	}
-
-	private String getUid(Map<String, Map<String, String>> uidsToLdapAttributes) {
-		try {
-
-			Map<String, String> attributesToValues = new HashMap<>();
-			attributesToValues = new ObjectMapper().readValue(getAttributes().get(0).getAdditionalInformations(),
-					new TypeReference<Map<String, String>>() {
-					});
-			String subjectId = attributesToValues.get(SUBJECT_ID);
-			String uid = uidsToLdapAttributes.entrySet().stream().filter(el -> el.getKey().equals(subjectId))
-					.findFirst().orElseThrow(() -> new PIPException("Impossible to retrieve the uid for user "
-							+ subjectId + " because is different from the subject id"))
-					.getKey();
-			return uid;
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (PIPException e) {
-			log.severe(e.getMessage());
-		}
-
-		return new String();
+		String retrieved = CachedResult.getAttributesToValues().get(attribute.getAttributeId());
+		log.severe("retrieved the value " + retrieved + " from PIPLdap");
+		return retrieved;
 	}
 
 	private String getMemberOf(String uid) {
+
 		log.severe("uid in getMemberOf=" + uid);
 		String[] attrsToSearchUser = { "cn" };
 		String filterDn = "ou=SME Pilot,ou=SME,ou=Pilots,dc=c3isp,dc=eu";
@@ -351,6 +266,7 @@ public final class PIPLdap extends PIPBase {
 		SearchScope level = SearchScope.ONELEVEL;
 		String filter = "(&(objectclass=groupOfUniqueNames)(uniqueMember=cn=" + uid + "," + filterDn + "))";
 		String memberOf = LdapQuery.queryForMemberOf(baseDn, filter, level, attrsToSearchUser);
+		log.severe("getMemberOf()=" + memberOf);
 		return memberOf;
 	}
 
@@ -363,16 +279,40 @@ public final class PIPLdap extends PIPBase {
 	 * @param request IN/OUT parameter
 	 */
 	@Override
-	public void subscribe(RequestType request) throws PIPException {
+	public void subscribe(RequestType request) {
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(1);
+		try {
+			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
 
-		addAdditionalInformation(request, attribute);
+			if (!checkIfMonitored(organization)) {
+				throw new PIPException("The organization " + organization + " is not monitored from PIPLdap");
+			}
 
-		String value = subscribe(attribute);
+			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ORGANIZATION));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
+			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
-		request.addAttribute(attribute, value);
+			log.severe("subscribing the following attributes: ");
+			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+
+			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+
+			attrToSubscribe.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, subscribe(attr))));
+
+			removeEmptyAttributes(request);
+			CachedResult.setCached(false);
+			CachedResult.getAttributesToValues().clear();
+
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
+		}
 	}
 
 	/**
@@ -421,44 +361,9 @@ public final class PIPLdap extends PIPBase {
 		return true;
 	}
 
-	private Map<String, String> getAttributesFromCategory(RequestType request, String category) {
-
-		List<AttributesType> attrstype = request.getAttributes().stream().filter(a -> a.getCategory().equals(category))
-				.collect(Collectors.toList());
-		List<String> attrIds = attrstype.stream().flatMap(a -> a.getAttribute().stream().map(b -> b.getAttributeId()))
-				.collect(Collectors.toList());
-		List<String> attrValues = attrstype.stream()
-				.flatMap(a -> a.getAttribute().stream()
-						.flatMap(b -> b.getAttributeValue().stream().map(c -> c.getContent().get(0).toString())))
-				.collect(Collectors.toList());
-		Map<String, String> idsToValues = new HashMap<String, String>();
-		idsToValues = IntStream.range(0, attrIds.size()).boxed()
-				.collect(Collectors.toMap(attrIds::get, attrValues::get));
-
-		return idsToValues;
-
-	}
-
-	private void addAdditionalInformation(RequestType request, Attribute attribute) {
-
-//		Map<String, String> idsToValuesSubject = getAttributesFromCategory(request, Category.SUBJECT.toString());
-		Map<String, String> idsToValuesSubject = new HashMap<String, String>();
-		idsToValuesSubject.put(Category.SUBJECT.toString(), "aarighi");
-		Map<String, String> idsToValuesResource = getAttributesFromCategory(request, Category.RESOURCE.toString());
-
-		Map<String, String> idsToValues = new HashMap<String, String>();
-		idsToValues.putAll(idsToValuesSubject);
-		idsToValues.putAll(idsToValuesResource);
-
-		String filters = null;
-		try {
-			filters = new ObjectMapper().writeValueAsString(idsToValues);
-			log.severe("filters = " + filters);
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
-		attribute.setAdditionalInformations(filters);
-
+	private void addAdditionalInformation(Attribute attribute, String filter) {
+		System.out.println("filters from pipjdbc = " + filter);
+		attribute.setAdditionalInformations(filter);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
@@ -531,6 +436,22 @@ public final class PIPLdap extends PIPBase {
 		ArrayList<Attribute> attrList = new ArrayList<>(Arrays.asList(attribute));
 		attrChangeMessage.setAttributes(attrList);
 		getRequestManager().sendMessage(attrChangeMessage);
+	}
+
+	private boolean checkIfMonitored(String organization) {
+		organization = organization.toLowerCase().replace(" ", "");
+		switch (organization) {
+		case "isp@cnr":
+		case "iscom-mise":
+			return false;
+		default:
+			return true;
+		}
+	}
+
+	public Attribute findAttributeById(String id) throws PIPException {
+		return getAttributes().stream().filter(attr -> attr.getAttributeId().equals(id)).findFirst()
+				.orElseThrow(() -> new PIPException("Cannot subscribe " + id + " because is missing in the request"));
 	}
 
 }

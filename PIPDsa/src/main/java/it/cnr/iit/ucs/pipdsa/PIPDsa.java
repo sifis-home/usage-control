@@ -4,12 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import it.cnr.iit.common.lambda.exceptions.ThrowingException;
+import it.cnr.iit.common.attributes.AttributeIds;
+import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
@@ -99,7 +96,6 @@ public final class PIPDsa extends PIPBase {
 	public static final String REST_PASSWORD = "rest-password";
 
 	public static final String DSA_FILTER = "filter";
-	private static final String DSA_ID_ATTRIBUTE = "urn:oasis:names:tc:xacml:3.0:resource:dsa-id";
 
 	public PIPDsa(PipProperties properties) {
 		super(properties);
@@ -156,22 +152,33 @@ public final class PIPDsa extends PIPBase {
 	@Override
 	public void retrieve(RequestType request) {
 		Reject.ifNull(request);
-		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
+		String dsaId = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.DSA_ID);
 
 		List<Attribute> attributeList = getAttributes();
-		attributeList.stream().forEach(a -> addAdditionalInformation(request, a, dsaId));
+		attributeList.stream().forEach(a -> addAdditionalInformation(a, dsaId));
 
-		List<String> dsaAttributeStringList = new ArrayList<String>();
-		attributeList.stream().filter(Objects::nonNull)
-				.map(ThrowingException.unchecked(a -> dsaAttributeStringList.add(retrieve(a)))).filter(Objects::nonNull)
-				.collect(Collectors.toList());
+//		List<String> dsaAttributeStringList = new ArrayList<String>();
 
-		List<DsaAttribute> dsaAttributeList = dsaAttributeStringList.stream()
-				.map(ThrowingException.unchecked(a -> new ObjectMapper().readValue(a, DsaAttribute.class)))
-				.collect(Collectors.toList());
-		Reject.ifEmpty(dsaAttributeList);
+//		attributeList.stream().filter(Objects::nonNull)
+//				.map(ThrowingException.unchecked(a -> dsaAttributeStringList.add(retrieve(a)))).filter(Objects::nonNull)
+//				.collect(Collectors.toList());
 
-		addAttributesToRequest(request, dsaAttributeList);
+		try {
+			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.DSA_VERSION));
+			attrToSubscribe.add(findAttributeById(AttributeIds.DSA_STATUS));
+			attrToSubscribe.stream()
+					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
+		}
+
+//		List<DsaAttribute> dsaAttributeList = dsaAttributeStringList.stream()
+//				.map(ThrowingException.unchecked(a -> new ObjectMapper().readValue(a, DsaAttribute.class)))
+//				.collect(Collectors.toList());
+//		Reject.ifEmpty(dsaAttributeList);
+//
+//		addAttributesToRequest(request, dsaAttributeList);
 
 	}
 
@@ -199,19 +206,20 @@ public final class PIPDsa extends PIPBase {
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DsaUrlMethods.getDsaUrl());
 
 			DsaAttribute dsaAttribute = null;
-			if (attribute.getAttributeId().endsWith("status")) {
+			if (attribute.getAttributeId().equals(AttributeIds.DSA_STATUS)) {
 				builder.path(DsaUrlMethods.getDsaStatus()).queryParam("dsaid", dsaId);
 				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
-			} else if (attribute.getAttributeId().endsWith("version")) {
+			} else if (attribute.getAttributeId().equals(AttributeIds.DSA_VERSION)) {
 				builder.path(DsaUrlMethods.getDsaVersion()).queryParam("dsaid", dsaId);
 				dsaAttribute = idsToMessage(builder, attribute.getAttributeId());
 			} else {
-				return new String();
+				throw new PIPException("cannot retrieve the value of " + attribute.getAttributeId());
 			}
-
-			return new ObjectMapper().writeValueAsString(dsaAttribute);
-		} catch (Exception e) {
-			e.printStackTrace();
+			String retrieved = dsaAttribute.getMessage();
+			log.severe("retrieved the value " + retrieved + " from PIPDsa");
+			return retrieved;
+		} catch (PIPException e) {
+			log.severe(e.getMessage());
 		}
 		return null;
 
@@ -244,17 +252,21 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public void subscribe(RequestType request) throws PIPException {
-		log.severe("called void subscribe");
+		log.severe("called void subscribe in PIPDsa");
 		Reject.ifNull(request);
 
-		Attribute attribute = getAttributes().get(1);
+		List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+		attrToSubscribe.add(findAttributeById(AttributeIds.DSA_VERSION));
+		attrToSubscribe.add(findAttributeById(AttributeIds.DSA_STATUS));
 
-		String dsaId = request.getAttribute(Category.RESOURCE.toString(), DSA_ID_ATTRIBUTE);
-		addAdditionalInformation(request, attribute, dsaId);
+		log.severe("subscribing the following attributes: ");
+		attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
 
-		String value = subscribe(attribute);
+		String dsaId = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.DSA_ID);
+		attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, dsaId));
 
-		request.addAttribute(attribute, value);
+		attrToSubscribe.stream()
+				.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, subscribe(attr))));
 	}
 
 	/**
@@ -304,7 +316,7 @@ public final class PIPDsa extends PIPBase {
 		return true;
 	}
 
-	private void addAdditionalInformation(RequestType request, Attribute attribute, String dsaId) {
+	private void addAdditionalInformation(Attribute attribute, String dsaId) {
 		attribute.setAdditionalInformations(dsaId);
 	}
 
@@ -378,6 +390,11 @@ public final class PIPDsa extends PIPBase {
 		ArrayList<Attribute> attrList = new ArrayList<>(Arrays.asList(attribute));
 		attrChangeMessage.setAttributes(attrList);
 		getRequestManager().sendMessage(attrChangeMessage);
+	}
+
+	public Attribute findAttributeById(String id) throws PIPException {
+		return getAttributes().stream().filter(attr -> attr.getAttributeId().equals(id)).findFirst()
+				.orElseThrow(() -> new PIPException("Cannot subscribe " + id + " because is missing in the request"));
 	}
 
 }
