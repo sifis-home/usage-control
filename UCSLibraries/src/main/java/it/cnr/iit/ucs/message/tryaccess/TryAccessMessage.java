@@ -31,63 +31,63 @@ import it.cnr.iit.xacml.wrappers.RequestWrapper;
  */
 public final class TryAccessMessage extends Message {
 
-    private String pepUri;
-    private String policyId;
-    private String policy;
-    private String request;
+	private String pepUri;
+	private String policyId;
+	private String policy;
+	private String request;
 
-    public TryAccessMessage( String source, String destination ) {
-        super( source, destination );
-        purpose = PURPOSE.TRY;
-    }
+	public TryAccessMessage(String source, String destination) {
+		super(source, destination);
+		purpose = PURPOSE.TRY;
+	}
 
-    public TryAccessMessage() {
-        super( ENTITIES.PEP.toString(), ENTITIES.CH.toString() );
-        purpose = PURPOSE.TRY;
-    }
+	public TryAccessMessage() {
+		super(ENTITIES.PEP.toString(), ENTITIES.CH.toString());
+		purpose = PURPOSE.TRY;
+	}
 
-    public void setPepUri( String pepUri ) {
-        Reject.ifBlank( pepUri );
-        this.pepUri = pepUri;
-    }
+	public void setPepUri(String pepUri) {
+		Reject.ifBlank(pepUri);
+		this.pepUri = pepUri;
+	}
 
-    public String getPepUri() {
-        return pepUri;
-    }
+	public String getPepUri() {
+		return pepUri;
+	}
 
-    public void setRequest( String request ) {
-        Reject.ifBlank( request );
-        try {
-            RequestWrapper requestWrapper = RequestWrapper.build( request ); // NOSONAR
-        } catch( RequestException e ) {
-            throw new IllegalStateException( "invalid request" );
-        }
-        this.request = request;
-    }
+	public void setRequest(String request) {
+		Reject.ifBlank(request);
+		try {
+			RequestWrapper requestWrapper = RequestWrapper.build(request); // NOSONAR
+		} catch (RequestException e) {
+			throw new IllegalStateException("invalid request");
+		}
+		this.request = request;
+	}
 
-    public String getRequest() {
-        return request;
-    }
+	public String getRequest() {
+		return request;
+	}
 
-    public void setPolicy( String policy ) {
-        Reject.ifBlank( policy );
-        try {
-            PolicyWrapper policyWrapper = PolicyWrapper.build( policy );
-        } catch( PolicyException e ) {
-            throw new IllegalStateException( "invalid policy" ); // NOSONAR
-        }
-        this.policy = policy;
-    }
+	public void setPolicy(String policy) {
+		Reject.ifBlank(policy);
+		try {
+			PolicyWrapper policyWrapper = PolicyWrapper.build(policy);
+		} catch (PolicyException e) {
+			throw new IllegalStateException("invalid policy"); // NOSONAR
+		}
+		this.policy = policy;
+	}
 
-    public String getPolicy() {
-        return policy;
-    }
+	public String getPolicy() {
+		return policy;
+	}
 
-    public void setPolicyId( String policyId ) {
-        this.policyId = policyId;
-    }
+	public void setPolicyId(String policyId) {
+		this.policyId = policyId;
+	}
 
-    public String getPolicyId() {
-        return policyId;
-    }
+	public String getPolicyId() {
+		return policyId;
+	}
 }

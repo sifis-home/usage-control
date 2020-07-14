@@ -134,4 +134,9 @@ public class UCSCoreService implements UCSInterface {
 		return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);
 	}
 
+	@Override
+	public String enrichRequest(String request) {
+		return contextHandler.enrichRequest(request);
+	}
+
 }

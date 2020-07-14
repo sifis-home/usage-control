@@ -86,4 +86,6 @@ public interface UCSInterface {
 	 */
 	public Message endAccess(EndAccessMessage endAccessMessage);
 
+	public String enrichRequest(String request);
+
 }

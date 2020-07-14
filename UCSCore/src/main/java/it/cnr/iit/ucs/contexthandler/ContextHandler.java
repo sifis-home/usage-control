@@ -78,35 +78,24 @@ public final class ContextHandler extends AbstractContextHandler {
 		Reject.ifNull(message, "TryAccessMessage is null");
 
 		PolicyWrapper policy = PolicyWrapper.build(getPap(), message);
-		log.severe("\n\n\nmessage.getPolicy() = " + policy + "\n\n\n");
-		log.severe("\n\n\nmessage.getRequest() = " + message.getRequest() + "\n\n\n");
-
-//		RequestEnricher enricher = new RequestEnricher();
-//		String fullReq = enricher.enrichRequest(message.getRequest(), policy.getPolicy());
-
-		log.severe("\n\n\nenriched request = " + message.getRequest() + "\n\n\n");
-
 		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
+		request.update();
 
+		log.severe("TryAccess policy: " + policy.getPolicy());
+		log.severe("TryAccess request: " + request.getRequest());
 		request.fatten(false);
-
-		log.severe("TryAccess fattened request contents : \n" + request.getRequest());
+		log.severe("TryAccess fattened request: " + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);
 		Reject.ifNull(evaluation);
-		log.log(Level.SEVERE, "TryAccess evaluated at {0} pdp response : {1}",
-				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
+		log.severe("TryAccess response: " + evaluation.getResponse());
 
 		String sessionId = generateSessionId();
 		getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);
 
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
-			// If access decision is PERMIT create entry in SessionManager
-			log.severe("\n\n\ndecision is PERMIT\n\n\n");
 			RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());
 			createSession(message, origRequest, policy, sessionId);
-		} else {
-			log.severe("\n\n\ndecision is " + evaluation.getResult() + "\n\n\n");
 		}
 
 		return buildTryAccessResponse(message, evaluation, sessionId);
@@ -147,7 +136,6 @@ public final class ContextHandler extends AbstractContextHandler {
 		String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();
 
 		// retrieve the id of ongoing attributes
-		log.severe("in createSession CH");
 		List<Attribute> onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
 		try {
 			log.severe("list of onGoingAttributes from policy: "
@@ -169,14 +157,6 @@ public final class ContextHandler extends AbstractContextHandler {
 		sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())
 				.setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)
 				.setMyIP(uri.getHost());
-
-		try {
-			log.severe("sessionAttributeBuilder="
-					+ new ObjectMapper().writeValueAsString(sessionAttributeBuilder.build()));
-		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		// insert all the values inside the session manager
 		if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {
@@ -222,17 +202,19 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+		request.update();
 
-		log.severe("StartAccess request contents : \n" + request.getRequest());
+		log.severe("StartAccess policy: " + policy.getPolicy());
+		log.severe("StartAccess request: " + request.getRequest());
 		request.fatten(true);
-		log.severe("StartAccess fattened request contents : \n" + request.getRequest());
+		log.severe("StartAccess fattened request: " + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
 		Reject.ifNull(evaluation);
-		log.log(Level.INFO, "StartAccess evaluated at {0} pdp response : {1}",
-				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
+		log.severe("StartAccess response: " + evaluation.getResponse());
 
-		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.TRY);
+//		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.TRY);
+		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.START);
 
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {
@@ -373,6 +355,11 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public EndAccessResponseMessage endAccess(EndAccessMessage message)
 			throws StatusException, RequestException, PolicyException {
+		// IMPORTANT: THE ENDACCESS OPERATION CANNOT WORK WITH THE CURRENTS POLICIES
+		// BECAUSE
+		// THE DecisionTime="post" IS MISSING
+		// THE ENDACCESS WILL RETURN ALWAYS A DENY, NO MATTERS THE REQUEST
+
 		log.log(Level.SEVERE, "EndAccess begins at {0}", System.currentTimeMillis());
 		Reject.ifNull(message, "EndAccessMessage is null");
 
@@ -387,18 +374,19 @@ public final class ContextHandler extends AbstractContextHandler {
 //			throw new StatusException("EndAccess: wrong status for session " + message.getSessionId());
 //		}
 
-		log.log(Level.SEVERE, "EndAccess evaluation starts at {0}", System.currentTimeMillis());
-
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+		request.update();
+
+		log.severe("EndAccess policy: " + policy.getPolicy());
+		log.severe("EndAccess request: " + request.getRequest());
 		request.fatten(false);
-		log.severe("fatten request in EndAccess: " + request.getRequest());
-		log.severe("policy in end access: " + policy.getPolicy());
+		log.severe("EndAccess fatten request: " + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.END);
-		log.severe("evaluation.getResponse():" + evaluation.getResponse());
-
 		Reject.ifNull(evaluation);
+		log.severe("EndAccess response:" + evaluation.getResponse());
+
 		log.log(Level.SEVERE, "EndAccess evaluated at {0} pdp response : {1}",
 				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
 
@@ -487,6 +475,22 @@ public final class ContextHandler extends AbstractContextHandler {
 				log.log(Level.SEVERE, "Error handling attribute changes");
 			}
 		}
+
+	}
+
+	@Override
+	public String enrichRequest(String request) {
+		RequestWrapper requestWrapper;
+		try {
+			requestWrapper = RequestWrapper.build(request, getPipRegistry());
+			requestWrapper.fatten(false);
+			return requestWrapper.getRequest();
+		} catch (RequestException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
 
 	}
 
