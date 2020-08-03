@@ -15,7 +15,7 @@
 	<description>Version 0.2.1 is now importing our custom balana (1.2.3-SNAPSHOT)</description>
     
     <properties>
-        <balana.version>1.2.3-SNAPSHOT</balana.version>
+        <balana.version>1.2.4-SNAPSHOT</balana.version>
     </properties>
 
 	<parent>

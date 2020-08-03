@@ -58,12 +58,12 @@ public class UCSCoreServiceBuilder {
 
 	public UCSCoreService build() {
 		try {
-			log.severe("[INIT] usage control initialisation ...");
+			log.info("[INIT] usage control initialisation ...");
 			buildComponents();
 			setupConnections();
-			log.severe("[DONE] building components completed");
+			log.info("[DONE] building components completed");
 		} catch (PreconditionException e) {
-			log.severe("[ERROR] " + e.getMessage());
+			log.info("[ERROR] " + e.getMessage());
 			Thread.currentThread().interrupt();
 		}
 		return ucsCore;
@@ -140,17 +140,16 @@ public class UCSCoreServiceBuilder {
 
 	private void buildPIPList() {
 		for (PipProperties pipProp : properties.getPipList()) {
-			log.severe("\n\n\npipProp.getAttributes.size: " + pipProp.getAttributes().size() + "\n\n\n");
+			log.severe("pipProp.getAttributes.size: " + pipProp.getAttributes().size());
 			Optional<PIPBase> pip = buildComponent(pipProp, PIPBase.class);
 			ucsCore.pipList.add(pip.get()); // NOSONAR
 		}
 	}
 
 	private <T> Optional<T> buildComponent(CommonProperties property, Class<T> clazz) {
-		log.severe("[BUILD] " + property.getName());
+		log.info("[BUILD] " + property.getName());
 		Optional<T> component = ReflectionsUtility.buildComponent(property, clazz);
 		Reject.ifAbsent(component, "Error building " + property.getName());
-		log.severe("\n\n\nbuildComponent returning " + component + "\n\n\n");
 		return component;
 	}
 

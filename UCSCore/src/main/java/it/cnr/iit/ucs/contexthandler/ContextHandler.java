@@ -141,7 +141,6 @@ public final class ContextHandler extends AbstractContextHandler {
 			log.severe("list of onGoingAttributes from policy: "
 					+ new ObjectMapper().writeValueAsString(onGoingAttributes));
 		} catch (JsonProcessingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();
@@ -325,6 +324,8 @@ public final class ContextHandler extends AbstractContextHandler {
 	}
 
 	private List<SessionInterface> getSessionListForCategory(Category category, String id, String name) {
+		log.severe(
+				"getSessionListForCategory parameters\ncategory = " + category + "\nid = " + id + "\nname = " + name);
 		switch (category) {
 		case ENVIRONMENT:
 			return getSessionManager().getSessionsForEnvironmentAttributes(id);
@@ -412,10 +413,11 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	public boolean reevaluateSessions(Attribute attribute) {
 		try {
-			log.info("ReevaluateSessions for  attributeId : " + attribute.getAttributeId());
+			log.severe("ReevaluateSessions for  attributeId : " + attribute.getAttributeId());
 			List<SessionInterface> sessionList = getSessionListForCategory(attribute.getCategory(),
 					attribute.getAttributeId(), attribute.getAdditionalInformations());
 			if (sessionList != null) {
+				log.severe("sessionList = " + new ObjectMapper().writeValueAsString(sessionList));
 				for (SessionInterface session : sessionList) {
 					reevaluate(session);
 				}
@@ -428,7 +430,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	}
 
 	public synchronized void reevaluate(SessionInterface session) throws PolicyException, RequestException {
-		log.log(Level.INFO, "Reevaluation begins at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "Reevaluation begins at {0}", System.currentTimeMillis());
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
@@ -438,24 +440,24 @@ public final class ContextHandler extends AbstractContextHandler {
 		Reject.ifNull(evaluation);
 		getObligationManager().translateObligations(evaluation, session.getId(), STATUS.END);
 
-		log.log(Level.INFO, "Reevaluate evaluated at {0} pdp response : {1}",
+		log.log(Level.SEVERE, "Reevaluate evaluated at {0} pdp response : {1}",
 				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
 
 		if (session.isStatus(STATUS.START.name()) && evaluation.isDecision(DecisionType.DENY)) {
-			log.log(Level.INFO, "Revoke at {0}", System.currentTimeMillis());
+			log.log(Level.SEVERE, "Revoke at {0}", System.currentTimeMillis());
 			getSessionManager().updateEntry(session.getId(), STATUS.REVOKE.name());
 
 		} else if (session.isStatus(STATUS.REVOKE.name()) && evaluation.isDecision(DecisionType.PERMIT)) {
-			log.log(Level.INFO, "Resume at {0}", System.currentTimeMillis());
+			log.log(Level.SEVERE, "Resume at {0}", System.currentTimeMillis());
 			getSessionManager().updateEntry(session.getId(), STATUS.START.name());
 		} else {
-			log.log(Level.INFO, "Reevaluation ends without change at {0}", System.currentTimeMillis());
+			log.log(Level.SEVERE, "Reevaluation ends without change at {0}", System.currentTimeMillis());
 			return;
 		}
 
 		ReevaluationResponseMessage response = buildReevaluationResponse(session, evaluation);
 		getRequestManager().sendReevaluation(response);
-		log.log(Level.INFO, "Reevaluation ends changing status at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "Reevaluation ends changing status at {0}", System.currentTimeMillis());
 	}
 
 	private ReevaluationResponseMessage buildReevaluationResponse(SessionInterface session, PDPEvaluation evaluation) {
@@ -469,7 +471,7 @@ public final class ContextHandler extends AbstractContextHandler {
 
 	@Override
 	public void attributeChanged(AttributeChangeMessage message) {
-		log.log(Level.INFO, "Attribute changed received at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "Attribute changed received at {0}", System.currentTimeMillis());
 		for (Attribute attribute : message.getAttributes()) {
 			if (!reevaluateSessions(attribute)) {
 				log.log(Level.SEVERE, "Error handling attribute changes");

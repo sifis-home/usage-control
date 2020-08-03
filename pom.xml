@@ -28,7 +28,7 @@
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>
 		<module>SessionManager</module>
-		<!-- <module>UCSRest</module> -->
+		<!--<module>UCSRest</module>-->
 		<module>UCSCore</module>
 		<!-- <module>PEPRest</module> -->
 	</modules>
