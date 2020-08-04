@@ -19,13 +19,13 @@
 
 	<modules>
 		<module>UCSLibraries</module>
-		<module>ObligationManager</module>
+		<!--<module>ObligationManager</module>-->
 		<!--<module>PIPReader</module>-->
-		<module>PIPJdbc</module>
-		<module>PIPDsa</module>
+		<!--<module>PIPJdbc</module>-->
+		<!--<module>PIPDsa</module>-->
 		<module>PolicyAdministrationPoint</module>
 		<module>PolicyDecisionPoint</module>
-		<module>SessionManager</module>
+		<!--<module>SessionManager</module>-->
 		<!-- <module>UCSRest</module> -->
 		<module>UCSCore</module>
 		<!-- <module>PEPRest</module> -->

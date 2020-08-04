@@ -79,10 +79,8 @@ public class RequestManager extends AbstractRequestManager {
 		Reject.ifNull(message, "Null message");
 		try {
 			if (!active) {
-				System.out.println("\n\n\n NOT ACTIVE \n\n\n");
 				return handleMessage(message);
 			} else {
-				System.out.println("\n\n\n ACTIVE \n\n\n");
 				getQueueOutput().put(message);
 			}
 		} catch (Exception e) {
@@ -119,22 +117,17 @@ public class RequestManager extends AbstractRequestManager {
 		Message responseMessage = null;
 		if (message instanceof AttributeChangeMessage) {
 			getContextHandler().attributeChanged((AttributeChangeMessage) message);
-			System.out.println("\n\n\n first if \n\n\n");
 			return null;
 		} else if (message.getPurpose() == PURPOSE.TRY) {
-			System.out.println("\n\n\n try if \n\n\n");
 			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);
 			if (responseMessage == null) {
-				log.severe("\n\n\nresponseMessage is null\n\n\n");
+				log.severe("responseMessage is null");
 			}
 		} else if (message.getPurpose() == PURPOSE.START) {
-			System.out.println("\n\n\n start if \n\n\n");
 			responseMessage = getContextHandler().startAccess((StartAccessMessage) message);
 		} else if (message.getPurpose() == PURPOSE.END) {
-			System.out.println("\n\n\n end if \n\n\n");
 			responseMessage = getContextHandler().endAccess((EndAccessMessage) message);
 		} else {
-			System.out.println("\n\n\n catch if \n\n\n");
 			throw new IllegalArgumentException("Invalid message arrived");
 		}
 		if (active) {
