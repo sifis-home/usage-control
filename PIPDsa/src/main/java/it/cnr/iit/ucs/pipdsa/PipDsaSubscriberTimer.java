@@ -28,7 +28,7 @@ final class PIPDsaSubscriberTimer extends TimerTask {
 	private Timer timer;
 	PIPDsa pip;
 
-	private static final long DEFAULT_RATE = 1L * 6000000;
+	private static final long DEFAULT_RATE = 1L * 5000;
 	private long rate = DEFAULT_RATE;
 
 	PIPDsaSubscriberTimer(PIPDsa pip) {

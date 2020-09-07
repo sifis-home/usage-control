@@ -20,6 +20,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
@@ -65,8 +68,17 @@ public class RequestManager extends AbstractRequestManager {
 	@Override
 	public synchronized void sendReevaluation(ReevaluationResponseMessage reevaluation) {
 		Reject.ifNull(reevaluation, "Null message");
-		log.info("Sending on going reevaluation.");
-		getPEPMap().get((reevaluation).getPepId()).onGoingEvaluation(reevaluation);
+		log.severe("Sending on going reevaluation.");
+		try {
+			log.severe("in sendReevaluation: " + new ObjectMapper().writeValueAsString(reevaluation));
+			if (getPEPMap() == null || getPEPMap().size() == 0) {
+				log.severe("pepMap is null or size is empty: " + getPEPMap().size());
+			}
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		getPEPMap().get(reevaluation.getPepId()).onGoingEvaluation(reevaluation);
 	}
 
 	/**
@@ -119,6 +131,12 @@ public class RequestManager extends AbstractRequestManager {
 			getContextHandler().attributeChanged((AttributeChangeMessage) message);
 			return null;
 		} else if (message.getPurpose() == PURPOSE.TRY) {
+
+			log.severe("in handleMesage, before tryAccess, calling sendReevaluation");
+
+//			ReevaluationResponseMessage fakeReval = new ReevaluationResponseMessage();
+//			fakeReval.setPepId("0");
+//			sendReevaluation(fakeReval);
 			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);
 			if (responseMessage == null) {
 				log.severe("responseMessage is null");

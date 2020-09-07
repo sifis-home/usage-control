@@ -56,6 +56,13 @@ public class UCSCoreServiceBuilder {
 		ucsCore.pepMap = new HashMap<>();
 	}
 
+	public UCSCoreServiceBuilder(PEPInterface pep, PepProperties pepProperties) {
+		ucsCore = new UCSCoreService();
+		ucsCore.pipList = new ArrayList<>();
+		ucsCore.pepMap = new HashMap<>();
+		ucsCore.pepMap.put(pepProperties.getId(), pep);
+	}
+
 	public UCSCoreService build() {
 		try {
 			log.info("[INIT] usage control initialisation ...");
@@ -80,7 +87,7 @@ public class UCSCoreServiceBuilder {
 		buildSessionManager();
 		buildPolicyDecisionPoint();
 		buildPolicyAdministrationPoint();
-		// buildPEPList();
+//		buildPEPList();
 		buildPIPList();
 		buildObligationManager();
 		return this;
@@ -94,7 +101,7 @@ public class UCSCoreServiceBuilder {
 		ucsCore.contextHandler.setObligationManager(ucsCore.obligationManager);
 		ucsCore.contextHandler.setPIPs(new ArrayList<PIPCHInterface>(ucsCore.pipList));
 		ucsCore.requestManager.setContextHandler(ucsCore.contextHandler);
-		// ucsCore.requestManager.setPEPMap(ucsCore.pepMap);
+		ucsCore.requestManager.setPEPMap(ucsCore.pepMap);
 		for (PIPBase pip : ucsCore.pipList) {
 			pip.setRequestManager(ucsCore.requestManager);
 		}
@@ -133,9 +140,11 @@ public class UCSCoreServiceBuilder {
 
 	private void buildPEPList() {
 		for (PepProperties pepProp : properties.getPepList()) {
+			log.severe("inside buildPEPList for");
 			Optional<PEPInterface> pep = buildComponent(pepProp, PEPInterface.class); // NOSONAR
 			ucsCore.pepMap.put(pepProp.getId(), pep.get()); // NOSONAR
 		}
+		log.severe("ucsCore.pepMap.size()=" + ucsCore.pepMap.size());
 	}
 
 	private void buildPIPList() {

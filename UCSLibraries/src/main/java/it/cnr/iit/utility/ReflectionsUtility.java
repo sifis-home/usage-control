@@ -19,47 +19,47 @@ import it.cnr.iit.utility.errorhandling.Reject;
 
 public class ReflectionsUtility {
 
-	private static final Logger log = Logger.getLogger(ReflectionsUtility.class.getName());
+    private static final Logger log = Logger.getLogger( ReflectionsUtility.class.getName() );
 
-	private ReflectionsUtility() {
-	}
+    private ReflectionsUtility() {}
 
-	private static <T> Set<Class<? extends T>> getSubTypesOf(String packageName, Class<T> clazz) {
-		Collection<URL> classLoadersList = ClasspathHelper.forPackage(packageName, ClasspathHelper.contextClassLoader(),
-				ClasspathHelper.staticClassLoader());
+    private static <T> Set<Class<? extends T>> getSubTypesOf( String packageName, Class<T> clazz ) {
+        Collection<URL> classLoadersList = ClasspathHelper.forPackage(
+            packageName, ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader() );
 
-		Reflections reflections = new Reflections(
-				new ConfigurationBuilder().setScanners(new SubTypesScanner(false)).setUrls(classLoadersList)
-						.filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(packageName))));
-		return reflections.getSubTypesOf(clazz);
-	}
+        Reflections reflections = new Reflections( new ConfigurationBuilder()
+            .setScanners( new SubTypesScanner( false ) )
+            .setUrls( classLoadersList )
+            .filterInputsBy( new FilterBuilder().include( FilterBuilder.prefix( packageName ) ) ) );
+        return reflections.getSubTypesOf( clazz );
+    }
 
-	public static <T> Optional<Class<T>> getClassFromPackageName(String name) {
-		try {
-			return Optional.of((Class<T>) Class.forName(name));
-		} catch (ClassNotFoundException e) {
-			log.warning(e.getMessage());
-		}
-		return Optional.empty();
-	}
+    public static <T> Optional<Class<T>> getClassFromPackageName( String name ) {
+        try {
+            return Optional.of( (Class<T>) Class.forName( name ) );
+        } catch( ClassNotFoundException e ) {
+            log.warning( e.getMessage() );
+        }
+        return Optional.empty();
+    }
 
-	private static <T> Optional<Class<T>> getClassFromSimpleName(String name, Class<T> clazz) {
-		Set<Class<? extends T>> classList = getSubTypesOf("", clazz);
-		for (Class<?> c : classList) {
-			if (c.getSimpleName().equalsIgnoreCase(name)) {
-				log.log(Level.INFO, () -> "Match found for " + name + " : " + c.getName());
-				return Optional.of((Class<T>) c);
-			}
-		}
-		return Optional.empty();
-	}
+    private static <T> Optional<Class<T>> getClassFromSimpleName( String name, Class<T> clazz ) {
+        Set<Class<? extends T>> classList = getSubTypesOf( "", clazz );
+        for( Class<?> c : classList ) {
+            if( c.getSimpleName().equalsIgnoreCase( name ) ) {
+                log.log( Level.INFO, () -> "Match found for " + name + " : " + c.getName() );
+                return Optional.of( (Class<T>) c );
+            }
+        }
+        return Optional.empty();
+    }
 
-	public static <T> Optional<Class<T>> getClass(String name, Class<T> clazz) {
-		if (name.contains(".")) {
-			return getClassFromPackageName(name);
-		}
-		return getClassFromSimpleName(name, clazz);
-	}
+    public static <T> Optional<Class<T>> getClass( String name, Class<T> clazz ) {
+        if( name.contains( "." ) ) {
+            return getClassFromPackageName( name );
+        }
+        return getClassFromSimpleName( name, clazz );
+    }
 
 	public static <T> Optional<T> buildComponent(CommonProperties properties, Class<T> clazz) {
 		Reject.ifBlank(properties.getName());
@@ -72,6 +72,7 @@ public class ReflectionsUtility {
 				return Optional.of(obj);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.severe(() -> "Failed building " + properties.getName() + " : " + e.getMessage());
 		}
 		return Optional.empty();

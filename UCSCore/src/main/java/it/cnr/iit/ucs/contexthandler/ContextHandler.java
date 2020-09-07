@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.cnr.iit.ucs.constants.STATUS;
 import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.ucs.exceptions.RequestException;
+import it.cnr.iit.ucs.exceptions.SessionManagerException;
 import it.cnr.iit.ucs.exceptions.StatusException;
 import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
@@ -137,29 +138,40 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		// retrieve the id of ongoing attributes
 		List<Attribute> onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
+		log.severe("list of ongoing attributes:");
+		onGoingAttributes.stream().forEach(el -> log.severe(el.getAttributeId()));
 		try {
 			log.severe("list of onGoingAttributes from policy: "
 					+ new ObjectMapper().writeValueAsString(onGoingAttributes));
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();
-		sessionAttributeBuilder
-				.setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))
-				.setOnGoingAttributesForAction(getAttributeIdsForCategory(onGoingAttributes, Category.ACTION))
-				.setOnGoingAttributesForResource(getAttributeIdsForCategory(onGoingAttributes, Category.RESOURCE))
-				.setOnGoingAttributesForEnvironment(
-						getAttributeIdsForCategory(onGoingAttributes, Category.ENVIRONMENT));
-		sessionAttributeBuilder.setSubjectName(request.getRequestType().getAttributeValue(Category.SUBJECT))
-				.setResourceName(request.getRequestType().getAttributeValue(Category.RESOURCE))
-				.setActionName(request.getRequestType().getAttributeValue(Category.ACTION));
-		sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())
-				.setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)
-				.setMyIP(uri.getHost());
+		try {
+			SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();
+			sessionAttributeBuilder
+					.setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))
+					.setOnGoingAttributesForAction(getAttributeIdsForCategory(onGoingAttributes, Category.ACTION))
+					.setOnGoingAttributesForResource(getAttributeIdsForCategory(onGoingAttributes, Category.RESOURCE))
+					.setOnGoingAttributesForEnvironment(
+							getAttributeIdsForCategory(onGoingAttributes, Category.ENVIRONMENT));
+			sessionAttributeBuilder.setSubjectName(request.getRequestType().getAttributeValue(Category.SUBJECT))
+					.setResourceName(request.getRequestType().getAttributeValue(Category.RESOURCE))
+					.setActionName(request.getRequestType().getAttributeValue(Category.ACTION));
+			sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())
+					.setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)
+					.setMyIP(uri.getHost());
 
-		// insert all the values inside the session manager
-		if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {
-			log.log(Level.SEVERE, "Session \"{0}\" has not been stored correctly", sessionId);
+			log.severe("sessionAttributeBuilder: ");
+			log.severe(new ObjectMapper().writeValueAsString(sessionAttributeBuilder.build()));
+			if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {
+				log.log(Level.SEVERE, "Session \"{0}\" has not been stored correctly", sessionId);
+			}
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SessionManagerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -324,8 +336,8 @@ public final class ContextHandler extends AbstractContextHandler {
 	}
 
 	private List<SessionInterface> getSessionListForCategory(Category category, String id, String name) {
-		log.severe(
-				"getSessionListForCategory parameters\ncategory = " + category + "\nid = " + id + "\nname = " + name);
+		log.severe("in getSessionListForCategory: category=" + category.toString() + " id=" + id + " name=" + name);
+
 		switch (category) {
 		case ENVIRONMENT:
 			return getSessionManager().getSessionsForEnvironmentAttributes(id);
@@ -424,6 +436,7 @@ public final class ContextHandler extends AbstractContextHandler {
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.severe("Error in Reevaluate sessions : " + e.getMessage());
 		}
 		return false;
@@ -434,7 +447,12 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+		request.update();
+
+		log.severe("Reevaluation policy: " + policy.getPolicy());
+		log.severe("Reevaluation request: " + request.getRequest());
 		request.fatten(false);
+		log.severe("Reevaluation fatten request: " + request.getRequest());
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
 		Reject.ifNull(evaluation);
@@ -472,7 +490,9 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public void attributeChanged(AttributeChangeMessage message) {
 		log.log(Level.SEVERE, "Attribute changed received at {0}", System.currentTimeMillis());
+		log.severe("message.getAttributes().size()=" + message.getAttributes().size());
 		for (Attribute attribute : message.getAttributes()) {
+			log.severe("in attributeChanged the attributeId is " + attribute.getAttributeId());
 			if (!reevaluateSessions(attribute)) {
 				log.log(Level.SEVERE, "Error handling attribute changes");
 			}
@@ -488,7 +508,6 @@ public final class ContextHandler extends AbstractContextHandler {
 			requestWrapper.fatten(false);
 			return requestWrapper.getRequest();
 		} catch (RequestException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

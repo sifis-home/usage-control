@@ -131,16 +131,17 @@ public final class PIPJdbc extends PIPBase {
 				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
 			}
 
-			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
-			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
-			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
-			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
+			List<Attribute> attrToRetrieve = new ArrayList<Attribute>();
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ORGANIZATION));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
+			attrToRetrieve.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
 			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
-			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
+			attrToRetrieve.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
 			log.severe("added the following attributes:");
-			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
-			attrToSubscribe.stream()
+			attrToRetrieve.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			attrToRetrieve.stream()
 					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
 
 		} catch (PIPException e) {
@@ -209,6 +210,7 @@ public final class PIPJdbc extends PIPBase {
 				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
 			}
 			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
+			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ORGANIZATION));
 			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ROLE));
 			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
 			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
@@ -325,7 +327,7 @@ public final class PIPJdbc extends PIPBase {
 	public void checkSubscriptions() {
 		for (Attribute attribute : subscriptions) {
 			String value = "";
-			log.log(Level.INFO, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
+			log.log(Level.SEVERE, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
 
 			try {
 				value = retrieve(attribute);
@@ -336,7 +338,7 @@ public final class PIPJdbc extends PIPBase {
 
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
 			if (!oldValue.equals(value)) { // if the attribute has changed
-				log.log(Level.INFO, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
+				log.log(Level.SEVERE, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
 						value, attribute.getAdditionalInformations(), System.currentTimeMillis() });
 				attribute.setValue(attribute.getDataType(), value);
 				notifyRequestManager(attribute);

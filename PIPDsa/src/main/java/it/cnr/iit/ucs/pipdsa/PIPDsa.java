@@ -17,6 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.cnr.iit.common.attributes.AttributeIds;
 import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
@@ -369,9 +372,14 @@ public final class PIPDsa extends PIPBase {
 
 			try {
 				value = retrieve(attribute);
+				log.severe("attribute in checkSubscriptions: " + new ObjectMapper().writeValueAsString(attribute));
+
 			} catch (PIPException e) {
 				log.log(Level.SEVERE, "Error reading attribute " + attribute.getAttributeId());
 				return;
+			} catch (JsonProcessingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
@@ -394,7 +402,7 @@ public final class PIPDsa extends PIPBase {
 
 	public Attribute findAttributeById(String id) throws PIPException {
 		return getAttributes().stream().filter(attr -> attr.getAttributeId().equals(id)).findFirst()
-				.orElseThrow(() -> new PIPException("Cannot subscribe " + id + " because is missing in the request"));
+				.orElseThrow(() -> new PIPException("Cannot find " + id + " because is missing in the request"));
 	}
 
 }

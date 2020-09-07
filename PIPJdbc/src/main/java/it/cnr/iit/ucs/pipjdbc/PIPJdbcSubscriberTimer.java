@@ -28,7 +28,7 @@ final class PIPJdbcSubscriberTimer extends TimerTask {
 	private Timer timer;
 	PIPJdbc pip;
 
-	private static final long DEFAULT_RATE = 1L * 6000000;
+	private static final long DEFAULT_RATE = 1L * 1000 * 60 * 60;
 	private long rate = DEFAULT_RATE;
 
 	PIPJdbcSubscriberTimer(PIPJdbc pip) {

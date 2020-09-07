@@ -37,48 +37,50 @@ import it.cnr.iit.utility.errorhandling.Reject;
  */
 public class PEPRestProxy implements PEPInterface {
 
-    private static final Logger log = Logger.getLogger( PEPRestProxy.class.getName() );
+	private static final Logger log = Logger.getLogger(PEPRestProxy.class.getName());
 
-    private PepProperties properties;
-    private URI uri;
+	private PepProperties properties;
+	private URI uri;
 
-    public PEPRestProxy( PepProperties properties ) {
-        Reject.ifNull( properties );
-        this.properties = properties;
-        Optional<URI> opturi = RESTUtils.parseUri( properties.getUri() );
-        Reject.ifAbsent( opturi, "error parsing uri" );
-        this.uri = opturi.get(); // NOSONAR
-    }
+	public PEPRestProxy(PepProperties properties) {
+		Reject.ifNull(properties);
+		this.properties = properties;
+		Optional<URI> opturi = RESTUtils.parseUri(properties.getUri());
+		Reject.ifAbsent(opturi, "error parsing uri");
+		this.uri = opturi.get(); // NOSONAR
+	}
 
-    @Override
-    // TODO return actual response.
-    public Message onGoingEvaluation( ReevaluationResponseMessage message ) {
-        RESTUtils.asyncPost( uri.toString(), OperationName.ONGOINGRESPONSE_REST, message );
-        return null;
-    }
+	@Override
+	// TODO return actual response.
+	public Message onGoingEvaluation(ReevaluationResponseMessage message) {
+		log.severe("in ongoing evaluation");
+		log.severe("uri=" + uri.toString());
+		RESTUtils.asyncPost(uri.toString(), OperationName.ONGOINGRESPONSE_REST, message);
+		return null;
+	}
 
-    @Override
-    // TODO return actual response.
-    public String receiveResponse( Message message ) {
-        Optional<String> api = getApiForMessage( message );
-        try {
-            RESTUtils.asyncPost( uri.toString(), api.get(), message ); // NOSONAR
-        } catch( Exception e ) {
-            log.severe( "Error posting message : " + api );
-            return "KO";
-        }
-        return "OK";
-    }
+	@Override
+	// TODO return actual response.
+	public String receiveResponse(Message message) {
+		Optional<String> api = getApiForMessage(message);
+		try {
+			RESTUtils.asyncPost(uri.toString(), api.get(), message); // NOSONAR
+		} catch (Exception e) {
+			log.severe("Error posting message : " + api);
+			return "KO";
+		}
+		return "OK";
+	}
 
-    private Optional<String> getApiForMessage( Message message ) {
-        if( message instanceof TryAccessResponseMessage ) {
-            return Optional.of( properties.getApiTryAccessResponse() );
-        } else if( message instanceof StartAccessResponseMessage ) {
-            return Optional.of( properties.getApiStartAccessResponse() );
-        } else if( message instanceof EndAccessResponseMessage ) {
-            return Optional.of( properties.getApiEndAccessResponse() );
-        }
-        return Optional.empty();
-    }
+	private Optional<String> getApiForMessage(Message message) {
+		if (message instanceof TryAccessResponseMessage) {
+			return Optional.of(properties.getApiTryAccessResponse());
+		} else if (message instanceof StartAccessResponseMessage) {
+			return Optional.of(properties.getApiStartAccessResponse());
+		} else if (message instanceof EndAccessResponseMessage) {
+			return Optional.of(properties.getApiEndAccessResponse());
+		}
+		return Optional.empty();
+	}
 
 }

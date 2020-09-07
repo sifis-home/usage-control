@@ -16,53 +16,51 @@
 package it.cnr.iit.xacml;
 
 /**
- * In XACML syntax the category can be one of:
- * Subject, Resource, Action, Environment.
- * This enumerate is used to hold the String that represents the category in the
- * UXACML format
+ * In XACML syntax the category can be one of: Subject, Resource, Action,
+ * Environment. This enumerate is used to hold the String that represents the
+ * category in the UXACML format
  *
  * @author Antonio La Marra
  */
 public enum Category {
-    ACTION( "urn:oasis:names:tc:xacml:3.0:attribute-category:action" ),
-    RESOURCE( "urn:oasis:names:tc:xacml:3.0:attribute-category:resource" ),
-    SUBJECT( "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject" ),
-    ENVIRONMENT( "urn:oasis:names:tc:xacml:3.0:attribute-category:environment" );
+	ACTION("urn:oasis:names:tc:xacml:3.0:attribute-category:action"),
+	RESOURCE("urn:oasis:names:tc:xacml:3.0:attribute-category:resource"),
+	SUBJECT("urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"),
+	ENVIRONMENT("urn:oasis:names:tc:xacml:3.0:attribute-category:environment");
 
-    private final String payload;
+	private final String payload;
 
-    Category( String payload ) {
-        this.payload = payload;
-    }
+	Category(String payload) {
+		this.payload = payload;
+	}
 
-    @Override
-    public String toString() {
-        return payload;
-    }
+	@Override
+	public String toString() {
+		return payload;
+	}
 
-    /**
-     * Converts the string passed as parameter to a CATEGORY enumerate
-     *
-     * @param payload
-     *          the string we want to convert
-     * @return the CATEGORY object correspondent to that string if any, null
-     *         otherwise
-     */
-    public static Category toCATEGORY( String payload ) {
-        if( payload.equalsIgnoreCase( ACTION.toString() ) ) {
-            return ACTION;
-        } else if( payload.equalsIgnoreCase( RESOURCE.toString() ) ) {
-            return RESOURCE;
-        } else if( payload.equalsIgnoreCase( SUBJECT.toString() ) ) {
-            return SUBJECT;
-        } else if( payload.equalsIgnoreCase( ENVIRONMENT.toString() ) ) {
-            return ENVIRONMENT;
-        }
-        return null;
-    }
+	/**
+	 * Converts the string passed as parameter to a CATEGORY enumerate
+	 *
+	 * @param payload the string we want to convert
+	 * @return the CATEGORY object correspondent to that string if any, null
+	 *         otherwise
+	 */
+	public static Category toCATEGORY(String payload) {
+		if (payload.equalsIgnoreCase(ACTION.toString())) {
+			return ACTION;
+		} else if (payload.equalsIgnoreCase(RESOURCE.toString())) {
+			return RESOURCE;
+		} else if (payload.equalsIgnoreCase(SUBJECT.toString())) {
+			return SUBJECT;
+		} else if (payload.equalsIgnoreCase(ENVIRONMENT.toString())) {
+			return ENVIRONMENT;
+		}
+		return null;
+	}
 
-    public boolean contains( String payload ) {
-        return this.payload.contains( payload );
-    }
+	public boolean contains(String payload) {
+		return this.payload.contains(payload);
+	}
 
 }

@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
+import it.cnr.iit.ucs.constants.AttributeIds;
+import it.cnr.iit.ucs.exceptions.SessionManagerException;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 
@@ -92,22 +94,63 @@ public final class RequestType {
 	 * perform the action. Any other schema is not allowed.
 	 *
 	 * @param requestAttributes the attributes of the request
-	 * @param subject           the category in which we're interested into
+	 * @param category          the category in which we're interested into
 	 * @return the value of the attribute, null otherwise
 	 */
-	public String getAttributeValue(Category subject) {
-		log.severe("\n\n\nRequestType.getAttributeValue, subject = " + subject + "\n\n\n");
-		try {
-			for (AttributesType attributeType : attributes) {
-				log.severe("attributeType.getCategory = " + attributeType.getCategory() + "\n\n\n");
-				if (attributeType.getCategory().equals(subject.toString())) {
-					log.severe("\n\n\nif statement\n\n\n");
-					return attributeType.getAttribute().get(0).getAttributeValue().get(0).getContent().get(0)
-							.toString();
+	public String getAttributeValue(Category category) throws SessionManagerException {
+//		log.severe("\n\n\n RequestType.getAttributeValue, category = " + category + "\n\n\n");
+//		try {
+//			for (AttributesType attributeType : attributes) {
+//				if (attributeType.getCategory().equals(category.toString())) {
+//					log.severe("getting attribute in getAttributeValue");
+//					log.severe(new ObjectMapper().writeValueAsString(attributeType));
+//					log.severe("returning " + attributeType.getAttribute().get(0).getAttributeValue().get(0)
+//							.getContent().get(0).toString());
+//					return attributeType.getAttribute().get(0).getAttributeValue().get(0).getContent().get(0)
+//							.toString();
+//				}
+//			}
+//		} catch (Exception e) {
+//			log.severe("error getting attribute value : " + e.getMessage());
+//		}
+
+		for (AttributesType attributeType : attributes) {
+			log.severe("attributeType.getCategory()= " + attributeType.getCategory());
+			log.severe("category.toString()= " + category.toString());
+			if (attributeType.getCategory().equals(category.toString())) {
+				for (AttributeType attribute : attributeType.getAttribute()) {
+					switch (category.toString()) {
+					case "urn:oasis:names:tc:xacml:3.0:attribute-category:action": {
+						if (attribute.getAttributeId().equals(AttributeIds.ACTION_ID)) {
+							log.severe("returning the content: "
+									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
+							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
+						}
+						break;
+					}
+					case "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject": {
+						if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_ID)) {
+							log.severe("returning the content: "
+									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
+							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
+						}
+						break;
+					}
+					case "urn:oasis:names:tc:xacml:3.0:attribute-category:resource": {
+						if (attribute.getAttributeId().equals(AttributeIds.DSA_ID)) {
+							log.severe("returning the content: "
+									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
+							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
+						}
+						break;
+					}
+					default: {
+						throw new SessionManagerException(
+								"Cannot retrieve attributes from category " + category.toString());
+					}
+					}
 				}
 			}
-		} catch (Exception e) {
-			log.severe("error getting attribute value : " + e.getMessage());
 		}
 
 		return null;
