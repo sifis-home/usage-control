@@ -115,31 +115,23 @@ public final class RequestType {
 //		}
 
 		for (AttributesType attributeType : attributes) {
-			log.severe("attributeType.getCategory()= " + attributeType.getCategory());
-			log.severe("category.toString()= " + category.toString());
 			if (attributeType.getCategory().equals(category.toString())) {
 				for (AttributeType attribute : attributeType.getAttribute()) {
 					switch (category.toString()) {
 					case "urn:oasis:names:tc:xacml:3.0:attribute-category:action": {
 						if (attribute.getAttributeId().equals(AttributeIds.ACTION_ID)) {
-							log.severe("returning the content: "
-									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
 							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
 						}
 						break;
 					}
 					case "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject": {
 						if (attribute.getAttributeId().equals(AttributeIds.SUBJECT_ID)) {
-							log.severe("returning the content: "
-									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
 							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
 						}
 						break;
 					}
 					case "urn:oasis:names:tc:xacml:3.0:attribute-category:resource": {
 						if (attribute.getAttributeId().equals(AttributeIds.DSA_ID)) {
-							log.severe("returning the content: "
-									+ attribute.getAttributeValue().get(0).getContent().get(0).toString());
 							return attribute.getAttributeValue().get(0).getContent().get(0).toString();
 						}
 						break;

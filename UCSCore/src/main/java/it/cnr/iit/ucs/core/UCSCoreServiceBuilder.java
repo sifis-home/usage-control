@@ -140,11 +140,9 @@ public class UCSCoreServiceBuilder {
 
 	private void buildPEPList() {
 		for (PepProperties pepProp : properties.getPepList()) {
-			log.severe("inside buildPEPList for");
 			Optional<PEPInterface> pep = buildComponent(pepProp, PEPInterface.class); // NOSONAR
 			ucsCore.pepMap.put(pepProp.getId(), pep.get()); // NOSONAR
 		}
-		log.severe("ucsCore.pepMap.size()=" + ucsCore.pepMap.size());
 	}
 
 	private void buildPIPList() {

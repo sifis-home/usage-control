@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.cnr.iit.common.attributes.AttributeIds;
 import it.cnr.iit.ucs.constants.STATUS;
 import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.ucs.exceptions.RequestException;
@@ -82,6 +83,9 @@ public final class ContextHandler extends AbstractContextHandler {
 		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
 		request.update();
 
+		String actionAttrValue = request.getRequestType().getAttribute(Category.ACTION.toString(),
+				AttributeIds.ACTION_ID);
+
 		log.severe("TryAccess policy: " + policy.getPolicy());
 		log.severe("TryAccess request: " + request.getRequest());
 		request.fatten(false);
@@ -94,7 +98,7 @@ public final class ContextHandler extends AbstractContextHandler {
 		String sessionId = generateSessionId();
 		getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);
 
-		if (evaluation.isDecision(DecisionType.PERMIT)) {
+		if (evaluation.isDecision(DecisionType.PERMIT) && actionAttrValue.contains("invoke")) {
 			RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());
 			createSession(message, origRequest, policy, sessionId);
 		}
@@ -140,12 +144,7 @@ public final class ContextHandler extends AbstractContextHandler {
 		List<Attribute> onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
 		log.severe("list of ongoing attributes:");
 		onGoingAttributes.stream().forEach(el -> log.severe(el.getAttributeId()));
-		try {
-			log.severe("list of onGoingAttributes from policy: "
-					+ new ObjectMapper().writeValueAsString(onGoingAttributes));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+
 		try {
 			SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();
 			sessionAttributeBuilder
@@ -230,7 +229,12 @@ public final class ContextHandler extends AbstractContextHandler {
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {
 				log.log(Level.SEVERE, "StartAccess error, sessionId {0} status update failed", message.getSessionId());
+
 			}
+
+			optSession = getSessionManager().getSessionForId(message.getSessionId());
+			Reject.ifAbsent(optSession, "StartAccess: no session for id " + message.getSessionId());
+			session = optSession.get(); // NOSONAR
 		} else {
 			List<Attribute> attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
 			if (revoke(session, attributes) && !getSessionManager().deleteEntry(message.getSessionId())) {
@@ -253,19 +257,19 @@ public final class ContextHandler extends AbstractContextHandler {
 	 * EndAccess, in this function, all the attributes are un-subscribed.
 	 */
 	private synchronized boolean revoke(SessionInterface session, List<Attribute> attributes) {
-		log.log(Level.INFO, "Revoke begins at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "Revoke begins at {0}", System.currentTimeMillis());
 
+		attributes.stream().forEach(el -> log.severe("called revoke for attribute " + el.getAttributeId()));
 		boolean otherSessions = attributesToUnsubscribe(session.getId(), (ArrayList<Attribute>) attributes);
 		if (!otherSessions) {
 			getPipRegistry().unsubscribeAll(attributes);
 		}
-
 		if (!getSessionManager().deleteEntry(session.getId())) {
 			log.log(Level.SEVERE, "EndAccess: errors during entry deletion for sessionId {0}", session.getId());
 			return false;
 		}
 
-		log.log(Level.INFO, "Revoke ends at {0}", System.currentTimeMillis());
+		log.log(Level.SEVERE, "Revoke ends at {0}", System.currentTimeMillis());
 		return true;
 	}
 
@@ -405,8 +409,11 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.END);
 
+		List<Attribute> attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
+		// Yes, START, because the policy has not any post condition, so we need to
+		// retrieve the ongoing
 		// access must be revoked
-		if (revoke(session, policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.END)))) {
+		if (revoke(session, attributes)) {
 			log.log(Level.SEVERE, "EndAccess evaluation with revoke ends at {0}", System.currentTimeMillis());
 		}
 
@@ -429,7 +436,6 @@ public final class ContextHandler extends AbstractContextHandler {
 			List<SessionInterface> sessionList = getSessionListForCategory(attribute.getCategory(),
 					attribute.getAttributeId(), attribute.getAdditionalInformations());
 			if (sessionList != null) {
-				log.severe("sessionList = " + new ObjectMapper().writeValueAsString(sessionList));
 				for (SessionInterface session : sessionList) {
 					reevaluate(session);
 				}
@@ -456,6 +462,8 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
 		Reject.ifNull(evaluation);
+		log.severe("Reevaluation response:" + evaluation.getResponse());
+
 		getObligationManager().translateObligations(evaluation, session.getId(), STATUS.END);
 
 		log.log(Level.SEVERE, "Reevaluate evaluated at {0} pdp response : {1}",
@@ -490,9 +498,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public void attributeChanged(AttributeChangeMessage message) {
 		log.log(Level.SEVERE, "Attribute changed received at {0}", System.currentTimeMillis());
-		log.severe("message.getAttributes().size()=" + message.getAttributes().size());
 		for (Attribute attribute : message.getAttributes()) {
-			log.severe("in attributeChanged the attributeId is " + attribute.getAttributeId());
 			if (!reevaluateSessions(attribute)) {
 				log.log(Level.SEVERE, "Error handling attribute changes");
 			}

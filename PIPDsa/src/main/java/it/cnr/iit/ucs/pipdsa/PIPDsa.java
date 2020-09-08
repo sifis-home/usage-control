@@ -17,9 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.cnr.iit.common.attributes.AttributeIds;
 import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
@@ -160,12 +157,6 @@ public final class PIPDsa extends PIPBase {
 		List<Attribute> attributeList = getAttributes();
 		attributeList.stream().forEach(a -> addAdditionalInformation(a, dsaId));
 
-//		List<String> dsaAttributeStringList = new ArrayList<String>();
-
-//		attributeList.stream().filter(Objects::nonNull)
-//				.map(ThrowingException.unchecked(a -> dsaAttributeStringList.add(retrieve(a)))).filter(Objects::nonNull)
-//				.collect(Collectors.toList());
-
 		try {
 			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
 			attrToSubscribe.add(findAttributeById(AttributeIds.DSA_VERSION));
@@ -174,25 +165,6 @@ public final class PIPDsa extends PIPBase {
 					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
 		} catch (PIPException e) {
 			log.severe(e.getMessage());
-		}
-
-//		List<DsaAttribute> dsaAttributeList = dsaAttributeStringList.stream()
-//				.map(ThrowingException.unchecked(a -> new ObjectMapper().readValue(a, DsaAttribute.class)))
-//				.collect(Collectors.toList());
-//		Reject.ifEmpty(dsaAttributeList);
-//
-//		addAttributesToRequest(request, dsaAttributeList);
-
-	}
-
-	private void addAttributesToRequest(RequestType request, List<DsaAttribute> dsaAttributeList) {
-
-		for (Attribute attr : getAttributes()) {
-			for (DsaAttribute dsaAttr : dsaAttributeList) {
-				if (attr.getAttributeId().equals(dsaAttr.getId())) {
-					request.addAttribute(attr, dsaAttr.getMessage());
-				}
-			}
 		}
 
 	}
@@ -304,7 +276,7 @@ public final class PIPDsa extends PIPBase {
 				for (Attribute subscribedAttribute : subscriptions) {
 					if (subscribedAttribute.getCategory() == Category.ENVIRONMENT || subscribedAttribute
 							.getAdditionalInformations().equals(attribute.getAdditionalInformations())) {
-						return removeAttribute(subscribedAttribute);
+						removeAttribute(subscribedAttribute);
 					}
 				}
 			}
@@ -316,6 +288,7 @@ public final class PIPDsa extends PIPBase {
 		if (!subscriptions.remove(subscribedAttribute)) {
 			throw new IllegalStateException("Unable to remove attribute from list");
 		}
+		log.severe("removed attribute " + subscribedAttribute.getAttributeId());
 		return true;
 	}
 
@@ -372,13 +345,8 @@ public final class PIPDsa extends PIPBase {
 
 			try {
 				value = retrieve(attribute);
-				log.severe("attribute in checkSubscriptions: " + new ObjectMapper().writeValueAsString(attribute));
-
 			} catch (PIPException e) {
 				log.log(Level.SEVERE, "Error reading attribute " + attribute.getAttributeId());
-				return;
-			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

@@ -199,6 +199,7 @@ public final class PIPTime extends PIPBase {
 	 *
 	 * @param attributes the list of attributes that must be unsubscribed
 	 */
+
 	@Override
 	public boolean unsubscribe(List<Attribute> attributes) throws PIPException {
 		Reject.ifEmpty(attributes);
@@ -207,7 +208,7 @@ public final class PIPTime extends PIPBase {
 				for (Attribute subscribedAttribute : subscriptions) {
 					if (subscribedAttribute.getCategory() == Category.ENVIRONMENT || subscribedAttribute
 							.getAdditionalInformations().equals(attribute.getAdditionalInformations())) {
-						return removeAttribute(subscribedAttribute);
+						removeAttribute(subscribedAttribute);
 					}
 				}
 			}

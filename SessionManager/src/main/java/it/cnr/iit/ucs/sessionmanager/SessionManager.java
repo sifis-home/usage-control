@@ -185,9 +185,7 @@ public final class SessionManager implements SessionManagerInterface {
 				}
 			}
 			if (parameterObject.getOnGoingAttributesForResource() != null) {
-				log.severe("inside getOnGoingAttributesForResource if");
 				for (String attr : parameterObject.getOnGoingAttributesForResource()) {
-					log.severe("Resource Attribute found: " + attr);
 					OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute(attr,
 							parameterObject.getResourceName(), COLUMN.RESOURCE);
 					attributes.add(a);
@@ -207,10 +205,7 @@ public final class SessionManager implements SessionManagerInterface {
 				}
 			}
 
-			log.severe("ongoingattributes size: " + attributes.size());
-
 			for (OnGoingAttribute a : attributes) {
-				log.severe("Inserting the following resourceName: " + a.getResourceName());
 				attributesDao.createOrUpdate(a);
 			}
 

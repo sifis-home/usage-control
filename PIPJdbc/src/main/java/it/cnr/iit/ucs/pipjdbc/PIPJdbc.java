@@ -259,7 +259,7 @@ public final class PIPJdbc extends PIPBase {
 				for (Attribute subscribedAttribute : subscriptions) {
 					if (subscribedAttribute.getCategory() == Category.ENVIRONMENT || subscribedAttribute
 							.getAdditionalInformations().equals(attribute.getAdditionalInformations())) {
-						return removeAttribute(subscribedAttribute);
+						removeAttribute(subscribedAttribute);
 					}
 				}
 			}
