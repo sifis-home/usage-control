@@ -67,194 +67,218 @@ import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 
 public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
-    private static final Logger log = Logger.getLogger( FileSystemPolicyFinderModule.class.getName() );
+	private static final Logger log = Logger.getLogger(FileSystemPolicyFinderModule.class.getName());
 
-    private PolicyFinder finder = null;
+	private PolicyFinder finder = null;
 
-    private static final String POLICY_FILE_EXTENSION = ".xml";
+	private static final String POLICY_FILE_EXTENSION = ".xml";
 
-    private String POLICY_FILE_FOLDER = null;
+	private String POLICY_FILE_FOLDER = null;
 
-    private Map<URI, AbstractPolicy> policies;
+	private Map<URI, AbstractPolicy> policies;
 
-    private PolicyCombiningAlgorithm combiningAlg;
+	private PolicyCombiningAlgorithm combiningAlg;
 
-    private DocumentBuilderFactory documentBuilderFactory;
+	private DocumentBuilderFactory documentBuilderFactory;
 
-    private String policyCondition;
+	private String policyCondition;
 
-    public FileSystemPolicyFinderModule(String policyFolderPath) {
-        policies = new HashMap<URI, AbstractPolicy>();
-        POLICY_FILE_FOLDER = policyFolderPath;
-        try {
-            documentBuilderFactory = DocumentBuilderFactory.newInstance();
-            documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            documentBuilderFactory.setIgnoringComments(true);
-            documentBuilderFactory.setNamespaceAware(true);
-            documentBuilderFactory.setValidating(false);
-        } catch (Exception e) {
-            log.severe(e.getMessage());
-            throw new IllegalStateException("Unable to protect against XXE");
-        }
-        loadPolicies();
-    }
+	public FileSystemPolicyFinderModule(String policyFolderPath) {
+		policies = new HashMap<URI, AbstractPolicy>();
+		POLICY_FILE_FOLDER = policyFolderPath;
+		try {
+			documentBuilderFactory = DocumentBuilderFactory.newInstance();
+			documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			documentBuilderFactory.setIgnoringComments(true);
+			documentBuilderFactory.setNamespaceAware(true);
+			documentBuilderFactory.setValidating(false);
+		} catch (Exception e) {
+			log.severe(e.getMessage());
+			throw new IllegalStateException("Unable to protect against XXE");
+		}
+		loadPolicies();
+	}
 
-    public FileSystemPolicyFinderModule(String policyFolderPath, STATUS status) {
-        this(policyFolderPath);
-        this.policyCondition = PolicyTags.getCondition(status);
-    }
+	public FileSystemPolicyFinderModule(String policyFolderPath, STATUS status) {
+		this(policyFolderPath);
+		this.policyCondition = PolicyTags.getCondition(status);
+	}
 
-    @Override
-    public void init(PolicyFinder finder) {
-        this.finder = finder;
-        combiningAlg = new DenyOverridesPolicyAlg();
-    }
+	@Override
+	public void init(PolicyFinder finder) {
+		this.finder = finder;
+		combiningAlg = new DenyOverridesPolicyAlg();
+	}
 
-    @Override
-    public PolicyFinderResult findPolicy(EvaluationCtx context) {
+	@Override
+	public PolicyFinderResult findPolicy(EvaluationCtx context) {
 
-        ArrayList<AbstractPolicy> selectedPolicies = new ArrayList<AbstractPolicy>();
-        Set<Map.Entry<URI, AbstractPolicy>> entrySet = policies.entrySet();
+		ArrayList<AbstractPolicy> selectedPolicies = new ArrayList<AbstractPolicy>();
+		Set<Map.Entry<URI, AbstractPolicy>> entrySet = policies.entrySet();
 
-        // iterate through all the policies we currently have loaded
-        for (Map.Entry<URI, AbstractPolicy> entry : entrySet) {
+		// iterate through all the policies we currently have loaded
+		for (Map.Entry<URI, AbstractPolicy> entry : entrySet) {
 
-            AbstractPolicy policy = entry.getValue();
-            MatchResult match = policy.match(context);
-            int result = match.getResult();
+			AbstractPolicy policy = entry.getValue();
+			MatchResult match = policy.match(context);
+			int result = match.getResult();
 
-            // if target matching was indeterminate, then return the error
-            if (result == MatchResult.INDETERMINATE)
-                return new PolicyFinderResult(match.getStatus());
+			// if target matching was indeterminate, then return the error
+			if (result == MatchResult.INDETERMINATE) {
+				return new PolicyFinderResult(match.getStatus());
+			}
 
-            // see if the target matched
-            if (result == MatchResult.MATCH) {
+			// see if the target matched
+			if (result == MatchResult.MATCH) {
 
-                if ((combiningAlg == null) && (selectedPolicies.size() > 0)) {
-                    // we found a match before, so this is an error
-                    ArrayList<String> code = new ArrayList<String>();
-                    code.add(Status.STATUS_PROCESSING_ERROR);
-                    Status status = new Status(code, "too many applicable " + "top-level policies");
-                    return new PolicyFinderResult(status);
-                }
+				if ((combiningAlg == null) && (selectedPolicies.size() > 0)) {
+					// we found a match before, so this is an error
+					ArrayList<String> code = new ArrayList<String>();
+					code.add(Status.STATUS_PROCESSING_ERROR);
+					Status status = new Status(code, "too many applicable " + "top-level policies");
+					return new PolicyFinderResult(status);
+				}
 
-                // this is the first match we've found, so remember it
-                if (selectedPolicies.size() == 0) {
-                    // sort of hack to prevent policyset
-                    selectedPolicies.add(policy);
-                }
-            }
-        }
+				// this is the first match we've found, so remember it
+				if (selectedPolicies.size() == 0) {
+					// sort of hack to prevent policyset
+					selectedPolicies.add(policy);
+				}
+			}
+		}
 
-        // no errors happened during the search, so now take the right
-        // action based on how many policies we found
-        switch (selectedPolicies.size()) {
-        case 0:
-            log.info("No matching XACML policy found");
-            return new PolicyFinderResult();
-        case 1:
-            return new PolicyFinderResult((selectedPolicies.get(0)));
-        default:
-            return new PolicyFinderResult(new PolicySet(null, combiningAlg, null, selectedPolicies));
-        }
-    }
+		// no errors happened during the search, so now take the right
+		// action based on how many policies we found
+		switch (selectedPolicies.size()) {
+		case 0:
+			log.info("No matching XACML policy found");
+			return new PolicyFinderResult();
+		case 1:
+			return new PolicyFinderResult((selectedPolicies.get(0)));
+		default:
+			return new PolicyFinderResult(new PolicySet(null, combiningAlg, null, selectedPolicies));
+		}
+	}
 
-    @Override
-    public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
-            PolicyMetaData parentMetaData) {
+	@Override
+	public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
+			PolicyMetaData parentMetaData) {
 
-        AbstractPolicy policy = policies.get(idReference);
-        if (policy != null) {
-            if (type == PolicyReference.POLICY_REFERENCE) {
-                if (policy instanceof Policy) {
-                    return new PolicyFinderResult(policy);
-                }
-            } else {
-                if (policy instanceof PolicySet) {
-                    return new PolicyFinderResult(policy);
-                }
-            }
-        }
+		AbstractPolicy policy = policies.get(idReference);
+		if (policy != null) {
+			if (type == PolicyReference.POLICY_REFERENCE) {
+				if (policy instanceof Policy) {
+					return new PolicyFinderResult(policy);
+				}
+			} else {
+				if (policy instanceof PolicySet) {
+					return new PolicyFinderResult(policy);
+				}
+			}
+		}
 
-        // if there was an error loading the policy, return the error
-        ArrayList<String> code = new ArrayList<String>();
-        code.add(Status.STATUS_PROCESSING_ERROR);
-        Status status = new Status(code, "couldn't load referenced policy");
-        return new PolicyFinderResult(status);
-    }
+		// if there was an error loading the policy, return the error
+		ArrayList<String> code = new ArrayList<String>();
+		code.add(Status.STATUS_PROCESSING_ERROR);
+		Status status = new Status(code, "couldn't load referenced policy");
+		return new PolicyFinderResult(status);
+	}
 
-    @Override
-    public boolean isIdReferenceSupported() {
-        return true;
-    }
+	@Override
+	public boolean isIdReferenceSupported() {
+		return true;
+	}
 
-    @Override
-    public boolean isRequestSupported() {
-        return true;
-    }
+	@Override
+	public boolean isRequestSupported() {
+		return true;
+	}
 
-    /**
-     * Re-sets the policies known to this module to those contained in the given
-     * database.
-     * 
-     * @return
-     */
-    public Integer loadPolicies() {
-        // Load all policy from fs folder
-        policies.clear();
-        if (POLICY_FILE_FOLDER == null) {
-            throw new IllegalStateException("Policy folder path not set.");
-        }
-        try {
-            Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
-                    .filter(path -> path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
-                    .forEach(policy -> loadPolicy(policy, finder));
-        } catch (IOException e) {
-            throw new IllegalStateException("Unable to read policies from filesystem");
-        }
+	/**
+	 * Re-sets the policies known to this module to those contained in the given
+	 * database.
+	 *
+	 * @return
+	 */
+	public Integer loadPolicies() {
+		// Load all policy from fs folder
+		policies.clear();
+		if (POLICY_FILE_FOLDER == null) {
+			throw new IllegalStateException("Policy folder path not set.");
+		}
+		log.severe("POLICY_FILE_FOLDER = " + POLICY_FILE_FOLDER);
 
-        return policies.size();
-    }
+		// TODO: still "premature end of file", maybe problem is when the file is saved?
 
-    /**
-     * Private helper that tries to load the given policy, and returns null if any
-     * error occurs.
-     *
-     * @param policy      file path to policy
-     * @param finder      policy finder
-     * @return org.w3c.dom.Element
-     */
-    protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
-        AbstractPolicy abstractPolicy = null;
+		try {
+			Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
+					.filter(path -> path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
+					.forEach(policy -> /* loadPolicy(policy, finder) */ log
+							.severe("in loadPolicies, policy = " + policy));
+		} catch (IOException e) {
+			throw new IllegalStateException("Unable to read policies from filesystem");
+		}
 
-        try {
-            policy = policyCondition == null ? policy
-                    : PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();
-        } catch (PolicyException e) {
-            return abstractPolicy;
-        }
+//		File dir = new File(POLICY_FILE_FOLDER);
+//		File[] directoryListing = dir.listFiles();
+//		if (directoryListing != null) {
+//			for (File policy : directoryListing) {
+//				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {
+//					log.severe("found policy " + policy.getName());
+//					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);
+//
+//				}
+//			}
+//		} else {
+//			log.severe("directoryListing is null");
+//		}
 
-        try (InputStream stream = new ByteArrayInputStream( policy.getBytes() )) {
-            DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
-            Document doc = db.parse( stream );
-            Element root = doc.getDocumentElement();
-            String name = root.getLocalName();
+		return policies.size();
+	}
 
-            if( name.equals( "Policy" ) ) {
-                abstractPolicy = Policy.getInstance( root );
-            } else if( name.equals( "PolicySet" ) ) {
-                abstractPolicy = PolicySet.getInstance( root, finder );
-            }
-        } catch( Exception e ) {
-            log.severe( "fail to load UXACML policy : " + e.getLocalizedMessage() );
-        }
+	/**
+	 * Private helper that tries to load the given policy, and returns null if any
+	 * error occurs.
+	 *
+	 * @param policy file path to policy
+	 * @param finder policy finder
+	 * @return org.w3c.dom.Element
+	 */
+	protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
+		AbstractPolicy abstractPolicy = null;
+		log.severe("in loadPolicy, policy path = " + policy);
 
-        if( abstractPolicy != null ) {
-            policies.put( abstractPolicy.getId(), abstractPolicy );
-        }
+		try {
+			policy = policyCondition == null ? policy
+					: PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();
+		} catch (PolicyException e) {
+			return abstractPolicy;
+		}
 
-        return abstractPolicy;
+		try (InputStream stream = new ByteArrayInputStream(policy.getBytes())) {
+			DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
+			Document doc = db.parse(stream);
+			Element root = doc.getDocumentElement();
+			String name = root.getLocalName();
 
-    }
+			log.severe("in loadPolicy, name = " + name);
+
+			if (name.equals("Policy")) {
+				abstractPolicy = Policy.getInstance(root);
+			} else if (name.equals("PolicySet")) {
+				abstractPolicy = PolicySet.getInstance(root, finder);
+			}
+		} catch (Exception e) {
+			log.severe("fail to load UXACML policy : " + e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+
+		if (abstractPolicy != null) {
+			policies.put(abstractPolicy.getId(), abstractPolicy);
+		}
+
+		return abstractPolicy;
+
+	}
 
 }
