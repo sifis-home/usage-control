@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -15,6 +16,8 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import it.cnr.iit.common.attributes.AttributeIds;
 import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
+import it.cnr.iit.ucs.db.DBInfoStorage;
+import it.cnr.iit.ucs.db.UserAttributes;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.journaling.JournalBuilder;
 import it.cnr.iit.ucs.journaling.JournalingInterface;
@@ -90,6 +93,7 @@ public final class PIPLdap extends PIPBase {
 	public static final String LDAP_BNDDN = "bnddn";
 	public static final String LDAP_PASS = "password";
 	public static final String ORG_LIST = "org-list";
+	public static final String DB_URI = "db-uri";
 
 	private List<String> orgList = new ArrayList<String>();
 
@@ -111,6 +115,7 @@ public final class PIPLdap extends PIPBase {
 			LdapQuery.init();
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}
@@ -124,6 +129,8 @@ public final class PIPLdap extends PIPBase {
 		LdapAuthorization.setBnddn(properties.getAdditionalProperties().get(LDAP_BNDDN));
 		Reject.ifFalse(properties.getAdditionalProperties().containsKey(LDAP_PASS), "missing bnddn password");
 		LdapAuthorization.setPassword(properties.getAdditionalProperties().get(LDAP_PASS));
+		Reject.ifFalse(properties.getAdditionalProperties().containsKey(DB_URI), "missing database URI");
+		DBInfoStorage.start(properties.getAdditionalProperties().get(DB_URI));
 	}
 
 	private void setOrgList(PipProperties properties) {
@@ -150,10 +157,11 @@ public final class PIPLdap extends PIPBase {
 
 		try {
 			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
-			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
+			UserAttributes userAttributes = Optional
+					.ofNullable(DBInfoStorage.getField("username", subjectId, UserAttributes.class)).orElse(null);
 
-			if (!checkIfMonitored(organization)) {
-				throw new PIPException("The organization " + organization + " is not monitored from PIPLdap");
+			if (userAttributes != null) {
+				throw new PIPException("Cannot monitor LDAP attributes for user " + subjectId);
 			}
 
 			List<Attribute> attrToRetrieve = new ArrayList<Attribute>();
@@ -284,10 +292,11 @@ public final class PIPLdap extends PIPBase {
 
 		try {
 			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
-			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
+			UserAttributes userAttributes = Optional
+					.ofNullable(DBInfoStorage.getField("username", subjectId, UserAttributes.class)).orElse(null);
 
-			if (!checkIfMonitored(organization)) {
-				throw new PIPException("The organization " + organization + " is not monitored from PIPLdap");
+			if (userAttributes != null) {
+				throw new PIPException("Cannot monitor LDAP attributes for user " + subjectId);
 			}
 
 			List<Attribute> attrToSubscribe = new ArrayList<Attribute>();

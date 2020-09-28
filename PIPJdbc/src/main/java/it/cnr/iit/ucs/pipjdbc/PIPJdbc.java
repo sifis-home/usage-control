@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -124,8 +125,11 @@ public final class PIPJdbc extends PIPBase {
 		log.severe("called void retrieve");
 
 		try {
-			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
 			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+			UserAttributes userAttributes = Optional
+					.ofNullable(DBInfoStorage.getField("username", subjectId, UserAttributes.class))
+					.orElseThrow(() -> new PIPException("Cannot monitor jdbc attributes for user " + subjectId));
+			String organization = userAttributes.getOrgname();
 
 			if (!checkIfMonitored(organization)) {
 				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
@@ -157,6 +161,8 @@ public final class PIPJdbc extends PIPBase {
 		switch (organization) {
 		case "isp@cnr":
 		case "iscom-mise":
+		case "cnr":
+		case "prova":
 			return true;
 		default:
 			return false;
@@ -203,8 +209,11 @@ public final class PIPJdbc extends PIPBase {
 		Reject.ifNull(request);
 
 		try {
-			String organization = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.RESOURCE_OWNER);
-			String username = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
+			UserAttributes userAttributes = Optional
+					.ofNullable(DBInfoStorage.getField("username", subjectId, UserAttributes.class))
+					.orElseThrow(() -> new PIPException("Cannot monitor jdbc attributes for user " + subjectId));
+			String organization = userAttributes.getOrgname();
 
 			if (!checkIfMonitored(organization)) {
 				throw new PIPException("The organization " + organization + " is not monitored from PIPJdbc");
@@ -218,7 +227,7 @@ public final class PIPJdbc extends PIPBase {
 			log.severe("subscribing the following attributes: ");
 			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
 
-			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, username));
+			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
 			attrToSubscribe.stream()
 					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, subscribe(attr))));

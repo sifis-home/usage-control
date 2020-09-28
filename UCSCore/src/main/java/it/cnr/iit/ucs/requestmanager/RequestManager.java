@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
@@ -116,6 +118,7 @@ public class RequestManager extends AbstractRequestManager {
 	}
 
 	private Message handleMessage(Message message) throws Exception {
+		log.severe("in handleMessage, message = " + new ObjectMapper().writeValueAsString(message));
 		Message responseMessage = null;
 		if (message instanceof AttributeChangeMessage) {
 			getContextHandler().attributeChanged((AttributeChangeMessage) message);
