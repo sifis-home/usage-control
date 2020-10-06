@@ -99,6 +99,7 @@ public final class PIPLdap extends PIPBase {
 
 	public PIPLdap(PipProperties properties) {
 		super(properties);
+		log.setLevel(Level.SEVERE);
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
@@ -136,7 +137,7 @@ public final class PIPLdap extends PIPBase {
 	private void setOrgList(PipProperties properties) {
 		Reject.ifFalse(properties.getAdditionalProperties().containsKey(ORG_LIST), "missing organization list");
 		orgList = Arrays.asList(properties.getAdditionalProperties().get(ORG_LIST).split(","));
-		orgList.stream().forEach(org -> log.severe("orgList: " + org));
+		orgList.stream().forEach(org -> log.info("orgList: " + org));
 	}
 
 	private void addAttributes(Map<String, String> pip) {
@@ -172,8 +173,8 @@ public final class PIPLdap extends PIPBase {
 			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 			attrToRetrieve.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
-			log.severe("added the following attributes:");
-			attrToRetrieve.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			log.info("added the following attributes:");
+			attrToRetrieve.stream().forEach(attr -> log.info(attr.getAttributeId()));
 			attrToRetrieve.stream()
 					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
 
@@ -252,29 +253,27 @@ public final class PIPLdap extends PIPBase {
 		String memberOf = getMemberOf(userAttrMap.get("uid"));
 		userAttrMap.put("memberof", memberOf);
 		userAttrMap.entrySet().stream()
-				.forEach(attr -> log.severe("key: " + attr.getKey() + ", value=" + attr.getValue()));
+				.forEach(attr -> log.info("key: " + attr.getKey() + ", value=" + attr.getValue()));
 		userAttrMap.values().removeIf(el -> el.equals(LdapQuery.NOT_FOUND));
 		userAttrMap.entrySet().stream()
-				.forEach(attr -> log.severe("key: " + attr.getKey() + ", value=" + attr.getValue()));
+				.forEach(attr -> log.info("key: " + attr.getKey() + ", value=" + attr.getValue()));
 
 		CachedResult.setAttributesToValues(mapLdapAttributesToOasis(userAttrMap));
 		CachedResult.setCached(true);
 
 		String retrieved = CachedResult.getAttributesToValues().get(attribute.getAttributeId());
-		log.severe("retrieved the value " + retrieved + " from PIPLdap");
+		log.info("retrieved the value " + retrieved + " from PIPLdap");
 		return retrieved;
 	}
 
 	private String getMemberOf(String uid) {
 
-		log.severe("uid in getMemberOf=" + uid);
 		String[] attrsToSearchUser = { "cn" };
 		String filterDn = "ou=SME Pilot,ou=SME,ou=Pilots,dc=c3isp,dc=eu";
 		String baseDn = "ou=SME,ou=Pilots,dc=c3isp,dc=eu";
 		SearchScope level = SearchScope.ONELEVEL;
 		String filter = "(&(objectclass=groupOfUniqueNames)(uniqueMember=cn=" + uid + "," + filterDn + "))";
 		String memberOf = LdapQuery.queryForMemberOf(baseDn, filter, level, attrsToSearchUser);
-		log.severe("getMemberOf()=" + memberOf);
 		return memberOf;
 	}
 
@@ -307,8 +306,8 @@ public final class PIPLdap extends PIPBase {
 			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
-			log.severe("subscribing the following attributes: ");
-			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			log.info("subscribing the following attributes: ");
+			attrToSubscribe.stream().forEach(attr -> log.info(attr.getAttributeId()));
 
 			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
@@ -425,13 +424,13 @@ public final class PIPLdap extends PIPBase {
 			try {
 				value = retrieve(attribute);
 			} catch (PIPException e) {
-				log.log(Level.WARNING, "Error reading attribute " + attribute.getAttributeId());
+				log.log(Level.SEVERE, "Error reading attribute " + attribute.getAttributeId());
 				return;
 			}
 
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
 			if (!oldValue.equals(value)) { // if the attribute has changed
-				log.log(Level.INFO, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
+				log.log(Level.SEVERE, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
 						value, attribute.getAdditionalInformations(), System.currentTimeMillis() });
 				attribute.setValue(attribute.getDataType(), value);
 				notifyRequestManager(attribute);

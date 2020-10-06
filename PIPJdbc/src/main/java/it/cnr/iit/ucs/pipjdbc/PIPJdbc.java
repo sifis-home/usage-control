@@ -25,8 +25,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.j256.ormlite.logger.LocalLog;
-
 import it.cnr.iit.common.attributes.AttributeIds;
 import it.cnr.iit.common.lambda.exceptions.ConsumerException;
 import it.cnr.iit.ucs.constants.ENTITIES;
@@ -78,13 +76,14 @@ public final class PIPJdbc extends PIPBase {
 
 	public PIPJdbc(PipProperties properties) {
 		super(properties);
-		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
+//		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
+		log.setLevel(Level.SEVERE);
 		Reject.ifFalse(init(properties), "Error initializing pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
 		try {
-			log.severe("Initializing PIPJdbc...");
+			log.info("Initializing PIPJdbc...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DB_URI), "missing database URI");
 			DBInfoStorage.start(properties.getAdditionalProperties().get(DB_URI));
@@ -122,7 +121,7 @@ public final class PIPJdbc extends PIPBase {
 	@Override
 	public void retrieve(RequestType request) throws PIPException {
 		Reject.ifNull(request);
-		log.severe("called void retrieve");
+		log.info("called void retrieve");
 
 		try {
 			String subjectId = request.getAttribute(Category.SUBJECT.toString(), AttributeIds.SUBJECT_ID);
@@ -143,8 +142,8 @@ public final class PIPJdbc extends PIPBase {
 			getAttributes().stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 			attrToRetrieve.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
-			log.severe("added the following attributes:");
-			attrToRetrieve.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			log.info("added the following attributes:");
+			attrToRetrieve.stream().forEach(attr -> log.info(attr.getAttributeId()));
 			attrToRetrieve.stream()
 					.forEach(ConsumerException.unchecked(attr -> request.addAttribute(attr, retrieve(attr))));
 
@@ -175,7 +174,7 @@ public final class PIPJdbc extends PIPBase {
 	 */
 	@Override
 	public String retrieve(Attribute attribute) throws PIPException {
-		log.severe("called string retrieve");
+		log.info("called string retrieve");
 		String username = attribute.getAdditionalInformations();
 		UserAttributes userAttributes = DBInfoStorage.getField("username", username, UserAttributes.class);
 
@@ -192,7 +191,7 @@ public final class PIPJdbc extends PIPBase {
 			throw new PIPException(
 					"cannot retrieve attribute " + attribute.getAttributeId() + " from database for user " + username);
 
-		log.severe("retrieved the value " + retrieved + " from PIPJdbc");
+		log.info("retrieved the value " + retrieved + " from PIPJdbc");
 		return retrieved;
 	}
 
@@ -224,8 +223,8 @@ public final class PIPJdbc extends PIPBase {
 			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_ISMEMBEROF));
 			attrToSubscribe.add(findAttributeById(AttributeIds.SUBJECT_COUNTRY));
 
-			log.severe("subscribing the following attributes: ");
-			attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+			log.info("subscribing the following attributes: ");
+			attrToSubscribe.stream().forEach(attr -> log.info(attr.getAttributeId()));
 
 			attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, subjectId));
 
@@ -336,12 +335,12 @@ public final class PIPJdbc extends PIPBase {
 	public void checkSubscriptions() {
 		for (Attribute attribute : subscriptions) {
 			String value = "";
-			log.log(Level.SEVERE, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
+			log.info("Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
 
 			try {
 				value = retrieve(attribute);
 			} catch (PIPException e) {
-				log.log(Level.WARNING, "Error reading attribute " + attribute.getAttributeId());
+				log.severe("Error reading attribute " + attribute.getAttributeId());
 				return;
 			}
 

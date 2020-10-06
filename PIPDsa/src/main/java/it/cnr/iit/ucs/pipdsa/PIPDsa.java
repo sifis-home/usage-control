@@ -99,13 +99,14 @@ public final class PIPDsa extends PIPBase {
 
 	public PIPDsa(PipProperties properties) {
 		super(properties);
+		log.setLevel(Level.SEVERE);
 		Reject.ifFalse(init(properties), "Error initialising pip : " + properties.getId());
 	}
 
 	private boolean init(PipProperties properties) {
 
 		try {
-			log.severe("Initializing PIPDsa...");
+			log.info("Initializing PIPDsa...");
 			List<Map<String, String>> pipProperties = properties.getAttributes();
 			Reject.ifFalse(properties.getAdditionalProperties().containsKey(DSAMGR_URL), "missing DSA Manager url");
 			setDsaEndpointMethods(properties);
@@ -191,7 +192,7 @@ public final class PIPDsa extends PIPBase {
 				throw new PIPException("cannot retrieve the value of " + attribute.getAttributeId());
 			}
 			String retrieved = dsaAttribute.getMessage();
-			log.severe("retrieved the value " + retrieved + " from PIPDsa");
+			log.info("retrieved the value " + retrieved + " from PIPDsa");
 			return retrieved;
 		} catch (PIPException e) {
 			log.severe(e.getMessage());
@@ -227,15 +228,15 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public void subscribe(RequestType request) throws PIPException {
-		log.severe("called void subscribe in PIPDsa");
+		log.info("called void subscribe in PIPDsa");
 		Reject.ifNull(request);
 
 		List<Attribute> attrToSubscribe = new ArrayList<Attribute>();
 		attrToSubscribe.add(findAttributeById(AttributeIds.DSA_VERSION));
 		attrToSubscribe.add(findAttributeById(AttributeIds.DSA_STATUS));
 
-		log.severe("subscribing the following attributes: ");
-		attrToSubscribe.stream().forEach(attr -> log.severe(attr.getAttributeId()));
+		log.info("subscribing the following attributes: ");
+		attrToSubscribe.stream().forEach(attr -> log.info(attr.getAttributeId()));
 
 		String dsaId = request.getAttribute(Category.RESOURCE.toString(), AttributeIds.DSA_ID);
 		attrToSubscribe.stream().forEach(attr -> addAdditionalInformation(attr, dsaId));
@@ -250,7 +251,7 @@ public final class PIPDsa extends PIPBase {
 	 */
 	@Override
 	public String subscribe(Attribute attribute) throws PIPException {
-		log.severe("called String subscribe");
+		log.info("called String subscribe");
 		Reject.ifNull(attribute);
 
 		String value = retrieve(attribute);
@@ -288,7 +289,7 @@ public final class PIPDsa extends PIPBase {
 		if (!subscriptions.remove(subscribedAttribute)) {
 			throw new IllegalStateException("Unable to remove attribute from list");
 		}
-		log.severe("removed attribute " + subscribedAttribute.getAttributeId());
+		log.info("removed attribute " + subscribedAttribute.getAttributeId());
 		return true;
 	}
 
@@ -341,7 +342,7 @@ public final class PIPDsa extends PIPBase {
 	public void checkSubscriptions() {
 		for (Attribute attribute : subscriptions) {
 			String value = "";
-			log.log(Level.SEVERE, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
+			log.log(Level.INFO, "Polling on value of the attribute " + attribute.getAttributeId() + " for change.");
 
 			try {
 				value = retrieve(attribute);

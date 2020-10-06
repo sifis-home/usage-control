@@ -25,13 +25,14 @@ public final class DBInfoStorage {
 	private static ConnectionSource connection;
 	private static Map<Class<?>, Dao<?, String>> daoMap = new ConcurrentHashMap<Class<?>, Dao<?, String>>();
 
-	private static Logger LOGGER = Logger.getLogger(DBInfoStorage.class.getName());
+	private static Logger log = Logger.getLogger(DBInfoStorage.class.getName());
 
 	private DBInfoStorage() {
 	}
 
 	public static boolean start(String databaseUrl) {
 		dbUrl = databaseUrl;
+		log.setLevel(Level.OFF);
 		System.out.println("called start in CommonDatabase");
 		try {
 			connection = new JdbcPooledConnectionSource(dbUrl);
@@ -52,7 +53,7 @@ public final class DBInfoStorage {
 
 	public static Boolean stop() {
 		if (initialized == false) {
-			LOGGER.log(Level.SEVERE, "portal DB was not correctly initialized");
+			log.log(Level.SEVERE, "portal DB was not correctly initialized");
 			return false;
 		}
 
@@ -69,7 +70,7 @@ public final class DBInfoStorage {
 
 	private static void refresh() {
 		if (!connection.isOpen()) {
-			LOGGER.log(Level.INFO, "Refreshing db connection...");
+			log.log(Level.INFO, "Refreshing db connection...");
 			start(dbUrl);
 		}
 	}
@@ -81,7 +82,7 @@ public final class DBInfoStorage {
 
 			if (!daoMap.containsKey(clazz)) {
 				Dao<?, String> dao = (Dao<?, String>) DaoManager.createDao(connection, clazz);
-				LOGGER.log(Level.INFO, "Creating table " + dao.getDataClass().getName());
+				log.log(Level.INFO, "Creating table " + dao.getDataClass().getName());
 				TableUtils.createTableIfNotExists(connection, dao.getDataClass());
 				daoMap.put(dao.getDataClass(), dao);
 			}
@@ -95,7 +96,7 @@ public final class DBInfoStorage {
 
 	public static <T> boolean createOrUpdateEntry(T entry) {
 		if (initialized == false) {
-			LOGGER.log(Level.SEVERE, "DB was not correctly initialized");
+			log.log(Level.SEVERE, "DB was not correctly initialized");
 			return false;
 		}
 		refresh();
@@ -109,13 +110,13 @@ public final class DBInfoStorage {
 			return false;
 		}
 
-		LOGGER.log(Level.INFO, "Entry created");
+		log.log(Level.INFO, "Entry created");
 		return true;
 	}
 
 	public static <T> boolean deleteEntry(int id, Class<T> clazz) {
 		if (initialized == false) {
-			LOGGER.log(Level.SEVERE, "DB was not correctly initialized");
+			log.log(Level.SEVERE, "DB was not correctly initialized");
 			return false;
 		}
 		try {
@@ -127,7 +128,7 @@ public final class DBInfoStorage {
 			return false;
 		}
 
-		LOGGER.log(Level.INFO, "Entry removed");
+		log.log(Level.INFO, "Entry removed");
 		return true;
 	}
 
@@ -200,7 +201,7 @@ public final class DBInfoStorage {
 			Dao<T, String> dao = (Dao<T, String>) getDao(clazz);
 			return dao.queryBuilder().where().eq(column, value).query();
 		} catch (Exception e) {
-			LOGGER.severe(() -> e.getClass().getSimpleName() + " : " + column + " :" + value + ", " + e.getMessage());
+			log.severe(() -> e.getClass().getSimpleName() + " : " + column + " :" + value + ", " + e.getMessage());
 		}
 		return new ArrayList<>();
 	}
