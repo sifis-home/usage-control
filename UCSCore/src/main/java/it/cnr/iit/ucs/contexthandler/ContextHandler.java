@@ -71,6 +71,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	@Override
 	public TryAccessResponseMessage tryAccess(TryAccessMessage message) throws PolicyException, RequestException {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "TryAccess received at {0}", new Object[] { System.currentTimeMillis() });
 		Reject.ifNull(message, "TryAccessMessage is null");
 
@@ -133,6 +134,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	private void createSession(TryAccessMessage message, RequestWrapper request, PolicyWrapper policy,
 			String sessionId) {
+		log.setLevel(Level.OFF);
 		policy = policy == null ? getPdp().findPolicy(request) : policy;
 		log.log(Level.INFO, "Creating a new session : {0} ", sessionId);
 
@@ -183,6 +185,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public StartAccessResponseMessage startAccess(StartAccessMessage message)
 			throws StatusException, PolicyException, RequestException {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "StartAccess begin scheduling at {0}", System.currentTimeMillis());
 
 		Optional<SessionInterface> optSession = getSessionManager().getSessionForId(message.getSessionId());
@@ -234,6 +237,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 * EndAccess, in this function, all the attributes are un-subscribed.
 	 */
 	private synchronized boolean revoke(SessionInterface session, List<Attribute> attributes) {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "Revoke begins at {0}", System.currentTimeMillis());
 
 		boolean otherSessions = attributesToUnsubscribe(session.getId(), (ArrayList<Attribute>) attributes);
@@ -347,6 +351,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public EndAccessResponseMessage endAccess(EndAccessMessage message)
 			throws StatusException, RequestException, PolicyException {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "EndAccess begins at {0}", System.currentTimeMillis());
 		Reject.ifNull(message, "EndAccessMessage is null");
 
@@ -393,6 +398,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 * This is the function where the effective reevaluation takes place.
 	 */
 	public boolean reevaluateSessions(Attribute attribute) {
+		log.setLevel(Level.OFF);
 		try {
 			log.info("ReevaluateSessions for  attributeId : " + attribute.getAttributeId());
 			List<SessionInterface> sessionList = getSessionListForCategory(attribute.getCategory(),
@@ -410,6 +416,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	}
 
 	public synchronized void reevaluate(SessionInterface session) throws PolicyException, RequestException {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "Reevaluation begins at {0}", System.currentTimeMillis());
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
@@ -451,6 +458,7 @@ public final class ContextHandler extends AbstractContextHandler {
 
 	@Override
 	public void attributeChanged(AttributeChangeMessage message) {
+		log.setLevel(Level.OFF);
 		log.log(Level.INFO, "Attribute changed received at {0}", System.currentTimeMillis());
 		for (Attribute attribute : message.getAttributes()) {
 			if (!reevaluateSessions(attribute)) {
