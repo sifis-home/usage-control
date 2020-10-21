@@ -17,12 +17,9 @@
 package it.cnr.iit.ucs.pdp;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -210,28 +207,26 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
 		// TODO: still "premature end of file", maybe problem is when the file is saved?
 
-		try {
-			Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
-					.filter(path -> path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
-					.forEach(policy -> /* loadPolicy(policy, finder) */ log
-							.severe("in loadPolicies, policy = " + policy));
-		} catch (IOException e) {
-			throw new IllegalStateException("Unable to read policies from filesystem");
-		}
-
-//		File dir = new File(POLICY_FILE_FOLDER);
-//		File[] directoryListing = dir.listFiles();
-//		if (directoryListing != null) {
-//			for (File policy : directoryListing) {
-//				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {
-//					log.severe("found policy " + policy.getName());
-//					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);
-//
-//				}
-//			}
-//		} else {
-//			log.severe("directoryListing is null");
+//		try {
+//			Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
+//					.filter(path -> path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
+//					.forEach(policy -> loadPolicy(policy, finder));
+//		} catch (IOException e) {
+//			throw new IllegalStateException("Unable to read policies from filesystem");
 //		}
+
+		File dir = new File(POLICY_FILE_FOLDER);
+		File[] directoryListing = dir.listFiles();
+		if (directoryListing != null) {
+			for (File policy : directoryListing) {
+				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {
+					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);
+
+				}
+			}
+		} else {
+			log.severe("directoryListing is null");
+		}
 
 		return policies.size();
 	}
@@ -246,7 +241,6 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 	 */
 	protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
 		AbstractPolicy abstractPolicy = null;
-		log.severe("in loadPolicy, policy path = " + policy);
 
 		try {
 			policy = policyCondition == null ? policy
@@ -256,12 +250,11 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 		}
 
 		try (InputStream stream = new ByteArrayInputStream(policy.getBytes())) {
+
 			DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();
 			Document doc = db.parse(stream);
 			Element root = doc.getDocumentElement();
 			String name = root.getLocalName();
-
-			log.severe("in loadPolicy, name = " + name);
 
 			if (name.equals("Policy")) {
 				abstractPolicy = Policy.getInstance(root);
