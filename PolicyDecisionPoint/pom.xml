@@ -148,6 +148,13 @@
 		</plugins>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>dist.wso2.org</id>
+			<url>https://dist.wso2.org/maven2</url>
+		</repository>
+	</repositories>
+	
 	<reporting>
 		<plugins>
 			<!-- CheckStyle plugin -->
