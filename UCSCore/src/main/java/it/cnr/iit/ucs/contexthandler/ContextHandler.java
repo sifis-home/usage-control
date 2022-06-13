@@ -37,6 +37,7 @@ import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.pdp.PDPEvaluation;
+import it.cnr.iit.ucs.pdp.PDPResponse;
 import it.cnr.iit.ucs.properties.components.ContextHandlerProperties;
 import it.cnr.iit.ucs.sessionmanager.OnGoingAttributesInterface;
 import it.cnr.iit.ucs.sessionmanager.SessionAttributesBuilder;
@@ -48,6 +49,8 @@ import it.cnr.iit.xacml.PolicyTags;
 import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 import it.cnr.iit.xacml.wrappers.RequestWrapper;
 import oasis.names.tc.xacml.core.schema.wd_17.DecisionType;
+import oasis.names.tc.xacml.core.schema.wd_17.ResponseType;
+import oasis.names.tc.xacml.core.schema.wd_17.ResultType;
 
 /**
  * The context handler coordinates the ucs operations and spawns a thread in
@@ -76,24 +79,57 @@ public final class ContextHandler extends AbstractContextHandler {
 		Reject.ifNull(message, "TryAccessMessage is null");
 
 		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
-//      request = RequestStatusEnricher.setAttributeForStatus(request, STATUS.TRY);
-//      request.fatten( false );
+      request = RequestStatusEnricher.setAttributeForStatus(request, STATUS.TRY);
+      request.fatten( false );
 		log.info("TryAccess fattened request contents : \n" + request.getRequest());
 		PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null
 				? PolicyWrapper.build(getPap(), message)
 				: getPdp().findPolicy(request);
-		log.info(policy == null || policy.getPolicy() == null ? "No policy found."
-				: "Policy found: \n" + policy.getPolicy());
+//		log.info(policy == null || policy.getPolicy() == null ? "No policy found."
+//				: "Policy found: \n" + policy.getPolicy());
+		if (policy == null || policy.getPolicy() == null) {
+			log.info("No applicable policy found");
+			//return buildTryAccessResponse(message, null, null);
+			ResultType resultType = new ResultType();
+			resultType.setDecision(DecisionType.NOT_APPLICABLE);
+			List<ResultType> results = new ArrayList<>();
+			results.add(resultType);
+			ResponseType responseType = new ResponseType();
+			responseType.setResult(results);
+			return buildTryAccessResponse(message, new PDPResponse(responseType), null);
 
-//		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);
-		PDPEvaluation evaluation = getPdp().evaluate(request, policy);
+			/*
+			All this should be done within the PolicyDecisionPoint.
+			In particular, the PolicyFinder should produce the response
+			containing NOT_APPLICABLE.
+			A solution might be calling the evaluate(request, status) method,
+			but, at the moment, this would use the FileSystemPolicyFinderModule,
+			which should be revised.
+			The code in the ContextHandler always (TRY, START, END) ends up using the
+			InputStreamBasedPolicyFinderModule.
+			The downside of using it is that it requires an already-selected policy
+			to be initialized. So, in the START and END cases, this is not a concern
+			since a policy was previously selected. However, in the TRY case, if
+			a policy is not specified, calling evaluate(request, policy) or
+			evaluate(request, policy, status) results in an error.
+
+			The findPolicy(request) method called previously uses the
+			FileSystemPolicyFinderModule and seems to work.
+			 */
+		}
+		else {
+			log.info("Policy found: \n" + policy.getPolicy());
+		}
+
+		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);
+//		PDPEvaluation evaluation = getPdp().evaluate(request, policy);
 
 		Reject.ifNull(evaluation);
 		log.log(Level.INFO, "TryAccess evaluated at {0} pdp response : {1}",
 				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
 
 		String sessionId = generateSessionId();
-//		getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);
+		getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);
 
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			// If access decision is PERMIT create entry in SessionManager
