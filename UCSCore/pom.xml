@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.cnr.iit.ucs</groupId>
 	<artifactId>UCSCore</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>integration-0.3.0-SNAPSHOT</version>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -24,37 +24,42 @@
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>UCSLibraries</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PolicyDecisionPoint</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>it.cnr.iit.ucs</groupId>
+			<artifactId>PIPReader</artifactId>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PIPDsa</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PIPJdbc</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>PolicyAdministrationPoint</artifactId>
-			<version>0.1.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>ObligationManager</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>SessionManager</artifactId>
-			<version>0.2.0-SNAPSHOT</version>
+			<version>integration-0.3.0-SNAPSHOT</version>
 		</dependency>
 
 		<!-- test -->
