@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.cnr.iit.ucs</groupId>
 	<artifactId>PIPJdbc</artifactId>
-	<version>integration-0.3.0</version>
+	<version>integration-0.3.1-SNAPSHOT</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -32,7 +32,7 @@
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>UCSLibraries</artifactId>
-			<version>integration-0.3.0</version>
+			<version>integration-0.3.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>it.cnr.iit</groupId>
