@@ -17,6 +17,7 @@ package it.cnr.iit.ucs.core;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.cnr.iit.ucs.contexthandler.AbstractContextHandler;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
@@ -70,4 +71,7 @@ public class UCSCoreService implements UCSInterface {
 		return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);
 	}
 
+	public Map<String, PEPInterface> getPEPMap() {
+		return this.pepMap;
+	}
 }
