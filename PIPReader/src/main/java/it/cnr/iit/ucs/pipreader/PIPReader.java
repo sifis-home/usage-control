@@ -121,7 +121,9 @@ public final class PIPReader extends PIPBase {
         Reject.ifNull( request );
 
         Attribute attribute = getAttributes().get( 0 );
-        addAdditionalInformation( request, attribute );
+        if (!isEnvironmentCategory(attribute)) {
+            addAdditionalInformation(request, attribute);
+        }
         try {
             String value = retrieve( attribute );
             request.addAttribute( attribute, value );
@@ -157,11 +159,15 @@ public final class PIPReader extends PIPBase {
         Reject.ifNull( request );
 
         Attribute attribute = getAttributes().get( 0 );
-        addAdditionalInformation( request, attribute );
-
-        String value = subscribe( attribute );
-
-        request.addAttribute( attribute, value );
+        if (!isEnvironmentCategory(attribute)) {
+            addAdditionalInformation(request, attribute);
+        }
+        try {
+            String value = subscribe( attribute );
+            request.addAttribute( attribute, value );
+        } catch (Exception e) {
+            //TODO: handle exception
+        }
     }
 
     /**
@@ -309,7 +315,9 @@ public final class PIPReader extends PIPBase {
 
     @Override
     public void performObligation( ObligationInterface obligation ) {
-        log.severe( "Perform obligation is unimplemented" );
+        if (obligation != null) {
+            log.severe("Perform obligation is unimplemented");
+        }
     }
 
     public void addSubscription( Attribute attribute ) {
