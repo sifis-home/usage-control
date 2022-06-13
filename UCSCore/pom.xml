@@ -212,26 +212,6 @@
 	</build>
 	
 	<repositories>
-<!--		<repository>-->
-<!--	        <id>nexus.snapshots</id>-->
-<!--	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>-->
-<!--	        <releases>-->
-<!--	            <enabled>false</enabled>-->
-<!--	        </releases>-->
-<!--	        <snapshots>-->
-<!--	            <enabled>true</enabled>-->
-<!--	        </snapshots>-->
-<!--		</repository>-->
-<!--		<repository>-->
-<!--	        <id>nexus.releases</id>-->
-<!--	        <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>-->
-<!--	        <releases>-->
-<!--	            <enabled>true</enabled>-->
-<!--	        </releases>-->
-<!--	        <snapshots>-->
-<!--	            <enabled>false</enabled>-->
-<!--	        </snapshots>-->
-<!--		</repository>-->
 		<repository>
 			<id>gitlab-maven-ucs</id>
 			<url>https://sssg-dev.iit.cnr.it/api/v4/projects/7/packages/maven</url>
@@ -256,18 +236,6 @@
 		</plugins>
 	</reporting>
 
-<!--	<distributionManagement>-->
-<!--		<snapshotRepository>-->
-<!--            <id>nexus</id>-->
-<!--            <name>maven-snapshots</name>-->
-<!--            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>-->
-<!--        </snapshotRepository>-->
-<!--        <repository>-->
-<!--            <id>nexus</id>-->
-<!--            <name>maven-releases</name>-->
-<!--            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>-->
-<!--        </repository>-->
-<!--	</distributionManagement>-->
 	<distributionManagement>
 		<repository>
 			<id>gitlab-maven-ucs</id>

@@ -231,11 +231,11 @@
 				<updatePolicy>never</updatePolicy>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>balana-repository</id>
-			<name>Balana Repository</name>
-			<url>http://maven.wso2.org/nexus/content/repositories/releases</url>
-		</repository>
+<!--		<repository>-->
+<!--			<id>balana-repository</id>-->
+<!--			<name>Balana Repository</name>-->
+<!--			<url>http://maven.wso2.org/nexus/content/repositories/releases</url>-->
+<!--		</repository>-->
 		<repository>
 			<id>jcenter</id>
 			<url>http://jcenter.bintray.com/</url>
@@ -263,20 +263,6 @@
 			</plugin>
 		</plugins>
 	</reporting>
-
-
-<!--	<distributionManagement>-->
-<!--		<snapshotRepository>-->
-<!--            <id>nexus</id>-->
-<!--            <name>maven-snapshots</name>-->
-<!--            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-snapshots/</url>-->
-<!--        </snapshotRepository>-->
-<!--        <repository>-->
-<!--            <id>nexus</id>-->
-<!--            <name>maven-releases</name>-->
-<!--            <url>http://nexusc3isp.iit.cnr.it:8081/repository/maven-releases/</url>-->
-<!--        </repository>-->
-<!--	</distributionManagement>-->
 
 	<distributionManagement>
 		<repository>
