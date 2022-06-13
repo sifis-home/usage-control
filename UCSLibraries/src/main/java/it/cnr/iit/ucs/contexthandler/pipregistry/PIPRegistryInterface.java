@@ -33,4 +33,6 @@ public interface PIPRegistryInterface {
 
     public boolean hasAttribute( Attribute attribute );
 
+    public void subscribe(RequestType request, List<Attribute> attributes);
+
 }
