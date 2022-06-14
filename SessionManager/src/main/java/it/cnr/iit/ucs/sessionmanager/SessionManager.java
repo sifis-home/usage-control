@@ -144,8 +144,13 @@ public final class SessionManager implements SessionManagerInterface {
     public Boolean deleteEntry( String sessionId ) {
         validStateAndArguments( sessionId );
         try {
-            ForeignCollection<OnGoingAttribute> a = sessionDao.queryForId( sessionId )
-                .getOnGoingAttributesAsForeign();
+            ForeignCollection<OnGoingAttribute> a;
+            try {
+                a = sessionDao.queryForId(sessionId)
+                        .getOnGoingAttributesAsForeign();
+            } catch (NullPointerException e) {
+                return false;
+            }
             for( OnGoingAttribute attribute : a ) {
                 attributesDao.deleteById( attribute.getId() );
             }
