@@ -251,9 +251,9 @@ public final class ContextHandler extends AbstractContextHandler {
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {
 				log.log(Level.SEVERE, "StartAccess error, sessionId {0} status update failed", message.getSessionId());
-				RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
-				getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);
 			}
+			RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+			getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);
 		} else {
 			if (revoke(session, attributes) && !getSessionManager().deleteEntry(message.getSessionId())) {
 				log.log(Level.SEVERE, "StartAccess error, sessionId {0} deletion failed", message.getSessionId());
