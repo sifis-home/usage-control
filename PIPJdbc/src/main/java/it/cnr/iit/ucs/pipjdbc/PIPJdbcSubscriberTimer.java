@@ -54,7 +54,9 @@ final class PIPJdbcSubscriberTimer extends TimerTask {
         if( rate <= 0 ) {
             this.rate = DEFAULT_RATE;
         }
-        this.rate = rate;
+        else {
+            this.rate = rate;
+        }
     }
 
 }

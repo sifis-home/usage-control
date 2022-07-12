@@ -112,6 +112,7 @@ public final class PIPDsa extends PIPBase {
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPDsaSubscriberTimer subscriberTimer = new PIPDsaSubscriberTimer(this);
+			subscriberTimer.setRate(properties.getRefreshRate());
 			subscriberTimer.start();
 			return true;
 		} catch (Exception e) {

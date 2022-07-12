@@ -15,6 +15,7 @@ public class UCFPipProperties implements PipProperties {
     private String journalDir;
     private String journalProtocol;
     private List<Map<String, String>> attributes;
+    private long refreshRate;
 
     @Override
     public String getName() {
@@ -73,4 +74,12 @@ public class UCFPipProperties implements PipProperties {
         return new HashMap<>();
     }
 
+    @Override
+    public long getRefreshRate() {
+        return refreshRate;
+    }
+
+    public void setRefreshRate(long refreshRate) {
+        this.refreshRate = refreshRate;
+    }
 }

@@ -25,4 +25,6 @@ public interface PipProperties extends CommonProperties, JournalProperties {
     public List<Map<String, String>> getAttributes();
 
     public boolean isMultiAttribute();
+
+    public long getRefreshRate();
 }

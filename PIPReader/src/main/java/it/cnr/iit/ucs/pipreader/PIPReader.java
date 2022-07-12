@@ -100,6 +100,7 @@ public final class PIPReader extends PIPBase {
             journal = JournalBuilder.build( properties );
 
             PIPReaderSubscriberTimer subscriberTimer = new PIPReaderSubscriberTimer( this );
+            subscriberTimer.setRate(properties.getRefreshRate());
             subscriberTimer.start();
             return true;
         } catch( Exception e ) {

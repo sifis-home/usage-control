@@ -92,6 +92,7 @@ public final class PIPJdbc extends PIPBase {
 			pipProperties.stream().forEach(pip -> addAttributes(pip));
 			journal = JournalBuilder.build(properties);
 			PIPJdbcSubscriberTimer subscriberTimer = new PIPJdbcSubscriberTimer(this);
+			subscriberTimer.setRate(properties.getRefreshRate());
 			subscriberTimer.start();
 			return true;
 		} catch (Exception e) {
