@@ -1,3 +1,14 @@
 .*
-target/
+target/*
 jgiven-reports/
+buildSrc/*
+docs/*
+balana-core/*
+balana-utils/*
+PolicyDecisionPoint/*
+PolicyAdministrationPoint/*
+SessionManager/*
+UCSRest/*
+PEPRest/*
+PIPReader/*
+ObligationManager/*

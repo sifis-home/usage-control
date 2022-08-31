@@ -1,0 +1,92 @@
+/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package ucs.requestmanager;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
+
+import ucs.contexthandler.ContextHandlerInterface;
+import ucs.message.Message;
+import ucs.message.attributechange.AttributeChangeMessage;
+import ucs.pep.PEPInterface;
+import ucs.properties.components.RequestManagerProperties;
+import utility.errorhandling.Reject;
+
+/**
+ * This is the abstract class representing the request manager.
+ * Since we may have different flavours of the request manager, each with its own
+ * characteristics (single thread or multiple threads, algorithms used to
+ * prioritise the queue and so on), this is a way to provide all the
+ * RequestManagers the same basics characteristics
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public abstract class AbstractRequestManager implements RequestManagerToCHInterface, RequestManagerInterface {
+
+    protected static final Logger log = Logger.getLogger( AbstractRequestManager.class.getName() );
+
+    private final BlockingQueue<Message> queueInput = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Message> queueOutput = new LinkedBlockingQueue<>();
+    private final BlockingQueue<AttributeChangeMessage> retrieveRequests = new LinkedBlockingQueue<>();
+
+    private ContextHandlerInterface contextHandler;
+    private HashMap<String, PEPInterface> pepMap;
+
+    protected RequestManagerProperties properties;
+
+    protected AbstractRequestManager( RequestManagerProperties properties ) {
+        Reject.ifNull( properties );
+        this.properties = properties;
+        pepMap = new HashMap<>();
+    }
+
+    public final void setContextHandler( ContextHandlerInterface contextHandler ) {
+        Reject.ifNull( contextHandler );
+        this.contextHandler = contextHandler;
+    }
+
+    public ContextHandlerInterface getContextHandler() {
+        return contextHandler;
+    }
+
+    public final void setPEPMap( Map<String, PEPInterface> pepMap ) {
+        Reject.ifNull( pepMap );
+        this.pepMap.putAll( pepMap );
+    }
+
+    protected HashMap<String, PEPInterface> getPEPMap() {
+        return pepMap;
+    }
+
+    protected BlockingQueue<Message> getQueueInput() {
+        return queueInput;
+    }
+
+    protected BlockingQueue<Message> getQueueOutput() {
+        return queueOutput;
+    }
+
+    protected final BlockingQueue<AttributeChangeMessage> getRetrieveRequestsQueue() {
+        return retrieveRequests;
+    }
+
+    public abstract void startMonitoring();
+
+}

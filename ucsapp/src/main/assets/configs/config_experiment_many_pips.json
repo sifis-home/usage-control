@@ -1,0 +1,953 @@
+{
+  "ucs.core": {
+    "uri": "http://localhost:9998",
+    "journalPath":"/tmp/ucf",
+    "journalProtocol": "file"
+  },
+
+  "ucs.request-manager": {
+    "name": "ucs.requestmanager.RequestManager",
+    "apiRemoteResponse":"/retrieveRemoteResponse",
+    "active": true
+  },
+
+  "ucs.context-handler": {
+    "name": "ucs.contexthandler.ContextHandler",
+    "uri": "http://localhost:9998"
+  },
+
+  "ucs.session-manager": {
+    "name": "ucs.sessionmanager.SessionManager",
+    "dbUri": "jdbc:sqlite:file::memory:?cache=shared"
+  },
+
+  "ucs.policy-decision-point": {
+    "name":"ucs.pdp.PolicyDecisionPoint",
+    "journalPath":"/tmp/ucf",
+    "journalProtocol": "file"
+  },
+
+  "ucs.policy-administration-point": {
+    "name":"ucs.pap.PolicyAdministrationPoint",
+    "path":""
+  },
+
+  "ucs.obligation-manager": {
+    "name": "ucs.obligationmanager.ObligationManager"
+  },
+
+  "ucs.pep-list": [
+    {
+      "name": "ucs.proxies.PEPHookProxy",
+      "id": "1",
+      "uri": "http://localhost:9999",
+      "revokeType": "SOFT",
+      "apiOngoingEvaluation": "onGoingEvaluation",
+      "apiTryAccessResponse": "tryAccessResponse",
+      "apiStartAccessResponse": "startAccessResponse",
+      "apiEndAccessResponse": "endAccessResponse"
+    }
+  ],
+
+  "ucs.pip-list": [
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "0",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:1.0:subject:role",
+          "EXPECTED_CATEGORY": "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#string",
+          "FILE_PATH": "pips/role.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "1",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:camera",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/camera.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "2",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "3",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light2",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light2.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "4",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light3",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light3.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "5",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light4",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light4.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "6",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light5",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light5.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "7",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light6",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light6.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "8",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light7",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light7.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "9",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light8",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light8.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "10",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light9",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light9.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "11",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light10",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light10.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "12",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light11",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light11.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "13",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light12",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light12.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "14",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light13",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light13.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "15",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light14",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light14.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "16",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light15",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light15.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "17",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light16",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light16.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "18",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light17",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light17.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "19",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light18",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light18.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "20",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light19",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light19.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "21",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light20",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light20.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "22",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light21",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light21.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "23",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light22",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light22.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "24",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light23",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light23.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "25",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light24",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light24.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "26",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light25",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light25.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "27",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light26",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light26.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "28",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light27",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light27.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "29",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light28",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light28.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "30",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light29",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light29.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "31",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light30",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light30.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "32",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light31",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light31.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "33",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light32",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light32.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "34",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light33",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light33.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "35",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light34",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light34.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "36",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light35",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light35.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "37",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light36",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light36.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "38",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light37",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light37.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "39",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light38",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light38.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "40",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light39",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light39.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "41",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light40",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light40.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "42",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light41",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light41.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "43",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light42",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light42.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "44",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light43",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light43.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "45",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light44",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light44.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "46",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light45",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light45.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "47",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light46",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light46.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "48",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light47",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light47.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "49",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light48",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light48.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "50",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light49",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light49.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "51",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light50",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/experiments/light50.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "52",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:sensor-light",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#double",
+          "SENSOR_TYPE": "TYPE_LIGHT"
+        }
+      ]
+    }
+  ]
+}

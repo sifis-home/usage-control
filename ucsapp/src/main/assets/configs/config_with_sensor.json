@@ -1,0 +1,205 @@
+{
+  "ucs.core": {
+    "uri": "http://localhost:9998",
+    "journalPath":"/tmp/ucf",
+    "journalProtocol": "file"
+  },
+
+  "ucs.request-manager": {
+    "name": "ucs.requestmanager.RequestManager",
+    "apiRemoteResponse":"/retrieveRemoteResponse",
+    "active": true
+  },
+
+  "ucs.context-handler": {
+    "name": "ucs.contexthandler.ContextHandler",
+    "uri": "http://localhost:9998"
+  },
+
+  "ucs.session-manager": {
+    "name": "ucs.sessionmanager.SessionManager",
+    "dbUri": "jdbc:sqlite:file::memory:?cache=shared"
+  },
+
+  "ucs.policy-decision-point": {
+    "name":"ucs.pdp.PolicyDecisionPoint",
+    "journalPath":"/tmp/ucf",
+    "journalProtocol": "file"
+  },
+
+  "ucs.policy-administration-point": {
+    "name":"ucs.pap.PolicyAdministrationPoint",
+    "path":""
+  },
+
+  "ucs.obligation-manager": {
+    "name": "ucs.obligationmanager.ObligationManager"
+  },
+
+  "ucs.pep-list": [
+    {
+      "name": "ucs.proxies.PEPHookProxy",
+      "id": "1",
+      "uri": "http://localhost:9999",
+      "revokeType": "SOFT",
+      "apiOngoingEvaluation": "onGoingEvaluation",
+      "apiTryAccessResponse": "tryAccessResponse",
+      "apiStartAccessResponse": "startAccessResponse",
+      "apiEndAccessResponse": "endAccessResponse"
+    }
+  ],
+
+  "ucs.pip-list": [
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "0",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:1.0:subject:role",
+          "EXPECTED_CATEGORY": "urn:oasis:names:tc:xacml:1.0:subject-category:access-subject",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#string",
+          "FILE_PATH": "pips/role.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "1",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:camera",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/camera.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPFileReader",
+      "id": "2",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:light",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#integer",
+          "FILE_PATH": "pips/light.txt"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "3",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:sensor-light",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#double",
+          "SENSOR_TYPE": "SENSOR_TYPE_LIGHT"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "4",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:location-longitude",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#double",
+          "SENSOR_TYPE": "LOCATION_LONGITUDE"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "5",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:location-latitude",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#double",
+          "SENSOR_TYPE": "LOCATION_LATITUDE"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "6",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:wifi-ssid",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#string",
+          "SENSOR_TYPE": "WIFI_SSID"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "7",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:current-time",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#time",
+          "SENSOR_TYPE": "TIME_TIME"
+        }
+      ]
+    },
+    {
+      "name": "ucs.pipreader.PIPSensorReader",
+      "id": "8",
+      "journalPath": "/tmp/ucf",
+      "journalProtocol": "file",
+      "additionalProperties": {
+        "KEY": "VALUE"
+      },
+      "attributes": [
+        {
+          "CATEGORY": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+          "ATTRIBUTE_ID": "urn:oasis:names:tc:xacml:3.0:environment:current-date",
+          "DATA_TYPE": "http://www.w3.org/2001/XMLSchema#date",
+          "SENSOR_TYPE": "TIME_DATE"
+        }
+      ]
+    }
+  ]
+}

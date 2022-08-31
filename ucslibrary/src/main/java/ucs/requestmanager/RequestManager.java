@@ -1,0 +1,149 @@
+/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package ucs.requestmanager;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
+import ucs.constants.PURPOSE;
+import ucs.contexthandler.ContextHandlerInterface;
+import ucs.message.Message;
+import ucs.message.attributechange.AttributeChangeMessage;
+import ucs.message.endaccess.EndAccessMessage;
+import ucs.message.reevaluation.ReevaluationResponseMessage;
+import ucs.message.startaccess.StartAccessMessage;
+import ucs.message.tryaccess.TryAccessMessage;
+import ucs.properties.components.RequestManagerProperties;
+import utility.FileLogger;
+import utility.errorhandling.Reject;
+
+/**
+ * All the requests coming to the context handler have to reach the request
+ * manager first that will choose how to handle them.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public class RequestManager extends AbstractRequestManager {
+
+    private static final Logger log = Logger.getLogger( RequestManager.class.getName() );
+    private boolean active = false;
+
+    private ExecutorService inquirers;
+
+    public RequestManager( RequestManagerProperties properties ) {
+        super( properties );
+        this.active = properties.isActive();
+        initializeInquirers();
+    }
+
+    /**
+     * Initialises the request manager with a pool of threads
+     *
+     * @return true if everything goes fine, false in case of exceptions
+    */
+    private void initializeInquirers() {
+        try {
+            inquirers = Executors.newFixedThreadPool( 1 );
+        } catch( Exception e ) {
+            log.severe( "Error initialising the RequestManager inquirers : " + e.getMessage() );
+        }
+    }
+
+    @Override
+    public synchronized void sendReevaluation( ReevaluationResponseMessage reevaluation ) {
+        Reject.ifNull( reevaluation, "Null message" );
+        log.info( "Sending on going reevaluation." );
+        FileLogger.appendLog(System.currentTimeMillis() + "\t" + "REEVALUATION_" + reevaluation.getEvaluation().getResult() + "\t" + reevaluation.getPepId());
+        getPEPMap().get( ( reevaluation ).getDestination() )
+            .onGoingEvaluation( reevaluation );
+    }
+
+    /**
+     * Handles the case of a message received from outside
+     * Once a message coming from outside is received from the request manager, it
+     * puts it in the priority queue of messages
+     */
+    @Override
+    public synchronized boolean sendMessage( Message message ) {
+        Reject.ifNull( message, "Null message" );
+        log.info("Received message with id: " + message.getMessageId());
+        try {
+            if( !active ) {
+                handleMessage( message );
+            } else {
+                log.info("Putting message ("+message.getMessageId()+")in queue");
+//                if(Thread.interrupted()){
+//                    log.info("thread is interrupted");
+//                }
+                getQueueOutput().put( message );
+            }
+            return true;
+        } catch( Exception e ) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    /**
+     * The context handler inquirers perform an infinite loop in order to retrieve
+     * the messages coming to the request manager and sends them to the context handler.
+    */
+    private class ContextHandlerInquirer implements Callable<Message> {
+
+        @Override
+        public Message call() {
+            Message message = null;
+            do{
+                try {
+                    message = getQueueOutput().take();
+                    log.info("Inquirer is working...");
+                    handleMessage( message );
+                } catch( Exception e ) {
+                    e.printStackTrace();
+                }
+            } while( message != null );
+
+            return null;
+        }
+    }
+
+    private void handleMessage( Message message ) throws Exception {
+        log.info("Handling message: " + message.getMessageId() + ", purpose: " + message.getPurpose());
+        Message responseMessage = null;
+        if( message instanceof AttributeChangeMessage ) {
+            getContextHandler().attributeChanged( (AttributeChangeMessage) message );
+            return;
+        } else if( message.getPurpose() == PURPOSE.TRY ) {
+            responseMessage = getContextHandler().tryAccess( (TryAccessMessage) message );
+        } else if( message.getPurpose() == PURPOSE.START ) {
+            responseMessage = getContextHandler().startAccess( (StartAccessMessage) message );
+        } else if( message.getPurpose() == PURPOSE.END ) {
+            responseMessage = getContextHandler().endAccess( (EndAccessMessage) message );
+        } else {
+            throw new IllegalArgumentException( "Invalid message arrived" );
+        }
+        getPEPMap().get( responseMessage.getDestination() ).receiveResponse( responseMessage );
+    }
+
+    @Override
+    public void startMonitoring() {
+        inquirers.submit( new ContextHandlerInquirer() );
+    }
+
+}

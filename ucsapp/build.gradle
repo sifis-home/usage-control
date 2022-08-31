@@ -1,0 +1,85 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 28
+
+    defaultConfig {
+        applicationId "com.example.ucsintent"
+        minSdk 26
+        targetSdk 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    applicationVariants.all { variant ->
+        variant.getRuntimeConfiguration().exclude group: 'io.netty', module: 'netty-all'
+        variant.getRuntimeConfiguration().exclude group: 'jakarta.validation', module: 'jakarta.validation-api'
+        variant.getRuntimeConfiguration().exclude group: 'jakarta.annotation', module: 'jakarta.annotation-api'
+        variant.getRuntimeConfiguration().exclude group: 'javax.activation', module: 'javax.activation-api'
+        variant.getRuntimeConfiguration().exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-core'
+        variant.getRuntimeConfiguration().exclude group: 'org.apache.tomcat.embed', module: 'tomcat-embed-el'
+        variant.getRuntimeConfiguration().exclude group: 'org.springframework', module: 'spring-aop'
+        variant.getRuntimeConfiguration().exclude group: 'org.apache.derby', module: 'derbyclient'
+//        variant.getRuntimeConfiguration().exclude group: 'org.slf4j', module: 'slf4j-api'
+        variant.getRuntimeConfiguration().exclude group: 'org.ops4j.pax.logging', module: 'pax-logging-api'
+        variant.getRuntimeConfiguration().exclude group: 'org.springframework', module: 'spring-jcl'
+        variant.getRuntimeConfiguration().exclude group: 'org.wso2.balana', module: 'org.wso2.balana.utils'
+
+        //For PDP
+        variant.getRuntimeConfiguration().exclude group: 'org.glassfish.jaxb', module: 'jaxb-runtime'
+        variant.getRuntimeConfiguration().exclude group: 'com.sun.activation', module: 'jakarta.activation'
+        variant.getRuntimeConfiguration().exclude group: 'javax.xml.bind', module: 'jaxb-api'
+        variant.getRuntimeConfiguration().exclude group: 'javax.activation', module: 'activation'
+
+        variant.getRuntimeConfiguration().exclude group: 'xpp3', module: 'xpp3'
+        variant.getRuntimeConfiguration().exclude group: 'commons-logging', module: 'commons-logging'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+}
+
+configurations {
+    all*.exclude module : 'spring-boot-starter-logging'
+    all*.exclude module : 'logback-classic'
+}
+
+
+dependencies {
+    implementation project(':balana-core')
+    implementation project(':ucslibrary')
+    implementation 'org.springframework:spring-web:5.2.4.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux:2.2.5.RELEASE'
+    implementation group: 'org.simpleframework', name: 'simple-xml', version: '2.7.1'
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.5"
+    implementation 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.12.5'
+    implementation group: 'io.fares.bind.xjc.plugins', name: 'jackson-xjc-plugin', version: '0.0.2'
+    implementation 'org.reflections:reflections:0.9.11'
+    implementation 'com.github.sbtourist:journalio:1.4.2'
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.4.0-b180830.0359'
+    implementation "org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438"
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+    implementation 'com.j256.ormlite:ormlite-android:5.1'
+    implementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.android.support.constraint:constraint-layout:2.0.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}
