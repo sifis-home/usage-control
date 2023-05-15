@@ -57,7 +57,7 @@ public class UCSCoreService implements UCSInterface {
 		Reject.ifNull(tryAccessMessage);
 		TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
 		// this is null
-		Reject.ifNull(response);
+//		Reject.ifNull(response);
 		return response;
 	}
 

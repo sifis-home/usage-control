@@ -75,12 +75,17 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public TryAccessResponseMessage tryAccess(TryAccessMessage message) throws PolicyException, RequestException {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "TryAccess received at {0}", new Object[] { System.currentTimeMillis() });
 		Reject.ifNull(message, "TryAccessMessage is null");
 
 		RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());
       request = RequestStatusEnricher.setAttributeForStatus(request, STATUS.TRY);
-      request.fatten( false );
+
+//		log.log(Level.INFO, "tryAccess: fattening start: {0}", new Object[] { System.currentTimeMillis() });
+		request.fatten( false );
+//		log.log(Level.INFO, "tryAccess: fattening ended: {0}", new Object[] { System.currentTimeMillis() });
+
 		log.info("TryAccess fattened request contents : \n" + request.getRequest());
 		PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null
 				? PolicyWrapper.build(getPap(), message)
@@ -121,8 +126,10 @@ public final class ContextHandler extends AbstractContextHandler {
 			log.info("Policy found: \n" + policy.getPolicy());
 		}
 
+//		log.log(Level.INFO, "TryAccess: policy evaluation start: {0}", new Object[] { System.currentTimeMillis() });
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);
 //		PDPEvaluation evaluation = getPdp().evaluate(request, policy);
+//		log.log(Level.INFO, "TryAccess: policy evaluation ended: {0}", new Object[] { System.currentTimeMillis() });
 
 		Reject.ifNull(evaluation);
 		log.log(Level.INFO, "TryAccess evaluated at {0} pdp response : {1}",
@@ -134,7 +141,9 @@ public final class ContextHandler extends AbstractContextHandler {
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			// If access decision is PERMIT create entry in SessionManager
 			RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());
+//			log.log(Level.INFO, "TryAccess: create session start: {0}", new Object[] { System.currentTimeMillis() });
 			createSession(message, origRequest, policy, sessionId);
+//			log.log(Level.INFO, "TryAccess: create session ended: {0}", new Object[] { System.currentTimeMillis() });
 		}
 
 		return buildTryAccessResponse(message, evaluation, sessionId);
@@ -171,6 +180,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	private void createSession(TryAccessMessage message, RequestWrapper request, PolicyWrapper policy,
 			String sessionId) {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		policy = policy == null ? getPdp().findPolicy(request) : policy;
 		log.log(Level.INFO, "Creating a new session : {0} ", sessionId);
 
@@ -222,6 +232,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	public StartAccessResponseMessage startAccess(StartAccessMessage message)
 			throws StatusException, PolicyException, RequestException {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "StartAccess begin scheduling at {0}", System.currentTimeMillis());
 
 		Optional<SessionInterface> optSession = getSessionManager().getSessionForId(message.getSessionId());
@@ -238,9 +249,15 @@ public final class ContextHandler extends AbstractContextHandler {
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
 		request = RequestStatusEnricher.setAttributeForStatus(request, STATUS.START);
+//		log.log(Level.INFO, "startAccess: fattening start: {0}", new Object[] { System.currentTimeMillis() });
 		request.fatten(false);
+//		request.fatten(true);
+//		log.log(Level.INFO, "startAccess: fattening ended: {0}", new Object[] { System.currentTimeMillis() });
 
+//		log.log(Level.INFO, "startAccess: policy evaluation start: {0}", new Object[] { System.currentTimeMillis() });
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
+//		log.log(Level.INFO, "startAccess: policy evaluation ended: {0}", new Object[] { System.currentTimeMillis() });
+
 		Reject.ifNull(evaluation);
 		log.log(Level.INFO, "StartAccess evaluated at {0} pdp response : {1}",
 				new Object[] { System.currentTimeMillis(), evaluation.getResult() });
@@ -248,10 +265,12 @@ public final class ContextHandler extends AbstractContextHandler {
 		getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.TRY);
 
 		List<Attribute> attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
+//		log.log(Level.INFO, "startAccess: update entry start: {0}", new Object[] { System.currentTimeMillis() });
 		if (evaluation.isDecision(DecisionType.PERMIT)) {
 			if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {
 				log.log(Level.SEVERE, "StartAccess error, sessionId {0} status update failed", message.getSessionId());
 			}
+//			log.log(Level.INFO, "startAccess: update entry ended: {0}", new Object[] { System.currentTimeMillis() });
 			RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
 			getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);
 		} else {
@@ -276,6 +295,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	private synchronized boolean revoke(SessionInterface session, List<Attribute> attributes) {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "Revoke begins at {0}", System.currentTimeMillis());
 
 		boolean otherSessions = attributesToUnsubscribe(session.getId(), (ArrayList<Attribute>) attributes);
@@ -390,6 +410,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	public EndAccessResponseMessage endAccess(EndAccessMessage message)
 			throws StatusException, RequestException, PolicyException {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "EndAccess begins at {0}", System.currentTimeMillis());
 		Reject.ifNull(message, "EndAccessMessage is null");
 
@@ -437,6 +458,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	 */
 	public boolean reevaluateSessions(Attribute attribute) {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		try {
 			log.info("ReevaluateSessions for  attributeId : " + attribute.getAttributeId());
 			List<SessionInterface> sessionList = getSessionListForCategory(attribute.getCategory(),
@@ -455,13 +477,19 @@ public final class ContextHandler extends AbstractContextHandler {
 
 	public synchronized void reevaluate(SessionInterface session) throws PolicyException, RequestException {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "Reevaluation begins at {0}", System.currentTimeMillis());
 
 		PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
 		RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());
+//		log.log(Level.INFO, "reevaluate: fattening start: {0}", new Object[] { System.currentTimeMillis() });
 		request.fatten(false);
+//		log.log(Level.INFO, "reevaluate: fattening ended: {0}", new Object[] { System.currentTimeMillis() });
 
+//		log.log(Level.INFO, "reevaluate: policy evaluation start: {0}", new Object[] { System.currentTimeMillis() });
 		PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);
+//		log.log(Level.INFO, "reevaluate: policy evaluation ended: {0}", new Object[] { System.currentTimeMillis() });
+
 		Reject.ifNull(evaluation);
 		getObligationManager().translateObligations(evaluation, session.getId(), STATUS.END);
 
@@ -470,7 +498,9 @@ public final class ContextHandler extends AbstractContextHandler {
 
 		if (session.isStatus(STATUS.START.name()) && evaluation.isDecision(DecisionType.DENY)) {
 			log.log(Level.INFO, "Revoke at {0}", System.currentTimeMillis());
+//			log.log(Level.INFO, "reevaluate: update entry start: {0}", new Object[] { System.currentTimeMillis() });
 			getSessionManager().updateEntry(session.getId(), STATUS.REVOKE.name());
+//			log.log(Level.INFO, "reevaluate: update entry ended: {0}", new Object[] { System.currentTimeMillis() });
 
 		} else if (session.isStatus(STATUS.REVOKE.name()) && evaluation.isDecision(DecisionType.PERMIT)) {
 			log.log(Level.INFO, "Resume at {0}", System.currentTimeMillis());
@@ -497,6 +527,7 @@ public final class ContextHandler extends AbstractContextHandler {
 	@Override
 	public void attributeChanged(AttributeChangeMessage message) {
 		log.setLevel(Level.OFF);
+//		log.setLevel(Level.INFO);
 		log.log(Level.INFO, "Attribute changed received at {0}", System.currentTimeMillis());
 		for (Attribute attribute : message.getAttributes()) {
 			if (!reevaluateSessions(attribute)) {
