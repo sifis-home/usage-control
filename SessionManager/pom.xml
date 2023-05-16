@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.cnr.iit.ucs</groupId>
 	<artifactId>SessionManager</artifactId>
-	<version>integration-0.3.1-SNAPSHOT</version>
+	<version>sifis-home-0.0.1-SNAPSHOT</version>
 
     <properties>
         <springfox.version>2.9.2</springfox.version>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>it.cnr.iit.ucs</groupId>
 			<artifactId>UCSLibraries</artifactId>
-			<version>integration-0.3.1-SNAPSHOT</version>
+			<version>sifis-home-0.0.1-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

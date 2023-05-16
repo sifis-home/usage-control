@@ -11,7 +11,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>it.cnr.iit.usagecontrolframework</groupId>
 	<artifactId>UsageControl</artifactId>
-	<version>integration-0.3.1-SNAPSHOT</version>
+	<version>sifis-home-0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Usage Control :: Aggregate POM</name>
@@ -28,7 +28,8 @@
 		<module>SessionManager</module>
 		<!-- <module>UCSRest</module> -->
 		<module>UCSCore</module>
-		<!-- <module>PEPRest</module> -->
+        <module>PEPDht</module>
+        <!-- <module>PEPRest</module> -->
 	</modules>
 	
 	<repositories>
