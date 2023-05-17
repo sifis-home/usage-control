@@ -1,15 +1,15 @@
 package it.cnr.iit.json.tryaccess;
 
-public class Message implements it.cnr.iit.json.Message {
+public class TryAccessRequest implements it.cnr.iit.json.MessageContent {
 
-    public String request;
-    public String policy;
+    public final String type = "try_access_request";
+    private String request;
+    private String policy;
 
-    public Message() {
-
+    public TryAccessRequest() {
     }
 
-    public Message(String request, String policy) {
+    public TryAccessRequest(String request, String policy) {
         this.request = request;
         this.policy = policy;
     }
