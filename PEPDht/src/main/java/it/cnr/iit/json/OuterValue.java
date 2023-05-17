@@ -2,8 +2,8 @@ package it.cnr.iit.json;
 
 public class OuterValue {
 
-    public long timestamp;
-    public Command command;
+    private long timestamp;
+    private Command command;
 
     public OuterValue(){
     }

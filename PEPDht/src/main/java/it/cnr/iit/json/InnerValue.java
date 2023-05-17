@@ -1,21 +1,17 @@
 package it.cnr.iit.json;
 
-import com.google.gson.annotations.SerializedName;
-
 public class InnerValue {
 
-    public String purpose;
-    public Message message;
-    public String pep_id;
-    public String message_id;
-    public String topic_name;
-    public String topic_uuid;
+    private MessageContent message;
+    private String pep_id;
+    private String message_id;
+    private String topic_name;
+    private String topic_uuid;
 
     public InnerValue() {
     }
 
-    public InnerValue(String purpose, Message message, String pep_id, String message_id, String topic_name, String topic_uuid) {
-        this.purpose = purpose;
+    public InnerValue(MessageContent message, String pep_id, String message_id, String topic_name, String topic_uuid) {
         this.message = message;
         this.pep_id = pep_id;
         this.message_id = message_id;
@@ -23,19 +19,11 @@ public class InnerValue {
         this.topic_uuid = topic_uuid;
     }
 
-    public String getPurpose() {
-        return purpose;
-    }
-
-    public void setPurpose(String purpose) {
-        this.purpose = purpose;
-    }
-
-    public Message getMessage() {
+    public MessageContent getMessage() {
         return message;
     }
 
-    public void setMessage(Message message) {
+    public void setMessage(MessageContent message) {
         this.message = message;
     }
 

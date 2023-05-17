@@ -2,7 +2,7 @@ package it.cnr.iit.json;
 
 public class RequestPubMessage {
 
-    public OuterValue value;
+    private OuterValue value;
 
     public RequestPubMessage() {
     }
