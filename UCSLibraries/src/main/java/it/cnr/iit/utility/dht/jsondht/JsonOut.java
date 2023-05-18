@@ -1,21 +1,22 @@
 package it.cnr.iit.utility.dht.jsondht;
 
+// example of try access request sent by a PEP
 // {
 //  "RequestPubMessage": {
 //    "value": {
-//      "timestamp": 1684316923041,
+//      "timestamp": 1684402025463,
 //      "command": {
 //        "command_type": "pep-command",
 //        "value": {
 //          "message": {
-//            "type": "try_access_request",
-//            "request": "iVBORw0KGgoAABGdBTUEAALGPC/xhBQAAAAlwSFlzA...",
-//            "policy": null
+//            "purpose": "TRY",
+//            "request": "request",
+//            "policy": "policy"
 //          },
-//          "pep_id": "pep_id",
-//          "message_id": "bf2cbe6b-c309-4ad6-b6b3-f300596f8d5a",
-//          "topic_name": "topic_name_XXX",
-//          "topic_uuid": "pub_topic_uuid"
+//          "pep_id": "pep-0",
+//          "message_id": "random123-msg_id",
+//          "topic_name": "topic-name",
+//          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
 //        }
 //      }
 //    }
