@@ -35,6 +35,11 @@ public final class StartAccessMessage extends Message implements IdentifiedMessa
         purpose = PURPOSE.START;
     }
 
+    public StartAccessMessage( String source, String destination, String messageId ) {
+        super( source, destination, messageId );
+        purpose = PURPOSE.START;
+    }
+
     public StartAccessMessage() {
         super( ENTITIES.PEP.toString(), ENTITIES.CH.toString() );
         purpose = PURPOSE.START;

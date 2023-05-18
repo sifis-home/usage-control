@@ -41,6 +41,11 @@ public final class TryAccessMessage extends Message {
         purpose = PURPOSE.TRY;
     }
 
+    public TryAccessMessage( String source, String destination, String messageId ) {
+        super( source, destination, messageId );
+        purpose = PURPOSE.TRY;
+    }
+
     public TryAccessMessage() {
         super( ENTITIES.PEP.toString(), ENTITIES.CH.toString() );
         purpose = PURPOSE.TRY;

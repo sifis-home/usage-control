@@ -29,7 +29,8 @@
 		<!-- <module>UCSRest</module> -->
 		<module>UCSCore</module>
         <module>PEPDht</module>
-        <!-- <module>PEPRest</module> -->
+		<module>UCSDht</module>
+		<!-- <module>PEPRest</module> -->
 	</modules>
 	
 	<repositories>

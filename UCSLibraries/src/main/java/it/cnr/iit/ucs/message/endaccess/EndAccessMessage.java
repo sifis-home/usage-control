@@ -35,6 +35,11 @@ public class EndAccessMessage extends Message implements IdentifiedMessage {
         purpose = PURPOSE.END;
     }
 
+    public EndAccessMessage( String source, String destination, String messageId ) {
+        super( source, destination, messageId );
+        purpose = PURPOSE.END;
+    }
+
     public EndAccessMessage() {
         super( ENTITIES.PEP.toString(), ENTITIES.CH.toString() );
         purpose = PURPOSE.END;

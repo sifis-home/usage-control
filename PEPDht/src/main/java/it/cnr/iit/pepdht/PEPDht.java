@@ -5,6 +5,7 @@ import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
 
+import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
@@ -12,6 +13,7 @@ import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+import it.cnr.iit.utility.errorhandling.Reject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +30,12 @@ public class PEPDht implements PEPInterface {
     private static final String PUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
 
+    private final PepProperties properties;
 
+    public PEPDht(PepProperties properties) {
+        Reject.ifNull(properties);
+        this.properties = properties;
+    }
 
 
     public static void main(String[] args) {
