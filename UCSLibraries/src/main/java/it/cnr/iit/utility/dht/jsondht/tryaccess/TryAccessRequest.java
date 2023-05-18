@@ -6,17 +6,26 @@ import it.cnr.iit.utility.dht.jsondht.MessageContent;
 public class TryAccessRequest implements MessageContent {
 
     public final String purpose = PURPOSE.TRY.name();
+    private String message_id;
     private String request;
     private String policy;
 
     public TryAccessRequest() {
     }
 
-    public TryAccessRequest(String request, String policy) {
+    public TryAccessRequest(String message_id, String request, String policy) {
+        this.message_id = message_id;
         this.request = request;
         this.policy = policy;
     }
 
+    public String getMessage_id() {
+        return message_id;
+    }
+
+    public void setMessage_id(String message_id) {
+        this.message_id = message_id;
+    }
     public String getRequest() {
         return request;
     }
