@@ -20,23 +20,22 @@ public class DHTUtils {
 
 
     /**
-     * Serialize a request and the other objects to the Json
-     * format accepted by the DHT
+     * Build a JsonOut object
      *
-     * @param message    the object containing the actual request
-     * @param message_id the identifier of this specific request.
-     *                   A response received from the DHT containing
-     *                   this exact message_id refers to this request
-     * @return the Json to send to the DHT
+     * @param message the object containing a request or a response
+     * @param pep_id the name of the PEP
+     * @param topic_name the name of the topic
+     * @param topic_uuid the unique identifier of the topic
+     * @param commandType the type of command
+     * @return the object to be then serialized and sent to the DHT
      */
-    public static String serializeOutgoingJson(MessageContent message, String message_id,
-                                               String pep_id, String topic_name, String topic_uuid,
-                                               String commandType) {
+    public static JsonOut buildOutgoingJsonObject(MessageContent message, String pep_id,
+                                                  String topic_name, String topic_uuid,
+                                                  String commandType) {
         InnerValue innerValue =
                 new InnerValue(
                         message,
                         pep_id,
-                        message_id,
                         topic_name,
                         topic_uuid);
 
@@ -47,30 +46,49 @@ public class DHTUtils {
 
         RequestPubMessage pubMsg = new RequestPubMessage(outerValue);
 
-        JsonOut outgoing = new JsonOut(pubMsg);
+        return new JsonOut(pubMsg);
+    }
 
-        String jsonOut = new GsonBuilder()
+    /**
+     * Serialize a JsonOut object to a Json string
+     * format accepted by the DHT
+     *
+     * @param jsonOut the object to be serialized
+     * @return the Json string to send to the DHT
+     */
+    public static String serializeOutgoingJson(JsonOut jsonOut) {
+
+        String outgoing = new GsonBuilder()
                 .disableHtmlEscaping()
                 .serializeNulls()
                 .create()
-                .toJson(outgoing);
+                .toJson(jsonOut);
 
-        System.out.println("Sending " + message.getClass().getSimpleName() + " message:");
+        String messageClass = jsonOut
+                .getRequestPubMessage()
+                .getValue()
+                .getCommand()
+                .getValue()
+                .getMessage()
+                .getClass()
+                .getSimpleName();
+
+        System.out.println("Sending " + messageClass + " message:");
         System.out.println(new GsonBuilder()
                 .disableHtmlEscaping()
                 .serializeNulls()
                 .setPrettyPrinting()
                 .create()
-                .toJson(outgoing));
-        return jsonOut;
+                .toJson(jsonOut));
+        return outgoing;
     }
 
 
     /**
-     * Deserialize the Json coming from the DHT
+     * Deserialize the Json string coming from the DHT
      *
-     * @param message The Json, as received from the DHT
-     * @return the object deserialized from the Json
+     * @param message The Json string, as received from the DHT
+     * @return the object deserialized from the Json string
      */
     public static JsonIn deserializeIncomingJson(String message) {
         return new GsonBuilder()
