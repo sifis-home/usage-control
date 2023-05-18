@@ -1,12 +1,10 @@
 package it.cnr.iit.pepdht;
 
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
-import it.cnr.iit.ucs.properties.components.PepProperties;
+
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
@@ -31,12 +29,7 @@ public class PEPDht implements PEPInterface {
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
 
 
-    private static final RuntimeTypeAdapterFactory<MessageContent> typeFactory = RuntimeTypeAdapterFactory
-            .of(MessageContent.class, "type")
-            .registerSubtype(TryAccessRequest.class, "try_access_request")
-            .registerSubtype(TryAccessResponse.class, "try_access_response")
-            .registerSubtype(StartAccessRequest.class, "start_access_request")
-            .registerSubtype(StartAccessResponse.class, "start_access_response");
+
 
     public static void main(String[] args) {
 
