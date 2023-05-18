@@ -121,7 +121,7 @@ public class UCSDht {
 
 
     private static String getMessageIdFromJson(JsonIn jsonIn) {
-        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage_id();
+        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getMessage_id();
     }
 
 
@@ -134,37 +134,52 @@ public class UCSDht {
         TryAccessResponseMessage response =
                 ucsClient.tryAccess(exampleRequest, null, getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
 
-        // compile the response (json)
-        String msg = buildTryAccessResponseMessage(jsonIn, response);
+        // build the json object
+        JsonOut jsonOut = buildTryAccessResponseMessage(jsonIn, response);
+
+        // serialize it to a json string
+        String msg = serializeOutgoingJson(jsonOut);
 
         // send the response
         dhtClientEndPoint.sendMessage(msg);
     }
 
-    private static String buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
-        MessageContent messageOut =
-                new TryAccessResponse(response.getEvaluation().getResult(), response.getSessionId());
 
-        return serializeOutgoingJson(messageOut, response.getMessageId(), getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+    private static JsonOut buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
+        MessageContent messageOut = new TryAccessResponse(
+                response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());
+
+        return buildOutgoingJsonObject(
+                messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
     private static void handleStartAccessRequest(JsonIn jsonIn) {
+        // construct a TryAccess message compliant with what the UCS accepts
         StartAccessRequest messageIn = (StartAccessRequest) getMessageFromJson(jsonIn);
 
+        // make the actual start access request to the UCS
         StartAccessResponseMessage response =
                 ucsClient.startAccess(messageIn.getSession_id(), getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+        //todo: I could catch an exception thrown if no session is found
 
-        String msg = buildStartAccessResponseMessage(jsonIn, response);
+        // build the json object
+        JsonOut jsonOut = buildStartAccessResponseMessage(jsonIn, response);
 
+        // serialize it to a json string
+        String msg = serializeOutgoingJson(jsonOut);
+
+        // send the response
         dhtClientEndPoint.sendMessage(msg);
     }
 
 
-    private static String buildStartAccessResponseMessage(JsonIn jsonIn, StartAccessResponseMessage response) {
+    private static JsonOut buildStartAccessResponseMessage(JsonIn jsonIn, StartAccessResponseMessage response) {
         MessageContent messageOut =
-                new StartAccessResponse(response.getEvaluation().getResult());
+                new StartAccessResponse(
+                        response.getMessageId(), response.getEvaluation().getResult());
 
-        return serializeOutgoingJson(messageOut, response.getMessageId(), getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+        return buildOutgoingJsonObject(
+                messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
 
