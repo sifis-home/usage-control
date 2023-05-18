@@ -7,15 +7,13 @@ public class EndAccessResponse implements MessageContent {
 
     public String purpose = PURPOSE.END_RESPONSE.name();
     private String evaluation;
-    private String session_id;
 
     public EndAccessResponse() {
 
     }
 
-    public EndAccessResponse(String evaluation, String session_id) {
+    public EndAccessResponse(String evaluation) {
         this.evaluation = evaluation;
-        this.session_id = session_id;
     }
 
     public String getEvaluation() {
@@ -24,13 +22,5 @@ public class EndAccessResponse implements MessageContent {
 
     public void setEvaluation(String evaluation) {
         this.evaluation = evaluation;
-    }
-
-    public String getSession_id() {
-        return session_id;
-    }
-
-    public void setSession_id(String policy) {
-        this.session_id = session_id;
     }
 }
