@@ -90,11 +90,11 @@ public class DHTClient {
      * Sends a logging message to the DHT
      *
      */
-     public void sendMessage(String jsonOut) {
+     public boolean sendMessage(String jsonOut) {
 
         // Return if DHT logging is not used
         if (!isLoggingEnabled) {
-            return;
+            return false;
         }
 
         // If a connection is not established yet (which should
@@ -103,7 +103,7 @@ public class DHTClient {
             try {
                 connect(wsURI);
             } catch (RuntimeException e) {
-                return;
+                return false;
             }
         }
 
@@ -114,7 +114,9 @@ public class DHTClient {
             System.err.println("Error: Sending logging payload to DHT failed");
             Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, e);
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public interface MessageHandler {
