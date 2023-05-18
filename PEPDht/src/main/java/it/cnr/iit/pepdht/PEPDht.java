@@ -8,6 +8,7 @@ import it.cnr.iit.ucs.pep.PEPInterface;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
@@ -17,11 +18,14 @@ import it.cnr.iit.utility.errorhandling.Reject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static it.cnr.iit.utility.dht.DHTUtils.*;
 
 public class PEPDht implements PEPInterface {
 
+    private static ConcurrentMap<String, JsonOut> unansweredMap = new ConcurrentHashMap<>();
     private static DHTClient dhtClientEndPoint;
     private static final String COMMAND_TYPE = "pep-command";
     private static final String SUB_COMMAND_TYPE = "ucs-command";
@@ -59,27 +63,32 @@ public class PEPDht implements PEPInterface {
     /**
      * Publish a tryAccess request on the DHT
      */
-    public static void tryAccess() {
-        // compile the request (json)
-        String msg = buildTryAccessMessage();
+    private static void tryAccess() {
+        // build the json object
+        JsonOut jsonOut = buildTryAccessMessage();
+
+        // serialize it to a json string
+        String msg = serializeOutgoingJson(jsonOut);
 
         // send the request
-        dhtClientEndPoint.sendMessage(msg);
+        if (dhtClientEndPoint.sendMessage(msg)) {
+            String messageId = jsonOut.getRequestPubMessage().getValue().getCommand().getValue().getMessage().getMessage_id();
+            unansweredMap.put(messageId, jsonOut);
+        }
     }
 
 
     /**
      * Build a tryAccess request as a Json to send to the DHT
      *
-     * @return the Json to send to the DHT
+     * @return the Json object to send to the DHT
      */
-    private static String buildTryAccessMessage() {
+    private static JsonOut buildTryAccessMessage() {
         TryAccessRequest message =
-                new TryAccessRequest("request", "policy");
-        String message_id = "random123-msg_id";
-        //String message_id = String.valueOf(UUID.randomUUID());
-        // save message_id in a structure
-        return serializeOutgoingJson(message, message_id, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+                new TryAccessRequest("random123-msg_id", "request", "policy");
+                //new TryAccessRequest(String.valueOf(UUID.randomUUID()), "request", "policy");
+
+        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
 
@@ -90,12 +99,12 @@ public class PEPDht implements PEPInterface {
      *                   a tryAccess response
      * @return the Json to send to the DHT
      */
-    private static String buildStartAccessMessage(String session_id) {
+    private static JsonOut buildStartAccessMessage(String session_id) {
         StartAccessRequest message =
-                new StartAccessRequest(session_id);
-        String message_id = "random456-msg_id";
-        // save message_id in a structure
-        return serializeOutgoingJson(message, message_id, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+                new StartAccessRequest("random456-msg_id", session_id);
+                //new StartAccessRequest(String.valueOf(UUID.randomUUID()), session_id);
+
+        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
 
@@ -114,10 +123,6 @@ public class PEPDht implements PEPInterface {
         return null;
     }
 
-//    public static String receiveResponse(String message) {
-//
-//    }
-
 
     /**
      * Check the evaluation. In case of Permit, (TODO: grants the access and)
@@ -132,14 +137,27 @@ public class PEPDht implements PEPInterface {
             System.out.println("Access denied. TryAccess evaluated to: " + message.getEvaluation());
             return;
         }
-        // if Permit, save the session_id, and make a startAccessRequest
-        String session_id = message.getSession_id();
-        String msg = buildStartAccessMessage(session_id);
-
-        // send the request
-        dhtClientEndPoint.sendMessage(msg);
+        // if Permit:
+        //  - grant access
+        //  - save the session_id
+        //  - send a start access request
+        String sessionId = message.getSession_id();
+        startAccess(sessionId);
     }
 
+    private static void startAccess(String sessionId) {
+        // build the json object
+        JsonOut jsonOut = buildStartAccessMessage(sessionId);
+
+        // serialize it to a json string
+        String msg = serializeOutgoingJson(jsonOut);
+
+        // send the request
+        if (dhtClientEndPoint.sendMessage(msg)) {
+            String messageId = jsonOut.getRequestPubMessage().getValue().getCommand().getValue().getMessage().getMessage_id();
+            unansweredMap.put(messageId, jsonOut);
+        }
+    }
 
     /**
      * Check the evaluation. In case of Permit, grants the access.
@@ -151,6 +169,8 @@ public class PEPDht implements PEPInterface {
         // check the evaluation
         if (!message.getEvaluation().equalsIgnoreCase("Permit")) {
             System.out.println("Access denied. StartAccess evaluated to: " + message.getEvaluation());
+            // terminate access
+            // send an end access request
             return;
         }
         // if Permit, grant access
@@ -164,6 +184,16 @@ public class PEPDht implements PEPInterface {
      * It handles the message according to its type
      */
     private static void processMessage(MessageContent message) {
+
+        // check that we are waiting a response for this message_id
+        if (!unansweredMap.containsKey(message.getMessage_id())) {
+            System.out.println("The received message_id is not associated with" +
+                    "any unanswered request that we sent.");
+            return;
+        } else {
+            unansweredMap.remove(message.getMessage_id());
+        }
+
         if (message instanceof TryAccessResponse) {
             // handle try access response
             System.out.println("handle try access response");
