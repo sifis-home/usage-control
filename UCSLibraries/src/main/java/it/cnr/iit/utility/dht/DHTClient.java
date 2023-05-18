@@ -1,4 +1,4 @@
-package it.cnr.iit.utility;
+package it.cnr.iit.utility.dht;
 
 import jakarta.websocket.ClientEndpoint;
 import jakarta.websocket.ContainerProvider;
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  * @author Juneau
  */
 @ClientEndpoint
-public class DHTUtils {
+public class DHTClient {
 
     Session session = null;
     private MessageHandler handler;
@@ -36,12 +36,12 @@ public class DHTUtils {
         }
     }
 
-    public DHTUtils(URI endpointURI) {
+    public DHTClient(URI endpointURI) {
         this.wsURI = endpointURI;
         connect(wsURI);
     }
 
-    public DHTUtils() {
+    public DHTClient() {
         connect(wsURI);
     }
 
@@ -81,7 +81,7 @@ public class DHTUtils {
 //        try {
 //            this.session.getBasicRemote().sendText(message);
 //        } catch (IOException ex) {
-//            Logger.getLogger(DHTUtils.class.getName()).log(Level.SEVERE, null, ex);
+//            Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
 
@@ -112,7 +112,7 @@ public class DHTUtils {
             session.getBasicRemote().sendText(jsonOut);
         } catch (IOException e) {
             System.err.println("Error: Sending logging payload to DHT failed");
-            Logger.getLogger(DHTUtils.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, e);
             e.printStackTrace();
         }
     }
@@ -130,7 +130,7 @@ public class DHTUtils {
 //import org.glassfish.tyrus.client.ClientManager;
 //
 //@ClientEndpoint
-//public class DHTUtils {
+//public class DHTClient {
 //
 //    private static ClientManager dhtClient = null;
 //    private static Session session = null;
@@ -141,7 +141,7 @@ public class DHTUtils {
 //
 //    private MessageHandler handler;
 //
-//    public DHTUtils(URI endpointURI) {
+//    public DHTClient(URI endpointURI) {
 //        try {
 //            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 //            container.connectToServer(this, endpointURI);
@@ -242,7 +242,7 @@ public class DHTUtils {
 //     * @param websocketUri the desired URI
 //     */
 //    public static void setWebsocketUri(String websocketUri) {
-//        DHTUtils.websocketUri = websocketUri;
+//        DHTClient.websocketUri = websocketUri;
 //    }
 //
 //    /**
@@ -258,7 +258,7 @@ public class DHTUtils {
 //        dhtClient = ClientManager.createClient();
 //        try {
 //            URI uri = new URI(websocketUri);
-//            session = dhtClient.connectToServer(DHTUtils.class, uri);
+//            session = dhtClient.connectToServer(DHTClient.class, uri);
 //            //latch.await();
 //        } catch (DeploymentException | URISyntaxException | IOException e) {
 //            System.err.println("Error: Failed to connect to DHT for logging");

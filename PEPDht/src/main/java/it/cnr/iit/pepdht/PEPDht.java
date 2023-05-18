@@ -1,4 +1,4 @@
-package it.cnr.iit;
+package it.cnr.iit.pepdht;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -8,9 +8,8 @@ import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.utility.dht.DHTClient;
-import it.cnr.iit.utility.DHTUtils;
-import it.cnr.iit.utility.errorhandling.Reject;
-import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -19,11 +18,18 @@ import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static it.cnr.iit.utility.dht.DHTUtils.*;
+
 public class PEPDht implements PEPInterface {
 
-    private static DHTUtils dhtClientEndPoint;
-    private static final String SUB_TOPIC_UUID = "ucs_topic_uuid";
+    private static DHTClient dhtClientEndPoint;
+    private static final String COMMAND_TYPE = "pep-command";
     private static final String SUB_COMMAND_TYPE = "ucs-command";
+    private static final String PEP_ID = "pep-0";
+    private static final String PUB_TOPIC_NAME = "topic-name";
+    private static final String PUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
+    private static final String SUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
+
 
     private static final RuntimeTypeAdapterFactory<MessageContent> typeFactory = RuntimeTypeAdapterFactory
             .of(MessageContent.class, "type")
@@ -35,7 +41,7 @@ public class PEPDht implements PEPInterface {
     public static void main(String[] args) {
 
         try {
-            dhtClientEndPoint = new DHTUtils(
+            dhtClientEndPoint = new DHTClient(
                     new URI("ws://localhost:3000/ws"));
             dhtClientEndPoint.addMessageHandler(setMessageHandler());
 
@@ -73,7 +79,7 @@ public class PEPDht implements PEPInterface {
         String message_id = "random123-msg_id";
         //String message_id = String.valueOf(UUID.randomUUID());
         // save message_id in a structure
-        return serializeOutgoingJson(message, message_id);
+        return serializeOutgoingJson(message, message_id, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
 
@@ -89,53 +95,9 @@ public class PEPDht implements PEPInterface {
                 new StartAccessRequest(session_id);
         String message_id = "random456-msg_id";
         // save message_id in a structure
-        return serializeOutgoingJson(message, message_id);
+        return serializeOutgoingJson(message, message_id, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
-
-    /**
-     * Serialize a request and the other objects to the Json
-     * format accepted by the DHT
-     *
-     * @param message    the object containing the actual request
-     * @param message_id the identifier of this specific request.
-     *                   A response received from the DHT containing
-     *                   this exact message_id refers to this request
-     * @return the Json to send to the DHT
-     */
-    public static String serializeOutgoingJson(MessageContent message, String message_id) {
-        InnerValue innerValue =
-                new InnerValue(
-                        message,
-                        "pep_id",
-                        message_id,
-                        "topic_name_XXX",
-                        "pub_topic_uuid");
-
-        Command command = new Command("pep-command", innerValue);
-
-        // set timestamp
-        OuterValue outerValue = new OuterValue(System.currentTimeMillis(), command);
-
-        RequestPubMessage pubMsg = new RequestPubMessage(outerValue);
-
-        JsonOut outgoing = new JsonOut(pubMsg);
-
-        String jsonOut = new GsonBuilder()
-                .disableHtmlEscaping()
-                .serializeNulls()
-                .create()
-                .toJson(outgoing);
-
-        System.out.println("Sending " + message.getClass().getSimpleName() + " message:");
-        System.out.println(new GsonBuilder()
-                .disableHtmlEscaping()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .create()
-                .toJson(outgoing));
-        return jsonOut;
-    }
 
     //    /**
 //     * This method is executed when a command containing a re-evaluation
@@ -155,45 +117,6 @@ public class PEPDht implements PEPInterface {
 //    public static String receiveResponse(String message) {
 //
 //    }
-
-
-    /**
-     * Deserialize the Json coming from the DHT
-     *
-     * @param message The Json, as received from the DHT
-     * @return the object deserialized from the Json
-     */
-    private static JsonIn deserializeIncomingJson(String message) {
-        return new GsonBuilder()
-                .registerTypeAdapterFactory(typeFactory)
-                .create().fromJson(message, JsonIn.class);
-    }
-
-
-    /**
-     * Check if the topic_uuid contained in the deserialized
-     * received message is the one this PEP is subscribed to
-     *
-     * @param jsonIn the JsonIn object, deserialized from the
-     *               Json received from the DHT
-     * @return true if the topic matches with the one this PEP
-     * is subscribed to. False otherwise.
-     */
-    private static boolean isTopicOfInterest(JsonIn jsonIn) {
-        if (!jsonIn
-                .getVolatile()
-                .getValue()
-                .getCommand()
-                .getValue()
-                .getTopic_uuid()
-                .equals(SUB_TOPIC_UUID)) {
-            //System.out.println("Topic does not match the one we are subscribed to: " +
-            //        "Message discarded.");
-            return false;
-        } else {
-            return true;
-        }
-    }
 
 
     /**
@@ -266,8 +189,8 @@ public class PEPDht implements PEPInterface {
     }
 
 
-    private static DHTUtils.MessageHandler setMessageHandler() {
-        DHTUtils.MessageHandler messageHandler = new DHTUtils.MessageHandler() {
+    private static DHTClient.MessageHandler setMessageHandler() {
+        DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
             public void handleMessage(String message) {
                 //System.out.println("Received new message\n");
 
@@ -277,7 +200,7 @@ public class PEPDht implements PEPInterface {
                     JsonIn jsonIn = deserializeIncomingJson(message);
 
                     // check the topic is the one we are subscribed to
-                    if (!isTopicOfInterest(jsonIn)) {
+                    if (!isTopicOfInterest(jsonIn, SUB_TOPIC_UUID)) {
                         return;
                     }
                     System.out.println("Topic matches. Message type: " + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());
