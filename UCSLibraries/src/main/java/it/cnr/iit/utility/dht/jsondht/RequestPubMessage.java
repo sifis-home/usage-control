@@ -1,4 +1,4 @@
-package it.cnr.iit.json;
+package it.cnr.iit.utility.dht.jsondht;
 
 public class RequestPubMessage {
 
