@@ -1,15 +1,19 @@
-package it.cnr.iit.json.tryaccess;
+package it.cnr.iit.utility.dht.jsondht.endaccess;
 
-public class TryAccessResponse implements it.cnr.iit.json.MessageContent {
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-    public String type = "try_access_response";
+public class EndAccessResponse implements MessageContent {
+
+    public String purpose = PURPOSE.END_RESPONSE.name();
     private String evaluation;
     private String session_id;
 
-    public TryAccessResponse() {
+    public EndAccessResponse() {
+
     }
 
-    public TryAccessResponse(String evaluation, String session_id) {
+    public EndAccessResponse(String evaluation, String session_id) {
         this.evaluation = evaluation;
         this.session_id = session_id;
     }

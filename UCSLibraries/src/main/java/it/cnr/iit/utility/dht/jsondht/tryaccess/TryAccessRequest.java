@@ -1,8 +1,11 @@
-package it.cnr.iit.json.tryaccess;
+package it.cnr.iit.utility.dht.jsondht.tryaccess;
 
-public class TryAccessRequest implements it.cnr.iit.json.MessageContent {
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-    public final String type = "try_access_request";
+public class TryAccessRequest implements MessageContent {
+
+    public final String purpose = PURPOSE.TRY.name();
     private String request;
     private String policy;
 

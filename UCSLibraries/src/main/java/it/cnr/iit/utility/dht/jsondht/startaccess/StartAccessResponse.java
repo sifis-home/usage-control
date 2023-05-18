@@ -1,8 +1,14 @@
-package it.cnr.iit.json.startaccess;
+package it.cnr.iit.utility.dht.jsondht.startaccess;
+
+import it.cnr.iit.ucs.constants.PURPOSE;
 
 public class StartAccessResponse implements it.cnr.iit.json.MessageContent {
 
-    public String type = "start_access_response";
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
+
+public class StartAccessResponse implements MessageContent {
+
+    public String purpose = PURPOSE.START_RESPONSE.name();
     private String evaluation;
     private String session_id;
 

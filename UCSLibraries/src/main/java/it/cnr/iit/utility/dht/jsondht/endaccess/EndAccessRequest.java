@@ -1,8 +1,11 @@
-package it.cnr.iit.json.endaccess;
+package it.cnr.iit.utility.dht.jsondht.endaccess;
 
-public class EndAccessRequest implements it.cnr.iit.json.MessageContent {
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-    public String type = "end_access_request";
+public class EndAccessRequest implements MessageContent {
+
+    public String purpose = PURPOSE.END.name();
     private String session_id;
 
     public EndAccessRequest() {
