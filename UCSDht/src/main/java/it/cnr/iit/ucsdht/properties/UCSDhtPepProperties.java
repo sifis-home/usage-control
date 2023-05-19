@@ -8,7 +8,7 @@ public class UCSDhtPepProperties implements PepProperties {
 
 	@Override
 	public String getName() {
-		return "it.cnr.iit.pepdht.PEPDht";
+		return "it.cnr.iit.ucsdht.PEPDhtUCSSide";
 	}
 
 	@Override
@@ -18,7 +18,7 @@ public class UCSDhtPepProperties implements PepProperties {
 
 	@Override
 	public String getId() {
-		return "0";
+		return "pep-0";
 	}
 
 	@Override
@@ -51,4 +51,20 @@ public class UCSDhtPepProperties implements PepProperties {
 		return "endAccessResponse";
 	}
 
+	@Override
+	public String getPubTopicName() {
+		return "topic-name";
+	}
+
+	@Override
+	public String getPubTopicUuid() {
+		return "topic-uuid-the-pep-is-subscribed-to";
+	}
+
+	@Override
+	public String getCommandType() {
+		return "ucs-command";
+	}
+
+	//todo: implement the setter
 }
