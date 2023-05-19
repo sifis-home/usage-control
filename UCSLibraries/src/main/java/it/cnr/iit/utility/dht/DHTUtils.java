@@ -4,6 +4,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -16,7 +18,9 @@ public class DHTUtils {
             .registerSubtype(TryAccessRequest.class, PURPOSE.TRY.name())
             .registerSubtype(TryAccessResponse.class, PURPOSE.TRY_RESPONSE.name())
             .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())
-            .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name());
+            .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())
+            .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())
+            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name());
 
 
     /**
