@@ -6,6 +6,7 @@ import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -20,7 +21,8 @@ public class DHTUtils {
             .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())
             .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())
             .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())
-            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name());
+            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())
+            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name());
 
 
     /**

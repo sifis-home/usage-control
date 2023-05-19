@@ -12,6 +12,7 @@ import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -235,12 +236,15 @@ public class PEPDht implements PEPInterface {
     private static void processMessage(MessageContent message) {
 
         // check that we are waiting a response for this message_id
-        if (!unansweredMap.containsKey(message.getMessage_id())) {
-            System.out.println("The received message_id is not associated with " +
-                    "any unanswered request that we sent.");
-            return;
-        } else {
-            unansweredMap.remove(message.getMessage_id());
+        if (!(message instanceof ReevaluationResponse)) {
+            if (!unansweredMap.containsKey(message.getMessage_id()
+            )) {
+                System.out.println("The received message_id is not associated with " +
+                        "any unanswered request that we sent.");
+                return;
+            } else {
+                unansweredMap.remove(message.getMessage_id());
+            }
         }
 
         accessTracker.add(message);
@@ -256,9 +260,9 @@ public class PEPDht implements PEPInterface {
         } else if (message instanceof EndAccessResponse) {
             // handle end access response
             handleEndAccessResponse((EndAccessResponse) message);
-//        } else if (message instanceof RevokeAccessResponse) {
-//            // handle start access response
-//            return;
+        } else if (message instanceof ReevaluationResponse) {
+            // handle reevaluation response
+            System.out.println("handle reevaluation response");
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
