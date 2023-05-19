@@ -100,11 +100,7 @@ public class UCSDht {
         // build the json object
         JsonOut jsonOut = buildTryAccessResponseMessage(jsonIn, response);
 
-        // serialize it to a json string
-        String msg = serializeOutgoingJson(jsonOut);
-
-        // send the response
-        dhtClientEndPoint.sendMessage(msg);
+        serializeAndSend(jsonOut);
     }
 
 
@@ -129,11 +125,7 @@ public class UCSDht {
         // build the json object
         JsonOut jsonOut = buildStartAccessResponseMessage(jsonIn, response);
 
-        // serialize it to a json string
-        String msg = serializeOutgoingJson(jsonOut);
-
-        // send the response
-        dhtClientEndPoint.sendMessage(msg);
+        serializeAndSend(jsonOut);
     }
 
 
@@ -159,11 +151,7 @@ public class UCSDht {
         // build the json object
         JsonOut jsonOut = buildEndAccessResponseMessage(jsonIn, response);
 
-        // serialize it to a json string
-        String msg = serializeOutgoingJson(jsonOut);
-
-        // send the response
-        dhtClientEndPoint.sendMessage(msg);
+        serializeAndSend(jsonOut);
     }
 
 
@@ -176,6 +164,22 @@ public class UCSDht {
                 messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
+
+    /**
+     * Serialize the JsonOut object passed as argument and publish the
+     * Json string on the DHT.
+     *
+     * @param jsonOut the object to serialize and send
+     */
+    private static void serializeAndSend(JsonOut jsonOut) {
+        // serialize the object to a json string
+        String msg = serializeOutgoingJson(jsonOut);
+
+        // send the request
+        if (!dhtClientEndPoint.sendMessage(msg)) {
+            System.err.println("Error sending the message to the DHT");
+        }
+    }
 
     private static void processMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
