@@ -4,8 +4,6 @@ import com.google.gson.JsonSyntaxException;
 import it.cnr.iit.pepdht.track.AccessTracker;
 import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
-import it.cnr.iit.ucs.pep.PEPInterface;
-import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.JsonOut;
@@ -17,7 +15,6 @@ import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
-import it.cnr.iit.utility.errorhandling.Reject;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,7 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import static it.cnr.iit.utility.dht.DHTUtils.*;
 
-public class PEPDht implements PEPInterface {
+public class PEPDht {
 
     // map containing the requests sent and for which a response has not been received yet.
     // The messageId is the key and the json object (the request) is the value
@@ -42,14 +39,6 @@ public class PEPDht implements PEPInterface {
     private static final String PUB_TOPIC_NAME = "topic-name";
     private static final String PUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
-
-    private final PepProperties properties;
-
-    public PEPDht(PepProperties properties) {
-        Reject.ifNull(properties);
-        this.properties = properties;
-    }
-
 
     public static void main(String[] args) {
 
@@ -268,22 +257,6 @@ public class PEPDht implements PEPInterface {
             // this should not happen since the deserialization would already have thrown an exception
             System.err.println("class not recognized. It might be a ResponseMessage");
         }
-    }
-
-
-    //    /**
-//     * This method is executed when a command containing a re-evaluation
-//     * is received from the dht.
-//     */
-    @Override
-    public Message onGoingEvaluation(ReevaluationResponseMessage message) {
-        return null;
-    }
-
-
-    @Override
-    public String receiveResponse(Message message) {
-        return null;
     }
 
 
