@@ -165,6 +165,10 @@ public class UCSDht {
     }
 
 
+    public static void handleReevaluation(JsonOut jsonOut) {
+        serializeAndSend(jsonOut);
+    }
+
     /**
      * Serialize the JsonOut object passed as argument and publish the
      * Json string on the DHT.
