@@ -61,8 +61,8 @@ public class UCSClient {
         return (StartAccessResponseMessage) ucs.startAccess(message);
     }
 
-    public EndAccessResponseMessage endAccess(String sessionId) {
-        EndAccessMessage message = buildEndAccessMessage(sessionId);
+    public EndAccessResponseMessage endAccess(String sessionId, String pepId, String messageId) {
+        EndAccessMessage message = buildEndAccessMessage(sessionId, pepId, messageId);
         return (EndAccessResponseMessage) ucs.endAccess(message);
     }
 
@@ -88,9 +88,11 @@ public class UCSClient {
         return message;
     }
 
-    private EndAccessMessage buildEndAccessMessage(String sessionId) {
+    private EndAccessMessage buildEndAccessMessage(String sessionId, String pepId, String messageId) {
+        // todo: same as in buildTryAccessMessage
         PepProperties pepProperties = properties.getPepList().get(0);
-        EndAccessMessage message = new EndAccessMessage(pepProperties.getId(), pepProperties.getUri());
+        // todo: same as in buildTryAccessMessage
+        EndAccessMessage message = new EndAccessMessage(pepId, pepProperties.getUri(), messageId);
         message.setSessionId(sessionId);
         return message;
     }
