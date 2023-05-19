@@ -16,9 +16,10 @@
 package it.cnr.iit.ucs.properties.components;
 
 import it.cnr.iit.ucs.properties.base.CommonProperties;
+import it.cnr.iit.ucs.properties.base.DhtProperties;
 import it.cnr.iit.ucs.properties.base.UriProperties;
 
-public interface PepProperties extends CommonProperties, UriProperties {
+public interface PepProperties extends CommonProperties, UriProperties, DhtProperties {
     public String getRevokeType();
 
     public String getApiOngoingEvaluation();
