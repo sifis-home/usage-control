@@ -1,9 +1,10 @@
 package it.cnr.iit.utility.dht.jsondht.startaccess;
 
 import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.EvaluatedMessageContent;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-public class StartAccessResponse implements MessageContent {
+public class StartAccessResponse implements MessageContent, EvaluatedMessageContent {
 
     public String purpose = PURPOSE.START_RESPONSE.name();
     private String message_id;

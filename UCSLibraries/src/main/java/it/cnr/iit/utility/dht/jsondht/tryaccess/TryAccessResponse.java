@@ -1,9 +1,10 @@
 package it.cnr.iit.utility.dht.jsondht.tryaccess;
 
 import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.EvaluatedMessageContent;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-public class TryAccessResponse implements MessageContent {
+public class TryAccessResponse implements MessageContent, EvaluatedMessageContent {
 
     public String purpose = PURPOSE.TRY_RESPONSE.name();
     private String message_id;

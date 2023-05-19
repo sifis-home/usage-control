@@ -1,9 +1,10 @@
 package it.cnr.iit.utility.dht.jsondht.endaccess;
 
 import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.EvaluatedMessageContent;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 
-public class EndAccessResponse implements MessageContent {
+public class EndAccessResponse implements MessageContent, EvaluatedMessageContent {
 
     public String purpose = PURPOSE.END_RESPONSE.name();
     private String message_id;
