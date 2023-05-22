@@ -109,9 +109,14 @@ public class PEPDht {
      * @return the Json object to send to the DHT
      */
     private static JsonOut buildTryAccessMessage() {
+        //todo: remove exampleRequest and examplePolicy, and get them from command line
         String base64Request = Base64.getEncoder().encodeToString(exampleRequest.getBytes());
+        String base64Policy = null;
+        if (examplePolicy != null) {
+             base64Policy = Base64.getEncoder().encodeToString(examplePolicy.getBytes());
+        }
         TryAccessRequest message =
-                new TryAccessRequest(String.valueOf(UUID.randomUUID()), base64Request, "policy");
+                new TryAccessRequest(String.valueOf(UUID.randomUUID()), base64Request, base64Policy);
 
         return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
@@ -383,4 +388,6 @@ public class PEPDht {
             "    </Attribute>\n" +
             "  </Attributes>\n" +
             "</Request>\n";
+
+    private static final String examplePolicy = null;
 }
