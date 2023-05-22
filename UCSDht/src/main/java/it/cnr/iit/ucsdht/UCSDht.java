@@ -12,6 +12,8 @@ import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
@@ -41,7 +43,6 @@ public class UCSDht {
 
     private static final String COMMAND_TYPE = "ucs-command";
     private static final String PUB_TOPIC_NAME = "topic-name";
-    private static final String PUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
 
     public static void main(String[] args) {
@@ -218,7 +219,7 @@ public class UCSDht {
                 pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);
     }
 
-    private static void processMessage(JsonIn jsonIn) {
+    private static void processPepMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
         if (message instanceof RegisterRequest) {
             // handle register request
@@ -243,6 +244,41 @@ public class UCSDht {
         }
     }
 
+    private static void processPapMessage(JsonIn jsonIn) {
+        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
+        if (message instanceof AddPolicyRequest) {
+            System.out.println("handle add policy request");
+            handleAddPolicyRequest(jsonIn);
+//        } else if (message instanceof DeletePolicyRequest) {
+//            System.out.println("handle delete policy request");
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+            System.err.println("class not recognized. It might be a ResponseMessage");
+        }
+    }
+
+    private static void handleAddPolicyRequest(JsonIn jsonIn) {
+        AddPolicyRequest messageIn = (AddPolicyRequest) getMessageFromJson(jsonIn);
+
+        String policy = messageIn.getPolicy();
+        //String policy = new String(Base64.getDecoder().decode(messageIn.getPolicy()));
+
+        JsonOut jsonOut;
+        if (!ucsClient.addPolicy(policy)) {
+            jsonOut = buildAddPolicyResponseMessage(jsonIn, "KO");
+        } else {
+            jsonOut = buildAddPolicyResponseMessage(jsonIn, "OK");
+        }
+        serializeAndSend(jsonOut);
+    }
+
+
+    private static JsonOut buildAddPolicyResponseMessage(JsonIn jsonIn, String code) {
+
+        MessageContent messageOut = new AddPolicyResponse(getMessageIdFromJson(jsonIn), code);
+        return buildOutgoingJsonObject(messageOut, "pap-0", "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+    }
 
     private static DHTClient.MessageHandler setMessageHandler() {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
@@ -268,11 +304,20 @@ public class UCSDht {
                     System.err.println("Error deserializing Json. " + e.getMessage());
                     return;
                 }
-                if (!isRegisterRequest(jsonIn) && !isPepRegistered(jsonIn)) {
-                    System.err.println("An unregistered PEP tried to make a request. Request discarded.");
-                    return;
+                switch(jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {
+                    case "pep-command":
+                        if (!isRegisterRequest(jsonIn) && !isPepRegistered(jsonIn)) {
+                            System.err.println("An unregistered PEP tried to make a request. Request discarded.");
+                            return;
+                        }
+                        processPepMessage(jsonIn);
+                        break;
+                    case "pap-command":
+                        processPapMessage(jsonIn);
+                        break;
+                    default:
+                        System.err.println("Wrong command type. Request discarded.");
                 }
-                processMessage(jsonIn);
             }
         };
         return messageHandler;

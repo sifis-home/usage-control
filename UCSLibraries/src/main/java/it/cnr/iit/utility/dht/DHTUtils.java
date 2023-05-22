@@ -4,6 +4,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
@@ -26,7 +28,9 @@ public class DHTUtils {
             .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())
             .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())
             .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())
-            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name());
+            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name())
+            .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())
+            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name());
 
 
     /**

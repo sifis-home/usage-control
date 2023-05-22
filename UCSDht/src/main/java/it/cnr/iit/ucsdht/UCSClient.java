@@ -94,9 +94,10 @@ public class UCSClient {
         return message;
     }
 
-    public void addPolicy(String policy) {
+    public boolean addPolicy(String policy) {
         PolicyAdministrationPoint pap = new PolicyAdministrationPoint(properties.getPolicyAdministrationPoint());
-        pap.addPolicy(policy);
+        String id = pap.addPolicy(policy);
+        return id != null;
     }
 
     public UCSInterface getInterface() {
