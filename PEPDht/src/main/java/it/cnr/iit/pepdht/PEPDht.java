@@ -85,8 +85,7 @@ public class PEPDht {
      */
     private static JsonOut buildRegisterMessage() {
         RegisterRequest message =
-                new RegisterRequest("random000-msg_id", SUB_TOPIC_NAME, SUB_TOPIC_UUID);
-        //new RegisterRequest(String.valueOf(UUID.randomUUID()), SUB_TOPIC_NAME, SUB_TOPIC_UUID);
+                new RegisterRequest(String.valueOf(UUID.randomUUID()), SUB_TOPIC_NAME, SUB_TOPIC_UUID);
 
         return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
@@ -109,8 +108,7 @@ public class PEPDht {
      */
     private static JsonOut buildTryAccessMessage() {
         TryAccessRequest message =
-                new TryAccessRequest("random123-msg_id", "request", "policy");
-        //new TryAccessRequest(String.valueOf(UUID.randomUUID()), "request", "policy");
+                new TryAccessRequest(String.valueOf(UUID.randomUUID()), base64Request, "policy");
 
         return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
@@ -136,8 +134,7 @@ public class PEPDht {
      */
     private static JsonOut buildStartAccessMessage(String sessionId) {
         StartAccessRequest message =
-                new StartAccessRequest("random456-msg_id", sessionId);
-        //new StartAccessRequest(String.valueOf(UUID.randomUUID()), session_id);
+                new StartAccessRequest(String.valueOf(UUID.randomUUID()), sessionId);
 
         return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
@@ -163,8 +160,7 @@ public class PEPDht {
      */
     private static JsonOut buildEndAccessMessage(String sessionId) {
         EndAccessRequest message =
-                new EndAccessRequest("random789-msg_id", sessionId);
-        //new EndAccessRequest(String.valueOf(UUID.randomUUID()), session_id);
+                new EndAccessRequest(String.valueOf(UUID.randomUUID()), sessionId);
 
         return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
