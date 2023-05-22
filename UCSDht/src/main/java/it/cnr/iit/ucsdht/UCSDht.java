@@ -28,6 +28,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import static it.cnr.iit.utility.dht.DHTUtils.*;
@@ -98,9 +99,9 @@ public class UCSDht {
         TryAccessRequest messageIn = (TryAccessRequest) getMessageFromJson(jsonIn);
 
         // make the actual try access request to the UCS
-        //TryAccessResponseMessage response = ucsClient.tryAccess(messageIn.getRequest(), null, pepId, messageId);
+        String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));
         TryAccessResponseMessage response =
-                ucsClient.tryAccess(exampleRequest, null, getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+                ucsClient.tryAccess(request, null, getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
 
         // build the json object
         JsonOut jsonOut = buildTryAccessResponseMessage(jsonIn, response);
@@ -299,28 +300,4 @@ public class UCSDht {
             throw new RuntimeException(e);
         }
     }
-
-
-    private static final String exampleRequest = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-            "<Request ReturnPolicyIdList=\"false\" CombinedDecision=\"false\"\n" +
-            "  xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\">\n" +
-            "  <Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n" +
-            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:subject:subject-id\" IncludeInResult=\"false\">\n" +
-            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">C</AttributeValue>\n" +
-            "    </Attribute>\n" +
-            "  </Attributes>\n" +
-            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">\n" +
-            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-id\" IncludeInResult=\"false\">\n" +
-            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">RES</AttributeValue>\n" +
-            "    </Attribute>\n" +
-            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-server\" IncludeInResult=\"false\">\n" +
-            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">AUD</AttributeValue>\n" +
-            "    </Attribute>\n" +
-            "  </Attributes>\n" +
-            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n" +
-            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\" IncludeInResult=\"false\">\n" +
-            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">OP</AttributeValue>\n" +
-            "    </Attribute>\n" +
-            "  </Attributes>\n" +
-            "</Request>\n";
 }

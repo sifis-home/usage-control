@@ -18,6 +18,8 @@ import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Base64;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -54,7 +56,7 @@ public class PEPDht {
         }
 
         register();
-        while(!isPepRegistered) {
+        while (!isPepRegistered) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -107,6 +109,7 @@ public class PEPDht {
      * @return the Json object to send to the DHT
      */
     private static JsonOut buildTryAccessMessage() {
+        String base64Request = Base64.getEncoder().encodeToString(exampleRequest.getBytes());
         TryAccessRequest message =
                 new TryAccessRequest(String.valueOf(UUID.randomUUID()), base64Request, "policy");
 
@@ -181,7 +184,7 @@ public class PEPDht {
         if (dhtClientEndPoint.sendMessage(msg)) {
             MessageContent message = jsonOut.getRequestPubMessage().getValue().getCommand().getValue().getMessage();
             unansweredMap.put(message.getMessage_id(), jsonOut);
-            if(!isRegisterRequest(message)) {
+            if (!isRegisterRequest(message)) {
                 accessTracker.add(message);
             }
         }
@@ -357,4 +360,27 @@ public class PEPDht {
             }
         }
     }
+
+    private static final String exampleRequest = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+            "<Request ReturnPolicyIdList=\"false\" CombinedDecision=\"false\"\n" +
+            "  xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\">\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:subject:subject-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">C</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">RES</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-server\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">AUD</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">OP</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "</Request>\n";
 }
