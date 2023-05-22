@@ -3,16 +3,16 @@ package it.cnr.iit.utility.dht.jsondht;
 public class InnerValue {
 
     private MessageContent message;
-    private String pep_id;
+    private String id;
     private String topic_name;
     private String topic_uuid;
 
     public InnerValue() {
     }
 
-    public InnerValue(MessageContent message, String pep_id, String topic_name, String topic_uuid) {
+    public InnerValue(MessageContent message, String id, String topic_name, String topic_uuid) {
         this.message = message;
-        this.pep_id = pep_id;
+        this.id = id;
         this.topic_name = topic_name;
         this.topic_uuid = topic_uuid;
     }
@@ -25,12 +25,12 @@ public class InnerValue {
         this.message = message;
     }
 
-    public String getPep_id() {
-        return pep_id;
+    public String getId() {
+        return id;
     }
 
-    public void setPep_id(String pep_id) {
-        this.pep_id = pep_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTopic_name() {

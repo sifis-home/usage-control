@@ -85,8 +85,8 @@ public class UCSDht {
     }
 
 
-    private static String getPepIdFromJson(JsonIn jsonIn) {
-        return jsonIn.getVolatile().getValue().getCommand().getValue().getPep_id();
+    private static String getIdFromJson(JsonIn jsonIn) {
+        return jsonIn.getVolatile().getValue().getCommand().getValue().getId();
     }
 
 
@@ -102,7 +102,7 @@ public class UCSDht {
         // make the actual try access request to the UCS
         String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));
         TryAccessResponseMessage response =
-                ucsClient.tryAccess(request, null, getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+                ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
 
         // build the json object
         JsonOut jsonOut = buildTryAccessResponseMessage(jsonIn, response);
@@ -114,7 +114,7 @@ public class UCSDht {
     private static JsonOut buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
         MessageContent messageOut = new TryAccessResponse(
                 response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());
-        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
+        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
     }
 
 
@@ -124,7 +124,7 @@ public class UCSDht {
 
         // make the actual start access request to the UCS
         StartAccessResponseMessage response =
-                ucsClient.startAccess(messageIn.getSession_id(), getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+                ucsClient.startAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
         //todo: I could catch an exception thrown if no session is found
 
         // build the json object
@@ -138,7 +138,7 @@ public class UCSDht {
         MessageContent messageOut =
                 new StartAccessResponse(
                         response.getMessageId(), response.getEvaluation().getResult());
-        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
+        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
     }
 
 
@@ -148,7 +148,7 @@ public class UCSDht {
 
         // make the actual end access request to the UCS
         EndAccessResponseMessage response =
-                ucsClient.endAccess(messageIn.getSession_id(), getPepIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+                ucsClient.endAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
         //todo: I could catch an exception thrown if no session is found
 
         // build the json object
@@ -162,7 +162,7 @@ public class UCSDht {
         MessageContent messageOut =
                 new EndAccessResponse(
                         response.getMessageId(), response.getEvaluation().getResult());
-        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
+        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
     }
 
 
@@ -191,7 +191,7 @@ public class UCSDht {
     // and when the pep was already registered
     // it returns KO if the pep cannot be registered
     public static void handleRegisterRequest(JsonIn jsonIn) {
-        String pepId = getPepIdFromJson(jsonIn);
+        String pepId = getIdFromJson(jsonIn);
         JsonOut jsonOut;
         if (!ucsClient.getPepMap().containsKey(pepId)) {
             RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);
@@ -210,10 +210,10 @@ public class UCSDht {
 
     private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
         MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);
-        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
+        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
     }
 
-    private static JsonOut buildJsonOut(MessageContent messageOut, String pepId) {
+    private static JsonOut buildJsonOutForPep(MessageContent messageOut, String pepId) {
         PepProperties pepProperties = ucsClient.getPepProperties(pepId);
         return buildOutgoingJsonObject(messageOut, pepId,
                 pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);
@@ -277,7 +277,7 @@ public class UCSDht {
     private static JsonOut buildAddPolicyResponseMessage(JsonIn jsonIn, String code) {
 
         MessageContent messageOut = new AddPolicyResponse(getMessageIdFromJson(jsonIn), code);
-        return buildOutgoingJsonObject(messageOut, "pap-0", "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
     }
 
     private static DHTClient.MessageHandler setMessageHandler() {
@@ -329,7 +329,7 @@ public class UCSDht {
     }
 
     private static boolean isPepRegistered(JsonIn jsonIn) {
-        return (ucsClient.getPepMap().containsKey(getPepIdFromJson(jsonIn)));
+        return (ucsClient.getPepMap().containsKey(getIdFromJson(jsonIn)));
     }
 
 

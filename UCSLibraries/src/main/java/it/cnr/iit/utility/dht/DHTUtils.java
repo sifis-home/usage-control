@@ -37,19 +37,19 @@ public class DHTUtils {
      * Build a JsonOut object
      *
      * @param message the object containing a request or a response
-     * @param pep_id the name of the PEP
+     * @param id the name of the entity communicating with the UCS
      * @param topic_name the name of the topic
      * @param topic_uuid the unique identifier of the topic
      * @param commandType the type of command
      * @return the object to be then serialized and sent to the DHT
      */
-    public static JsonOut buildOutgoingJsonObject(MessageContent message, String pep_id,
+    public static JsonOut buildOutgoingJsonObject(MessageContent message, String id,
                                                   String topic_name, String topic_uuid,
                                                   String commandType) {
         InnerValue innerValue =
                 new InnerValue(
                         message,
-                        pep_id,
+                        id,
                         topic_name,
                         topic_uuid);
 
