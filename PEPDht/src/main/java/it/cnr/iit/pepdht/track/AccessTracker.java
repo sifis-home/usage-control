@@ -3,6 +3,7 @@ package it.cnr.iit.pepdht.track;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -14,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 public class AccessTracker {
-    private Map<String, List<String>> msgIdsPerSession = new HashMap<>();
-    private Map<String, MessageInfo> msgFlow = new HashMap<>();
+    private final Map<String, List<String>> msgIdsPerSession = new HashMap<>();
+    private final Map<String, MessageInfo> msgFlow = new HashMap<>();
 
     public boolean add(MessageContent message) {
         if (msgFlow.containsKey(message.getMessage_id())) {
@@ -27,6 +28,9 @@ public class AccessTracker {
             return addNewMessage(message);
         } else if (message instanceof EndAccessRequest) {
             addMessageId(((EndAccessRequest) message).getSession_id(), message.getMessage_id());
+            return addNewMessage(message);
+        } else if (message instanceof ReevaluationResponse) {
+            addMessageId(((ReevaluationResponse) message).getSession_id(), message.getMessage_id());
             return addNewMessage(message);
         } else {
             throw new IllegalArgumentException("Invalid message");
@@ -56,6 +60,8 @@ public class AccessTracker {
             messageInfo = MessageInfo.build((StartAccessRequest) message);
         } else if (message instanceof EndAccessRequest) {
             messageInfo = MessageInfo.build((EndAccessRequest) message);
+        } else if (message instanceof ReevaluationResponse) {
+            messageInfo = MessageInfo.build((ReevaluationResponse) message);
         }
         return insert(message.getMessage_id(), messageInfo);
     }
@@ -92,6 +98,7 @@ public class AccessTracker {
         msgIdsPerSession.get(sessionId).add(messageId);
     }
 
+
     public String getSessionId(String messageId) {
         if (!msgFlow.containsKey(messageId)) {
             throw new IllegalArgumentException();
@@ -99,6 +106,7 @@ public class AccessTracker {
         MessageInfo messageInfo = msgFlow.get(messageId);
         return messageInfo.getSessionId();
     }
+
 
     public void clear() {
         msgFlow.clear();

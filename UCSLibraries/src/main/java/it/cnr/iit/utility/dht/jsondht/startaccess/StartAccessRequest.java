@@ -24,6 +24,7 @@ public class StartAccessRequest implements MessageContent {
     public void setMessage_id(String message_id) {
         this.message_id = message_id;
     }
+
     public String getSession_id() {
         return session_id;
     }

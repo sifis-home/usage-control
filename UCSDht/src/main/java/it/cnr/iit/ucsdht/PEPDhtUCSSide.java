@@ -23,24 +23,17 @@ public class PEPDhtUCSSide implements PEPInterface {
     @Override
     public Message onGoingEvaluation(ReevaluationResponseMessage message) {
 
-
         MessageContent messageOut =
                 new ReevaluationResponse(
-                        message.getMessageId(), message.getEvaluation().getResult());
+                        message.getMessageId(), message.getEvaluation().getResult(), message.getSessionId());
         JsonOut jsonOut = buildOutgoingJsonObject(
                 messageOut,
                 properties.getId(),
                 properties.getPubTopicName(),
                 properties.getPubTopicUuid(),
                 properties.getCommandType());
+
         UCSDht.handleReevaluation(jsonOut);
-
-        // we should have PepProperties implementing DhtProperties
-        // then, we could extract everything from there, both on UCSDht and here.
-
-
-        // this time the message_id is chosen by the UCS
-
 
         return null;
     }

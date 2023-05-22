@@ -3,6 +3,7 @@ package it.cnr.iit.pepdht.track;
 import it.cnr.iit.utility.dht.jsondht.EvaluatedMessageContent;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -31,6 +32,17 @@ public class MessageInfo {
 
     public static MessageInfo build(EndAccessRequest message) {
         MessageInfo messageInfo = build(STATUS.ENDACCESS_SENT);
+        messageInfo.setSessionId(message.getSession_id());
+        return messageInfo;
+    }
+
+    public static MessageInfo build(ReevaluationResponse message) {
+        MessageInfo messageInfo = null;
+        if (message.getEvaluation().equalsIgnoreCase("Permit")) {
+            messageInfo = build(STATUS.SESSION_RESUMED);
+        } else {
+            messageInfo = build(STATUS.REVOKED);
+        }
         messageInfo.setSessionId(message.getSession_id());
         return messageInfo;
     }
