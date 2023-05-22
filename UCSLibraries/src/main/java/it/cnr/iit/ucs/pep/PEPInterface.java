@@ -17,6 +17,7 @@ package it.cnr.iit.ucs.pep;
 
 import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
+import it.cnr.iit.ucs.properties.components.PepProperties;
 
 /**
  * Interface offered to the UCS by the PEP.
@@ -46,4 +47,6 @@ public interface PEPInterface {
      * inside the message sent to the context handler), or it can be a REST API.
      */
     public String receiveResponse( Message message );
+
+    public PepProperties getProperties();
 }

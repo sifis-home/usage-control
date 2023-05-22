@@ -6,6 +6,15 @@ import it.cnr.iit.ucs.properties.components.PepProperties;
 
 public class UCSDhtPepProperties implements PepProperties {
 
+	// the identifier of the pep
+	String pepId = "pep-default";
+
+	// the topic name this pep is subscribed to
+	String subTopicName = "topic-name-the-pep-is-subscribed-to";
+
+	// the topic uuid this pep is subscribed to
+	String subTopicUuid = "topic-uuid-the-pep-is-subscribed-to";
+
 	@Override
 	public String getName() {
 		return "it.cnr.iit.ucsdht.PEPDhtUCSSide";
@@ -18,7 +27,11 @@ public class UCSDhtPepProperties implements PepProperties {
 
 	@Override
 	public String getId() {
-		return "pep-0";
+		return this.pepId;
+	}
+
+	public void setId(String pepId) {
+		this.pepId = pepId;
 	}
 
 	@Override
@@ -52,19 +65,25 @@ public class UCSDhtPepProperties implements PepProperties {
 	}
 
 	@Override
-	public String getPubTopicName() {
-		return "topic-name";
+	public String getSubTopicName() {
+		return this.subTopicName;
 	}
 
 	@Override
-	public String getPubTopicUuid() {
-		return "topic-uuid-the-pep-is-subscribed-to";
+	public String getSubTopicUuid() {
+		return this.subTopicUuid;
+	}
+
+	public void setSubTopicName(String subTopicName) {
+		this.subTopicName = subTopicName;
+	}
+
+	public void setSubTopicUuid(String subTopicUuid) {
+		this.subTopicUuid = subTopicUuid;
 	}
 
 	@Override
 	public String getCommandType() {
 		return "ucs-command";
 	}
-
-	//todo: implement the setter
 }

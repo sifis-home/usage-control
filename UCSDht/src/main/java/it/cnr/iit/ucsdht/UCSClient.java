@@ -1,9 +1,5 @@
 package it.cnr.iit.ucsdht;
 
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
 import it.cnr.iit.ucs.exceptions.RequestException;
@@ -20,16 +16,17 @@ import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.ucs.ucs.UCSInterface;
-import it.cnr.iit.ucsdht.properties.UCSDhtCoreProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtProperties;
 import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 import it.cnr.iit.xacml.wrappers.RequestWrapper;
-//import se.sics.ace.ucs.properties.AceUcsProperties;
+
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 /**
- *
- * @author Simone Facchini and Marco Rasori
- *
+ * @author Marco Rasori
  */
 public class UCSClient {
 
@@ -111,22 +108,15 @@ public class UCSClient {
     }
 
     public Map<String, PEPInterface> getPepMap() {
-        return ((UCSCoreService)ucs).getPEPMap();
+        return ((UCSCoreService) ucs).getPEPMap();
     }
 
-//    public void setUcsHelperForPeps(UcsHelper uh){
-//        Map<String, PEPInterface> pepMap = getPepMap();
-//        for (Map.Entry<String, PEPInterface> entry : pepMap.entrySet()) {
-//            AcePep ap = (AcePep)(entry.getValue());
-//            ap.setUcsHelper(uh);
-//        }
-//    }
 
     public String findPolicy(String req) {
         RequestWrapper request;
-        try{
+        try {
             request = RequestWrapper.build(req);
-        } catch(RequestException e) {
+        } catch (RequestException e) {
             LOGGER.info("Unable to create request wrapper");
             return null;
         }
@@ -141,7 +131,22 @@ public class UCSClient {
         return papPath;
     }
 
-//    public void addPep(String id, PEPInterface pepInterface) {
-//        this.getPepMap().put(id, pepInterface);
-//    }
+    public boolean addPep(String pepId, String subTopicName, String subTopicUuid) {
+        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();
+        pepProperties.setId(pepId);
+        pepProperties.setSubTopicName(subTopicName);
+        pepProperties.setSubTopicUuid(subTopicUuid);
+        PEPInterface pep = new PEPDhtUCSSide(pepProperties);
+        try {
+            this.getPepMap().put(pepId, pep);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public PepProperties getPepProperties(String pepId) {
+        return this.getPepMap().get(pepId).getProperties();
+    }
 }

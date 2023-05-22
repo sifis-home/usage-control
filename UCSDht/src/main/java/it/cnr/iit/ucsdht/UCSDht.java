@@ -1,16 +1,21 @@
 package it.cnr.iit.ucsdht;
 
 import com.google.gson.JsonSyntaxException;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
 import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
-import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
+import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtPapProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
 import it.cnr.iit.utility.dht.DHTClient;
-import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -51,7 +56,7 @@ public class UCSDht {
     }
 
 
-    private static void initializeUCS(){
+    private static void initializeUCS() {
         UCSDhtPipReaderProperties pipReader = new UCSDhtPipReaderProperties();
         List<PipProperties> pipPropertiesList = new ArrayList<>();
 
@@ -61,7 +66,7 @@ public class UCSDht {
                 "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
                 Category.ENVIRONMENT.toString(),
                 DataType.STRING.toString(),
-                path  + File.separator + "sample-attribute.txt");
+                path + File.separator + "sample-attribute.txt");
         pipReader.setRefreshRate(1000L);
         pipPropertiesList.add(pipReader);
 
@@ -107,9 +112,7 @@ public class UCSDht {
     private static JsonOut buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
         MessageContent messageOut = new TryAccessResponse(
                 response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());
-
-        return buildOutgoingJsonObject(
-                messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
     }
 
 
@@ -133,9 +136,7 @@ public class UCSDht {
         MessageContent messageOut =
                 new StartAccessResponse(
                         response.getMessageId(), response.getEvaluation().getResult());
-
-        return buildOutgoingJsonObject(
-                messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
     }
 
 
@@ -159,9 +160,7 @@ public class UCSDht {
         MessageContent messageOut =
                 new EndAccessResponse(
                         response.getMessageId(), response.getEvaluation().getResult());
-
-        return buildOutgoingJsonObject(
-                messageOut, getPepIdFromJson(jsonIn), PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
+        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
     }
 
 
@@ -185,9 +184,46 @@ public class UCSDht {
         }
     }
 
+
+    // this method returns OK both when the registration went through successfully
+    // and when the pep was already registered
+    // it returns KO if the pep cannot be registered
+    public static void handleRegisterRequest(JsonIn jsonIn) {
+        String pepId = getPepIdFromJson(jsonIn);
+        JsonOut jsonOut;
+        if (!ucsClient.getPepMap().containsKey(pepId)) {
+            RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);
+            String subTopicName = messageIn.getSub_topic_name();
+            String subTopicUuid = messageIn.getSub_topic_uuid();
+
+            if (!ucsClient.addPep(pepId, subTopicName, subTopicUuid)) {
+                jsonOut = buildRegisterResponseMessage(jsonIn, "KO");
+                serializeAndSend(jsonOut);
+                return;
+            }
+        }
+        jsonOut = buildRegisterResponseMessage(jsonIn, "OK");
+        serializeAndSend(jsonOut);
+    }
+
+    private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
+        MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);
+        return buildJsonOut(messageOut, getPepIdFromJson(jsonIn));
+    }
+
+    private static JsonOut buildJsonOut(MessageContent messageOut, String pepId) {
+        PepProperties pepProperties = ucsClient.getPepProperties(pepId);
+        return buildOutgoingJsonObject(messageOut, pepId,
+                pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);
+    }
+
     private static void processMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
-        if (message instanceof TryAccessRequest) {
+        if (message instanceof RegisterRequest) {
+            // handle register request
+            System.out.println("handle register request");
+            handleRegisterRequest(jsonIn);
+        } else if (message instanceof TryAccessRequest) {
             // handle try access request
             System.out.println("handle try access request");
             handleTryAccessRequest(jsonIn);
@@ -211,7 +247,7 @@ public class UCSDht {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
             /**
              * Deserialize the received message and check the topic matches
-             * the one the PEP is subscribed to. If so, process the request
+             * the one the UCS is subscribed to. If so, process the request
              * coming from the DHT
              *
              * @param message the message, a json string, coming from the DHT
@@ -231,10 +267,23 @@ public class UCSDht {
                     System.err.println("Error deserializing Json. " + e.getMessage());
                     return;
                 }
+                if (!isRegisterRequest(jsonIn) && !isPepRegistered(jsonIn)) {
+                    System.err.println("An unregistered PEP tried to make a request. Request discarded.");
+                    return;
+                }
                 processMessage(jsonIn);
             }
         };
         return messageHandler;
+    }
+
+    private static boolean isRegisterRequest(JsonIn jsonIn) {
+        MessageContent messageIn = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
+        return messageIn instanceof RegisterRequest;
+    }
+
+    private static boolean isPepRegistered(JsonIn jsonIn) {
+        return (ucsClient.getPepMap().containsKey(getPepIdFromJson(jsonIn)));
     }
 
 
@@ -252,26 +301,26 @@ public class UCSDht {
     }
 
 
-private static final String exampleRequest = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
-        "<Request ReturnPolicyIdList=\"false\" CombinedDecision=\"false\"\n" +
-        "  xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\">\n" +
-        "  <Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n" +
-        "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:subject:subject-id\" IncludeInResult=\"false\">\n" +
-        "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">C</AttributeValue>\n" +
-        "    </Attribute>\n" +
-        "  </Attributes>\n" +
-        "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">\n" +
-        "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-id\" IncludeInResult=\"false\">\n" +
-        "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">RES</AttributeValue>\n" +
-        "    </Attribute>\n" +
-        "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-server\" IncludeInResult=\"false\">\n" +
-        "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">AUD</AttributeValue>\n" +
-        "    </Attribute>\n" +
-        "  </Attributes>\n" +
-        "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n" +
-        "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\" IncludeInResult=\"false\">\n" +
-        "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">OP</AttributeValue>\n" +
-        "    </Attribute>\n" +
-        "  </Attributes>\n" +
-        "</Request>\n";
+    private static final String exampleRequest = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+            "<Request ReturnPolicyIdList=\"false\" CombinedDecision=\"false\"\n" +
+            "  xmlns=\"urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\">\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:subject:subject-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">C</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:resource\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">RES</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:resource:resource-server\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">AUD</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "  <Attributes Category=\"urn:oasis:names:tc:xacml:3.0:attribute-category:action\">\n" +
+            "    <Attribute AttributeId=\"urn:oasis:names:tc:xacml:1.0:action:action-id\" IncludeInResult=\"false\">\n" +
+            "      <AttributeValue DataType=\"http://www.w3.org/2001/XMLSchema#string\">OP</AttributeValue>\n" +
+            "    </Attribute>\n" +
+            "  </Attributes>\n" +
+            "</Request>\n";
 }

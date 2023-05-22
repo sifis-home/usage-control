@@ -81,4 +81,8 @@ public class PEPRestProxy implements PEPInterface {
         return Optional.empty();
     }
 
+    @Override
+    public PepProperties getProperties() {
+        return properties;
+    }
 }

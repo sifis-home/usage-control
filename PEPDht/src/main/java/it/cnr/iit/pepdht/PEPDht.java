@@ -2,8 +2,6 @@ package it.cnr.iit.pepdht;
 
 import com.google.gson.JsonSyntaxException;
 import it.cnr.iit.pepdht.track.AccessTracker;
-import it.cnr.iit.ucs.message.Message;
-import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.JsonOut;
@@ -11,6 +9,8 @@ import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -38,7 +38,9 @@ public class PEPDht {
     private static final String PEP_ID = "pep-0";
     private static final String PUB_TOPIC_NAME = "topic-name";
     private static final String PUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
+    private static final String SUB_TOPIC_NAME = "topic-name-the-pep-is-subscribed-to";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-pep-is-subscribed-to";
+    private static boolean isPepRegistered = false;
 
     public static void main(String[] args) {
 
@@ -51,10 +53,42 @@ public class PEPDht {
             throw new RuntimeException(e);
         }
 
+        register();
+        while(!isPepRegistered) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         tryAccess();
 
         NewThread t = new NewThread();
         t.start();
+    }
+
+
+    /**
+     * Publish a register request on the DHT
+     */
+    private static void register() {
+        // build the json object
+        JsonOut jsonOut = buildRegisterMessage();
+        serializeAndSend(jsonOut);
+    }
+
+    /**
+     * Build a register request as a Json to send to the DHT
+     *
+     * @return the Json object to send to the DHT
+     */
+    private static JsonOut buildRegisterMessage() {
+        RegisterRequest message =
+                new RegisterRequest("random000-msg_id", SUB_TOPIC_NAME, SUB_TOPIC_UUID);
+        //new RegisterRequest(String.valueOf(UUID.randomUUID()), SUB_TOPIC_NAME, SUB_TOPIC_UUID);
+
+        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);
     }
 
 
@@ -151,7 +185,9 @@ public class PEPDht {
         if (dhtClientEndPoint.sendMessage(msg)) {
             MessageContent message = jsonOut.getRequestPubMessage().getValue().getCommand().getValue().getMessage();
             unansweredMap.put(message.getMessage_id(), jsonOut);
-            accessTracker.add(message);
+            if(!isRegisterRequest(message)) {
+                accessTracker.add(message);
+            }
         }
     }
 
@@ -290,12 +326,29 @@ public class PEPDht {
                     System.err.println("Error deserializing Json. " + e.getMessage());
                     return;
                 }
+                if (isRegisterResponse(msg) && !isPepRegistered) {
+                    // evaluate response and set
+                    RegisterResponse registerResponse = (RegisterResponse) msg;
+                    if (registerResponse.getCode().equals("OK")) {
+                        isPepRegistered = true;
+                        System.out.println("This PEP ('" + PEP_ID + "') is now registered at the UCS");
+                        return;
+                    }
+                }
                 processMessage(msg);
             }
         };
         return messageHandler;
     }
 
+
+    private static boolean isRegisterResponse(MessageContent messageIn) {
+        return messageIn instanceof RegisterResponse;
+    }
+
+    private static boolean isRegisterRequest(MessageContent messageIn) {
+        return messageIn instanceof RegisterRequest;
+    }
 
     public static class NewThread extends Thread {
         public void run() {

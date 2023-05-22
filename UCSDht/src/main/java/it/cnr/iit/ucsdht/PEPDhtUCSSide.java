@@ -29,8 +29,8 @@ public class PEPDhtUCSSide implements PEPInterface {
         JsonOut jsonOut = buildOutgoingJsonObject(
                 messageOut,
                 properties.getId(),
-                properties.getPubTopicName(),
-                properties.getPubTopicUuid(),
+                properties.getSubTopicName(),
+                properties.getSubTopicUuid(),
                 properties.getCommandType());
 
         UCSDht.handleReevaluation(jsonOut);
@@ -41,5 +41,11 @@ public class PEPDhtUCSSide implements PEPInterface {
     @Override
     public String receiveResponse(Message message) {
         return null;
+    }
+
+
+    @Override
+    public PepProperties getProperties() {
+        return properties;
     }
 }

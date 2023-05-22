@@ -7,6 +7,8 @@ import it.cnr.iit.utility.dht.jsondht.*;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
@@ -16,6 +18,8 @@ public class DHTUtils {
 
     private static final RuntimeTypeAdapterFactory<MessageContent> typeFactory = RuntimeTypeAdapterFactory
             .of(MessageContent.class, "purpose")
+            .registerSubtype(RegisterRequest.class, PURPOSE.REGISTER.name())
+            .registerSubtype(RegisterResponse.class, PURPOSE.REGISTER_RESPONSE.name())
             .registerSubtype(TryAccessRequest.class, PURPOSE.TRY.name())
             .registerSubtype(TryAccessResponse.class, PURPOSE.TRY_RESPONSE.name())
             .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())
