@@ -1,0 +1,19 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684256524618,
+      "command": {
+        "command_type": "pap-command",
+        "value": {
+          "message": {
+            "purpose": "LIST_POLICIES",
+            "message_id": "random456-msg_id"
+          },
+          "id": "pap-0",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

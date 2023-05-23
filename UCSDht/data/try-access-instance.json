@@ -1,0 +1,21 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684851920422,
+      "command": {
+        "command_type": "pep-command",
+        "value": {
+          "message": {
+            "purpose": "TRY",
+            "message_id": "2b21f0e1-9d2a-4760-8ddb-53ff1af46d7f",
+            "request": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/Pgo8UmVxdWVzdCBSZXR1cm5Qb2xpY3lJZExpc3Q9ImZhbHNlIiBDb21iaW5lZERlY2lzaW9uPSJmYWxzZSIKICB4bWxucz0idXJuOm9hc2lzOm5hbWVzOnRjOnhhY21sOjMuMDpjb3JlOnNjaGVtYTp3ZC0xNyI+CiAgPEF0dHJpYnV0ZXMgQ2F0ZWdvcnk9InVybjpvYXNpczpuYW1lczp0Yzp4YWNtbDoxLjA6c3ViamVjdC1jYXRlZ29yeTphY2Nlc3Mtc3ViamVjdCI+CiAgICA8QXR0cmlidXRlIEF0dHJpYnV0ZUlkPSJ1cm46b2FzaXM6bmFtZXM6dGM6eGFjbWw6MS4wOnN1YmplY3Q6c3ViamVjdC1pZCIgSW5jbHVkZUluUmVzdWx0PSJmYWxzZSI+CiAgICAgIDxBdHRyaWJ1dGVWYWx1ZSBEYXRhVHlwZT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEjc3RyaW5nIj5DPC9BdHRyaWJ1dGVWYWx1ZT4KICAgIDwvQXR0cmlidXRlPgogIDwvQXR0cmlidXRlcz4KICA8QXR0cmlidXRlcyBDYXRlZ29yeT0idXJuOm9hc2lzOm5hbWVzOnRjOnhhY21sOjMuMDphdHRyaWJ1dGUtY2F0ZWdvcnk6cmVzb3VyY2UiPgogICAgPEF0dHJpYnV0ZSBBdHRyaWJ1dGVJZD0idXJuOm9hc2lzOm5hbWVzOnRjOnhhY21sOjEuMDpyZXNvdXJjZTpyZXNvdXJjZS1pZCIgSW5jbHVkZUluUmVzdWx0PSJmYWxzZSI+CiAgICAgIDxBdHRyaWJ1dGVWYWx1ZSBEYXRhVHlwZT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEjc3RyaW5nIj5SRVM8L0F0dHJpYnV0ZVZhbHVlPgogICAgPC9BdHRyaWJ1dGU+CiAgICA8QXR0cmlidXRlIEF0dHJpYnV0ZUlkPSJ1cm46b2FzaXM6bmFtZXM6dGM6eGFjbWw6MS4wOnJlc291cmNlOnJlc291cmNlLXNlcnZlciIgSW5jbHVkZUluUmVzdWx0PSJmYWxzZSI+CiAgICAgIDxBdHRyaWJ1dGVWYWx1ZSBEYXRhVHlwZT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS9YTUxTY2hlbWEjc3RyaW5nIj5BVUQ8L0F0dHJpYnV0ZVZhbHVlPgogICAgPC9BdHRyaWJ1dGU+CiAgPC9BdHRyaWJ1dGVzPgogIDxBdHRyaWJ1dGVzIENhdGVnb3J5PSJ1cm46b2FzaXM6bmFtZXM6dGM6eGFjbWw6My4wOmF0dHJpYnV0ZS1jYXRlZ29yeTphY3Rpb24iPgogICAgPEF0dHJpYnV0ZSBBdHRyaWJ1dGVJZD0idXJuOm9hc2lzOm5hbWVzOnRjOnhhY21sOjEuMDphY3Rpb246YWN0aW9uLWlkIiBJbmNsdWRlSW5SZXN1bHQ9ImZhbHNlIj4KICAgICAgPEF0dHJpYnV0ZVZhbHVlIERhdGFUeXBlPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSNzdHJpbmciPk9QPC9BdHRyaWJ1dGVWYWx1ZT4KICAgIDwvQXR0cmlidXRlPgogIDwvQXR0cmlidXRlcz4KPC9SZXF1ZXN0Pgo=",
+            "policy": null
+          },
+          "id": "pep-0",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

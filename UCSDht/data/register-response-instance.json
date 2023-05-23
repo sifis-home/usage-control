@@ -1,0 +1,20 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684851919514,
+      "command": {
+        "command_type": "ucs-command",
+        "value": {
+          "message": {
+            "purpose": "REGISTER_RESPONSE",
+            "message_id": "3d0ee6bb-6ec7-403c-aaa1-c27d3e8795a1",
+            "code": "OK"
+          },
+          "id": "pep-0",
+          "topic_name": "topic-name-the-pep-is-subscribed-to",
+          "topic_uuid": "topic-uuid-the-pep-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

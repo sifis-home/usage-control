@@ -1,0 +1,20 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684851921396,
+      "command": {
+        "command_type": "pep-command",
+        "value": {
+          "message": {
+            "purpose": "START",
+            "message_id": "3985a09e-7679-48c4-bad8-09cd89987bb6",
+            "session_id": "ac60debb-1fc2-4384-9daa-e3226636925a"
+          },
+          "id": "pep-0",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

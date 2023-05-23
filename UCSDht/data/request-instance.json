@@ -1,0 +1,21 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684851919378,
+      "command": {
+        "command_type": "pep-command",
+        "value": {
+          "message": {
+            "purpose": "REGISTER",
+            "message_id": "3d0ee6bb-6ec7-403c-aaa1-c27d3e8795a1",
+            "sub_topic_name": "topic-name-the-pep-is-subscribed-to",
+            "sub_topic_uuid": "topic-uuid-the-pep-is-subscribed-to"
+          },
+          "id": "pep-0",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

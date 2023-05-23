@@ -1,0 +1,20 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684854321678,
+      "command": {
+        "command_type": "ucs-command",
+        "value": {
+          "message": {
+            "purpose": "DELETE_POLICY_RESPONSE",
+            "message_id": "random456-msg_id",
+            "code": "OK"
+          },
+          "id": "pap-0",
+          "topic_name": "topic-name-pap-is-subscribed-to",
+          "topic_uuid": "topic-uuid-pap-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

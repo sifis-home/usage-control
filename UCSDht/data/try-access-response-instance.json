@@ -1,0 +1,21 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1684851921390,
+      "command": {
+        "command_type": "ucs-command",
+        "value": {
+          "message": {
+            "purpose": "TRY_RESPONSE",
+            "message_id": "2b21f0e1-9d2a-4760-8ddb-53ff1af46d7f",
+            "evaluation": "Permit",
+            "session_id": "ac60debb-1fc2-4384-9daa-e3226636925a"
+          },
+          "id": "pep-0",
+          "topic_name": "topic-name-the-pep-is-subscribed-to",
+          "topic_uuid": "topic-uuid-the-pep-is-subscribed-to"
+        }
+      }
+    }
+  }
+}
