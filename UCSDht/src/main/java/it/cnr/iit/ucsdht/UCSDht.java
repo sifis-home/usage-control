@@ -274,8 +274,8 @@ public class UCSDht {
     private static void handleAddPolicyRequest(JsonIn jsonIn) {
         AddPolicyRequest messageIn = (AddPolicyRequest) getMessageFromJson(jsonIn);
 
-        String policy = messageIn.getPolicy();
-        //String policy = new String(Base64.getDecoder().decode(messageIn.getPolicy()));
+        //String policy = messageIn.getPolicy();
+        String policy = new String(Base64.getDecoder().decode(messageIn.getPolicy()));
 
         JsonOut jsonOut;
         if (!ucsClient.addPolicy(policy)) {
@@ -336,9 +336,10 @@ public class UCSDht {
 
         String policyId = messageIn.getPolicy_id();
 
-        JsonOut jsonOut;
         String policy = ucsClient.getPolicy(policyId);
-        jsonOut = buildGetPolicyResponseMessage(jsonIn, policy);
+        String base64Policy = Base64.getEncoder().encodeToString(policy.getBytes());
+
+        JsonOut jsonOut = buildGetPolicyResponseMessage(jsonIn, base64Policy);
 
         serializeAndSend(jsonOut);
     }
