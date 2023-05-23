@@ -92,12 +92,17 @@ public class UCSClient {
     }
 
     public boolean addPolicy(String policy) {
+        // todo: check that policyId and the policy identifier within the policy match. If not, return false
         String id = ucs.getPap().addPolicy(policy);
         return id != null;
     }
 
     public boolean deletePolicy(String policyId) {
         return ucs.getPap().deletePolicy(policyId);
+    }
+
+    public List<String> listPolicies() {
+        return ucs.getPap().listPolicies();
     }
 
     public UCSInterface getInterface() {

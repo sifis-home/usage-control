@@ -10,6 +10,8 @@ import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
 import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
@@ -34,7 +36,9 @@ public class DHTUtils {
             .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())
             .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name())
             .registerSubtype(DeletePolicyRequest.class, PURPOSE.DELETE_POLICY.name())
-            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name());
+            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name())
+            .registerSubtype(ListPoliciesRequest.class, PURPOSE.LIST_POLICIES.name())
+            .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name());
 
 
     /**

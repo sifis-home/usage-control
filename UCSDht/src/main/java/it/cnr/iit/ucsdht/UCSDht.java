@@ -18,6 +18,8 @@ import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
 import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
@@ -254,6 +256,9 @@ public class UCSDht {
         } else if (message instanceof DeletePolicyRequest) {
             System.out.println("handle delete policy request");
             handleDeletePolicyRequest(jsonIn);
+        } else if (message instanceof ListPoliciesRequest) {
+            System.out.println("handle list policies request");
+            handleListPoliciesRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
@@ -305,6 +310,20 @@ public class UCSDht {
         return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
     }
 
+
+    private static void handleListPoliciesRequest(JsonIn jsonIn) {
+        List<String> policyList = ucsClient.listPolicies();
+
+        JsonOut jsonOut = buildListPoliciesResponseMessage(jsonIn, policyList);
+        serializeAndSend(jsonOut);
+    }
+
+
+    private static JsonOut buildListPoliciesResponseMessage(JsonIn jsonIn, List<String> policyList) {
+
+        MessageContent messageOut = new ListPoliciesResponse(getMessageIdFromJson(jsonIn), policyList);
+        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+    }
 
     private static DHTClient.MessageHandler setMessageHandler() {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
