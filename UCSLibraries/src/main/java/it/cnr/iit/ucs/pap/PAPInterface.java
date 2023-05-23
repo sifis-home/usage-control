@@ -20,30 +20,36 @@ import java.util.List;
 /**
  * This is the interface to be used to communicate with the Policy
  * Administration Point.
- *
+ * <p>
  * The PAP is a storage of Policy, hence all the methods regarding the PAP are
- * methods to add, retrieve or list the policy it stores.
+ * methods to add, retrieve, delete, or list the policy it stores.
  *
  * @author Antonio La Marra
  */
 public interface PAPInterface {
     /**
+     * Deletes the policy identified by that policy id
+     *
+     * @param policyId the id of the policy we're interested into
+     * @return true if the policy is deleted. False otherwise
+     */
+    boolean deletePolicy(String policyId);
+
+    /**
      * Retrieves the policy identified by that policy id
      *
-     * @param policyId
-     *          the id of the policy we're interested into
+     * @param policyId the id of the policy we're interested into
      * @return a String that represents the policy
      */
-    public String retrievePolicy( String policyId );
+     String retrievePolicy(String policyId);
 
     /**
      * Add a new policy to the table
      *
-     * @param policy
-     *          the policy to be added
+     * @param policy the policy to be added
      * @return String id of the policy added if everything goes fine, null otherwise
      */
-    public String addPolicy( String policy );
+     String addPolicy(String policy);
 
 
     /**
@@ -51,12 +57,12 @@ public interface PAPInterface {
      *
      * @return String path of policy folder storage
      */
-    public String getPath();
+     String getPath();
 
     /**
      * List all the policies stored in the table
      *
      * @return the list of policies in String format
      */
-    public List<String> listPolicies();
+     List<String> listPolicies();
 }
