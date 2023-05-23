@@ -15,10 +15,6 @@
  ******************************************************************************/
 package it.cnr.iit.ucs.core;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import it.cnr.iit.ucs.contexthandler.AbstractContextHandler;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
 import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
@@ -36,6 +32,10 @@ import it.cnr.iit.ucs.sessionmanager.SessionManagerInterface;
 import it.cnr.iit.ucs.ucs.UCSInterface;
 import it.cnr.iit.utility.errorhandling.Reject;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * This class contains all the components
  *
@@ -43,35 +43,63 @@ import it.cnr.iit.utility.errorhandling.Reject;
  */
 public class UCSCoreService implements UCSInterface {
 
-	AbstractContextHandler contextHandler;
-	AbstractRequestManager requestManager;
-	ObligationManagerInterface obligationManager;
-	SessionManagerInterface sessionManager;
-	PDPInterface pdp;
-	PAPInterface pap;
-	List<PIPBase> pipList;
-	HashMap<String, PEPInterface> pepMap;
+    AbstractContextHandler contextHandler;
+    AbstractRequestManager requestManager;
+    ObligationManagerInterface obligationManager;
+    SessionManagerInterface sessionManager;
+    PDPInterface pdp;
+    PAPInterface pap;
+    List<PIPBase> pipList;
+    HashMap<String, PEPInterface> pepMap;
 
-	@Override
-	public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
-		Reject.ifNull(tryAccessMessage);
-		TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
-		// this is null
+    @Override
+    public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
+        Reject.ifNull(tryAccessMessage);
+        TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);
+        // this is null
 //		Reject.ifNull(response);
-		return response;
-	}
+        return response;
+    }
 
-	@Override
-	public StartAccessResponseMessage startAccess(StartAccessMessage startAccessMessage) {
-		return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);
-	}
+    @Override
+    public StartAccessResponseMessage startAccess(StartAccessMessage startAccessMessage) {
+        return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);
+    }
 
-	@Override
-	public EndAccessResponseMessage endAccess(EndAccessMessage endAccessMessage) {
-		return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);
-	}
+    @Override
+    public EndAccessResponseMessage endAccess(EndAccessMessage endAccessMessage) {
+        return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);
+    }
 
-	public Map<String, PEPInterface> getPEPMap() {
-		return this.pepMap;
-	}
+    public AbstractContextHandler getContextHandler() {
+        return contextHandler;
+    }
+
+    public AbstractRequestManager getRequestManager() {
+        return requestManager;
+    }
+
+    public ObligationManagerInterface getObligationManager() {
+        return obligationManager;
+    }
+
+    public SessionManagerInterface getSessionManager() {
+        return sessionManager;
+    }
+
+    public PDPInterface getPdp() {
+        return pdp;
+    }
+
+    public PAPInterface getPap() {
+        return pap;
+    }
+
+    public List<PIPBase> getPipList() {
+        return pipList;
+    }
+
+    public Map<String, PEPInterface> getPEPMap() {
+        return this.pepMap;
+    }
 }
