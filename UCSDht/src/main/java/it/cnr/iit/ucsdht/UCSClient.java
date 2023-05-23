@@ -61,8 +61,7 @@ public class UCSClient {
     }
 
     private TryAccessMessage buildTryAccessMessage(String request, String policy, String pepId, String messageId) {
-        // todo: get the properties related to the pepId passed as argument
-        PepProperties pepProperties = properties.getPepList().get(0);
+        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();
 //        TryAccessMessage message = new TryAccessMessage(pepProperties.getId(), pepProperties.getUri());
         // todo: find out what 'destination' (second parameter of the TryAccessMessage method) should be.
         //       In existing invocations, once is the ucsUri and once the pep.Uri contained in the pepProperties.
@@ -74,8 +73,7 @@ public class UCSClient {
     }
 
     private StartAccessMessage buildStartAccessMessage(String sessionId, String pepId, String messageId) {
-        // todo: same as in buildTryAccessMessage
-        PepProperties pepProperties = properties.getPepList().get(0);
+        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();
         // todo: same as in buildTryAccessMessage
         StartAccessMessage message = new StartAccessMessage(pepId, pepProperties.getUri(), messageId);
         message.setSessionId(sessionId);
@@ -83,8 +81,7 @@ public class UCSClient {
     }
 
     private EndAccessMessage buildEndAccessMessage(String sessionId, String pepId, String messageId) {
-        // todo: same as in buildTryAccessMessage
-        PepProperties pepProperties = properties.getPepList().get(0);
+        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();
         // todo: same as in buildTryAccessMessage
         EndAccessMessage message = new EndAccessMessage(pepId, pepProperties.getUri(), messageId);
         message.setSessionId(sessionId);
