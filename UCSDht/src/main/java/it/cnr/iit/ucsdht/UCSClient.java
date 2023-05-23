@@ -138,6 +138,7 @@ public class UCSClient {
         PEPInterface pep = new PEPDhtUCSSide(pepProperties);
         try {
             ucs.getPEPMap().put(pepId, pep);
+            ucs.getRequestManager().setPEPMap(ucs.getPEPMap());
         } catch (Exception e) {
             e.printStackTrace();
             return false;
