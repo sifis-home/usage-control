@@ -18,6 +18,8 @@ import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
 import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
@@ -259,6 +261,9 @@ public class UCSDht {
         } else if (message instanceof ListPoliciesRequest) {
             System.out.println("handle list policies request");
             handleListPoliciesRequest(jsonIn);
+        } else if (message instanceof GetPolicyRequest) {
+            System.out.println("handle get policy request");
+            handleGetPolicyRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
@@ -324,6 +329,27 @@ public class UCSDht {
         MessageContent messageOut = new ListPoliciesResponse(getMessageIdFromJson(jsonIn), policyList);
         return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
     }
+
+
+    private static void handleGetPolicyRequest(JsonIn jsonIn) {
+        GetPolicyRequest messageIn = (GetPolicyRequest) getMessageFromJson(jsonIn);
+
+        String policyId = messageIn.getPolicy_id();
+
+        JsonOut jsonOut;
+        String policy = ucsClient.getPolicy(policyId);
+        jsonOut = buildGetPolicyResponseMessage(jsonIn, policy);
+
+        serializeAndSend(jsonOut);
+    }
+
+
+    private static JsonOut buildGetPolicyResponseMessage(JsonIn jsonIn, String policy) {
+
+        MessageContent messageOut = new GetPolicyResponse(getMessageIdFromJson(jsonIn), policy);
+        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+    }
+
 
     private static DHTClient.MessageHandler setMessageHandler() {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {

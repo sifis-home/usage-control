@@ -105,6 +105,10 @@ public class UCSClient {
         return ucs.getPap().listPolicies();
     }
 
+    public String getPolicy(String policyId) {
+        return ucs.getPap().retrievePolicy(policyId);
+    }
+
     public UCSInterface getInterface() {
         return ucs;
     }
