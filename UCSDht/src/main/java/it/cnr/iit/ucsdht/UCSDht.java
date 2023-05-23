@@ -14,6 +14,8 @@ import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
@@ -249,8 +251,9 @@ public class UCSDht {
         if (message instanceof AddPolicyRequest) {
             System.out.println("handle add policy request");
             handleAddPolicyRequest(jsonIn);
-//        } else if (message instanceof DeletePolicyRequest) {
-//            System.out.println("handle delete policy request");
+        } else if (message instanceof DeletePolicyRequest) {
+            System.out.println("handle delete policy request");
+            handleDeletePolicyRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
@@ -280,6 +283,29 @@ public class UCSDht {
         return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
     }
 
+
+    private static void handleDeletePolicyRequest(JsonIn jsonIn) {
+        DeletePolicyRequest messageIn = (DeletePolicyRequest) getMessageFromJson(jsonIn);
+
+        String policyId = messageIn.getPolicy_id();
+
+        JsonOut jsonOut;
+        if (!ucsClient.deletePolicy(policyId)) {
+            jsonOut = buildDeletePolicyResponseMessage(jsonIn, "KO");
+        } else {
+            jsonOut = buildDeletePolicyResponseMessage(jsonIn, "OK");
+        }
+        serializeAndSend(jsonOut);
+    }
+
+
+    private static JsonOut buildDeletePolicyResponseMessage(JsonIn jsonIn, String code) {
+
+        MessageContent messageOut = new DeletePolicyResponse(getMessageIdFromJson(jsonIn), code);
+        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+    }
+
+
     private static DHTClient.MessageHandler setMessageHandler() {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
             /**
@@ -304,7 +330,7 @@ public class UCSDht {
                     System.err.println("Error deserializing Json. " + e.getMessage());
                     return;
                 }
-                switch(jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {
+                switch (jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {
                     case "pep-command":
                         if (!isRegisterRequest(jsonIn) && !isPepRegistered(jsonIn)) {
                             System.err.println("An unregistered PEP tried to make a request. Request discarded.");

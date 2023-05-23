@@ -6,6 +6,8 @@ import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
@@ -30,16 +32,18 @@ public class DHTUtils {
             .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())
             .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name())
             .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())
-            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name());
+            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name())
+            .registerSubtype(DeletePolicyRequest.class, PURPOSE.DELETE_POLICY.name())
+            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name());
 
 
     /**
      * Build a JsonOut object
      *
-     * @param message the object containing a request or a response
-     * @param id the name of the entity communicating with the UCS
-     * @param topic_name the name of the topic
-     * @param topic_uuid the unique identifier of the topic
+     * @param message     the object containing a request or a response
+     * @param id          the name of the entity communicating with the UCS
+     * @param topic_name  the name of the topic
+     * @param topic_uuid  the unique identifier of the topic
      * @param commandType the type of command
      * @return the object to be then serialized and sent to the DHT
      */

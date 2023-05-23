@@ -100,6 +100,11 @@ public class UCSClient {
         return id != null;
     }
 
+    public boolean deletePolicy(String policyId) {
+        PolicyAdministrationPoint pap = new PolicyAdministrationPoint(properties.getPolicyAdministrationPoint());
+        return pap.deletePolicy(policyId);
+    }
+
     public UCSInterface getInterface() {
         return ucs;
     }

@@ -55,10 +55,24 @@ public class PolicyAdministrationPoint implements PAPInterface {
         this.properties = properties;
     }
 
+
+    /**
+     * Deletes the policy that has as id the policyId passed as parameter
+     *
+     * @param policyId the policyId to be used
+     * @return true if deletion is successful (and the file does not exist anymore).
+     * False, otherwise.
+     */
+    public boolean deletePolicy(String policyId) {
+        String policyFile = properties.getPath() + File.separator + policyId + POLICY_FILE_EXTENSION;
+        File pFile = new File(policyFile);
+        return (pFile.delete() && !pFile.exists());
+    }
+
     /**
      * Retrieves the policy that has as id the policyId passed as parameter
      *
-     * @param the policyId to be used
+     * @param policyId the policyId to be used
      * @return the policy in string format
      */
     @Override
