@@ -9,8 +9,6 @@ import it.cnr.iit.ucs.message.startaccess.StartAccessMessage;
 import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
-import it.cnr.iit.ucs.pap.PolicyAdministrationPoint;
-import it.cnr.iit.ucs.pdp.PolicyDecisionPoint;
 import it.cnr.iit.ucs.pep.PEPInterface;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
@@ -22,7 +20,6 @@ import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 import it.cnr.iit.xacml.wrappers.RequestWrapper;
 
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -34,7 +31,7 @@ public class UCSClient {
 
     private final UCSDhtProperties properties;
 
-    private UCSInterface ucs;
+    private UCSCoreService ucs;
 
     private final String papPath;
 
@@ -50,17 +47,17 @@ public class UCSClient {
 
     public TryAccessResponseMessage tryAccess(String request, String policy, String pepId, String messageId) {
         TryAccessMessage message = buildTryAccessMessage(request, policy, pepId, messageId);
-        return (TryAccessResponseMessage) ucs.tryAccess(message);
+        return ucs.tryAccess(message);
     }
 
     public StartAccessResponseMessage startAccess(String sessionId, String pepId, String messageId) {
         StartAccessMessage message = buildStartAccessMessage(sessionId, pepId, messageId);
-        return (StartAccessResponseMessage) ucs.startAccess(message);
+        return ucs.startAccess(message);
     }
 
     public EndAccessResponseMessage endAccess(String sessionId, String pepId, String messageId) {
         EndAccessMessage message = buildEndAccessMessage(sessionId, pepId, messageId);
-        return (EndAccessResponseMessage) ucs.endAccess(message);
+        return ucs.endAccess(message);
     }
 
     private TryAccessMessage buildTryAccessMessage(String request, String policy, String pepId, String messageId) {
@@ -95,14 +92,12 @@ public class UCSClient {
     }
 
     public boolean addPolicy(String policy) {
-        PolicyAdministrationPoint pap = new PolicyAdministrationPoint(properties.getPolicyAdministrationPoint());
-        String id = pap.addPolicy(policy);
+        String id = ucs.getPap().addPolicy(policy);
         return id != null;
     }
 
     public boolean deletePolicy(String policyId) {
-        PolicyAdministrationPoint pap = new PolicyAdministrationPoint(properties.getPolicyAdministrationPoint());
-        return pap.deletePolicy(policyId);
+        return ucs.getPap().deletePolicy(policyId);
     }
 
     public UCSInterface getInterface() {
@@ -113,11 +108,6 @@ public class UCSClient {
         return properties;
     }
 
-    public Map<String, PEPInterface> getPepMap() {
-        return ((UCSCoreService) ucs).getPEPMap();
-    }
-
-
     public String findPolicy(String req) {
         RequestWrapper request;
         try {
@@ -126,10 +116,7 @@ public class UCSClient {
             LOGGER.info("Unable to create request wrapper");
             return null;
         }
-        PolicyAdministrationPoint pap = new PolicyAdministrationPoint(properties.getPolicyAdministrationPoint());
-        PolicyDecisionPoint pdp = new PolicyDecisionPoint(properties.getPolicyDecisionPoint());
-        pdp.setPap(pap);
-        PolicyWrapper policy = pdp.findPolicy(request);
+        PolicyWrapper policy = ucs.getPdp().findPolicy(request);
         return policy.getPolicyType().getPolicyId();
     }
 
@@ -144,7 +131,7 @@ public class UCSClient {
         pepProperties.setSubTopicUuid(subTopicUuid);
         PEPInterface pep = new PEPDhtUCSSide(pepProperties);
         try {
-            this.getPepMap().put(pepId, pep);
+            ucs.getPEPMap().put(pepId, pep);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -152,7 +139,11 @@ public class UCSClient {
         return true;
     }
 
+    public boolean pepMapHas(String pepId) {
+        return ucs.getPEPMap().containsKey(pepId);
+    }
+
     public PepProperties getPepProperties(String pepId) {
-        return this.getPepMap().get(pepId).getProperties();
+        return ucs.getPEPMap().get(pepId).getProperties();
     }
 }

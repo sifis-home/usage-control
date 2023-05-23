@@ -193,10 +193,10 @@ public class UCSDht {
     // and when the pep was already registered
     // it returns KO if the pep cannot be registered
     public static void handleRegisterRequest(JsonIn jsonIn) {
-        String pepId = getIdFromJson(jsonIn);
         JsonOut jsonOut;
-        if (!ucsClient.getPepMap().containsKey(pepId)) {
+        if (!isPepRegistered(jsonIn)) {
             RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);
+            String pepId = getIdFromJson(jsonIn);
             String subTopicName = messageIn.getSub_topic_name();
             String subTopicUuid = messageIn.getSub_topic_uuid();
 
@@ -355,7 +355,7 @@ public class UCSDht {
     }
 
     private static boolean isPepRegistered(JsonIn jsonIn) {
-        return (ucsClient.getPepMap().containsKey(getIdFromJson(jsonIn)));
+        return (ucsClient.pepMapHas(getIdFromJson(jsonIn)));
     }
 
 
