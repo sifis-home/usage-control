@@ -1,6 +1,7 @@
 package it.cnr.iit.utility.dht;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
@@ -136,12 +137,16 @@ public class DHTUtils {
     public static boolean isTopicOfInterest(JsonIn jsonIn, String topic) {
         //System.out.println("Topic does not match the one we are subscribed to: " +
         //        "Message discarded.");
-        return jsonIn
-                .getVolatile()
-                .getValue()
-                .getCommand()
-                .getValue()
-                .getTopic_uuid()
-                .equals(topic);
+        try {
+            return jsonIn
+                    .getVolatile()
+                    .getValue()
+                    .getCommand()
+                    .getValue()
+                    .getTopic_uuid()
+                    .equals(topic);
+        } catch (Exception e) {
+            throw new JsonSyntaxException(e.getMessage());
+        }
     }
 }

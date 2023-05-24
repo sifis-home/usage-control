@@ -327,7 +327,7 @@ public class PEPDht {
                     System.out.println("Topic matches. Message type: " + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());
                     msg = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
                 } catch (JsonSyntaxException e) {
-                    System.err.println("Error deserializing Json. " + e.getMessage());
+                    System.err.println("Error deserializing Json. Message discarded.");
                     return;
                 }
                 if (isRegisterResponse(msg) && !isPepRegistered) {
