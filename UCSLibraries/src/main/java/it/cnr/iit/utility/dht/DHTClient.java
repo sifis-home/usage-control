@@ -64,7 +64,7 @@ public class DHTClient {
 //        } catch (IOException ex){
 //            System.out.println(ex);
 //        }
-        System.out.println("Connected");
+        System.out.println("Connected to " + wsURI);
     }
 
     public void addMessageHandler(MessageHandler msgHandler) {

@@ -35,6 +35,8 @@ public class PEPDht {
     // Useful to retrieve the sessionId from a messageId
     private static final AccessTracker accessTracker = new AccessTracker();
     private static DHTClient dhtClientEndPoint;
+    private static String dhtUri = "ws://localhost:3000/ws";
+
     private static final String COMMAND_TYPE = "pep-command";
     private static final String SUB_COMMAND_TYPE = "ucs-command";
     private static final String PEP_ID = "pep-0";
@@ -45,6 +47,22 @@ public class PEPDht {
     private static boolean isPepRegistered = false;
 
     public static void main(String[] args) {
+
+        if (args.length != 0 && args[0].equals("-d")) {
+            URI parsed = null;
+            try {
+                parsed = new URI(args[1]);
+            } catch (URISyntaxException | ArrayIndexOutOfBoundsException e) {
+                // No URI indicated
+                System.err.println("Invalid URI after -d option");
+                return;
+            }
+            dhtUri = parsed.toString();
+        }
+
+        if(!isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
+            return;
+        }
 
         try {
             dhtClientEndPoint = new DHTClient(

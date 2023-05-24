@@ -35,19 +35,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.io.IOException;
 
 import static it.cnr.iit.utility.dht.DHTUtils.*;
 
 public class UCSDht {
 
     private static DHTClient dhtClientEndPoint;
-    private static final String SUB_COMMAND_TYPE = "ucs-command";
+    private static String dhtUri = "ws://localhost:3000/ws";
     private static UCSClient ucsClient;
 
+    private static final String SUB_COMMAND_TYPE = "ucs-command";
     private static final String COMMAND_TYPE = "ucs-command";
     private static final String PUB_TOPIC_NAME = "topic-name";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
@@ -57,14 +58,31 @@ public class UCSDht {
 
     public static void main(String[] args) {
 
+        if (args.length != 0 && args[0].equals("-d")) {
+            URI parsed = null;
+            try {
+                parsed = new URI(args[1]);
+            } catch (URISyntaxException | ArrayIndexOutOfBoundsException e) {
+                // No URI indicated
+                System.err.println("Invalid URI after -d option");
+                return;
+            }
+            dhtUri = parsed.toString();
+        }
+
         initializeUCS();
+
+        if (!isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
+            return;
+        }
+
         try {
-            dhtClientEndPoint = new DHTClient(
-                    new URI("ws://localhost:3000/ws"));
+            dhtClientEndPoint = new DHTClient(new URI(dhtUri));
             dhtClientEndPoint.addMessageHandler(setMessageHandler());
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("Waiting for commands...");
     }
 
 

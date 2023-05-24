@@ -23,6 +23,11 @@ import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
+
 public class DHTUtils {
 
     private static final RuntimeTypeAdapterFactory<MessageContent> typeFactory = RuntimeTypeAdapterFactory
@@ -148,5 +153,49 @@ public class DHTUtils {
         } catch (Exception e) {
             throw new JsonSyntaxException(e.getMessage());
         }
+    }
+
+
+    /**
+     * Wait for a connection to the DHT before proceeding
+     *
+     * @param dhtWebsocketUri the URI of the WebSocket interface for the DHT
+     * @return true when the connection succeeds
+     */
+    public static boolean isDhtReachable(String dhtWebsocketUri, int timeout, int attempts) {
+
+        Socket socket = null;
+        URI dhtUri = URI.create(dhtWebsocketUri);
+
+        long connectionTime = System.currentTimeMillis();
+        for (int i = 0; i < attempts; i++) {
+            try {
+                connectionTime = System.currentTimeMillis();
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(dhtUri.getHost(), dhtUri.getPort()), timeout);
+                break;
+            } catch (Exception e) {
+                System.err.println("Failed: Attempt " + (i + 1) + " of " + attempts + " to reach DHT at: " + dhtWebsocketUri);
+                if (i == attempts - 1) {
+                    return false;
+                }
+                try {
+                    long currentTime = System.currentTimeMillis();
+                    long timeLeftToSleep = connectionTime + timeout - currentTime > 0 ?
+                            connectionTime + timeout - currentTime : 0L;
+
+                    Thread.sleep(timeLeftToSleep);
+                } catch (InterruptedException ex) {
+                    System.err.println("Failed to sleep while waiting for the next attempt");
+                }
+            }
+        }
+        try {
+            assert socket != null;
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 }
