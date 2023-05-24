@@ -32,6 +32,7 @@ import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -50,6 +51,9 @@ public class UCSDht {
     private static final String COMMAND_TYPE = "ucs-command";
     private static final String PUB_TOPIC_NAME = "topic-name";
     private static final String SUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
+    private static final File attributesDir = new File(Utils.getResourcePath(UCSDht.class), "attributes");
+    private static final File policiesDir = new File(Utils.getResourcePath(UCSDht.class), "policies");
+
 
     public static void main(String[] args) {
 
@@ -65,24 +69,37 @@ public class UCSDht {
 
 
     private static void initializeUCS() {
-        UCSDhtPipReaderProperties pipReader = new UCSDhtPipReaderProperties();
+
+        Utils.createDir(attributesDir);
+        Utils.createDir(policiesDir);
+
         List<PipProperties> pipPropertiesList = new ArrayList<>();
 
-        String path = getResourcePath(UCSDht.class);
-        System.out.println(path);
+        // add sample attribute
+        UCSDhtPipReaderProperties pipReader = new UCSDhtPipReaderProperties();
         pipReader.addAttribute(
                 "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
                 Category.ENVIRONMENT.toString(),
                 DataType.STRING.toString(),
-                path + File.separator + "sample-attribute.txt");
+                attributesDir + File.separator + "sample-attribute.txt");
         pipReader.setRefreshRate(1000L);
         pipPropertiesList.add(pipReader);
 
-        UCSDhtPapProperties papProperties = new UCSDhtPapProperties(path);
+        setAttributeValue(attributesDir.getAbsolutePath() + File.separator
+                + "sample-attribute.txt", "attribute-1-value");
+
+        UCSDhtPapProperties papProperties = new UCSDhtPapProperties(policiesDir.getAbsolutePath());
 
         ucsClient = new UCSClient(pipPropertiesList, papProperties);
-        System.out.println("UCS initialized");
-        //ucsClient.addPep("new-pep", new PEPDht(new UCSDhtPepProperties()));
+
+        // add sample policy
+        String examplePolicy = Utils.readContent(Utils.accessFile(UCSDht.class, "example-policy.xml"));
+        ucsClient.addPolicy(examplePolicy);
+
+        System.out.println("Policies directory: " + policiesDir.getAbsolutePath());
+        System.out.println("Attributes directory: " + attributesDir.getAbsolutePath());
+
+        System.out.println("UCS initialization complete");
     }
 
 
@@ -405,16 +422,16 @@ public class UCSDht {
     }
 
 
-    public static String getResourcePath(Class<?> clazz) {
+    public static void setAttributeValue(String fileName, String value) {
 
-        URL input = clazz.getProtectionDomain().getCodeSource().getLocation();
-
+        File file = new File(fileName);
+        FileWriter fw = null;
         try {
-            File myfile = new File(input.toURI());
-            File dir = myfile.getParentFile(); // strip off .jar file
-            return dir.getAbsolutePath();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            fw = new FileWriter(file);
+            fw.write(value);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
