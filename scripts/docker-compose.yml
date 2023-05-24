@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  # USAGE CONTROL ENGINE
+  usage-control-engine:
+    image: ghcr.io/sifis-home/usage-control-engine:latest
+    entrypoint: ["java", "-jar", "UCSDht/UCSDht.jar"]
+    depends_on:
+      domo-dht-manager:
+        condition: service_healthy
+
+  # POLICY ENFORCEMENT POINT
+  pep-java:
+    image: ghcr.io/sifis-home/pep-java:latest
+    entrypoint: ["java", "-jar", "PEPDht/PEPDht.jar"]
+    depends_on:
+  #      usage-control-engine:
+  #        condition: service_started
+      domo-dht-manager:
+        condition: service_healthy
+
+  # The DHT. The AS uses it for logging. The clients use it to receive commands and relay back responses from the server(s).
+  domo-dht-manager:
+    image: domo-dht-manager
+    entrypoint: ["/domo-dht-manager", "/db.sqlite", "true", "5a52aafb2a44ff5c360d4dc04e4a792e28637da07b96072a2f0a5ea5286f2739", "3000", "true"]
+    expose:
+      - "3000/tcp"
+    ports:
+      - 3000:3000/tcp
+    healthcheck:
+      test: timeout 20s bash -c ':> /dev/tcp/127.0.0.1/3000'
+      interval: 30s
+      timeout: 10s
+      retries: 5
