@@ -1,3 +1,5 @@
 .*
 target/
 jgiven-reports/
+apps/
+docker-build/
