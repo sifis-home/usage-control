@@ -67,7 +67,7 @@ public class PEPDht {
 
         try {
             dhtClientEndPoint = new DHTClient(
-                    new URI("ws://localhost:3000/ws"));
+                    new URI(dhtUri));
             dhtClientEndPoint.addMessageHandler(setMessageHandler());
 
         } catch (URISyntaxException e) {
