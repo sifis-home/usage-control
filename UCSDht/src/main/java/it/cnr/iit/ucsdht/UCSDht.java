@@ -18,6 +18,7 @@ import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
 import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
@@ -146,7 +147,9 @@ public class UCSDht {
                 ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
 
         // build the json object
-        JsonOut jsonOut = buildTryAccessResponseMessage(jsonIn, response);
+        JsonOut jsonOut = response == null ?
+                buildErrorResponseMessageForPep(jsonIn, "Error during try access") :
+                buildTryAccessResponseMessage(jsonIn, response);
 
         serializeAndSend(jsonOut);
     }
@@ -166,10 +169,11 @@ public class UCSDht {
         // make the actual start access request to the UCS
         StartAccessResponseMessage response =
                 ucsClient.startAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
-        //todo: I could catch an exception thrown if no session is found
 
         // build the json object
-        JsonOut jsonOut = buildStartAccessResponseMessage(jsonIn, response);
+        JsonOut jsonOut = response == null ?
+                buildErrorResponseMessageForPep(jsonIn, "Error during start access") :
+                buildStartAccessResponseMessage(jsonIn, response);
 
         serializeAndSend(jsonOut);
     }
@@ -190,10 +194,11 @@ public class UCSDht {
         // make the actual end access request to the UCS
         EndAccessResponseMessage response =
                 ucsClient.endAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
-        //todo: I could catch an exception thrown if no session is found
 
         // build the json object
-        JsonOut jsonOut = buildEndAccessResponseMessage(jsonIn, response);
+        JsonOut jsonOut = response == null ?
+                buildErrorResponseMessageForPep(jsonIn, "Error during end access") :
+                buildEndAccessResponseMessage(jsonIn, response);
 
         serializeAndSend(jsonOut);
     }
@@ -249,16 +254,27 @@ public class UCSDht {
         serializeAndSend(jsonOut);
     }
 
+
     private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
         MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);
         return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
     }
+
 
     private static JsonOut buildJsonOutForPep(MessageContent messageOut, String pepId) {
         PepProperties pepProperties = ucsClient.getPepProperties(pepId);
         return buildOutgoingJsonObject(messageOut, pepId,
                 pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);
     }
+
+
+    private static JsonOut buildErrorResponseMessageForPep(JsonIn jsonIn, String description) {
+        MessageContent messageOut =
+                new ErrorResponse(
+                        getMessageIdFromJson(jsonIn), description);
+        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));
+    }
+
 
     private static void processPepMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
@@ -386,6 +402,12 @@ public class UCSDht {
         return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
     }
 
+    private static JsonOut buildErrorResponseMessage(JsonIn jsonIn, String description) {
+        MessageContent messageOut =
+                new ErrorResponse(
+                        getMessageIdFromJson(jsonIn), description);
+        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), "topic-name-pap-is-subscribed-to", "topic-uuid-pap-is-subscribed-to", COMMAND_TYPE);
+    }
 
     private static DHTClient.MessageHandler setMessageHandler() {
         DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {
@@ -417,14 +439,33 @@ public class UCSDht {
                             System.err.println("An unregistered PEP tried to make a request. Request discarded.");
                             return;
                         }
-                        processPepMessage(jsonIn);
+                        try {
+                            processPepMessage(jsonIn);
+                        } catch (Exception e) {
+                            System.err.println("Error processing PEP request: " + e.getMessage());
+                            JsonOut jsonOut =
+                                    buildErrorResponseMessageForPep(jsonIn, e.getMessage());
+                            serializeAndSend(jsonOut);
+                        }
                         break;
                     case "pap-command":
-                        processPapMessage(jsonIn);
+                        try {
+                            processPapMessage(jsonIn);
+                        } catch (Exception e) {
+                            System.err.println("Error processing PAP request: " + e.getMessage());
+                            JsonOut jsonOut =
+                                    buildErrorResponseMessage(jsonIn, e.getMessage());
+                            serializeAndSend(jsonOut);
+                        }
                         break;
                     default:
                         System.err.println("Wrong command type. Request discarded.");
                 }
+            }
+
+            @Override
+            public void handleError() {
+                System.err.println("Websocket error occurred");
             }
         };
         return messageHandler;

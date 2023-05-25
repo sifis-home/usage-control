@@ -359,6 +359,11 @@ public class PEPDht {
                 }
                 processMessage(msg);
             }
+
+            @Override
+            public void handleError() {
+                System.err.println("Websocket error occurred");
+            }
         };
         return messageHandler;
     }

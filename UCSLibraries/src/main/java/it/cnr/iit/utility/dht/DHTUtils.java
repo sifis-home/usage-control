@@ -11,6 +11,7 @@ import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
 import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
@@ -48,7 +49,8 @@ public class DHTUtils {
             .registerSubtype(ListPoliciesRequest.class, PURPOSE.LIST_POLICIES.name())
             .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name())
             .registerSubtype(GetPolicyRequest.class, PURPOSE.GET_POLICY.name())
-            .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name());
+            .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name())
+            .registerSubtype(ErrorResponse.class, PURPOSE.ERROR_RESPONSE.name());
 
 
     /**

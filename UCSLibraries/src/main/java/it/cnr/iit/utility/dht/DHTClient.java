@@ -1,11 +1,7 @@
 package it.cnr.iit.utility.dht;
 
-import jakarta.websocket.ClientEndpoint;
-import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.WebSocketContainer;
+import jakarta.websocket.*;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -67,6 +63,12 @@ public class DHTClient {
         System.out.println("Connected to " + wsURI);
     }
 
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        System.err.println("There was an error for session: " + session.getId());
+        handler.handleError();
+    }
+
     public void addMessageHandler(MessageHandler msgHandler) {
         this.handler = msgHandler;
     }
@@ -121,6 +123,7 @@ public class DHTClient {
 
     public interface MessageHandler {
          void handleMessage(String message);
+         void handleError();
     }
 }
 //
