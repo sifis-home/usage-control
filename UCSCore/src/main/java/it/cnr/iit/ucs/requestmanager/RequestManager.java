@@ -84,9 +84,10 @@ public class RequestManager extends AbstractRequestManager {
 				getQueueOutput().put(message);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			log.severe("e.getLocalizedMessage()=" + e.getLocalizedMessage());
-			Thread.currentThread().interrupt();
+			//Thread.currentThread().interrupt();
+			return null;
 		}
 		return null;
 	}
