@@ -19,6 +19,7 @@ import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Base64;
+import java.util.Scanner;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -72,6 +73,10 @@ public class PEPDht {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+
+        System.out.println("\nPress Enter key to start with the requests...");
+        Scanner s = new Scanner(System.in);
+        s.nextLine();
 
         register();
         while (!isPepRegistered) {
