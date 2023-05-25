@@ -74,9 +74,11 @@ public class PEPDht {
             throw new RuntimeException(e);
         }
 
-        System.out.println("\nPress Enter key to start with the requests...");
-        Scanner s = new Scanner(System.in);
-        s.nextLine();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         register();
         while (!isPepRegistered) {
