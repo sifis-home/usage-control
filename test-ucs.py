@@ -61,6 +61,8 @@ def send_command(command):
         delete_policy()
     elif command == "9":
         unrecognized_command()
+    elif command == "q":
+        exit("")
     else:
         print("command not found")
         enter_command()
