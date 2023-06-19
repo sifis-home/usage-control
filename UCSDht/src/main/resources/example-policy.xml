@@ -49,20 +49,6 @@
                     <AttributeValue
                             DataType="http://www.w3.org/2001/XMLSchema#string">OP</AttributeValue>
                 </Apply>
-                <Apply
-                        FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
-                    <Apply
-                            FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-one-and-only">
-                        <AttributeDesignator
-                                AttributeId="urn:oasis:names:tc:xacml:1.0:resource:resource-id"
-                                Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
-                                DataType="http://www.w3.org/2001/XMLSchema#string"
-                                MustBePresent="true">
-                        </AttributeDesignator>
-                    </Apply>
-                    <AttributeValue
-                            DataType="http://www.w3.org/2001/XMLSchema#string">RES</AttributeValue>
-                </Apply>
             </Apply>
         </Condition>
         <!-- On going condition -->
@@ -109,8 +95,3 @@
         <Target></Target>
     </Rule>
 </Policy>
-
-
-
-
-
