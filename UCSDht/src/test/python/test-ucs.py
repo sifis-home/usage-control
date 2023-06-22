@@ -105,7 +105,7 @@ def register():
 
 ## TRY ACCESS
 def try_access():
-    request = Path('./UCSDht/src/main/resources/example-request.xml').read_text()
+    request = Path('../../../src/main/resources/example-request.xml').read_text()
     print("XACML request used:")
     print(request)
     b = base64.b64encode(bytes(request, 'utf-8')) # bytes
@@ -206,7 +206,7 @@ def check_session_before_sending(ws_req):
 
 ## ADD POLICY
 def add_policy():
-    policy = Path('./UCSDht/src/main/resources/example-policy.xml').read_text()
+    policy = Path('../../../resources/example-policy.xml').read_text()
     print("XACML policy used:")
     print(policy)
     b = base64.b64encode(bytes(policy, 'utf-8')) # bytes
@@ -272,7 +272,7 @@ def get_policy():
                         "message": {
                             "purpose": "GET_POLICY",
                             "message_id": str(uuid.uuid1()),
-                            "policy_id": "example-policy-for-test-ucs.py"
+                            "policy_id": "example-policy"
                         },
                         "id": "pap-web_socket",
                         "topic_name": "topic-name",
@@ -298,7 +298,7 @@ def delete_policy():
                             "purpose": "DELETE_POLICY",
                             "message_id": str(uuid.uuid1()),
                             "policy": None,
-                            "policy_id": "example-policy-for-test-ucs.py"
+                            "policy_id": "example-policy"
                         },
                         "id": "pap-web_socket",
                         "topic_name": "topic-name",
