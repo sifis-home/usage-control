@@ -19,15 +19,15 @@ function stop_UCSDht() {
       force="-9"
     fi
 
-    ppid=$(ps | grep UCSDht | awk '{print $1}' | head -n 1)
+    ppid=$(ps aux | grep UCSDht | awk '{print $2}' | head -n 1)
 
     kill $force $ppid
+
+    echo "Waiting for UCSDht death..."
 
     if [ $? -eq 0 ]; then  # il processo esisteva ed è stato killato
       echo "Killed UCSDht "
     fi
-
-    echo "Waiting for UCSDht death..."
 
     sleep 1
     cont=$((cont+1))
@@ -38,7 +38,7 @@ function stop_UCSDht() {
 
 function check() {
 
-  if [[ -f $FILE ]] ; then
+  if test -f "$FILE"; then
      # file exists
      if ! pgrep -f UCSDht > /dev/null 2>&1 ; then
        start_UCSDht
