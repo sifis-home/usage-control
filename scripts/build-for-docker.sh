@@ -51,8 +51,12 @@ cp ../Dockerfile.base $dockerfile
 echo 'RUN mkdir -p /apps/UCSDht' >> $dockerfile
 echo "ADD UCSDht/UCSDht.jar /apps/UCSDht" >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
+echo 'ADD ../../scripts/run_UCSDht.sh /' >> $dockerfile
+echo 'RUN chmod +x /run_UCSDht.sh' >> $dockerfile
 echo '' >> $dockerfile
-echo 'ENTRYPOINT ["java", "-jar", "UCSDht/UCSDht.jar"]' >> $dockerfile
+echo 'ENTRYPOINT ["/run_UCSDht.sh"]' >> $dockerfile
+
+#echo 'ENTRYPOINT ["java", "-jar", "UCSDht/UCSDht.jar"]' >> $dockerfile
 
 if [ "$1" == "--build-images" ]
 then
