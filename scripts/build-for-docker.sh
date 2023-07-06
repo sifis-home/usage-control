@@ -21,8 +21,9 @@ fi
 mkdir -p docker-build/ucs
 cd docker-build
 
-# Copy needed files (jar files and library files)
+# Copy needed files (jar files, library files, and entrypoint script)
 cp -r ../apps/* ./ucs
+cp ../scripts/run_UCSDht.sh ./ucs
 
 ## Create base Dockerfile. Initial part is same for all images.
 #  Setting the timezone, otherwise the default is UTC.
@@ -51,7 +52,7 @@ cp ../Dockerfile.base $dockerfile
 echo 'RUN mkdir -p /apps/UCSDht' >> $dockerfile
 echo "ADD UCSDht/UCSDht.jar /apps/UCSDht" >> $dockerfile
 echo 'ADD lib /apps/lib/' >> $dockerfile
-echo 'ADD ../../scripts/run_UCSDht.sh /' >> $dockerfile
+echo 'ADD run_UCSDht.sh /' >> $dockerfile
 echo 'RUN chmod +x /run_UCSDht.sh' >> $dockerfile
 echo '' >> $dockerfile
 echo 'ENTRYPOINT ["/run_UCSDht.sh"]' >> $dockerfile
