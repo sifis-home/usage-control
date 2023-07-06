@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 FILE=/services/leader_file.txt
 
-function start_UCSDht {
+function start_UCSDht() {
   echo "Starting UCSDht ..."
   java -jar /apps/UCSDht/UCSDht.jar &
 
 }
 
-function stop_UCSDht {
+function stop_UCSDht() {
 
   cont=0
   while pgrep -f UCSDht > /dev/null 2>&1; do
@@ -36,7 +36,7 @@ function stop_UCSDht {
 }
 
 
-function check {
+function check() {
 
   if [[ -f $FILE ]] ; then
      # file exists
