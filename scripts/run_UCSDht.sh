@@ -10,7 +10,7 @@ function start_UCSDht() {
 function stop_UCSDht() {
 
   cont=0
-  while pgrep -f UCSDht > /dev/null 2>&1; do
+  while pgrep -f UCSDht.jar > /dev/null 2>&1; do
 
     force=""
 
@@ -40,7 +40,7 @@ function check() {
 
   if test -f "$FILE"; then
      # file exists
-     if ! pgrep -f UCSDht > /dev/null 2>&1 ; then
+     if ! pgrep -f UCSDht.jar > /dev/null 2>&1 ; then
        start_UCSDht
      fi
   else
