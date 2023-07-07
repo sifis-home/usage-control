@@ -23,8 +23,6 @@ function stop_UCSDht() {
 
     echo "Attempt to kill the UCSDht process..."
 
-    echo $ppid
-    echo $force
     if kill $force $ppid; then  # il processo esisteva ed è stato killato
       echo "Killed UCSDht "
     fi
