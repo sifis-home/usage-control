@@ -19,11 +19,10 @@ function stop_UCSDht() {
       force="-9"
     fi
 
-    ppid=$(ps aux | grep UCSDht | awk '{print $2}' | head -n 1)
+    ppid=$(ps aux | grep UCSDht.jar | awk '{print $2}' | head -n 1)
 
-    echo $ppid
     echo "Attempt to kill the UCSDht process..."
-    
+
     if kill $force $ppid -eq 0; then  # il processo esisteva ed è stato killato
       echo "Killed UCSDht "
     fi
