@@ -430,7 +430,7 @@ public class UCSDht {
                     }
                     System.out.println("Topic matches. Message type: " + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());
                 } catch (JsonSyntaxException e) {
-                    System.err.println("Error deserializing Json. Message discarded.");
+                    //System.err.println("Error deserializing Json. Message discarded.");
                     return;
                 }
                 switch (jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {
