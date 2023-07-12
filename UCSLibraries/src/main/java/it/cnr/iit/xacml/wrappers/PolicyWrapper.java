@@ -16,6 +16,7 @@
 package it.cnr.iit.xacml.wrappers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -120,44 +121,110 @@ public class PolicyWrapper implements PolicyWrapperInterface {
         return new ArrayList<>();
     }
 
+
+    /**
+     * Given a root node, build a number of lists equal to the number of attributes found within the tree
+     * and save them in the elementList.
+     * Each list should contain exactly one element whose value is of type AttributeDesignatorType, and one
+     * or more elements whose value is of type AttributeValueType.
+     * When this list (auxList) is fully populated, it is cloned and added to the elementList. Then, it is
+     * reset to be used in the next recursive iterations.
+     * @param node the root node we want start the iterations from
+     * @param elementList list containing lists. Each list is related to one attribute and should contain exactly
+     *                    one element whose value is of type AttributeDesignatorType, and one or more elements
+     *                    whose value is of type AttributeValueType.
+     * @param auxList a list that temporarily contains the information related to one attribute. When fully
+     *                populated, this list is cloned and added to the elementList. Then, it is reset to be used
+     *                in the next recursive iterations.
+     */
+    private void recursiveGetChildren(JAXBElement<?> node, List<ArrayList<JAXBElement<?>>> elementList, ArrayList<JAXBElement<?>> auxList) {
+        Object objValue = node.getValue();
+        if( objValue instanceof ApplyType ) {
+            ApplyType applyType = (ApplyType) objValue;
+            ArrayList<JAXBElement<?>> children = (ArrayList<JAXBElement<?>>) applyType.getExpression();
+            boolean hasAnAttributeValueTypeChild = false;
+            for (JAXBElement<?> jaxbElement : children) {
+                Object child = jaxbElement.getValue();
+                if (child instanceof AttributeValueType) {
+                    // At least one direct child of this node is of type AttributeValueType
+                    hasAnAttributeValueTypeChild = true;
+                }
+            }
+            for (JAXBElement<?> jaxbElement : children) {
+                recursiveGetChildren(jaxbElement, elementList, auxList);
+            }
+            if (hasAnAttributeValueTypeChild) {
+                // if we get here it means that the node is of type ApplyType, it has at least
+                // one child of type AttributeValueType, and the recursion of this node is terminated,
+                // i.e., all its child nodes have been visited and the attributeList has been fully
+                // populated.
+                elementList.add((ArrayList<JAXBElement<?>>) auxList.clone());
+                auxList.clear();
+            }
+        } else if (objValue instanceof AttributeValueType) {
+            auxList.add(node);
+        } else if (objValue instanceof AttributeDesignatorType) {
+            auxList.add(node);
+        }
+    }
+
+
     /**
      * Function that effectively extracts the attributes from the condition.
      * The attribute object we have built up, embeds two different complex types
      * in the xsd: one is the AttributeDesignator, the other is the attribute
      * value.
      *
-     * @param conditionType
-     *          the condition we are analysing
-     * @return the list of attributes types interested by this condition.
+     * @param conditionType the condition we are analysing
+     * @return the list of attributes contained in this condition.
      */
     private List<Attribute> getAttributesFromCondition( ConditionType conditionType ) {
-        ArrayList<JAXBElement<?>> elementList = new ArrayList<>();
-        elementList.add( conditionType.getExpression() );
-        ArrayList<Attribute> attributeList = new ArrayList<>();
-        int lastIndex = 0;
-        for( int i = 0; i < elementList.size(); i++ ) {
-            Object objValue = elementList.get( i ).getValue();
-            if( objValue instanceof ApplyType ) {
-                ApplyType applyType = (ApplyType) objValue;
-                elementList.addAll( applyType.getExpression() );
-            } else if( objValue instanceof AttributeDesignatorType ) {
-                AttributeDesignatorType attrDesignatorType = (AttributeDesignatorType) objValue;
-                Attribute attribute = attributeList.get( lastIndex );
-                attribute.setAttributeId( attrDesignatorType.getAttributeId() );
-                attribute.setCategory( Category.toCATEGORY( attrDesignatorType.getCategory() ) );
-                attribute.setDataType( DataType.toDATATYPE( attrDesignatorType.getDataType() ) );
-                lastIndex++;
-            } else if( objValue instanceof AttributeValueType ) {
-                AttributeValueType attributeValueType = (AttributeValueType) objValue;
-                Attribute attribute = new Attribute();
-                for( Object obj : attributeValueType.getContent() ) {
-                    attribute.setAttributeValues( attributeValueType.getDataType(), obj.toString() );
+        List<ArrayList<JAXBElement<?>>> elementList = new ArrayList<>();
+
+        // populate the elementList as a list of lists. Each list contains
+        // one or more elements whose value is of type AttributeValueType
+        // and only one element whose value is of type AttributeDesignatorType
+        recursiveGetChildren(conditionType.getExpression(), elementList, new ArrayList<>());
+
+        ArrayList<Attribute> attributesList = new ArrayList<>();
+
+        for (ArrayList<JAXBElement<?>> attributeValuesAndDesignatorList : elementList) {
+            List<List<Object>> dataTypeAndValuesList = new ArrayList<>();
+
+            Attribute attribute = new Attribute();
+
+            // get the attribute values from the elements whose value is of type AttributeValueType
+            // and store them in the dataTypeAndValuesList
+            for (JAXBElement<?> jaxbElement : attributeValuesAndDesignatorList) {
+                if (jaxbElement.getValue() instanceof AttributeValueType) {
+                    AttributeValueType attributeValueType = (AttributeValueType) jaxbElement.getValue();
+                    for (Object obj : attributeValueType.getContent()) {
+                        dataTypeAndValuesList.add(Arrays.asList(attributeValueType.getDataType(), obj));
+                    }
                 }
-                attributeList.add( attribute );
+            }
+
+            // get the other info from the element whose value is of type AttributeDesignatorType,
+            // build the attribute of type Attribute, and add it to the list that will be returned
+            for (JAXBElement<?> jaxbElement : attributeValuesAndDesignatorList) {
+                if (jaxbElement.getValue() instanceof AttributeDesignatorType) {
+                    AttributeDesignatorType attrDesignatorType = (AttributeDesignatorType) jaxbElement.getValue();
+
+                    attribute.setAttributeId(attrDesignatorType.getAttributeId());
+                    attribute.setCategory(Category.toCATEGORY(attrDesignatorType.getCategory()));
+                    attribute.setDataType(DataType.toDATATYPE(attrDesignatorType.getDataType()));
+
+                    for (List<Object> o : dataTypeAndValuesList) {
+                        // the first element of the list is the datatype, while the second is the attribute value
+                        attribute.setAttributeValues(o.get(0).toString(), o.get(1).toString());
+                    }
+                    attributesList.add(attribute);
+                }
             }
         }
-        return attributeList;
+        return attributesList;
     }
+
 
     @Override
     public String retrieveObligations() {
