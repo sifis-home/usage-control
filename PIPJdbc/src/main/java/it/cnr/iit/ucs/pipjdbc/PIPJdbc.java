@@ -180,6 +180,12 @@ public final class PIPJdbc extends PIPBase {
 
 	}
 
+
+	// to fix
+	public void subscribe(RequestType request, String attributeId) {
+	}
+
+
 	/**
 	 * Performs the subscribe operation. This operation is very similar to the
 	 * retrieve operation. The only difference is that in this case we have to

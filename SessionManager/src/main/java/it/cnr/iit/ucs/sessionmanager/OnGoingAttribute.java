@@ -5,8 +5,6 @@
  */
 package it.cnr.iit.ucs.sessionmanager;
 
-import java.util.UUID;
-
 /**
  *
  * The class representing an on going attribute in the database.
@@ -18,10 +16,11 @@ import java.util.UUID;
  */
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
 import it.cnr.iit.utility.errorhandling.Reject;
 
-@DatabaseTable( tableName = "on_going_attributes" )
+import java.util.UUID;
+
+@DatabaseTable(tableName = "on_going_attributes")
 public class OnGoingAttribute implements OnGoingAttributesInterface {
 
     public enum COLUMN {
@@ -37,23 +36,23 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     public static final String RESOURCENAME_FIELD = "resource_name";
     public static final String ACTIONNAME_FIELD = "action_name";
 
-    @DatabaseField( id = true, columnName = ID_FIELD_NAME )
+    @DatabaseField(id = true, columnName = ID_FIELD_NAME)
     private String id;
 
-    @DatabaseField( canBeNull = false, columnName = ATTRIBUTEID_FIELD )
+    @DatabaseField(canBeNull = false, columnName = ATTRIBUTEID_FIELD)
     private String attributeId;
 
-    @DatabaseField( columnName = SUBJECTNAME_FIELD )
+    @DatabaseField(columnName = SUBJECTNAME_FIELD)
     private String subjectName;
 
-    @DatabaseField( columnName = RESOURCENAME_FIELD )
+    @DatabaseField(columnName = RESOURCENAME_FIELD)
     private String resourceName;
 
-    @DatabaseField( columnName = ACTIONNAME_FIELD )
+    @DatabaseField(columnName = ACTIONNAME_FIELD)
     private String actionName;
 
-    @DatabaseField( foreign = true, foreignAutoRefresh = true, canBeNull = false,
-        columnName = SESSION_ID_FIELD_NAME )
+    @DatabaseField(foreign = true, foreignAutoRefresh = true, canBeNull = false,
+            columnName = SESSION_ID_FIELD_NAME)
     private Session session;
 
     // @DatabaseField(columnName = SESSION_ID_FIELD_NAME)
@@ -64,32 +63,32 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
         subjectName = resourceName = actionName = null;
     }
 
-    private OnGoingAttribute( String attributeId, String subjectName, String resourceName,
-            String actionName ) {
-        setId( UUID.randomUUID().toString() );
-        setAttributeId( attributeId );
-        setSubjectName( subjectName );
-        setResourceName( resourceName );
-        setActionName( actionName );
+    private OnGoingAttribute(String attributeId, String subjectName, String resourceName,
+                             String actionName) {
+        setId(UUID.randomUUID().toString());
+        setAttributeId(attributeId);
+        setSubjectName(subjectName);
+        setResourceName(resourceName);
+        setActionName(actionName);
     }
 
-    public static OnGoingAttribute createOnGoingAttribute( String attributeId, String name, COLUMN column ) {
-        Reject.ifBlank( attributeId );
-        if( column != COLUMN.ENVIRONMENT ) {
-            Reject.ifBlank( name );
+    public static OnGoingAttribute createOnGoingAttribute(String attributeId, String name, COLUMN column) {
+        Reject.ifBlank(attributeId);
+        if (column != COLUMN.ENVIRONMENT) {
+            Reject.ifBlank(name);
         }
         OnGoingAttribute onGoingAttribute = new OnGoingAttribute();
-        onGoingAttribute.setAttributeId( attributeId );
-        onGoingAttribute.setId( UUID.randomUUID().toString() );
-        switch( column ) {
+        onGoingAttribute.setAttributeId(attributeId);
+        onGoingAttribute.setId(UUID.randomUUID().toString());
+        switch (column) {
             case SUBJECT:
-                onGoingAttribute.setSubjectName( name );
+                onGoingAttribute.setSubjectName(name);
                 break;
             case ACTION:
-                onGoingAttribute.setActionName( name );
+                onGoingAttribute.setActionName(name);
                 break;
             case RESOURCE:
-                onGoingAttribute.setResourceName( name );
+                onGoingAttribute.setResourceName(name);
                 break;
             default:
                 break;
@@ -97,16 +96,16 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
         return onGoingAttribute;
     }
 
-    public static OnGoingAttribute createOnGoingAttributeForAction( String attributeId, String actionName ) {
-        Reject.ifBlank( attributeId );
-        Reject.ifBlank( actionName );
-        return new OnGoingAttribute( attributeId, null, null, actionName );
+    public static OnGoingAttribute createOnGoingAttributeForAction(String attributeId, String actionName) {
+        Reject.ifBlank(attributeId);
+        Reject.ifBlank(actionName);
+        return new OnGoingAttribute(attributeId, null, null, actionName);
     }
 
-    public static OnGoingAttribute createOnGoingAttributeForResource( String attributeId, String resourceName ) {
-        Reject.ifBlank( attributeId );
-        Reject.ifBlank( resourceName );
-        return new OnGoingAttribute( attributeId, null, null, resourceName );
+    public static OnGoingAttribute createOnGoingAttributeForResource(String attributeId, String resourceName) {
+        Reject.ifBlank(attributeId);
+        Reject.ifBlank(resourceName);
+        return new OnGoingAttribute(attributeId, null, null, resourceName);
     }
 
     @Override
@@ -114,7 +113,7 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
         return actionName;
     }
 
-    public void setActionName( String actionName ) {
+    public void setActionName(String actionName) {
         this.actionName = actionName;
     }
 
@@ -123,7 +122,7 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
         return sessionId;
     }
 
-    public void setSessionId( String sessionId ) {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
@@ -140,10 +139,9 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     /**
      * Sets the ID of the OnGoingAttribute raw in the database
      *
-     * @param id
-     *          ID to be set
+     * @param id ID to be set
      */
-    public void setId( String id ) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -160,10 +158,9 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     /**
      * Sets the attribute name
      *
-     * @param attributeId
-     *          attribute name to be set
+     * @param attributeId attribute name to be set
      */
-    public void setAttributeId( String attributeId ) {
+    public void setAttributeId(String attributeId) {
         this.attributeId = attributeId;
     }
 
@@ -180,10 +177,9 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     /**
      * Sets the subject ID
      *
-     * @param subjectName
-     *          subject ID to be set
+     * @param subjectName subject ID to be set
      */
-    public void setSubjectName( String subjectName ) {
+    public void setSubjectName(String subjectName) {
         this.subjectName = subjectName;
     }
 
@@ -200,10 +196,9 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     /**
      * Sets the resource ID
      *
-     * @param resourceName
-     *          object ID to be set
+     * @param resourceName object ID to be set
      */
-    public void setResourceName( String resourceName ) {
+    public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
 
@@ -219,10 +214,9 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     /**
      * Sets the session for this attribute
      *
-     * @param session
-     *          attribute session to be set
+     * @param session attribute session to be set
      */
-    public void setSession( Session session ) {
+    public void setSession(Session session) {
         this.session = session;
     }
 
@@ -230,11 +224,11 @@ public class OnGoingAttribute implements OnGoingAttributesInterface {
     public String toString() {
         String result = "( name = " + attributeId + ", ";
 
-        if( subjectName != null && !subjectName.isEmpty() ) {
+        if (subjectName != null && !subjectName.isEmpty()) {
             result += "subject_id = " + subjectName + ", ";
         }
 
-        if( resourceName != null && !resourceName.isEmpty() ) {
+        if (resourceName != null && !resourceName.isEmpty()) {
             result += "object_id = " + resourceName + ", ";
         }
 

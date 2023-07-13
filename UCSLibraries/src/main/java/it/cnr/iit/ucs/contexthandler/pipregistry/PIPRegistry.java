@@ -97,16 +97,16 @@ public class PIPRegistry implements PIPRegistryInterface {
 
 
 	/**
-	 * Given a list of attributes, invokes the PIPs' subscribe method
-	 * for each attribute, if that attribute is owned by a PIP.
-	 * If an attribute has category different from ENVIRONMENT, e.g.,
-	 * is a SUBJECT-related attribute, use the request to retrieve
-	 * the value of the SUBJECT attribute and set it as
-	 * 'additionalInformation' of the attribute. This is needed by
-	 * the PIP for subscribing to the right attribute value.
-	 * For example, a PIPReader responsible for the 'role' attribute
-	 * (a SUBJECT-related attribute) needs to know the 'subject-id'
-	 * to monitor.
+	 * Given a list of attributes, invokes the PIPs' subscribe(request, attributeId)
+	 * method if that attributeId id handled by a PIP.
+	 *
+	 * This method has to be revised when a PIP multiAttribute will be
+	 * implemented. Indeed, the subscribe(request) method would subscribe
+	 * all the attributes the PIP is handling. (Currently, since there is
+	 * no MultiAttribute PIP, the subscribe(request) takes only the first
+	 * attribute in the attributesMap (call getAttributes().get(0)).
+	 * On the contrary, if the PIP is multiAttribute, we need to specify
+	 * which attribute we want the PIP to subscribe to.
 	 *
 	 * @param request the request
 	 * @param attributes the list of attributes to subscribe to. It
@@ -114,26 +114,50 @@ public class PIPRegistry implements PIPRegistryInterface {
 	 */
 	@Override
 	public void subscribe(RequestType request, List<Attribute> attributes) {
+
+		// loop on all the PIPs
 		for (PIPCHInterface pip : pipList) {
-			int attributesNumber = pip.getAttributes().size();
-			for (int i = 0; i < attributesNumber; i++) {
-				Attribute pipAttribute = pip.getAttributes().get(i);
-				Category category = pipAttribute.getCategory();
-				for (Attribute a : attributes) {
-					if (pipAttribute.getAttributeId().equals(a.getAttributeId())) {
-						try {
-							if (!category.equals(Category.ENVIRONMENT)) {
-								String filter = request.getAttributeValue(category);
-								a.setAdditionalInformations(filter);
-							}
-							pip.subscribe(a);
-						} catch (Exception e) {
-							log.severe("Error subscribe : " + e.getMessage());
-							Throwables.throwIfUnchecked(new RuntimeException("Error subscribe : " + e.getMessage()));
-						}
+//			int attributesNumber = pip.getAttributes().size();
+
+			//loop on the ongoing attributes
+			for (Attribute attr : attributes) {
+
+				// if among the attributeIds handled by the PIP there is
+				// the attributeId of the attribute we are considering,
+				if (pip.getAttributeIds().contains(attr.getAttributeId())) {
+					try {
+						pip.subscribe(request, attr.getAttributeId());
+					} catch (Exception e) {
+						log.severe("Error subscribe : " + e.getMessage());
+						Throwables.throwIfUnchecked(new RuntimeException("Error subscribe : " + e.getMessage()));
 					}
 				}
 			}
 		}
+
+			// loop on all the attributes of a PIP
+//			for (int i = 0; i < attributesNumber; i++) {
+//				Attribute pipAttribute = pip.getAttributes().get(i);
+//				// get the category of the PIP's attribute
+//				Category category = pipAttribute.getCategory();
+				//loop on the ongoing attributes
+//				for (Attribute a : attributes) {
+					// if the PIP's attributeId is equal to the ongoing attribute we are considering
+//					if (pipAttribute.getAttributeId().equals(a.getAttributeId())) {
+//						try {
+//							if (!category.equals(Category.ENVIRONMENT)) {
+//								String filter = request.getAttributeValue(category);
+//								a.setAdditionalInformations(filter);
+//							}
+//							pip.subscribe(a);
+//							pip.subscribe(request);
+//						} catch (Exception e) {
+//							log.severe("Error subscribe : " + e.getMessage());
+//							Throwables.throwIfUnchecked(new RuntimeException("Error subscribe : " + e.getMessage()));
+//						}
+//					}
+//				}
+//			}
+//		}
 	}
 }

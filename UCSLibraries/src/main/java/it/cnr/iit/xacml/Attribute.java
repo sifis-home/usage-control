@@ -38,9 +38,12 @@ public final class Attribute implements Cloneable {
 
 	private Category category;
 
+	/**
+	 * Map having the dataType of the attribute as key, and a list of attribute values as value.
+	 */
 	private final HashMap<String, List<String>> attributeValueMap;
 
-	private String additionalInformations;
+	private String additionalInformations = "";
 
 	public Attribute() {
 		attributeValueMap = new HashMap<>();
@@ -85,7 +88,7 @@ public final class Attribute implements Cloneable {
 	/**
 	 * Creates the IncludeInResult element of the attribute
 	 *
-	 * @param includeInResult_ Issuer element value (true or false)
+	 * @param includeInResult Issuer element value (true or false)
 	 */
 	public void setIncludeInResult(boolean includeInResult) {
 		this.includeInResult = includeInResult;
@@ -94,7 +97,7 @@ public final class Attribute implements Cloneable {
 	/**
 	 * Retrieves attribute values of a certain type
 	 *
-	 * @param dataType_ a string representing the attribute type
+	 * @param dataType a string representing the attribute type
 	 * @return a list of attribute values
 	 */
 	public List<String> getAttributeValues(DataType dataType) {
@@ -105,7 +108,7 @@ public final class Attribute implements Cloneable {
 	/**
 	 * Retrieves attribute values of a certain type
 	 *
-	 * @param dataType_ a string representing the attribute type
+	 * @param dataType a string representing the attribute type
 	 * @return a list of attribute values
 	 */
 	public List<String> getAttributeValues(String dataType) {
@@ -155,7 +158,7 @@ public final class Attribute implements Cloneable {
 	/**
 	 * Creates the values of an attribute given its type
 	 *
-	 * @param dataType_ a DataType object representig the attribute type
+	 * @param dataType a DataType object representing the attribute type
 	 * @param value
 	 */
 	public void setAttributeValues(DataType dataType, String value) {
@@ -182,18 +185,18 @@ public final class Attribute implements Cloneable {
 	@Override
 	public String toString() {
 		StringBuilder resultBuilder = new StringBuilder();
-		resultBuilder.append("\nAttributeID=" + attributeId);
-		resultBuilder.append(",Issuer=" + issuer);
-		resultBuilder.append(",IncludeInResult=" + includeInResult + "\n");
+		resultBuilder.append("\nAttributeID=").append(attributeId);
+		resultBuilder.append(",Issuer=").append(issuer);
+		resultBuilder.append(",IncludeInResult=").append(includeInResult).append("\n");
 
 		for (Map.Entry<String, List<String>> entry : attributeValueMap.entrySet()) {
 			List<String> values = entry.getValue();
-			resultBuilder.append("DataType=" + entry.getKey() + ":");
+			resultBuilder.append("DataType=").append(entry.getKey()).append(":");
 
 			if (values != null) {
-				resultBuilder.append("Value=" + values.toString());
+				resultBuilder.append("Value=").append(values);
 			}
-			resultBuilder.append("\tAdditionalInfo: " + additionalInformations);
+			resultBuilder.append("\tAdditionalInfo: ").append(additionalInformations);
 		}
 		return resultBuilder.toString();
 	}
@@ -285,7 +288,7 @@ public final class Attribute implements Cloneable {
 		for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
 			DataType datatype = DataType.toDATATYPE(entry.getKey());
 			if (datatype == null) {
-				log.severe("ERROR in RETRIEVING DT");
+				log.severe("Error in retrieving the DataType");
 				return;
 			}
 			attributeValueMap.put(datatype.toString(), entry.getValue());

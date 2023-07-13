@@ -21,9 +21,13 @@ import it.cnr.iit.xacml.Attribute;
 public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
 
     private RequestManagerInterface requestManager;
-    private HashMap<String, Attribute> attributesMap = new HashMap<>();
 
-    private PipProperties properties;
+    /**
+     * Map having the attributeId as key and an Attribute object as value
+     */
+    private final HashMap<String, Attribute> attributesMap = new HashMap<>();
+
+    private final PipProperties properties;
 
     public PIPBase( PipProperties properties ) {
         Reject.ifNull( properties );
@@ -32,16 +36,12 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
 
     @Override
     public final ArrayList<String> getAttributeIds() {
-        ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.addAll( attributesMap.keySet() );
-        return arrayList;
+        return new ArrayList<>(attributesMap.keySet());
     }
 
     @Override
     public final ArrayList<Attribute> getAttributes() {
-        ArrayList<Attribute> arrayList = new ArrayList<>();
-        arrayList.addAll( attributesMap.values() );
-        return arrayList;
+        return new ArrayList<>(attributesMap.values());
     }
 
     @Override

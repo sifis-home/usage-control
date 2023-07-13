@@ -5,15 +5,15 @@
  */
 package it.cnr.iit.ucs.sessionmanager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Creates Session objects. It configures OrmLite annotations to persist these
@@ -21,10 +21,10 @@ import com.j256.ormlite.table.DatabaseTable;
  *
  * @author Fabio Bindi, Filippo Lauria and Antonio La Marra
  */
-@DatabaseTable( tableName = "sessions" )
+@DatabaseTable(tableName = "sessions")
 public final class Session implements SessionInterface {
 
-    private static Logger log = Logger.getLogger( Session.class.getName() );
+    private static final Logger log = Logger.getLogger(Session.class.getName());
 
     public static final String ID_FIELD_NAME = "id";
     public static final String POLICYSET_FIELD_NAME = "policy_set";
@@ -33,25 +33,25 @@ public final class Session implements SessionInterface {
     public static final String PEPURI_FIELD_NAME = "pep_uri";
     public static final String MYIP_FIELD = "myip";
 
-    @DatabaseField( id = true, columnName = ID_FIELD_NAME )
+    @DatabaseField(id = true, columnName = ID_FIELD_NAME)
     private String id;
 
-    @DatabaseField( columnName = POLICYSET_FIELD_NAME, dataType = DataType.LONG_STRING )
+    @DatabaseField(columnName = POLICYSET_FIELD_NAME, dataType = DataType.LONG_STRING)
     private String policySet;
 
-    @DatabaseField( columnName = ORIGINALREQUEST_FIELD_NAME, dataType = DataType.LONG_STRING )
+    @DatabaseField(columnName = ORIGINALREQUEST_FIELD_NAME, dataType = DataType.LONG_STRING)
     private String originalRequest;
 
-    @DatabaseField( columnName = STATUS_FIELD_NAME )
+    @DatabaseField(columnName = STATUS_FIELD_NAME)
     private String status;
 
-    @DatabaseField( columnName = PEPURI_FIELD_NAME )
+    @DatabaseField(columnName = PEPURI_FIELD_NAME)
     private String pepURI;
 
-    @DatabaseField( columnName = MYIP_FIELD )
+    @DatabaseField(columnName = MYIP_FIELD)
     private String myIP;
 
-    @ForeignCollectionField( eager = true, columnName = OnGoingAttribute.ATTRIBUTEID_FIELD )
+    @ForeignCollectionField(eager = true, columnName = OnGoingAttribute.ATTRIBUTEID_FIELD)
     private ForeignCollection<OnGoingAttribute> onGoingAttributes;
 
     public Session() {
@@ -59,17 +59,14 @@ public final class Session implements SessionInterface {
     }
 
     /**
-     *
-     * @param id_              session ID
-     * @param policySet_       policy containing all the mutable attributes needed
-     *                         during the session
-     * @param originalRequest_ original XAML reqest containing informations about
-     *                         the subject/object
-     * @param status_          status of the session
-     * @param pepURI_          URI of the PEP that started the session
+     * @param id              session ID
+     * @param policySet       policy containing all the mutable attributes needed during the session
+     * @param originalRequest original XAML request containing information about the subject/object
+     * @param status          status of the session
+     * @param pepURI          URI of the PEP that started the session
      */
-    public Session( String id, String policySet, String originalRequest, String status, String pepURI,
-            String myIP ) {
+    public Session(String id, String policySet, String originalRequest, String status, String pepURI,
+                   String myIP) {
         this.id = id;
         this.policySet = policySet;
         this.originalRequest = originalRequest;
@@ -91,9 +88,9 @@ public final class Session implements SessionInterface {
     /**
      * Sets the session ID
      *
-     * @param id_ session ID to be set
+     * @param id session ID to be set
      */
-    public void setId( String id ) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -110,9 +107,9 @@ public final class Session implements SessionInterface {
     /**
      * Sets the policySet
      *
-     * @param policySet_ policySet to set
+     * @param policySet policySet to set
      */
-    public void setPolicySet( String policySet ) {
+    public void setPolicySet(String policySet) {
         this.policySet = policySet;
     }
 
@@ -129,9 +126,9 @@ public final class Session implements SessionInterface {
     /**
      * Sets the originalRequest
      *
-     * @param originalRequest_ originalRequest to be set
+     * @param originalRequest originalRequest to be set
      */
-    public void setOriginalRequest( String originalRequest ) {
+    public void setOriginalRequest(String originalRequest) {
         this.originalRequest = originalRequest;
     }
 
@@ -148,27 +145,27 @@ public final class Session implements SessionInterface {
     /**
      * Sets the status of the session
      *
-     * @param status_ status to be set
+     * @param status status to be set
      */
-    public void setStatus( String status ) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
     @Override
-    public boolean isStatus( String status ) {
-        return this.status.equalsIgnoreCase( status );
+    public boolean isStatus(String status) {
+        return this.status.equalsIgnoreCase(status);
     }
 
     /**
      * Sets the URI of the PEP
      *
-     * @param pepURI_ URI of the PEP to be set
+     * @param pepURI URI of the PEP to be set
      */
-    public void setPepURI( String pepURI ) {
+    public void setPepURI(String pepURI) {
         this.pepURI = pepURI;
     }
 
-    public void setMyIP( String ip ) {
+    public void setMyIP(String ip) {
         this.myIP = ip;
     }
 
@@ -180,8 +177,8 @@ public final class Session implements SessionInterface {
     @Override
     public List<OnGoingAttributesInterface> getOnGoingAttributes() {
         List<OnGoingAttributesInterface> list = new ArrayList<>();
-        for( OnGoingAttribute onGoingAttribute : onGoingAttributes ) {
-            list.add( onGoingAttribute );
+        for (OnGoingAttribute onGoingAttribute : onGoingAttributes) {
+            list.add(onGoingAttribute);
         }
         return list;
     }
@@ -193,8 +190,8 @@ public final class Session implements SessionInterface {
      */
     public List<OnGoingAttributesInterface> getOnGoingAttribute() {
         List<OnGoingAttributesInterface> list = new ArrayList<>();
-        for( OnGoingAttributesInterface onGoingAttribute : onGoingAttributes ) {
-            list.add( onGoingAttribute );
+        for (OnGoingAttributesInterface onGoingAttribute : onGoingAttributes) {
+            list.add(onGoingAttribute);
         }
         return list;
     }
@@ -211,17 +208,17 @@ public final class Session implements SessionInterface {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append( "SessionId = " + id + "\nPolicySet = " + policySet + "\n" );
-        stringBuilder.append( "OriginalRequest = " + originalRequest + "\n" );
-        stringBuilder.append( "Status = " + status + "\npepURI = " + pepURI + "\n" );
-        if( onGoingAttributes != null ) {
-            stringBuilder.append( "OnGoingAttributes = " );
+        stringBuilder.append("SessionId = ").append(id).append("\nPolicySet = ").append(policySet).append("\n");
+        stringBuilder.append("OriginalRequest = ").append(originalRequest).append("\n");
+        stringBuilder.append("Status = ").append(status).append("\npepURI = ").append(pepURI).append("\n");
+        if (onGoingAttributes != null) {
+            stringBuilder.append("OnGoingAttributes = ");
             try {
-                for( OnGoingAttribute a : onGoingAttributes ) {
-                    stringBuilder.append( a.toString() + " " );
+                for (OnGoingAttribute a : onGoingAttributes) {
+                    stringBuilder.append(a.toString()).append(" ");
                 }
-            } catch( NullPointerException e ) {
-                log.warning( "Error null ongoing attributes" );
+            } catch (NullPointerException e) {
+                log.warning("Error null ongoing attributes");
             }
         }
         return stringBuilder.toString();
@@ -238,7 +235,7 @@ public final class Session implements SessionInterface {
     }
 
     @Override
-    public void setRequest( String request ) {
+    public void setRequest(String request) {
         this.originalRequest = request;
     }
 

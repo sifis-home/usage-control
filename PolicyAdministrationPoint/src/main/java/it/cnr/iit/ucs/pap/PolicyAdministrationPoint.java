@@ -26,6 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import it.cnr.iit.ucs.exceptions.PAPException;
 import it.cnr.iit.ucs.exceptions.PolicyException;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.utility.FileUtility;
@@ -90,9 +91,8 @@ public class PolicyAdministrationPoint implements PAPInterface {
     /**
      * Adds a new policy
      *
-     * @param policy
-     *          the policy to be added
-     * @return true if everything goes OK, false otherwise
+     * @param policy the policy to be added
+     * @return the policyId if everything goes OK, null otherwise
      */
     @Override
     public String addPolicy( String policy ) {
@@ -142,14 +142,18 @@ public class PolicyAdministrationPoint implements PAPInterface {
      * @return the list of the IDs of the policies stored
      */
     @Override
-    public List<String> listPolicies() {
+    public List<String> listPolicies() throws PAPException {
         // TODO UCS-33 NOSONAR
         File directory = new File( properties.getPath() );
         File[] files = directory.listFiles( ( dir, name ) -> name.toLowerCase().endsWith( POLICY_FILE_EXTENSION ) );
-        return Arrays.asList( files ).parallelStream()
-            .map( File::getName )
-            .map( FileUtility::stripExtension )
-            .collect( Collectors.toList() );
+        if (files != null) {
+            return Arrays.asList( files ).parallelStream()
+                .map( File::getName )
+                .map( FileUtility::stripExtension )
+                .collect( Collectors.toList() );
+        } else {
+            throw new PAPException("Error retrieving the list of policies");
+        }
     }
 
     @Override

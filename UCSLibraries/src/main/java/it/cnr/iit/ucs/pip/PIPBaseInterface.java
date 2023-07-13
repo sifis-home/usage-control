@@ -23,7 +23,7 @@ import it.cnr.iit.xacml.Attribute;
 /**
  * Base interface for a PIP.
  * Basically each PIP has to offer as interfaces some getters that allow the
- * context handelr to know in advance the characteristics of the PIP with which
+ * context handler to know in advance the characteristics of the PIP with which
  * it's dealing with.
  *
  * @author antonio
@@ -42,9 +42,9 @@ public interface PIPBaseInterface {
 
     /**
      * This function retrieves the list of attributes this PIP can monitor.
-         * This function has been added in order to allow the possibility of having
+     * This function has been added in order to allow the possibility of having
      * Multi-Attributes attribute managers.
-         *
+     *
      * @return the list of attributes this PIP is in charge of monitoring
      */
     public List<Attribute> getAttributes();

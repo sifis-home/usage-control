@@ -15,6 +15,8 @@
  ******************************************************************************/
 package it.cnr.iit.ucs.pap;
 
+import it.cnr.iit.ucs.exceptions.PAPException;
+
 import java.util.List;
 
 /**
@@ -64,5 +66,5 @@ public interface PAPInterface {
      *
      * @return the list of policies in String format
      */
-     List<String> listPolicies();
+     List<String> listPolicies() throws PAPException;
 }

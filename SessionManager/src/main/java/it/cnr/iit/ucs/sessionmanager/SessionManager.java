@@ -36,12 +36,12 @@ import it.cnr.iit.xacml.Attribute;
  */
 public final class SessionManager implements SessionManagerInterface {
 
-    private static Logger log = Logger.getLogger( SessionManager.class.getName() );
+    private static final Logger log = Logger.getLogger( SessionManager.class.getName() );
 
     private static final String MSG_ERR_SQL = "Error in SQL query : {0}";
 
     // url to connect to the database
-    private String databaseURL;
+    private final String databaseURL;
     private ConnectionSource connection;
     // dao to perform operations on the session table
     private Dao<Session, String> sessionDao;
@@ -101,7 +101,7 @@ public final class SessionManager implements SessionManagerInterface {
         try {
             connection.close();
         } catch( IOException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             initialized = false;
             throw new IllegalStateException( "SessionManager not in a valid state anymore" );
         }
@@ -127,7 +127,7 @@ public final class SessionManager implements SessionManagerInterface {
             s.setStatus( status );
             sessionDao.update( s );
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             return false;
         }
         return true;
@@ -166,8 +166,7 @@ public final class SessionManager implements SessionManagerInterface {
      * Creates an entry for a session. This is the general function, in this case
      * the request has ongoingattributes related to the subject, the
      * object/resource, the action and the environment
-     * @param resourceName
-     *          the name of the object to which the attributes are related
+     * @param parameterObject
      *
      * @return true if everything goes fine, false otherwise
      */
@@ -211,7 +210,7 @@ public final class SessionManager implements SessionManagerInterface {
                 }
             }
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             return false;
         }
         return true;
@@ -250,14 +249,14 @@ public final class SessionManager implements SessionManagerInterface {
             return sessions;
 
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
         }
         return new ArrayList<>();
     }
 
     /**
      * Retrieves the list of sessions that have that attributeid and that subject
-     * specified as on going attributes. This is done to avoid the retrieval of
+     * specified as ongoing attributes. This is done to avoid the retrieval of
      * sessions that are interested in a certain attributeid related to different
      * subject
      *
@@ -296,7 +295,7 @@ public final class SessionManager implements SessionManagerInterface {
             return sessions;
 
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
         }
         return new ArrayList<>();
     }
@@ -337,14 +336,14 @@ public final class SessionManager implements SessionManagerInterface {
             return sessions;
 
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
         }
         return new ArrayList<>();
     }
 
     /**
-     * Retrieves the list of sessions that have that attributeid and that action
-     * specified as on going attributes. This is done to avoid the retrieval of
+     * Retrieves the list of sessions that have that attributeId and that action
+     * specified as ongoing attributes. This is done to avoid the retrieval of
      * sessions that are interested in a certain attribute related to different
      * actions.
      *
@@ -378,7 +377,7 @@ public final class SessionManager implements SessionManagerInterface {
             return sessions;
 
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
         }
         return new ArrayList<>();
     }
@@ -396,7 +395,7 @@ public final class SessionManager implements SessionManagerInterface {
         try {
             return Optional.ofNullable( sessionDao.queryForId( sessionId ) );
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             return Optional.empty();
         }
     }
@@ -421,7 +420,7 @@ public final class SessionManager implements SessionManagerInterface {
             }
             return returnList;
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             return new ArrayList<>();
         }
     }
@@ -458,7 +457,7 @@ public final class SessionManager implements SessionManagerInterface {
             return sessions;
 
         } catch( SQLException e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
         }
         return new ArrayList<>();
     }
@@ -470,7 +469,7 @@ public final class SessionManager implements SessionManagerInterface {
             Session session = sessionDao.queryForId( sessionId );
             return session.getOnGoingAttribute();
         } catch( Exception e ) {
-            log.severe( String.format( MSG_ERR_SQL, e.getMessage() ) );
+            log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             return new ArrayList<>();
         }
     }

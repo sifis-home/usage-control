@@ -1,9 +1,7 @@
 package it.cnr.iit.ucs.pdptest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Map;
@@ -114,7 +112,7 @@ public class PDPTest {
     }
 
     @Test
-    public void testPDP() {
+    public void testPDP() throws PolicyException {
         PolicyWrapper policyWrapper = getPolicyWrapper( this.policy );
         assertNotNull( policyWrapper );
         assertThat( testEvaluation( requestDeny, policyWrapper ) ).contains( "deny" );
@@ -132,8 +130,8 @@ public class PDPTest {
         assertThat( testEvaluation( requestDeny, policyWrapper, STATUS.END ) ).contains( "deny" );
         assertThat( testEvaluation( requestPermit, policyWrapper, STATUS.END ) ).contains( "permit" );
         assertThat( testEvaluation( requestIndeterminate, policyWrapper, STATUS.END ) ).contains( "indeterminate" );
-        assertTrue( testEvaluation( requestIndeterminate, null, STATUS.END ) == null );
-        assertTrue( testEvaluation( null, policyWrapper, STATUS.END ) == null );
+        assertNull(testEvaluation(requestIndeterminate, null, STATUS.END));
+        assertNull(testEvaluation(null, policyWrapper, STATUS.END));
         PolicyWrapper policyWrapperDup = getPolicyWrapper( policyDup );
         assertNotNull( policyWrapperDup );
         assertThat( testEvaluation( requestPermit, policyWrapperDup, STATUS.TRY ) ).contains( "permit" );
@@ -145,7 +143,6 @@ public class PDPTest {
             requestWrapper = RequestWrapper.build( request, null );
         } catch( RequestException e ) {
             fail( "error parsing request" );
-
         }
 
         PDPEvaluation response = policyDecisionpoint.evaluate( requestWrapper, policy );
@@ -170,24 +167,28 @@ public class PDPTest {
                 return null;
             }
         } catch( Exception e ) {
-            e.printStackTrace();
+            log.info(e.getMessage());
             return null;
         }
     }
 
-    private RequestWrapper getRequestWrapper( String request ) {
+    private RequestWrapper getRequestWrapper( String request ) throws RequestException {
         RequestWrapper requestWrapper = null;
         try {
             requestWrapper = RequestWrapper.build( request, null );
-        } catch( RequestException e ) {}
+        } catch( RequestException e ) {
+            throw new RequestException(e.getMessage());
+        }
         return requestWrapper;
     }
 
-    private PolicyWrapper getPolicyWrapper( String policy ) {
+    private PolicyWrapper getPolicyWrapper( String policy ) throws PolicyException {
         PolicyWrapper policyWrapper = null;
         try {
             policyWrapper = PolicyWrapper.build( policy );
-        } catch( PolicyException e ) {}
+        } catch( PolicyException e ) {
+            throw new PolicyException(e.getMessage());
+        }
         return policyWrapper;
     }
 

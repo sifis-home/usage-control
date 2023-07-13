@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.File;
 import java.util.Map;
 
+import it.cnr.iit.ucs.exceptions.PAPException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,7 +65,11 @@ public class PolicyAdministrationPointTest {
 
     @Test
     public void policiesCanBeListed() {
-        assertFalse( pap.listPolicies().isEmpty() );
+        try {
+            assertFalse( pap.listPolicies().isEmpty() );
+        } catch (PAPException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private PapProperties properties = new PapProperties() {

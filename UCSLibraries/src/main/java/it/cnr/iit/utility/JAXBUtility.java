@@ -15,24 +15,18 @@
  ******************************************************************************/
 package it.cnr.iit.utility;
 
-import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.*;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
 
 /**
  * This is the class devoted to store the utility required to deal with the
  * JAXB.
  *
  * @author antonio
- *
  */
 public final class JAXBUtility {
 
@@ -44,31 +38,27 @@ public final class JAXBUtility {
     public static final String SCHEMA = "urn:oasis:names:tc:xacml:3.0:core:schema:wd-17";
 
     /**
-     * Takes an object which skeleton has been provided by the xjc utility and
+     * Takes an object whose skeleton has been provided by the xjc utility and
      * marshals it into a string that represents the xml
      *
-     * @param clazz
-     *          the class to which the object belongs
-     * @param object
-     *          the object itself
-     * @param name
-     *          the name of the class of the object
-     * @param schema
-     *          the schema to be used, it can be null
+     * @param clazz  the class to which the object belongs
+     * @param object the object itself
+     * @param name   the name of the class of the object
+     * @param schema the schema to be used, it can be null
      * @return a String that represents the xml of the object
      * @throws JAXBException
      */
-    public static final <T> String marshalToString( Class<T> clazz, T object,
-            String name, String schema ) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance( clazz );
+    public static <T> String marshalToString(Class<T> clazz, T object,
+                                             String name, String schema) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, true );
+        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
-        QName qName = new QName( schema, name );
-        JAXBElement<T> elem = new JAXBElement<>( qName, clazz, null, object );
+        QName qName = new QName(schema, name);
+        JAXBElement<T> elem = new JAXBElement<>(qName, clazz, null, object);
 
         StringWriter stringWriter = new StringWriter();
-        jaxbMarshaller.marshal( elem, stringWriter );
+        jaxbMarshaller.marshal(elem, stringWriter);
 
         return stringWriter.getBuffer().toString();
     }
@@ -77,20 +67,20 @@ public final class JAXBUtility {
      * Takes a String that represents the content of an xml and converts it into
      * one of the objects provided by the xjc tool.
      *
-     * @param clazz
-     *          the class to which the object belongs
-     * @param xmlString
-     *          the xml in string format
+     * @param clazz     the class to which the object belongs
+     * @param xmlString the xml in string format
      * @return the object built up after unmarshalling, null otherwise
      * @throws JAXBException
      */
-    public static final <T> T unmarshalToObject( Class<T> clazz, String xmlString )
-            throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance( clazz );
+    public static <T> T unmarshalToObject(Class<T> clazz, String xmlString) throws JAXBException {
+        if (xmlString == null) {
+            throw new JAXBException("The XML String was null");
+        }
+        JAXBContext jaxbContext = JAXBContext.newInstance(clazz);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         Source stream = new StreamSource(
-            new ByteArrayInputStream( xmlString.getBytes() ) );
-        JAXBElement<T> element = jaxbUnmarshaller.unmarshal( stream, clazz );
+                new ByteArrayInputStream(xmlString.getBytes()));
+        JAXBElement<T> element = jaxbUnmarshaller.unmarshal(stream, clazz);
 
         return element.getValue();
     }
