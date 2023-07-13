@@ -11,12 +11,16 @@ import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
+import it.cnr.iit.ucs.pip.PIPBase;
+import it.cnr.iit.ucs.pipreader.PIPReader;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.ucs.ucs.UCSInterface;
 import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtProperties;
+import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 import it.cnr.iit.xacml.wrappers.RequestWrapper;
 
@@ -149,6 +153,44 @@ public class UCSClient {
             return false;
         }
         return true;
+    }
+
+    public boolean addPip(String pipType, String attributeId, String category,
+                          String dataType, String attributePath, String fileName, long refreshRate) {
+        if (!pipType.equals("PIPReader")) {
+            System.err.println("pip_type differs from PIPReader: " +
+                    "at the moment, PIPReader is the only type of PIP supported");
+            return false;
+        }
+
+        checkIfAttributeIdAlreadyMonitored(attributeId);
+
+        // need to check it here since in the properties we concatenate the attributePath and the fileName.
+        // Therefore, when the PIP gets initialized, the fileName will never be empty, but it possibly
+        // contains only the attributePath if the fileName happened to be empty.
+        Reject.ifTrue(fileName.isEmpty(), "'file_name' cannot be empty");
+
+        UCSDhtPipReaderProperties pipProperties = new UCSDhtPipReaderProperties();
+
+        pipProperties.addAttribute(attributeId, category, dataType, attributePath + fileName);
+        pipProperties.setRefreshRate(refreshRate);
+
+        PIPBase pip = new PIPReader(pipProperties);
+        try {
+            ucs.getPipList().add(pip);
+            pip.setRequestManager(ucs.getRequestManager());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    private void checkIfAttributeIdAlreadyMonitored(String attributeId) {
+        for (PIPBase pip : ucs.getPipList()) {
+            Reject.ifTrue(pip.getAttributeIds().contains(attributeId),
+                    "Another PIP is already monitoring the same attributeId");
+        }
     }
 
     public boolean pepMapHas(String pepId) {

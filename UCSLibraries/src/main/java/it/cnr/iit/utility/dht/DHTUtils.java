@@ -5,6 +5,8 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
 import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
 import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
@@ -50,6 +52,8 @@ public class DHTUtils {
             .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name())
             .registerSubtype(GetPolicyRequest.class, PURPOSE.GET_POLICY.name())
             .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name())
+            .registerSubtype(AddPipRequest.class, PURPOSE.ADD_PIP.name())
+            .registerSubtype(AddPipResponse.class, PURPOSE.ADD_PIP_RESPONSE.name())
             .registerSubtype(ErrorResponse.class, PURPOSE.ERROR_RESPONSE.name());
 
 

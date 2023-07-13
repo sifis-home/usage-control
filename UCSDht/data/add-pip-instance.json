@@ -1,0 +1,26 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1689261191520,
+      "command": {
+        "command_type": "pip-command",
+        "value": {
+          "message": {
+            "purpose": "ADD_PIP",
+            "message_id": "c80a7bfc-218f-11ee-9d1d-acde48001122",
+            "pip_type": "PIPReader",
+            "attribute_id": "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed",
+            "category": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+            "data_type": "http://www.w3.org/2001/XMLSchema#string",
+            "attribute_value": "true",
+            "file_name": "windows-in-bedroom.txt",
+            "refresh_rate": 1000
+          },
+          "id": "pip-web_socket",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

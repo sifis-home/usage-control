@@ -1,0 +1,20 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1689261191716,
+      "command": {
+        "command_type": "ucs-command",
+        "value": {
+          "message": {
+            "purpose": "ADD_PIP_RESPONSE",
+            "message_id": "c80a7bfc-218f-11ee-9d1d-acde48001122",
+            "code": "OK"
+          },
+          "id": "pip-web_socket",
+          "topic_name": "topic-name-pip-is-subscribed-to",
+          "topic_uuid": "topic-uuid-pip-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

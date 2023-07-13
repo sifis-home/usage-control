@@ -35,8 +35,8 @@ def enter_command():
     print("")
     print("LIST OF COMMANDS:")
     print("")
-    print("  PEP commands:              PAP commands:")
-    print("    1 : register               5 : add policy")
+    print("  PEP commands:              PAP commands:              PIP commands:")
+    print("    1 : register               5 : add policy             9: add pip")
     print("    2 : try access             6 : list policies")
     print("    3 : start access           7 : get policy")
     print("    4 : end access             8 : delete policy")
@@ -64,6 +64,8 @@ def send_command(command):
     elif command == "8":
         delete_policy()
     elif command == "9":
+        add_pip()
+    elif command == "10":
         unrecognized_command()
     elif command == "q":
         exit("")
@@ -206,7 +208,7 @@ def check_session_before_sending(ws_req):
 
 ## ADD POLICY
 def add_policy():
-    policy = Path('../../../resources/example-policy.xml').read_text()
+    policy = Path('../../../src/main/resources/example-policy.xml').read_text()
     print("XACML policy used:")
     print(policy)
     b = base64.b64encode(bytes(policy, 'utf-8')) # bytes
@@ -309,6 +311,43 @@ def delete_policy():
         }
     }
     print("\n-------- DELETE POLICY ---------\n")
+    print_and_send(ws_req)
+
+def add_pip():
+    attribute_id = "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed"
+    category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
+    data_type = "http://www.w3.org/2001/XMLSchema#string"
+    attribute_value = "true"
+    file_name = "windows-in-bedroom.txt"
+    refresh_rate = 1000
+
+    ws_req = {
+        "RequestPubMessage": {
+            "value": {
+                "timestamp": int(datetime.datetime.now().timestamp()*1000),
+                "command": {
+                    "command_type": "pip-command",
+                    "value": {
+                        "message": {
+                            "purpose": "ADD_PIP",
+                            "message_id": str(uuid.uuid1()),
+                            "pip_type": "PIPReader",
+                            "attribute_id": attribute_id,
+                            "category": category,
+                            "data_type": data_type,
+                            "attribute_value": attribute_value,
+                            "file_name": file_name,
+                            "refresh_rate": refresh_rate
+                        },
+                        "id": "pip-web_socket",
+                        "topic_name": "topic-name",
+                        "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+                    }
+                }
+            }
+        }
+    }
+    print("\n--------- ADD PIP -----------\n")
     print_and_send(ws_req)
 
 ## UNRECOGNIZED COMMAND
