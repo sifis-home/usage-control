@@ -41,7 +41,7 @@ public class SubscriberTimer extends TimerTask {
 	public synchronized void run() {
 		for (Attribute attribute : subscriptions) {
 			// System.out.println("[PipFile] Subscribe iteration");
-			String filter = attribute.getAdditionalInformations();
+			String filter = attribute.getAdditionalInformation();
 
 			Map<String, Set<String>> ldapMap = ldapConnector.search("dc=c3isp,dc=eu", attributeNames, filter);
 

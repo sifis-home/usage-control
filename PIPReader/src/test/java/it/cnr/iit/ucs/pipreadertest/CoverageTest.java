@@ -202,42 +202,42 @@ public class CoverageTest {
     }
 
     public void remoteRetrievalTest() throws PIPException {
-        // test should fail because additionalInformations is not set
+        // test should fail because additionalInformation is not set
         PIPException subjectException = assertThrows(PIPException.class,
                 () -> testRetrieveAttribute(subjectAttribute, subjectAttributePip));
         assertTrue(subjectException.getMessage().contains("Attribute Manager: unable to retrieve a value for filter:"));
 
-        // test should pass because additionalInformations is set with a value present in the file role.txt
-        subjectAttribute.setAdditionalInformations("User");
+        // test should pass because additionalInformation is set with a value present in the file role.txt
+        subjectAttribute.setAdditionalInformation("User");
         String subjectRole = testRetrieveAttribute(subjectAttribute, subjectAttributePip);
         assertEquals("IIT", subjectRole);
-        // clear additionalInformations for other tests
-        subjectAttribute.setAdditionalInformations("");
+        // clear additionalInformation for other tests
+        subjectAttribute.setAdditionalInformation("");
 
 
-        // test should fail because additionalInformations is not set
+        // test should fail because additionalInformation is not set
         PIPException resourceException = assertThrows(PIPException.class,
                 () -> testRetrieveAttribute(resourceAttribute, resourceAttributePip));
         assertTrue(resourceException.getMessage().contains("Attribute Manager: unable to retrieve a value for filter:"));
 
-        // test should pass because additionalInformations is set with a value present in the file resource.txt
-        resourceAttribute.setAdditionalInformations("DATASET");
+        // test should pass because additionalInformation is set with a value present in the file resource.txt
+        resourceAttribute.setAdditionalInformation("DATASET");
         String resourceValue = testRetrieveAttribute(resourceAttribute, resourceAttributePip);
         assertEquals("SECRET", resourceValue);
-        // clear additionalInformations for other tests
-        resourceAttribute.setAdditionalInformations("");
+        // clear additionalInformation for other tests
+        resourceAttribute.setAdditionalInformation("");
 
-        // test should fail because additionalInformations is not set
+        // test should fail because additionalInformation is not set
         PIPException actionException = assertThrows(PIPException.class,
                 () -> testRetrieveAttribute(actionAttribute, actionAttributePip));
         assertTrue(actionException.getMessage().contains("Attribute Manager: unable to retrieve a value for filter:"));
 
-        // test should pass because additionalInformations is set with a value present in the file action.txt
-        actionAttribute.setAdditionalInformations("READ");
+        // test should pass because additionalInformation is set with a value present in the file action.txt
+        actionAttribute.setAdditionalInformation("READ");
         String actionValue = testRetrieveAttribute(actionAttribute, actionAttributePip);
         assertEquals("ANALYZE", actionValue);
-        // clear additionalInformations for other tests
-        actionAttribute.setAdditionalInformations("");
+        // clear additionalInformation for other tests
+        actionAttribute.setAdditionalInformation("");
 
         String value = testRetrieveAttribute(environmentAttribute, environmentAttributePip);
         assertEquals("30.0", value);
@@ -249,7 +249,7 @@ public class CoverageTest {
     // The retrieve(attribute) method retrieves the attribute directly.
     //
     // For a PIP monitoring a (i) subject-related attribute, (ii) a resource-related attribute,
-    // or a (iii) action-related attribute, the additionalInformations field has to be set
+    // or a (iii) action-related attribute, the additionalInformation field has to be set
     // explicitly before the invocation of this method.
     // Otherwise, this method will fail because the PIP is unaware of the 'filter' to be used
     // For example, if the PIP is monitoring the attribute with attributeId urn:...:subject-role,
@@ -390,7 +390,7 @@ public class CoverageTest {
             boolean value = testUnsubscribeAttribute(subjectAttribute, subjectAttributePip);
             assertFalse(value);
 
-            subjectAttribute.setAdditionalInformations("User");
+            subjectAttribute.setAdditionalInformation("User");
             value = testUnsubscribeAttribute(subjectAttribute, subjectAttributePip);
             assertTrue(value);
 
@@ -399,11 +399,11 @@ public class CoverageTest {
             value = testUnsubscribeAttribute(subjectAttribute, subjectAttributePip);
             assertFalse(value);
 
-            resourceAttribute.setAdditionalInformations("DATASET");
+            resourceAttribute.setAdditionalInformation("DATASET");
             value = testUnsubscribeAttribute(resourceAttribute, resourceAttributePip);
             assertTrue(value);
 
-            actionAttribute.setAdditionalInformations("READ");
+            actionAttribute.setAdditionalInformation("READ");
             value = testUnsubscribeAttribute(actionAttribute, actionAttributePip);
             assertTrue(value);
 

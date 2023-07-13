@@ -392,7 +392,7 @@ public final class ContextHandler extends AbstractContextHandler {
         Attribute attribute = new Attribute();
         attribute.setAttributeId(ongoingAttribute.getAttributeId());
         if (!name.isEmpty()) {
-            attribute.setAdditionalInformations(name);
+            attribute.setAdditionalInformation(name);
         }
         return attribute;
     }
@@ -456,7 +456,7 @@ public final class ContextHandler extends AbstractContextHandler {
         try {
             log.info("ReevaluateSessions for  attributeId : " + attribute.getAttributeId());
             List<SessionInterface> sessionList = getSessionListForCategory(attribute.getCategory(),
-                    attribute.getAttributeId(), attribute.getAdditionalInformations());
+                    attribute.getAttributeId(), attribute.getAdditionalInformation());
             if (sessionList != null) {
                 for (SessionInterface session : sessionList) {
                     reevaluate(session);

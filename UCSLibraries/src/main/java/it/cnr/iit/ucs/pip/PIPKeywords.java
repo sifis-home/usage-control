@@ -2,7 +2,7 @@ package it.cnr.iit.ucs.pip;
 
 public final class PIPKeywords {
     /**
-     * Whenever a PIP has to retrieve some informations related to an attribute
+     * Whenever a PIP has to retrieve some information related to an attribute
      * that is stored inside the request, the only information it requires in
      * order to retrieve the value from the request is the category of the
      * attribute

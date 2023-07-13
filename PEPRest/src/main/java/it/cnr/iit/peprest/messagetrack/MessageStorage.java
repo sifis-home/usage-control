@@ -27,7 +27,7 @@ public class MessageStorage implements MessageStorageInterface, MessagesPerSessi
 
     private static final Logger log = Logger.getLogger( MessageStorage.class.getName() );
 
-    private HashMap<String, MessageInformations> messageFlow = new HashMap<>();
+    private HashMap<String, MessageInformation> messageFlow = new HashMap<>();
     private HashMap<String, LinkedList<String>> messagesPerSession = new HashMap<>();
 
     @Override
@@ -82,38 +82,38 @@ public class MessageStorage implements MessageStorageInterface, MessagesPerSessi
     }
 
     private boolean mergeMessages( Message message ) {
-        MessageInformations messageInformations = messageFlow.get( message.getMessageId() );
+        MessageInformation messageInformation = messageFlow.get( message.getMessageId() );
         if( message instanceof TryAccessResponseMessage ) {
             addMessagePerSession( (TryAccessResponseMessage) message );
-            messageInformations.merge( (TryAccessResponseMessage) message );
+            messageInformation.merge( (TryAccessResponseMessage) message );
         } else if( message instanceof StartAccessResponseMessage ) {
-            messageInformations.merge( (StartAccessResponseMessage) message );
+            messageInformation.merge( (StartAccessResponseMessage) message );
         } else if( message instanceof EndAccessResponseMessage ) {
-            messageInformations.merge( (EndAccessResponseMessage) message );
+            messageInformation.merge( (EndAccessResponseMessage) message );
         }
-        return insert( messageInformations );
+        return insert( messageInformation );
     }
 
     private boolean addNewMessage( Message message ) {
-        MessageInformations messageInformations = null;
+        MessageInformation messageInformation = null;
         if( message instanceof TryAccessMessage ) {
-            messageInformations = MessageInformations.build( (TryAccessMessage) message );
+            messageInformation = MessageInformation.build( (TryAccessMessage) message );
         } else if( message instanceof StartAccessMessage ) {
-            messageInformations = MessageInformations.build( (StartAccessMessage) message );
+            messageInformation = MessageInformation.build( (StartAccessMessage) message );
         } else if( message instanceof EndAccessMessage ) {
-            messageInformations = MessageInformations.build( (EndAccessMessage) message );
+            messageInformation = MessageInformation.build( (EndAccessMessage) message );
         } else if( message instanceof ReevaluationResponseMessage ) {
-            messageInformations = MessageInformations.build( (ReevaluationResponseMessage) message );
+            messageInformation = MessageInformation.build( (ReevaluationResponseMessage) message );
         }
-        return insert( messageInformations );
+        return insert( messageInformation );
     }
 
-    private boolean insert( MessageInformations messageInformations ) {
-        if( messageInformations == null ) {
-            log.severe( "MessageInformations is null" );
+    private boolean insert( MessageInformation messageInformation ) {
+        if( messageInformation == null ) {
+            log.severe( "MessageInformation is null" );
             return false;
         }
-        messageFlow.put( messageInformations.getMessageId(), messageInformations );
+        messageFlow.put( messageInformation.getMessageId(), messageInformation );
         return true;
     }
 

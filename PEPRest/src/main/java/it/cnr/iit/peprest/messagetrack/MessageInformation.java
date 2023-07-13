@@ -20,7 +20,7 @@ import oasis.names.tc.xacml.core.schema.wd_17.DecisionType;
  *
  * @author Antonio La Marra, Alessandro Rosetti
  */
-public class MessageInformations {
+public class MessageInformation {
 
     private CallerResponse callerResponse;
     private String messageId;
@@ -50,29 +50,29 @@ public class MessageInformations {
         this.callerResponse = callerResponse;
     }
 
-    private static MessageInformations build( Message message, PEP_STATUS status ) {
-        MessageInformations messageInformations = new MessageInformations();
-        messageInformations.messageId = message.getMessageId();
-        messageInformations.callerResponse = new CallerResponse();
-        messageInformations.callerResponse.setStatus( status );
-        return messageInformations;
+    private static MessageInformation build(Message message, PEP_STATUS status ) {
+        MessageInformation messageInformation = new MessageInformation();
+        messageInformation.messageId = message.getMessageId();
+        messageInformation.callerResponse = new CallerResponse();
+        messageInformation.callerResponse.setStatus( status );
+        return messageInformation;
     }
 
-    public static MessageInformations build( TryAccessMessage message ) {
+    public static MessageInformation build(TryAccessMessage message ) {
         return build( message, PEP_STATUS.TRYACCESS_SENT );
     }
 
-    public static MessageInformations build( StartAccessMessage message ) {
-        MessageInformations messageInformations = build( message, PEP_STATUS.STARTACCESS_SENT );
-        messageInformations.callerResponse.setSessionId( message.getSessionId() );
-        return messageInformations;
+    public static MessageInformation build(StartAccessMessage message ) {
+        MessageInformation messageInformation = build( message, PEP_STATUS.STARTACCESS_SENT );
+        messageInformation.callerResponse.setSessionId( message.getSessionId() );
+        return messageInformation;
     }
 
-    public static MessageInformations build( EndAccessMessage message ) {
+    public static MessageInformation build(EndAccessMessage message ) {
         return build( message, PEP_STATUS.ENDACCESS_SENT );
     }
 
-    public static MessageInformations build( ReevaluationResponseMessage message ) {
+    public static MessageInformation build(ReevaluationResponseMessage message ) {
         if( message.getEvaluation().isDecision( DecisionType.PERMIT ) ) {
             return build( message, PEP_STATUS.SESSION_RESUMED );
         } else {

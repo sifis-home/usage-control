@@ -17,7 +17,7 @@ package it.cnr.iit.ucs.sessionmanager;
 
 /**
  * This is the interface the ContextHandler and the SessionManager use to
- * communicate informations about ongoing attributes.
+ * communicate information about ongoing attributes.
  * 
  * @author antonio
  *
@@ -32,16 +32,16 @@ public interface OnGoingAttributesInterface {
     public String getId();
 
     /**
-     * Retrieves the session id to which the on going attribute is related
+     * Retrieves the session id to which the ongoing attribute is related
      * 
-     * @return the session id to which the on going attribute is related
+     * @return the session id to which the ongoing attribute is related
      */
     public String getSessionId();
 
     /**
-     * Retrieves the attribute id of the on going attribute
+     * Retrieves the attribute id of the ongoing attribute
      * 
-     * @return the attribute id of the on going attribute
+     * @return the attribute id of the ongoing attribute
      */
     public String getAttributeId();
 

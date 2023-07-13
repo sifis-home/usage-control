@@ -173,7 +173,7 @@ public class LDAPConnector {
 
 	/**
 	 * Retrieves the schema related to each user, thus it retrieves in which LDAP
-	 * directories User informations are stored.
+	 * directories User information are stored.
 	 * <p>
 	 * In case of a regular user this function will return cn=user,ou=Users, while
 	 * in BT use case this function will return

@@ -48,7 +48,7 @@ import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
  * <li>Temporarily there will be also the part related to CoCoCloud in which we
  * used to have RuntimeAttestation</li>
  * </ol>
- * All the informations related to these attributes come from the configuration
+ * All the information related to these attributes come from the configuration
  * of this PIP. The PIP expects to have the DSA_ID (conversely the PolicyID as
  * an attribute of the resource that is requested). <b>This attributeID has
  * multiple values</b>
@@ -63,10 +63,10 @@ public final class PIPDsa extends PIPBase {
 	// Class attributes
 	// ---------------------------------------------------------------------------
 	/**
-	 * Whenever a PIP has to retrieve some informations related to an attribute that
-	 * is stored inside the request, it has to know in advance all the informations
+	 * Whenever a PIP has to retrieve some information related to an attribute that
+	 * is stored inside the request, it has to know in advance all the information
 	 * to retrieve that atrtribute. E.g. if this PIP has to retrieve the
-	 * informations about the subject, it has to know in advance which is the
+	 * information about the subject, it has to know in advance which is the
 	 * attribute id qualifying the subject, its category and the datatype used,
 	 * otherwise it is not able to retrieve the value of that attribute, hence it
 	 * would not be able to communicate with the AM properly
@@ -78,9 +78,9 @@ public final class PIPDsa extends PIPBase {
 	protected final BlockingQueue<Attribute> subscriptions = new LinkedBlockingQueue<>();
 
 	/**
-	 * Whenever a PIP has to retrieve some informations related to an attribute that
-	 * is stored inside the request, it has to know in advance all the informations
-	 * to retrieve that attribute. E.g. if this PIP has to retrieve the informations
+	 * Whenever a PIP has to retrieve some information related to an attribute that
+	 * is stored inside the request, it has to know in advance all the information
+	 * to retrieve that attribute. E.g. if this PIP has to retrieve the information
 	 * about the subject, it has to know in advance which is the attribute id
 	 * qualifying the subject, its category and the data-type used, otherwise it is
 	 * not able to retrieve the value of that attribute, hence it would not be able
@@ -191,7 +191,7 @@ public final class PIPDsa extends PIPBase {
 	public String retrieve(Attribute attribute) throws PIPException {
 		try {
 
-			String dsaId = attribute.getAdditionalInformations();
+			String dsaId = attribute.getAdditionalInformation();
 			UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(DsaUrlMethods.getDsaUrl());
 
 			DsaAttribute dsaAttribute = null;
@@ -282,7 +282,7 @@ public final class PIPDsa extends PIPBase {
 			if (attribute.getAttributeId().equals(getAttributeIds().get(0))) {
 				for (Attribute subscribedAttribute : subscriptions) {
 					if (subscribedAttribute.getCategory() == Category.ENVIRONMENT || subscribedAttribute
-							.getAdditionalInformations().equals(attribute.getAdditionalInformations())) {
+							.getAdditionalInformation().equals(attribute.getAdditionalInformation())) {
 						return removeAttribute(subscribedAttribute);
 					}
 				}
@@ -299,7 +299,7 @@ public final class PIPDsa extends PIPBase {
 	}
 
 	private void addAdditionalInformation(RequestType request, Attribute attribute, String dsaId) {
-		attribute.setAdditionalInformations(dsaId);
+		attribute.setAdditionalInformation(dsaId);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
@@ -359,7 +359,7 @@ public final class PIPDsa extends PIPBase {
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
 			if (!oldValue.equals(value)) { // if the attribute has changed
 				log.log(Level.INFO, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
-						value, attribute.getAdditionalInformations(), System.currentTimeMillis() });
+						value, attribute.getAdditionalInformation(), System.currentTimeMillis() });
 				attribute.setValue(attribute.getDataType(), value);
 				notifyRequestManager(attribute);
 			}

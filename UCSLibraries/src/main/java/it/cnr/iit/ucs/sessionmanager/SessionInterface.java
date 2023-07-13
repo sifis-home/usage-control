@@ -21,7 +21,7 @@ import java.util.List;
  * This is the Session interface.
  *
  * A session interface is a set of common API the SessionManager and the Context
- * Handler agree on using when communicating between each other informations
+ * Handler agree on using when communicating between each other information
  * about a session.
  * The provided API are the ones to retrieve the various fields of a Session.
  * All the returned parameters are in String format.

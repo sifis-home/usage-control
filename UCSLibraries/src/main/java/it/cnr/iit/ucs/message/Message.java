@@ -24,7 +24,7 @@ import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.errorhandling.Reject;
 
 /**
- * A message contains basic informations needed by the actors that are communicating.
+ * A message contains basic information needed by the actors that are communicating.
  *
  * @author Antonio La Marra, Alessandro Rosetti
  */

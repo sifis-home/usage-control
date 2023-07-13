@@ -43,7 +43,7 @@ public final class Attribute implements Cloneable {
 	 */
 	private final HashMap<String, List<String>> attributeValueMap;
 
-	private String additionalInformations = "";
+	private String additionalInformation = "";
 
 	public Attribute() {
 		attributeValueMap = new HashMap<>();
@@ -196,7 +196,7 @@ public final class Attribute implements Cloneable {
 			if (values != null) {
 				resultBuilder.append("Value=").append(values);
 			}
-			resultBuilder.append("\tAdditionalInfo: ").append(additionalInformations);
+			resultBuilder.append("\tAdditionalInfo: ").append(additionalInformation);
 		}
 		return resultBuilder.toString();
 	}
@@ -268,12 +268,12 @@ public final class Attribute implements Cloneable {
 		return category;
 	}
 
-	public String getAdditionalInformations() {
-		return additionalInformations;
+	public String getAdditionalInformation() {
+		return additionalInformation;
 	}
 
-	public void setAdditionalInformations(String additionalInformations) {
-		this.additionalInformations = additionalInformations;
+	public void setAdditionalInformation(String additionalInformation) {
+		this.additionalInformation = additionalInformation;
 	}
 
 	public void setValue(DataType dataType, String... values) {

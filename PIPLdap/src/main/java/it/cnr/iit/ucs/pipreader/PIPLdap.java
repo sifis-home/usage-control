@@ -42,7 +42,7 @@ import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
 
 /**
  * PIP LDAP implementation: it performs PIP operations by retrieving and
- * updating user informations stored in an LDAP server
+ * updating user information stored in an LDAP server
  *
  * @author Fabio Bindi and Filippo Lauria
  */

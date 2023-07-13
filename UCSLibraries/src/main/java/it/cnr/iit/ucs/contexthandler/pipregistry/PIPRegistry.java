@@ -117,7 +117,6 @@ public class PIPRegistry implements PIPRegistryInterface {
 
 		// loop on all the PIPs
 		for (PIPCHInterface pip : pipList) {
-//			int attributesNumber = pip.getAttributes().size();
 
 			//loop on the ongoing attributes
 			for (Attribute attr : attributes) {
@@ -134,30 +133,5 @@ public class PIPRegistry implements PIPRegistryInterface {
 				}
 			}
 		}
-
-			// loop on all the attributes of a PIP
-//			for (int i = 0; i < attributesNumber; i++) {
-//				Attribute pipAttribute = pip.getAttributes().get(i);
-//				// get the category of the PIP's attribute
-//				Category category = pipAttribute.getCategory();
-				//loop on the ongoing attributes
-//				for (Attribute a : attributes) {
-					// if the PIP's attributeId is equal to the ongoing attribute we are considering
-//					if (pipAttribute.getAttributeId().equals(a.getAttributeId())) {
-//						try {
-//							if (!category.equals(Category.ENVIRONMENT)) {
-//								String filter = request.getAttributeValue(category);
-//								a.setAdditionalInformations(filter);
-//							}
-//							pip.subscribe(a);
-//							pip.subscribe(request);
-//						} catch (Exception e) {
-//							log.severe("Error subscribe : " + e.getMessage());
-//							Throwables.throwIfUnchecked(new RuntimeException("Error subscribe : " + e.getMessage()));
-//						}
-//					}
-//				}
-//			}
-//		}
 	}
 }

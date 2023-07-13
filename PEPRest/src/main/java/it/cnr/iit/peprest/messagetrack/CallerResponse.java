@@ -1,7 +1,7 @@
 package it.cnr.iit.peprest.messagetrack;
 
 /**
- * This object holds many useful informations:
+ * This object holds many useful pieces of information:
  * <ol>
  * <li>The status of the message</li>
  * <li>The id that was assigned to the session initialized by the caller, if any, by which the caller can manage its

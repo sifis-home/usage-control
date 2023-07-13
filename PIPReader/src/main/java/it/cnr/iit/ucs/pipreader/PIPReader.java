@@ -160,7 +160,7 @@ public final class PIPReader extends PIPBase {
         if (isEnvironmentCategory(attribute)) {
             value = read(filePath);
         } else {
-            value = read(filePath, attribute.getAdditionalInformations());
+            value = read(filePath, attribute.getAdditionalInformation());
         }
         attribute.setValue(attribute.getDataType(), value);
         return value;
@@ -266,8 +266,8 @@ public final class PIPReader extends PIPBase {
                     // if the attribute is of category Environment,
                     // or if the additionalInformation matches
                     if (subscribedAttribute.getCategory() == Category.ENVIRONMENT ||
-                            subscribedAttribute.getAdditionalInformations()
-                                    .equals(attributeToUnsubscribe.getAdditionalInformations())) {
+                            subscribedAttribute.getAdditionalInformation()
+                                    .equals(attributeToUnsubscribe.getAdditionalInformation())) {
                         atLeastOneAttributeRemoved = removeAttribute(subscribedAttribute);
                         break;
                     }
@@ -286,7 +286,7 @@ public final class PIPReader extends PIPBase {
 
     private void addAdditionalInformation(RequestType request, Attribute attribute) {
         String filter = request.getAttributeValue(expectedCategoryMap.get(attribute.getAttributeId()));
-        attribute.setAdditionalInformations(filter);
+        attribute.setAdditionalInformation(filter);
     }
 
     public boolean isEnvironmentCategory(Attribute attribute) {
@@ -423,7 +423,7 @@ public final class PIPReader extends PIPBase {
                 log.log(Level.INFO,
                         "Attribute {0}={1}:{2} changed at {3}",
                         new Object[]{attribute.getAttributeId(), value,
-                                attribute.getAdditionalInformations(),
+                                attribute.getAdditionalInformation(),
                                 System.currentTimeMillis()});
                 attribute.setValue(attribute.getDataType(), value);
                 notifyRequestManager(attribute);

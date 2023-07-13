@@ -41,8 +41,8 @@ public interface UCSInterface {
 	 * this node.
 	 *
 	 * @param tryAccessMessage the tryAccessMessage object, it contains all the
-	 *                         informations required for the recipient to call back
-	 *                         the caller and all the informations to correctly
+	 *                         information required for the recipient to call back
+	 *                         the caller and all the information to correctly
 	 *                         evaluate the request.
 	 */
 	public Message tryAccess(TryAccessMessage tryAccessMessage);
@@ -58,7 +58,7 @@ public interface UCSInterface {
 	 * another UCS, exactly as it happens in tryAccess.
 	 *
 	 * @param startAccessMessage the startAccess message object. It contains all the
-	 *                           informations required for the recipient to call
+	 *                           information required for the recipient to call
 	 *                           back the caller, in general in this message the
 	 *                           caller puts only the sessionID that has to be
 	 *                           evaluated
@@ -81,7 +81,7 @@ public interface UCSInterface {
 	 * asked from the scheduler of another UCS, exactly as it happens in tryAccess
 	 * and startAccess.
 	 *
-	 * @param endAccessMessage the message containing the informations required to
+	 * @param endAccessMessage the message containing the information required to
 	 *                         perform the endAccess
 	 */
 	public Message endAccess(EndAccessMessage endAccessMessage);

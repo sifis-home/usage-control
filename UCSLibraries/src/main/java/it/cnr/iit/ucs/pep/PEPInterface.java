@@ -34,14 +34,14 @@ public interface PEPInterface {
      * onGoingEvaluation changes
      *
      * @param message
-     *          the message containing the informations required by the PEP
+     *          the message containing the information required by the PEP
      * @return a message
      */
     public Message onGoingEvaluation( ReevaluationResponseMessage message );
 
     /**
      * In the asynchronous case the PEP has also to offer a way for the ucs to
-     * communicate with it. Hence the PEP will also have a function to be used by
+     * communicate with it. Hence, the PEP will also have a function to be used by
      * the UCS for sending responses. In the case in which the PEP is local to the
      * context handler, this will be considered a callback function (to be put
      * inside the message sent to the context handler), or it can be a REST API.

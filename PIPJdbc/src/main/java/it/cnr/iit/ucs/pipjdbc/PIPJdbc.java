@@ -66,9 +66,9 @@ public final class PIPJdbc extends PIPBase {
 	private static final String SUBJECT_ID = "urn:oasis:names:tc:xacml:1.0:subject:subject-id";
 
 	/**
-	 * Whenever a PIP has to retrieve some informations related to an attribute that
-	 * is stored inside the request, it has to know in advance all the informations
-	 * to retrieve that attribute. E.g. if this PIP has to retrieve the informations
+	 * Whenever a PIP has to retrieve some information related to an attribute that
+	 * is stored inside the request, it has to know in advance all the information
+	 * to retrieve that attribute. E.g. if this PIP has to retrieve the information
 	 * about the subject, it has to know in advance which is the attribute id
 	 * qualifying the subject, its category and the data-type used, otherwise it is
 	 * not able to retrieve the value of that attribute, hence it would not be able
@@ -164,7 +164,7 @@ public final class PIPJdbc extends PIPBase {
 	public String retrieve(Attribute attribute) throws PIPException {
 		Map<String, String> attributesToValues = new HashMap<>();
 		try {
-			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformations(),
+			attributesToValues = new ObjectMapper().readValue(attribute.getAdditionalInformation(),
 					new TypeReference<Map<String, String>>() {
 					});
 
@@ -236,7 +236,7 @@ public final class PIPJdbc extends PIPBase {
 			if (attribute.getAttributeId().equals(getAttributeIds().get(0))) {
 				for (Attribute subscribedAttribute : subscriptions) {
 					if (subscribedAttribute.getCategory() == Category.ENVIRONMENT || subscribedAttribute
-							.getAdditionalInformations().equals(attribute.getAdditionalInformations())) {
+							.getAdditionalInformation().equals(attribute.getAdditionalInformation())) {
 						return removeAttribute(subscribedAttribute);
 					}
 				}
@@ -273,7 +273,7 @@ public final class PIPJdbc extends PIPBase {
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		attribute.setAdditionalInformations(filters);
+		attribute.setAdditionalInformation(filters);
 	}
 
 	public boolean isEnvironmentCategory(Attribute attribute) {
@@ -336,7 +336,7 @@ public final class PIPJdbc extends PIPBase {
 			String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);
 			if (!oldValue.equals(value)) { // if the attribute has changed
 				log.log(Level.INFO, "Attribute {0}={1}:{2} changed at {3}", new Object[] { attribute.getAttributeId(),
-						value, attribute.getAdditionalInformations(), System.currentTimeMillis() });
+						value, attribute.getAdditionalInformation(), System.currentTimeMillis() });
 				attribute.setValue(attribute.getDataType(), value);
 				notifyRequestManager(attribute);
 			}
