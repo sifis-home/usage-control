@@ -2,6 +2,7 @@ package it.cnr.iit.ucsdht;
 
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
+import it.cnr.iit.ucs.exceptions.PAPException;
 import it.cnr.iit.ucs.exceptions.RequestException;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
 import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
@@ -99,7 +100,11 @@ public class UCSClient {
     }
 
     public List<String> listPolicies() {
-        return ucs.getPap().listPolicies();
+        try {
+            return ucs.getPap().listPolicies();
+        } catch (PAPException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     public String getPolicy(String policyId) {
