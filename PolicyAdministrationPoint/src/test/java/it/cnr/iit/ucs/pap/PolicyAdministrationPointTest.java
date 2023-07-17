@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 
 public class PolicyAdministrationPointTest {
 
-    private static final String POLICY_FILE_LOCATION = "../res/xmls/";
+    private static final String POLICY_FILE_LOCATION = "../res/xmls/policies/";
     private static final String POLICY_ID = "policy2Attributes.xml";
     private static final String POLICY_FILE_NAME_TO_CREATE = "policy_1.xml";
     private PolicyAdministrationPoint pap;
