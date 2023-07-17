@@ -15,19 +15,16 @@
  ******************************************************************************/
 package it.cnr.iit.ucs.pap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import it.cnr.iit.ucs.exceptions.PAPException;
+import it.cnr.iit.ucs.properties.components.PapProperties;
+import it.cnr.iit.utility.FileUtility;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Map;
 
-import it.cnr.iit.ucs.exceptions.PAPException;
-import org.junit.Before;
-import org.junit.Test;
-
-import it.cnr.iit.ucs.properties.components.PapProperties;
-import it.cnr.iit.utility.FileUtility;
+import static org.junit.Assert.*;
 
 public class PolicyAdministrationPointTest {
 
@@ -38,41 +35,93 @@ public class PolicyAdministrationPointTest {
 
     @Before
     public void init() {
-        File policyFile = new File( POLICY_FILE_LOCATION + POLICY_ID );
-        if( policyFile.exists() ) {
+        File policyFile = new File(POLICY_FILE_LOCATION + POLICY_ID);
+        if (policyFile.exists()) {
             policyFile.delete();
         }
-        pap = new PolicyAdministrationPoint( properties );
+        pap = new PolicyAdministrationPoint(properties);
     }
 
     @Test
     public void aPolicyCanBePersistedAndReloaded() {
         // given a policy
-        String policyToStore = FileUtility.readFileAsString( POLICY_FILE_LOCATION + POLICY_FILE_NAME_TO_CREATE );
+        String policyToStore = FileUtility.readFileAsString(POLICY_FILE_LOCATION + POLICY_FILE_NAME_TO_CREATE);
 
         // when pap store is called
-        String policyId = pap.addPolicy( policyToStore );
+        String policyId = pap.addPolicy(policyToStore);
 
         // then the policy is persisted
-        assertNotNull( policyId );
+        assertNotNull(policyId);
 
         // and the policy can be retrieved
-        String policyRetrieved = pap.retrievePolicy( policyId );
+        String policyRetrieved = pap.retrievePolicy(policyId);
 
         // and the retrieved one is same as the one persisted
-        assertEquals( policyToStore, policyRetrieved );
+        assertEquals(policyToStore, policyRetrieved);
+
+        // The policy is deleted
+        assertTrue(pap.deletePolicy(policyId));
+
+        // If we try to delete the same policy again, it fails and returns false
+        assertFalse(pap.deletePolicy(policyId));
     }
 
     @Test
     public void policiesCanBeListed() {
         try {
-            assertFalse( pap.listPolicies().isEmpty() );
+            assertFalse(pap.listPolicies().isEmpty());
         } catch (PAPException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private PapProperties properties = new PapProperties() {
+    @Test
+    public void testFailListPolicies() {
+        PapProperties wrongPathProperties = new PapProperties() {
+            @Override
+            public String getName() {
+                return null;
+            }
+
+            @Override
+            public String getId() {
+                return null;
+            }
+
+            @Override
+            public Map<String, String> getAdditionalProperties() {
+                return null;
+            }
+
+            @Override
+            public String getPath() {
+                return "wrong-path";
+            }
+        };
+        PolicyAdministrationPoint pap = new PolicyAdministrationPoint(wrongPathProperties);
+        try {
+            pap.listPolicies();
+        } catch (PAPException e) {
+            assertEquals("Error retrieving the list of policies", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetPath() {
+        assertEquals(POLICY_FILE_LOCATION, pap.getPath());
+    }
+
+    @Test
+    public void testFailAddPolicy() {
+        assertNull(pap.addPolicy("non-valid-policy"));
+    }
+
+    @Test
+    public void testFailRetrievePolicy() {
+        assertNull(pap.retrievePolicy("non-existent-policy-id"));
+    }
+
+    private final PapProperties properties = new PapProperties() {
 
         @Override
         public String getName() {
