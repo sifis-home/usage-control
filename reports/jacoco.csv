@@ -10,8 +10,8 @@ coverage/PIPReader,it.cnr.iit.ucs.pipreader,PIPReaderSubscriberTimer,6,35,1,1,2,
 coverage/PIPReader,it.cnr.iit.ucs.pipreader,PIPReader,125,579,8,42,34,122,12,37,6,18
 coverage/PolicyAdministrationPoint,it.cnr.iit.ucs.pap,PolicyAdministrationPoint,29,181,5,9,6,39,5,11,0,9
 coverage/PolicyDecisionPoint,it.cnr.iit.ucs.pdp,FileSystemPolicyFinderModule,373,5,39,0,91,1,29,1,9,1
-coverage/PolicyDecisionPoint,it.cnr.iit.ucs.pdp,InputStreamBasedPolicyFinderModule,74,165,11,8,14,47,9,9,0,8
 coverage/PolicyDecisionPoint,it.cnr.iit.ucs.pdp,PolicyDecisionPoint,386,186,31,11,78,46,26,13,6,12
+coverage/PolicyDecisionPoint,it.cnr.iit.ucs.pdp,InputStreamBasedPolicyFinderModule,74,165,11,8,14,47,9,9,0,8
 coverage/SessionManager,it.cnr.iit.ucs.sessionmanager,OnGoingAttribute,136,78,8,6,29,30,15,13,11,9
 coverage/SessionManager,it.cnr.iit.ucs.sessionmanager,Session,74,128,4,4,25,31,14,11,11,10
 coverage/SessionManager,it.cnr.iit.ucs.sessionmanager,SessionManager,245,722,20,44,56,173,19,36,4,19
@@ -29,8 +29,8 @@ coverage/UCSDht,it.cnr.iit.ucsdht,PEPDhtUCSSide,43,0,0,0,15,0,4,0,4,0
 coverage/UCSDht,it.cnr.iit.ucsdht,UCSDht,810,0,42,0,206,0,58,0,37,0
 coverage/UCSDht,it.cnr.iit.ucsdht,UCSDht.new DHTClient.MessageHandler() {...},130,0,10,0,40,0,9,0,3,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPepProperties,51,0,0,0,22,0,16,0,16,0
-coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPipProperties,73,0,0,0,21,0,11,0,11,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtObligationManagerProperties,9,0,0,0,4,0,4,0,4,0
+coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPipProperties,73,0,0,0,21,0,11,0,11,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtRequestManagerProperties,13,0,0,0,6,0,6,0,6,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtProperties,51,0,0,0,15,0,10,0,10,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPdpProperties,15,0,0,0,7,0,7,0,7,0
@@ -85,8 +85,8 @@ coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,ExpressionType,0,3,
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,MatchType,16,15,0,0,8,5,4,5,4,5
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,PolicyIssuerType,4,17,1,1,2,5,2,3,1,3
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributeDesignatorType,20,18,0,0,10,6,5,6,5,6
-coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AllOfType,0,14,1,1,0,4,1,2,0,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,ObjectFactory,632,334,0,0,103,56,103,2,103,2
+coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AllOfType,0,14,1,1,0,4,1,2,0,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,PolicyIdentifierListType,0,14,1,1,0,4,1,2,0,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,StatusDetailType,0,14,1,1,0,4,1,2,0,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,RequestDefaultsType,4,6,0,0,2,2,1,2,1,2
@@ -98,8 +98,8 @@ coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,MultiRequestsType,0
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,VariableReferenceType,4,6,0,0,2,2,1,2,1,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributeAssignmentExpressionType,16,15,0,0,8,5,4,5,4,5
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,MissingAttributeDetailType,16,26,1,1,8,8,5,6,4,6
-coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,DefaultsType,4,6,0,0,2,2,1,2,1,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,PolicyType,24,84,0,2,6,34,4,23,4,22
+coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,DefaultsType,4,6,0,0,2,2,1,2,1,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributesReferenceType,4,6,0,0,2,2,1,2,1,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributeType,0,35,0,2,0,13,0,9,0,8
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,TargetType,0,14,1,1,0,4,1,2,0,2
