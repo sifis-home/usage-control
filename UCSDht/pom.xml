@@ -6,7 +6,7 @@
     <parent>
         <groupId>it.cnr.iit.usagecontrolframework</groupId>
         <artifactId>UsageControl</artifactId>
-        <version>sifis-home-0.0.1-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <groupId>it.cnr.iit.ucsdht</groupId>
@@ -33,31 +33,30 @@
         <dependency>
             <groupId>it.cnr.iit.ucs</groupId>
             <artifactId>UCSLibraries</artifactId>
-            <version>sifis-home-0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>it.cnr.iit.ucs</groupId>
             <artifactId>PolicyAdministrationPoint</artifactId>
-            <version>sifis-home-0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.cnr.iit.ucs</groupId>
             <artifactId>UCSCore</artifactId>
-            <version>sifis-home-0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.cnr.iit.ucs</groupId>
             <artifactId>PolicyDecisionPoint</artifactId>
-            <version>sifis-home-0.0.1-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>it.cnr.iit.pepdht</groupId>
             <artifactId>PEPDht</artifactId>
-            <version>sifis-home-0.0.1-SNAPSHOT</version>
-<!--            <scope>compile</scope>-->
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -72,6 +71,7 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -89,6 +89,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -105,6 +106,28 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <!-- JaCoCo plugin -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.10</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
