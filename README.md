@@ -1,3 +1,5 @@
+[![coverage](https://raw.githubusercontent.com/sifis-home/usage-control/gh-pages/reports/jacoco.svg 'Code Coverage')](https://sifis-home.github.io/usage-control/reports/index.html)
+
 # Usage Control (UCS)
 
 This repository (branch sifis-home) implements the Usage Control System for the SIFIS-Home project.
