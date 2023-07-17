@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AbstractContextHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.contexthandler</a> &gt; <span class="el_source">AbstractContextHandler.java</span></div><h1>AbstractContextHandler.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.contexthandler;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+
+import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistry;
+import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
+import it.cnr.iit.ucs.obligationmanager.ObligationManagerInterface;
+import it.cnr.iit.ucs.pap.PAPInterface;
+import it.cnr.iit.ucs.pdp.PDPInterface;
+import it.cnr.iit.ucs.pip.PIPCHInterface;
+import it.cnr.iit.ucs.properties.components.ContextHandlerProperties;
+import it.cnr.iit.ucs.requestmanager.RequestManagerToCHInterface;
+import it.cnr.iit.ucs.sessionmanager.SessionManagerInterface;
+import it.cnr.iit.utility.RESTUtils;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * This is the abstract representation of the context handler object.
+ * In order to work properly, a context handler requires the interfaces offered
+ * by other components.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public abstract class AbstractContextHandler implements ContextHandlerInterface {
+
+    private SessionManagerInterface sessionManager;
+    private RequestManagerToCHInterface requestManager;
+    private ObligationManagerInterface obligationManager;
+    private PIPRegistryInterface pipRegistry;
+    private PDPInterface pdp;
+    private PAPInterface pap;
+
+    protected ContextHandlerProperties properties;
+    protected URI uri;
+
+<span class="fc" id="L54">    protected AbstractContextHandler( ContextHandlerProperties properties ) {</span>
+<span class="fc" id="L55">        Reject.ifNull( properties, ContextHandlerProperties.class.getName() );</span>
+<span class="fc" id="L56">        this.properties = properties;</span>
+
+<span class="fc" id="L58">        Optional&lt;URI&gt; baseUri = RESTUtils.parseUri( properties.getUri() );</span>
+<span class="fc" id="L59">        Reject.ifAbsent( baseUri );</span>
+<span class="fc" id="L60">        this.uri = baseUri.get(); // NOSONAR</span>
+
+<span class="fc" id="L62">        pipRegistry = new PIPRegistry();</span>
+<span class="fc" id="L63">    }</span>
+
+    protected final SessionManagerInterface getSessionManager() {
+<span class="fc" id="L66">        return sessionManager;</span>
+    }
+
+    public void setSessionManager( SessionManagerInterface sessionManager ) {
+<span class="fc" id="L70">        Reject.ifNull( sessionManager, SessionManagerInterface.class.getName() );</span>
+<span class="fc" id="L71">        this.sessionManager = sessionManager;</span>
+<span class="fc" id="L72">    }</span>
+
+    protected final PDPInterface getPdp() {
+<span class="fc" id="L75">        return pdp;</span>
+    }
+
+    public void setPdp( PDPInterface pdp ) {
+<span class="fc" id="L79">        Reject.ifNull( pdp, PDPInterface.class.getName() );</span>
+<span class="fc" id="L80">        this.pdp = pdp;</span>
+<span class="fc" id="L81">    }</span>
+
+    protected final PAPInterface getPap() {
+<span class="fc" id="L84">        return pap;</span>
+    }
+
+    public void setPap( PAPInterface pap ) {
+<span class="fc" id="L88">        Reject.ifNull( pap, PAPInterface.class.getName() );</span>
+<span class="fc" id="L89">        this.pap = pap;</span>
+<span class="fc" id="L90">    }</span>
+
+    protected final RequestManagerToCHInterface getRequestManager() {
+<span class="nc" id="L93">        return requestManager;</span>
+    }
+
+    public void setRequestManager(
+            RequestManagerToCHInterface requestManager ) {
+<span class="fc" id="L98">        Reject.ifNull( requestManager, RequestManagerToCHInterface.class.getName() );</span>
+<span class="fc" id="L99">        this.requestManager = requestManager;</span>
+<span class="fc" id="L100">    }</span>
+
+    public void setPIPs( List&lt;PIPCHInterface&gt; pipList ) {
+<span class="nc" id="L103">        Reject.ifNull( pipList, PIPCHInterface.class.getName() + &quot; list&quot; );</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        for( PIPCHInterface pip : pipList ) {</span>
+<span class="nc" id="L105">            pipRegistry.add( pip );</span>
+<span class="nc" id="L106">        }</span>
+<span class="nc" id="L107">    }</span>
+
+    protected void setPipRegistry( PIPRegistryInterface pipRegistry ) {
+<span class="nc" id="L110">        Reject.ifNull( pipRegistry, PIPRegistryInterface.class.getName() );</span>
+<span class="nc" id="L111">        this.pipRegistry = pipRegistry;</span>
+<span class="nc" id="L112">    }</span>
+
+    public PIPRegistryInterface getPipRegistry() {
+<span class="fc" id="L115">        return pipRegistry;</span>
+    }
+
+    public void setObligationManager( ObligationManagerInterface obligationManager ) {
+<span class="fc" id="L119">        Reject.ifNull( obligationManager, ObligationManagerInterface.class.getName() );</span>
+<span class="fc" id="L120">        this.obligationManager = obligationManager;</span>
+<span class="fc" id="L121">    }</span>
+
+    protected final ObligationManagerInterface getObligationManager() {
+<span class="fc" id="L124">        return obligationManager;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

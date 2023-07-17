@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Category.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.xacml</a> &gt; <span class="el_source">Category.java</span></div><h1>Category.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.xacml;
+
+/**
+ * In XACML syntax the category can be one of:
+ * Subject, Resource, Action, Environment.
+ * This enumerate is used to hold the String that represents the category in the
+ * UXACML format
+ *
+ * @author Antonio La Marra
+ */
+<span class="fc" id="L26">public enum Category {</span>
+<span class="fc" id="L27">    ACTION( &quot;urn:oasis:names:tc:xacml:3.0:attribute-category:action&quot; ),</span>
+<span class="fc" id="L28">    RESOURCE( &quot;urn:oasis:names:tc:xacml:3.0:attribute-category:resource&quot; ),</span>
+<span class="fc" id="L29">    SUBJECT( &quot;urn:oasis:names:tc:xacml:1.0:subject-category:access-subject&quot; ),</span>
+<span class="fc" id="L30">    ENVIRONMENT( &quot;urn:oasis:names:tc:xacml:3.0:attribute-category:environment&quot; ),</span>
+<span class="fc" id="L31">    UCS(&quot;urn:uxacml:names:xacml:3.0:attribute-category:ucs&quot;);</span>
+
+    private final String payload;
+
+<span class="fc" id="L35">    Category( String payload ) {</span>
+<span class="fc" id="L36">        this.payload = payload;</span>
+<span class="fc" id="L37">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L41">        return payload;</span>
+    }
+
+    /**
+     * Converts the string passed as parameter to a CATEGORY enumerate
+     *
+     * @param payload
+     *          the string we want to convert
+     * @return the CATEGORY object correspondent to that string if any, null
+     *         otherwise
+     */
+    public static Category toCATEGORY( String payload ) {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if( payload.equalsIgnoreCase( ACTION.toString() ) ) {</span>
+<span class="fc" id="L54">            return ACTION;</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        } else if( payload.equalsIgnoreCase( RESOURCE.toString() ) ) {</span>
+<span class="fc" id="L56">            return RESOURCE;</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        } else if( payload.equalsIgnoreCase( SUBJECT.toString() ) ) {</span>
+<span class="fc" id="L58">            return SUBJECT;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        } else if( payload.equalsIgnoreCase( ENVIRONMENT.toString() ) ) {</span>
+<span class="fc" id="L60">            return ENVIRONMENT;</span>
+        }
+<span class="fc" id="L62">        return null;</span>
+    }
+
+    public boolean contains( String payload ) {
+<span class="nc" id="L66">        return this.payload.contains( payload );</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

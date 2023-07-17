@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RequestWrapper.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.xacml.wrappers</a> &gt; <span class="el_source">RequestWrapper.java</span></div><h1>RequestWrapper.java</h1><pre class="source lang-java linenums">package it.cnr.iit.xacml.wrappers;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBException;
+
+import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
+import it.cnr.iit.ucs.exceptions.RequestException;
+import it.cnr.iit.utility.JAXBUtility;
+import it.cnr.iit.xacml.Attribute;
+
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributesType;
+import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
+
+public class RequestWrapper {
+
+<span class="fc" id="L19">    private static final Logger log = Logger.getLogger( RequestWrapper.class.getName() );</span>
+
+    private PIPRegistryInterface pipRegistry;
+    private RequestType requestType;
+    private String request;
+
+    private RequestWrapper() {}
+
+    public static RequestWrapper build( String request ) throws RequestException {
+<span class="fc" id="L28">        return build( request, null );</span>
+    }
+
+    public static RequestWrapper build( String request, PIPRegistryInterface pipRegistry ) throws RequestException {
+<span class="fc" id="L32">        RequestWrapper requestWrapper = new RequestWrapper();</span>
+        try {
+<span class="fc" id="L34">            requestWrapper.requestType = unmarshalRequestType( request );</span>
+<span class="fc" id="L35">        } catch( JAXBException e ) {</span>
+<span class="fc" id="L36">            throw new RequestException( &quot;Error marshalling request : {0}&quot; + e.getMessage() );</span>
+<span class="fc" id="L37">        }</span>
+
+<span class="fc" id="L39">        requestWrapper.request = request;</span>
+<span class="fc" id="L40">        requestWrapper.pipRegistry = pipRegistry;</span>
+<span class="fc" id="L41">        return requestWrapper;</span>
+    }
+
+    public static RequestWrapper build( RequestWrapper request ) throws RequestException {
+<span class="nc" id="L45">        return RequestWrapper.build( request.getRequest(), request.pipRegistry );</span>
+    }
+
+    public String getRequest() {
+<span class="fc" id="L49">        return request;</span>
+    }
+
+    public RequestType getRequestType() {
+<span class="nc" id="L53">        return requestType;</span>
+    }
+
+    public boolean requestHasAttribute( Attribute attribute ) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        for( AttributesType attributeType : requestType.getAttributes() ) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            for( AttributeType att : attributeType.getAttribute() ) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                if( attribute.getAttributeId().equals( att.getAttributeId() ) ) {</span>
+<span class="nc" id="L60">                    return true;</span>
+                }
+<span class="nc" id="L62">            }</span>
+<span class="nc" id="L63">        }</span>
+<span class="nc" id="L64">        return false;</span>
+    }
+
+    public boolean update() {
+        try {
+<span class="fc" id="L69">            request = marshalRequestType( requestType );</span>
+<span class="fc" id="L70">            return true;</span>
+<span class="nc" id="L71">        } catch( JAXBException e ) {</span>
+<span class="nc" id="L72">            log.log( Level.SEVERE, &quot;Error marshalling request (update) : {0}&quot;, e.getMessage() );</span>
+<span class="nc" id="L73">            return false;</span>
+        }
+    }
+
+    public synchronized boolean fatten( boolean subscribe ) {
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if( pipRegistry == null ) {</span>
+<span class="nc" id="L79">            log.log( Level.INFO, &quot;pipRegistry is not set in this requestWrapper&quot; );</span>
+<span class="nc" id="L80">            return false;</span>
+        }
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if( subscribe ) {</span>
+<span class="nc" id="L83">            pipRegistry.subscribeAll( requestType );</span>
+        } else {
+<span class="fc" id="L85">            pipRegistry.retrieveAll( requestType );</span>
+        }
+<span class="fc" id="L87">        return update();</span>
+    }
+
+    public void setAttribute(Attribute attribute, String value) {
+<span class="fc" id="L91">		requestType.removeAttribute(attribute.getCategory(), attribute.getAttributeId());</span>
+<span class="fc" id="L92">		requestType.addAttribute(attribute, value);</span>
+		try {
+<span class="fc" id="L94">			request = marshalRequestType(requestType);</span>
+<span class="nc" id="L95">		} catch (JAXBException e) {</span>
+<span class="fc" id="L96">		}</span>
+<span class="fc" id="L97">	}</span>
+
+    public static RequestType unmarshalRequestType( String request ) throws JAXBException {
+<span class="fc" id="L100">        return JAXBUtility.unmarshalToObject( RequestType.class, request );</span>
+    }
+
+    public static String marshalRequestType( RequestType request ) throws JAXBException {
+<span class="fc" id="L104">        return JAXBUtility.marshalToString( RequestType.class, request, &quot;Request&quot;, JAXBUtility.SCHEMA );</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

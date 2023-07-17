@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PEPDht.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PEPDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.pepdht</a> &gt; <span class="el_source">PEPDht.java</span></div><h1>PEPDht.java</h1><pre class="source lang-java linenums">package it.cnr.iit.pepdht;
+
+import com.google.gson.JsonSyntaxException;
+import it.cnr.iit.pepdht.track.AccessTracker;
+import it.cnr.iit.utility.dht.DHTClient;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Base64;
+import java.util.Scanner;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static it.cnr.iit.utility.dht.DHTUtils.*;
+
+<span class="nc" id="L29">public class PEPDht {</span>
+
+    // map containing the requests sent and for which a response has not been received yet.
+    // The messageId is the key and the json object (the request) is the value
+<span class="nc" id="L33">    private static final ConcurrentMap&lt;String, JsonOut&gt; unansweredMap = new ConcurrentHashMap&lt;&gt;();</span>
+
+    // object that keeps track of the status of requests and answers.
+    // Useful to retrieve the sessionId from a messageId
+<span class="nc" id="L37">    private static final AccessTracker accessTracker = new AccessTracker();</span>
+    private static DHTClient dhtClientEndPoint;
+<span class="nc" id="L39">    private static String dhtUri = &quot;ws://localhost:3000/ws&quot;;</span>
+
+    private static final String COMMAND_TYPE = &quot;pep-command&quot;;
+    private static final String SUB_COMMAND_TYPE = &quot;ucs-command&quot;;
+    private static final String PEP_ID = &quot;pep-0&quot;;
+    private static final String PUB_TOPIC_NAME = &quot;topic-name&quot;;
+    private static final String PUB_TOPIC_UUID = &quot;topic-uuid-the-ucs-is-subscribed-to&quot;;
+    private static final String SUB_TOPIC_NAME = &quot;topic-name-the-pep-is-subscribed-to&quot;;
+    private static final String SUB_TOPIC_UUID = &quot;topic-uuid-the-pep-is-subscribed-to&quot;;
+<span class="nc" id="L48">    private static boolean isPepRegistered = false;</span>
+
+    public static void main(String[] args) {
+
+<span class="nc bnc" id="L52" title="All 4 branches missed.">        if (args.length != 0 &amp;&amp; args[0].equals(&quot;-d&quot;)) {</span>
+<span class="nc" id="L53">            URI parsed = null;</span>
+            try {
+<span class="nc" id="L55">                parsed = new URI(args[1]);</span>
+<span class="nc" id="L56">            } catch (URISyntaxException | ArrayIndexOutOfBoundsException e) {</span>
+                // No URI indicated
+<span class="nc" id="L58">                System.err.println(&quot;Invalid URI after -d option&quot;);</span>
+<span class="nc" id="L59">                return;</span>
+<span class="nc" id="L60">            }</span>
+<span class="nc" id="L61">            dhtUri = parsed.toString();</span>
+        }
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if(!isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
+<span class="nc" id="L65">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L69">            dhtClientEndPoint = new DHTClient(</span>
+                    new URI(dhtUri));
+<span class="nc" id="L71">            dhtClientEndPoint.addMessageHandler(setMessageHandler());</span>
+
+<span class="nc" id="L73">        } catch (URISyntaxException e) {</span>
+<span class="nc" id="L74">            throw new RuntimeException(e);</span>
+<span class="nc" id="L75">        }</span>
+
+        try {
+<span class="nc" id="L78">            Thread.sleep(5000);</span>
+<span class="nc" id="L79">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L80">            throw new RuntimeException(e);</span>
+<span class="nc" id="L81">        }</span>
+
+<span class="nc" id="L83">        register();</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        while (!isPepRegistered) {</span>
+            try {
+<span class="nc" id="L86">                Thread.sleep(1000);</span>
+<span class="nc" id="L87">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L88">                throw new RuntimeException(e);</span>
+<span class="nc" id="L89">            }</span>
+        }
+
+<span class="nc" id="L92">        tryAccess();</span>
+
+<span class="nc" id="L94">        NewThread t = new NewThread();</span>
+<span class="nc" id="L95">        t.start();</span>
+<span class="nc" id="L96">    }</span>
+
+
+    /**
+     * Publish a register request on the DHT
+     */
+    private static void register() {
+        // build the json object
+<span class="nc" id="L104">        JsonOut jsonOut = buildRegisterMessage();</span>
+<span class="nc" id="L105">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L106">    }</span>
+
+    /**
+     * Build a register request as a Json to send to the DHT
+     *
+     * @return the Json object to send to the DHT
+     */
+    private static JsonOut buildRegisterMessage() {
+<span class="nc" id="L114">        RegisterRequest message =</span>
+<span class="nc" id="L115">                new RegisterRequest(String.valueOf(UUID.randomUUID()), SUB_TOPIC_NAME, SUB_TOPIC_UUID);</span>
+
+<span class="nc" id="L117">        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);</span>
+    }
+
+
+    /**
+     * Publish a tryAccess request on the DHT
+     */
+    private static void tryAccess() {
+        // build the json object
+<span class="nc" id="L126">        JsonOut jsonOut = buildTryAccessMessage();</span>
+<span class="nc" id="L127">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L128">    }</span>
+
+
+    /**
+     * Build a tryAccess request as a Json to send to the DHT
+     *
+     * @return the Json object to send to the DHT
+     */
+    private static JsonOut buildTryAccessMessage() {
+        //todo: remove exampleRequest and examplePolicy, and get them from command line
+<span class="nc" id="L138">        String base64Request = Base64.getEncoder().encodeToString(exampleRequest.getBytes());</span>
+<span class="nc" id="L139">        String base64Policy = null;</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (examplePolicy != null) {</span>
+<span class="nc" id="L141">             base64Policy = Base64.getEncoder().encodeToString(examplePolicy.getBytes());</span>
+        }
+<span class="nc" id="L143">        TryAccessRequest message =</span>
+<span class="nc" id="L144">                new TryAccessRequest(String.valueOf(UUID.randomUUID()), base64Request, base64Policy);</span>
+
+<span class="nc" id="L146">        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);</span>
+    }
+
+    /**
+     * Publish a startAccess request on the DHT
+     *
+     * @param sessionId the session identifier
+     */
+    private static void startAccess(String sessionId) {
+        // build the json object
+<span class="nc" id="L156">        JsonOut jsonOut = buildStartAccessMessage(sessionId);</span>
+<span class="nc" id="L157">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L158">    }</span>
+
+
+    /**
+     * Build a startAccess request as a Json to send to the DHT
+     *
+     * @param sessionId the session identifier, as extracted from
+     *                  a tryAccess response
+     * @return the Json to send to the DHT
+     */
+    private static JsonOut buildStartAccessMessage(String sessionId) {
+<span class="nc" id="L169">        StartAccessRequest message =</span>
+<span class="nc" id="L170">                new StartAccessRequest(String.valueOf(UUID.randomUUID()), sessionId);</span>
+
+<span class="nc" id="L172">        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);</span>
+    }
+
+
+    /**
+     * Publish an endAccess request on the DHT
+     *
+     * @param sessionId the session identifier
+     */
+    private static void endAccess(String sessionId) {
+        // build the json object
+<span class="nc" id="L183">        JsonOut jsonOut = buildEndAccessMessage(sessionId);</span>
+<span class="nc" id="L184">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L185">    }</span>
+
+
+    /**
+     * Build an endAccess request as a Json to send to the DHT
+     *
+     * @param sessionId the session identifier
+     * @return the Json to send to the DHT
+     */
+    private static JsonOut buildEndAccessMessage(String sessionId) {
+<span class="nc" id="L195">        EndAccessRequest message =</span>
+<span class="nc" id="L196">                new EndAccessRequest(String.valueOf(UUID.randomUUID()), sessionId);</span>
+
+<span class="nc" id="L198">        return buildOutgoingJsonObject(message, PEP_ID, PUB_TOPIC_NAME, PUB_TOPIC_UUID, COMMAND_TYPE);</span>
+    }
+
+
+    /**
+     * Serialize the JsonOut object passed as argument and publish the
+     * Json string on the DHT. If this succeeds, update the structures
+     * to keep track of the access and add this request to the unanswered.
+     *
+     * @param jsonOut the object to serialize and send
+     */
+    private static void serializeAndSend(JsonOut jsonOut) {
+        // serialize the object to a json string
+<span class="nc" id="L211">        String msg = serializeOutgoingJson(jsonOut);</span>
+
+        // send the request
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        if (dhtClientEndPoint.sendMessage(msg)) {</span>
+<span class="nc" id="L215">            MessageContent message = jsonOut.getRequestPubMessage().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc" id="L216">            unansweredMap.put(message.getMessage_id(), jsonOut);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            if (!isRegisterRequest(message)) {</span>
+<span class="nc" id="L218">                accessTracker.add(message);</span>
+            }
+        }
+<span class="nc" id="L221">    }</span>
+
+
+    /**
+     * Check the evaluation. In case of Permit, (TODO: grants the access and)
+     * publishes a startAccess request on the DHT.
+     * In any other case, denies the access.
+     *
+     * @param message the tryAccess response received from the DHT
+     */
+    private static void handleTryAccessResponse(TryAccessResponse message) {
+        // check the evaluation
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        if (!message.getEvaluation().equalsIgnoreCase(&quot;Permit&quot;)) {</span>
+<span class="nc" id="L234">            System.out.println(&quot;Access denied. TryAccess evaluated to: &quot; + message.getEvaluation());</span>
+<span class="nc" id="L235">            return;</span>
+        }
+        // if Permit:
+        //  - grant access
+        //  - send a start access request
+<span class="nc" id="L240">        startAccess(message.getSession_id());</span>
+<span class="nc" id="L241">    }</span>
+
+
+    /**
+     * Check the evaluation. In case is not Permit, denies the access.
+     *
+     * @param message the startAccess response received from the DHT
+     */
+    private static void handleStartAccessResponse(StartAccessResponse message) {
+        // check the evaluation
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        if (!message.getEvaluation().equalsIgnoreCase(&quot;Permit&quot;)) {</span>
+<span class="nc" id="L252">            System.out.println(&quot;Access denied. StartAccess evaluated to: &quot; + message.getEvaluation());</span>
+            // terminate access
+<span class="nc" id="L254">            return;</span>
+        }
+        // if Permit, keep granting access
+<span class="nc" id="L257">        System.out.println(&quot;Ongoing access is granted&quot;);</span>
+
+        // simulate usage for some time
+        try {
+<span class="nc" id="L261">            Thread.sleep(3000);</span>
+<span class="nc" id="L262">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L263">            throw new RuntimeException(e);</span>
+<span class="nc" id="L264">        }</span>
+
+        // access terminates naturally
+        // send an end access request
+<span class="nc" id="L268">        String sessionId = accessTracker.getSessionId(message.getMessage_id());</span>
+<span class="nc" id="L269">        endAccess(sessionId);</span>
+<span class="nc" id="L270">    }</span>
+
+
+    /**
+     * Print the evaluation. Actually, the evaluation doesn't matter for
+     * the access, since it is already terminated.
+     *
+     * @param message the startAccess response received from the DHT
+     */
+    private static void handleEndAccessResponse(EndAccessResponse message) {
+        // print the evaluation
+<span class="nc" id="L281">        System.out.println(&quot;EndAccess evaluated to: &quot; + message.getEvaluation());</span>
+<span class="nc" id="L282">    }</span>
+
+
+    /**
+     * This method is executed when a message with a valid topic
+     * is received from the DHT.
+     * It handles the message according to its type
+     */
+    private static void processMessage(MessageContent message) {
+
+        // check that we are waiting a response for this message_id
+<span class="nc bnc" id="L293" title="All 2 branches missed.">        if (!(message instanceof ReevaluationResponse)) {</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">            if (!unansweredMap.containsKey(message.getMessage_id()</span>
+            )) {
+<span class="nc" id="L296">                System.out.println(&quot;The received message_id is not associated with &quot; +</span>
+                        &quot;any unanswered request that we sent.&quot;);
+<span class="nc" id="L298">                return;</span>
+            } else {
+<span class="nc" id="L300">                unansweredMap.remove(message.getMessage_id());</span>
+            }
+        }
+
+<span class="nc" id="L304">        accessTracker.add(message);</span>
+
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if (message instanceof TryAccessResponse) {</span>
+            // handle try access response
+<span class="nc" id="L308">            System.out.println(&quot;handle try access response&quot;);</span>
+<span class="nc" id="L309">            handleTryAccessResponse((TryAccessResponse) message);</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">        } else if (message instanceof StartAccessResponse) {</span>
+            // handle start access response
+<span class="nc" id="L312">            System.out.println(&quot;handle start access response&quot;);</span>
+<span class="nc" id="L313">            handleStartAccessResponse((StartAccessResponse) message);</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        } else if (message instanceof EndAccessResponse) {</span>
+            // handle end access response
+<span class="nc" id="L316">            handleEndAccessResponse((EndAccessResponse) message);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        } else if (message instanceof ReevaluationResponse) {</span>
+            // handle reevaluation response
+<span class="nc" id="L319">            System.out.println(&quot;handle reevaluation response&quot;);</span>
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+<span class="nc" id="L323">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+        }
+<span class="nc" id="L325">    }</span>
+
+
+    /**
+     * Message handler that implements the handleMessage method deserializes the received
+     *
+     * @return the message handler
+     */
+    private static DHTClient.MessageHandler setMessageHandler() {
+<span class="nc" id="L334">        DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {</span>
+            /**
+             * Deserialize the received message and check the topic matches
+             * the one the PEP is subscribed to. If so, process the response
+             * coming from the DHT
+             *
+             * @param message the message, a json string, coming from the DHT
+             */
+            public void handleMessage(String message) {
+                MessageContent msg;
+                try {
+                    // deserialize json
+<span class="nc" id="L346">                    JsonIn jsonIn = deserializeIncomingJson(message);</span>
+
+                    // check the topic is the one we are subscribed to
+<span class="nc bnc" id="L349" title="All 2 branches missed.">                    if (!isTopicOfInterest(jsonIn, SUB_TOPIC_UUID)) {</span>
+<span class="nc" id="L350">                        return;</span>
+                    }
+<span class="nc" id="L352">                    System.out.println(&quot;Topic matches. Message type: &quot; + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());</span>
+<span class="nc" id="L353">                    msg = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc" id="L354">                } catch (JsonSyntaxException e) {</span>
+<span class="nc" id="L355">                    System.err.println(&quot;Error deserializing Json. Message discarded.&quot;);</span>
+<span class="nc" id="L356">                    return;</span>
+<span class="nc" id="L357">                }</span>
+<span class="nc bnc" id="L358" title="All 4 branches missed.">                if (isRegisterResponse(msg) &amp;&amp; !isPepRegistered) {</span>
+                    // evaluate response and set
+<span class="nc" id="L360">                    RegisterResponse registerResponse = (RegisterResponse) msg;</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                    if (registerResponse.getCode().equals(&quot;OK&quot;)) {</span>
+<span class="nc" id="L362">                        isPepRegistered = true;</span>
+<span class="nc" id="L363">                        System.out.println(&quot;This PEP ('&quot; + PEP_ID + &quot;') is now registered at the UCS&quot;);</span>
+<span class="nc" id="L364">                        return;</span>
+                    }
+                }
+<span class="nc" id="L367">                processMessage(msg);</span>
+<span class="nc" id="L368">            }</span>
+
+            @Override
+            public void handleError() {
+<span class="nc" id="L372">                System.err.println(&quot;Websocket error occurred&quot;);</span>
+<span class="nc" id="L373">            }</span>
+        };
+<span class="nc" id="L375">        return messageHandler;</span>
+    }
+
+
+    private static boolean isRegisterResponse(MessageContent messageIn) {
+<span class="nc" id="L380">        return messageIn instanceof RegisterResponse;</span>
+    }
+
+    private static boolean isRegisterRequest(MessageContent messageIn) {
+<span class="nc" id="L384">        return messageIn instanceof RegisterRequest;</span>
+    }
+
+<span class="nc" id="L387">    public static class NewThread extends Thread {</span>
+        public void run() {
+            while (true) {
+                try {
+<span class="nc" id="L391">                    Thread.sleep(1000);</span>
+<span class="nc" id="L392">                } catch (InterruptedException e) {</span>
+<span class="nc" id="L393">                    e.printStackTrace();</span>
+<span class="nc" id="L394">                }</span>
+            }
+        }
+    }
+
+    private static final String exampleRequest = &quot;&lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;UTF-8\&quot; standalone=\&quot;yes\&quot;?&gt;\n&quot; +
+            &quot;&lt;Request ReturnPolicyIdList=\&quot;false\&quot; CombinedDecision=\&quot;false\&quot;\n&quot; +
+            &quot;  xmlns=\&quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17\&quot;&gt;\n&quot; +
+            &quot;  &lt;Attributes Category=\&quot;urn:oasis:names:tc:xacml:1.0:subject-category:access-subject\&quot;&gt;\n&quot; +
+            &quot;    &lt;Attribute AttributeId=\&quot;urn:oasis:names:tc:xacml:1.0:subject:subject-id\&quot; IncludeInResult=\&quot;false\&quot;&gt;\n&quot; +
+            &quot;      &lt;AttributeValue DataType=\&quot;http://www.w3.org/2001/XMLSchema#string\&quot;&gt;C&lt;/AttributeValue&gt;\n&quot; +
+            &quot;    &lt;/Attribute&gt;\n&quot; +
+            &quot;  &lt;/Attributes&gt;\n&quot; +
+            &quot;  &lt;Attributes Category=\&quot;urn:oasis:names:tc:xacml:3.0:attribute-category:resource\&quot;&gt;\n&quot; +
+            &quot;    &lt;Attribute AttributeId=\&quot;urn:oasis:names:tc:xacml:1.0:resource:resource-id\&quot; IncludeInResult=\&quot;false\&quot;&gt;\n&quot; +
+            &quot;      &lt;AttributeValue DataType=\&quot;http://www.w3.org/2001/XMLSchema#string\&quot;&gt;RES&lt;/AttributeValue&gt;\n&quot; +
+            &quot;    &lt;/Attribute&gt;\n&quot; +
+            &quot;    &lt;Attribute AttributeId=\&quot;urn:oasis:names:tc:xacml:1.0:resource:resource-server\&quot; IncludeInResult=\&quot;false\&quot;&gt;\n&quot; +
+            &quot;      &lt;AttributeValue DataType=\&quot;http://www.w3.org/2001/XMLSchema#string\&quot;&gt;AUD&lt;/AttributeValue&gt;\n&quot; +
+            &quot;    &lt;/Attribute&gt;\n&quot; +
+            &quot;  &lt;/Attributes&gt;\n&quot; +
+            &quot;  &lt;Attributes Category=\&quot;urn:oasis:names:tc:xacml:3.0:attribute-category:action\&quot;&gt;\n&quot; +
+            &quot;    &lt;Attribute AttributeId=\&quot;urn:oasis:names:tc:xacml:1.0:action:action-id\&quot; IncludeInResult=\&quot;false\&quot;&gt;\n&quot; +
+            &quot;      &lt;AttributeValue DataType=\&quot;http://www.w3.org/2001/XMLSchema#string\&quot;&gt;OP&lt;/AttributeValue&gt;\n&quot; +
+            &quot;    &lt;/Attribute&gt;\n&quot; +
+            &quot;  &lt;/Attributes&gt;\n&quot; +
+            &quot;&lt;/Request&gt;\n&quot;;
+
+<span class="nc" id="L422">    private static final String examplePolicy = null;</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

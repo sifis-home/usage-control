@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ReevaluationTableInterface.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.sessionmanager</a> &gt; <span class="el_source">ReevaluationTableInterface.java</span></div><h1>ReevaluationTableInterface.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ * 
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.sessionmanager;
+
+import it.cnr.iit.xacml.Attribute;
+
+/**
+ * This is the interface used to deal with the reevaluation interface.
+ * The ReevaluationTable is used to keep a track of the sessions under
+ * evaluation in order to avoid sessions reevaluated at the same time by
+ * different nodes. The ReevaluationTable must provide, to sum up, some methods
+ * to insert a session, if that session is not already under evaluation. and
+ * methods to retrieve the sessions that are already under evaluation.
+ * 
+ * @author antonio
+ *
+ */
+public interface ReevaluationTableInterface {
+
+<span class="nc" id="L33">    public enum REEV_STATUS {</span>
+<span class="nc" id="L34">        NOT_IN_REEVALUATION, IN_REEVALUATION_DIFFERENT_ATTRIBUTE, IN_REEVALUATION_SAME_ATTRIBUTE, IN_REEVALUATION</span>
+    }
+
+    /**
+     * Checks if the session id is already present and if the attribute id that
+     * has triggered the evaluation is the same
+     * 
+     * @param sessionId
+     *          the session id
+     * @param attribute
+     *          the attribute that has triggered the evaluation. If the attribute
+     *          is null, this means that we are checking only if the session is
+     *          already under evaluation
+     * @return the status of the session.
+     */
+    public REEV_STATUS checkSession( String sessionId, Attribute attribute );
+
+    /**
+     * Tries to insert the session along with the Attribute that has triggered the
+     * evaluation
+     * 
+     * @param session
+     *          the session under evaluation
+     * @param attribute
+     *          the attribute that has triggered the evaluation
+     * @return true if the insertion goes ok, false otherwise
+     */
+    public boolean insertSession( SessionInterface session, Attribute attribute );
+
+    /**
+     * Stores in the table that the session has been reevaluated
+     * 
+     * @param session
+     *          the session that was under reevaluation
+     * @return true if everything goes ok, false otherwise
+     */
+    public boolean stopSession( SessionInterface session );
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

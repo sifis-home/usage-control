@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>TryAccessMessage.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.message.tryaccess</a> &gt; <span class="el_source">TryAccessMessage.java</span></div><h1>TryAccessMessage.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.message.tryaccess;
+
+import it.cnr.iit.ucs.constants.ENTITIES;
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.ucs.exceptions.RequestException;
+import it.cnr.iit.ucs.message.Message;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
+import it.cnr.iit.xacml.wrappers.RequestWrapper;
+
+/**
+ * This is a tryAccess message.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public final class TryAccessMessage extends Message {
+
+    private String pepUri;
+    private String policyId;
+    private String policy;
+    private String request;
+
+    public TryAccessMessage( String source, String destination ) {
+<span class="fc" id="L40">        super( source, destination );</span>
+<span class="fc" id="L41">        purpose = PURPOSE.TRY;</span>
+<span class="fc" id="L42">    }</span>
+
+    public TryAccessMessage( String source, String destination, String messageId ) {
+<span class="fc" id="L45">        super( source, destination, messageId );</span>
+<span class="fc" id="L46">        purpose = PURPOSE.TRY;</span>
+<span class="fc" id="L47">    }</span>
+
+    public TryAccessMessage() {
+<span class="fc" id="L50">        super( ENTITIES.PEP.toString(), ENTITIES.CH.toString() );</span>
+<span class="fc" id="L51">        purpose = PURPOSE.TRY;</span>
+<span class="fc" id="L52">    }</span>
+
+    public void setPepUri( String pepUri ) {
+<span class="fc" id="L55">        Reject.ifBlank( pepUri );</span>
+<span class="fc" id="L56">        this.pepUri = pepUri;</span>
+<span class="fc" id="L57">    }</span>
+
+    public String getPepUri() {
+<span class="fc" id="L60">        return pepUri;</span>
+    }
+
+    public void setRequest( String request ) {
+<span class="fc" id="L64">        Reject.ifBlank( request );</span>
+        try {
+<span class="fc" id="L66">            RequestWrapper requestWrapper = RequestWrapper.build( request ); // NOSONAR</span>
+<span class="fc" id="L67">        } catch( RequestException e ) {</span>
+<span class="fc" id="L68">            throw new IllegalStateException( &quot;invalid request&quot; );</span>
+<span class="fc" id="L69">        }</span>
+<span class="fc" id="L70">        this.request = request;</span>
+<span class="fc" id="L71">    }</span>
+
+    public String getRequest() {
+<span class="fc" id="L74">        return request;</span>
+    }
+
+    public void setPolicy( String policy ) {
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">        if (policy != null) {</span>
+            try {
+<span class="fc" id="L80">                PolicyWrapper policyWrapper = PolicyWrapper.build( policy );</span>
+<span class="fc" id="L81">            } catch( PolicyException e ) {</span>
+<span class="fc" id="L82">                throw new IllegalStateException( &quot;invalid policy&quot; ); // NOSONAR</span>
+<span class="fc" id="L83">            }</span>
+<span class="fc" id="L84">            this.policy = policy;</span>
+        }
+<span class="fc" id="L86">    }</span>
+
+    public String getPolicy() {
+<span class="fc" id="L89">        return policy;</span>
+    }
+
+    public void setPolicyId( String policyId ) {
+<span class="fc" id="L93">        this.policyId = policyId;</span>
+<span class="fc" id="L94">    }</span>
+
+    public String getPolicyId() {
+<span class="fc" id="L97">        return policyId;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

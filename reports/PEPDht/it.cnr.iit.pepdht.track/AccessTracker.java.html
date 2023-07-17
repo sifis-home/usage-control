@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AccessTracker.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PEPDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.pepdht.track</a> &gt; <span class="el_source">AccessTracker.java</span></div><h1>AccessTracker.java</h1><pre class="source lang-java linenums">package it.cnr.iit.pepdht.track;
+
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+<span class="nc" id="L17">public class AccessTracker {</span>
+<span class="nc" id="L18">    private final Map&lt;String, List&lt;String&gt;&gt; msgIdsPerSession = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L19">    private final Map&lt;String, MessageInfo&gt; msgFlow = new HashMap&lt;&gt;();</span>
+
+    public boolean add(MessageContent message) {
+<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (msgFlow.containsKey(message.getMessage_id())) {</span>
+<span class="nc" id="L23">            return mergeMessages(message);</span>
+<span class="nc bnc" id="L24" title="All 2 branches missed.">        } else if (message instanceof TryAccessRequest) {</span>
+<span class="nc" id="L25">            return addNewMessage(message);</span>
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        } else if (message instanceof StartAccessRequest) {</span>
+<span class="nc" id="L27">            addMessageId(((StartAccessRequest) message).getSession_id(), message.getMessage_id());</span>
+<span class="nc" id="L28">            return addNewMessage(message);</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
+<span class="nc" id="L30">            addMessageId(((EndAccessRequest) message).getSession_id(), message.getMessage_id());</span>
+<span class="nc" id="L31">            return addNewMessage(message);</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        } else if (message instanceof ReevaluationResponse) {</span>
+<span class="nc" id="L33">            addMessageId(((ReevaluationResponse) message).getSession_id(), message.getMessage_id());</span>
+<span class="nc" id="L34">            return addNewMessage(message);</span>
+        } else {
+<span class="nc" id="L36">            throw new IllegalArgumentException(&quot;Invalid message&quot;);</span>
+        }
+    }
+
+
+    private boolean mergeMessages(MessageContent message) {
+<span class="nc" id="L42">        MessageInfo messageInfo = msgFlow.get(message.getMessage_id());</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if (message instanceof TryAccessResponse) {</span>
+<span class="nc" id="L44">            addMessagePerSession((TryAccessResponse) message);</span>
+<span class="nc" id="L45">            messageInfo.merge((TryAccessResponse) message);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">        } else if (message instanceof StartAccessResponse) {</span>
+<span class="nc" id="L47">            messageInfo.merge((StartAccessResponse) message);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        } else if (message instanceof EndAccessResponse) {</span>
+<span class="nc" id="L49">            messageInfo.merge((EndAccessResponse) message);</span>
+        }
+<span class="nc" id="L51">        return insert(message.getMessage_id(), messageInfo);</span>
+    }
+
+
+    private boolean addNewMessage(MessageContent message) {
+<span class="nc" id="L56">        MessageInfo messageInfo = null;</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (message instanceof TryAccessRequest) {</span>
+<span class="nc" id="L58">            messageInfo = MessageInfo.build((TryAccessRequest) message);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        } else if (message instanceof StartAccessRequest) {</span>
+<span class="nc" id="L60">            messageInfo = MessageInfo.build((StartAccessRequest) message);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
+<span class="nc" id="L62">            messageInfo = MessageInfo.build((EndAccessRequest) message);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        } else if (message instanceof ReevaluationResponse) {</span>
+<span class="nc" id="L64">            messageInfo = MessageInfo.build((ReevaluationResponse) message);</span>
+        }
+<span class="nc" id="L66">        return insert(message.getMessage_id(), messageInfo);</span>
+    }
+
+
+    private boolean insert(String messageId, MessageInfo messageInfo) {
+<span class="nc bnc" id="L71" title="All 4 branches missed.">        if (messageId == null || messageInfo == null) {</span>
+<span class="nc" id="L72">            System.err.println(&quot;Insertion in msgFlow aborted: null arguments&quot;);</span>
+<span class="nc" id="L73">            return false;</span>
+        }
+<span class="nc" id="L75">        msgFlow.put(messageId, messageInfo);</span>
+<span class="nc" id="L76">        return true;</span>
+    }
+
+
+    public List&lt;String&gt; getMessagesPerSession(String sessionId) {
+//        Reject.ifBlank( sessionId );
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        if (!msgIdsPerSession.containsKey(sessionId)) {</span>
+<span class="nc" id="L83">            throw new IllegalArgumentException();</span>
+        }
+<span class="nc" id="L85">        return msgIdsPerSession.get(sessionId);</span>
+    }
+
+
+    private void addMessagePerSession(TryAccessResponse message) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (message.getEvaluation().equalsIgnoreCase(&quot;Permit&quot;)) {</span>
+<span class="nc" id="L91">            msgIdsPerSession.put(message.getSession_id(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L92">            addMessageId(message.getSession_id(), message.getMessage_id());</span>
+        }
+<span class="nc" id="L94">    }</span>
+
+
+    private void addMessageId(String sessionId, String messageId) {
+<span class="nc" id="L98">        msgIdsPerSession.get(sessionId).add(messageId);</span>
+<span class="nc" id="L99">    }</span>
+
+
+    public String getSessionId(String messageId) {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        if (!msgFlow.containsKey(messageId)) {</span>
+<span class="nc" id="L104">            throw new IllegalArgumentException();</span>
+        }
+<span class="nc" id="L106">        MessageInfo messageInfo = msgFlow.get(messageId);</span>
+<span class="nc" id="L107">        return messageInfo.getSessionId();</span>
+    }
+
+
+    public void clear() {
+<span class="nc" id="L112">        msgFlow.clear();</span>
+<span class="nc" id="L113">        msgIdsPerSession.clear();</span>
+<span class="nc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

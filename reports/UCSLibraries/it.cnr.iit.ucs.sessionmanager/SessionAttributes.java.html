@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SessionAttributes.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.sessionmanager</a> &gt; <span class="el_source">SessionAttributes.java</span></div><h1>SessionAttributes.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.sessionmanager;
+
+import java.util.List;
+
+<span class="fc" id="L5">public class SessionAttributes {</span>
+    private String sessionId;
+    private String policySet;
+    private String originalRequest;
+    private List&lt;String&gt; onGoingAttributesForSubject;
+    private List&lt;String&gt; onGoingAttributesForResource;
+    private List&lt;String&gt; onGoingAttributesForAction;
+    private List&lt;String&gt; onGoingAttributesForEnvironment;
+    private String status;
+    private String pepURI;
+    private String myIP;
+    private String subjectName;
+    private String resourceName;
+    private String actionName;
+
+    public String getSessionId() {
+<span class="fc" id="L21">        return sessionId;</span>
+    }
+
+    public void setSessionId( String sessionId ) {
+<span class="fc" id="L25">        this.sessionId = sessionId;</span>
+<span class="fc" id="L26">    }</span>
+
+    public String getPolicySet() {
+<span class="fc" id="L29">        return policySet;</span>
+    }
+
+    public void setPolicySet( String policySet ) {
+<span class="fc" id="L33">        this.policySet = policySet;</span>
+<span class="fc" id="L34">    }</span>
+
+    public String getOriginalRequest() {
+<span class="fc" id="L37">        return originalRequest;</span>
+    }
+
+    public void setOriginalRequest( String originalRequest ) {
+<span class="fc" id="L41">        this.originalRequest = originalRequest;</span>
+<span class="fc" id="L42">    }</span>
+
+    public List&lt;String&gt; getOnGoingAttributesForSubject() {
+<span class="fc" id="L45">        return onGoingAttributesForSubject;</span>
+    }
+
+    public void setOnGoingAttributesForSubject( List&lt;String&gt; onGoingAttributesForSubject ) {
+<span class="fc" id="L49">        this.onGoingAttributesForSubject = onGoingAttributesForSubject;</span>
+<span class="fc" id="L50">    }</span>
+
+    public List&lt;String&gt; getOnGoingAttributesForResource() {
+<span class="fc" id="L53">        return onGoingAttributesForResource;</span>
+    }
+
+    public void setOnGoingAttributesForResource( List&lt;String&gt; onGoingAttributesForResource ) {
+<span class="fc" id="L57">        this.onGoingAttributesForResource = onGoingAttributesForResource;</span>
+<span class="fc" id="L58">    }</span>
+
+    public List&lt;String&gt; getOnGoingAttributesForAction() {
+<span class="fc" id="L61">        return onGoingAttributesForAction;</span>
+    }
+
+    public void setOnGoingAttributesForAction( List&lt;String&gt; onGoingAttributesForAction ) {
+<span class="fc" id="L65">        this.onGoingAttributesForAction = onGoingAttributesForAction;</span>
+<span class="fc" id="L66">    }</span>
+
+    public List&lt;String&gt; getOnGoingAttributesForEnvironment() {
+<span class="fc" id="L69">        return onGoingAttributesForEnvironment;</span>
+    }
+
+    public void setOnGoingAttributesForEnvironment( List&lt;String&gt; onGoingAttributesForEnvironment ) {
+<span class="fc" id="L73">        this.onGoingAttributesForEnvironment = onGoingAttributesForEnvironment;</span>
+<span class="fc" id="L74">    }</span>
+
+    public String getStatus() {
+<span class="fc" id="L77">        return status;</span>
+    }
+
+    public void setStatus( String status ) {
+<span class="fc" id="L81">        this.status = status;</span>
+<span class="fc" id="L82">    }</span>
+
+    public String getPepURI() {
+<span class="fc" id="L85">        return pepURI;</span>
+    }
+
+    public void setPepURI( String pepURI ) {
+<span class="fc" id="L89">        this.pepURI = pepURI;</span>
+<span class="fc" id="L90">    }</span>
+
+    public String getMyIP() {
+<span class="fc" id="L93">        return myIP;</span>
+    }
+
+    public void setMyIP( String myIP ) {
+<span class="fc" id="L97">        this.myIP = myIP;</span>
+<span class="fc" id="L98">    }</span>
+
+    public String getSubjectName() {
+<span class="fc" id="L101">        return subjectName;</span>
+    }
+
+    public void setSubjectName( String subjectName ) {
+<span class="fc" id="L105">        this.subjectName = subjectName;</span>
+<span class="fc" id="L106">    }</span>
+
+    public String getResourceName() {
+<span class="fc" id="L109">        return resourceName;</span>
+    }
+
+    public void setResourceName( String resourceName ) {
+<span class="fc" id="L113">        this.resourceName = resourceName;</span>
+<span class="fc" id="L114">    }</span>
+
+    public String getActionName() {
+<span class="fc" id="L117">        return actionName;</span>
+    }
+
+    public void setActionName( String actionName ) {
+<span class="fc" id="L121">        this.actionName = actionName;</span>
+<span class="fc" id="L122">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

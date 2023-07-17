@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>SessionAttributesBuilder.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.sessionmanager</a> &gt; <span class="el_source">SessionAttributesBuilder.java</span></div><h1>SessionAttributesBuilder.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.sessionmanager;
+
+import java.util.List;
+
+public class SessionAttributesBuilder {
+
+    private SessionAttributes sessionAttributes;
+
+<span class="fc" id="L9">    public SessionAttributesBuilder() {</span>
+<span class="fc" id="L10">        sessionAttributes = new SessionAttributes();</span>
+<span class="fc" id="L11">    }</span>
+
+    public SessionAttributesBuilder setSessionId( String sessionId ) {
+<span class="fc" id="L14">        sessionAttributes.setSessionId( sessionId );</span>
+<span class="fc" id="L15">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setPolicySet( String policySet ) {
+<span class="fc" id="L19">        sessionAttributes.setPolicySet( policySet );</span>
+<span class="fc" id="L20">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setOriginalRequest( String originalRequest ) {
+<span class="fc" id="L24">        sessionAttributes.setOriginalRequest( originalRequest );</span>
+<span class="fc" id="L25">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setOnGoingAttributesForSubject( List&lt;String&gt; onGoingAttributesForSubject ) {
+<span class="fc" id="L29">        sessionAttributes.setOnGoingAttributesForSubject( onGoingAttributesForSubject );</span>
+<span class="fc" id="L30">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setOnGoingAttributesForResource( List&lt;String&gt; onGoingAttributesForResource ) {
+<span class="fc" id="L34">        sessionAttributes.setOnGoingAttributesForResource( onGoingAttributesForResource );</span>
+<span class="fc" id="L35">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setOnGoingAttributesForAction( List&lt;String&gt; onGoingAttributesForAction ) {
+<span class="fc" id="L39">        sessionAttributes.setOnGoingAttributesForAction( onGoingAttributesForAction );</span>
+<span class="fc" id="L40">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setOnGoingAttributesForEnvironment( List&lt;String&gt; onGoingAttributesForEnvironment ) {
+<span class="fc" id="L44">        sessionAttributes.setOnGoingAttributesForEnvironment( onGoingAttributesForEnvironment );</span>
+<span class="fc" id="L45">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setStatus( String status ) {
+<span class="fc" id="L49">        sessionAttributes.setStatus( status );</span>
+<span class="fc" id="L50">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setPepURI( String pepURI ) {
+<span class="fc" id="L54">        sessionAttributes.setPepURI( pepURI );</span>
+<span class="fc" id="L55">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setMyIP( String myIP ) {
+<span class="fc" id="L59">        sessionAttributes.setMyIP( myIP );</span>
+<span class="fc" id="L60">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setSubjectName( String subjectName ) {
+<span class="fc" id="L64">        sessionAttributes.setSubjectName( subjectName );</span>
+<span class="fc" id="L65">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setResourceName( String resourceName ) {
+<span class="fc" id="L69">        sessionAttributes.setResourceName( resourceName );</span>
+<span class="fc" id="L70">        return this;</span>
+    }
+
+    public SessionAttributesBuilder setActionName( String actionName ) {
+<span class="fc" id="L74">        sessionAttributes.setActionName( actionName );</span>
+<span class="fc" id="L75">        return this;</span>
+    }
+
+    public SessionAttributes build() {
+<span class="fc" id="L79">        return sessionAttributes;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

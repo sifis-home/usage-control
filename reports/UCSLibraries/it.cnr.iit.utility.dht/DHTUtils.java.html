@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>DHTUtils.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility.dht</a> &gt; <span class="el_source">DHTUtils.java</span></div><h1>DHTUtils.java</h1><pre class="source lang-java linenums">package it.cnr.iit.utility.dht;
+
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsondht.*;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
+import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.URI;
+
+<span class="nc" id="L34">public class DHTUtils {</span>
+
+<span class="nc" id="L36">    private static final RuntimeTypeAdapterFactory&lt;MessageContent&gt; typeFactory = RuntimeTypeAdapterFactory</span>
+<span class="nc" id="L37">            .of(MessageContent.class, &quot;purpose&quot;)</span>
+<span class="nc" id="L38">            .registerSubtype(RegisterRequest.class, PURPOSE.REGISTER.name())</span>
+<span class="nc" id="L39">            .registerSubtype(RegisterResponse.class, PURPOSE.REGISTER_RESPONSE.name())</span>
+<span class="nc" id="L40">            .registerSubtype(TryAccessRequest.class, PURPOSE.TRY.name())</span>
+<span class="nc" id="L41">            .registerSubtype(TryAccessResponse.class, PURPOSE.TRY_RESPONSE.name())</span>
+<span class="nc" id="L42">            .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())</span>
+<span class="nc" id="L43">            .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())</span>
+<span class="nc" id="L44">            .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())</span>
+<span class="nc" id="L45">            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())</span>
+<span class="nc" id="L46">            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name())</span>
+<span class="nc" id="L47">            .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())</span>
+<span class="nc" id="L48">            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name())</span>
+<span class="nc" id="L49">            .registerSubtype(DeletePolicyRequest.class, PURPOSE.DELETE_POLICY.name())</span>
+<span class="nc" id="L50">            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name())</span>
+<span class="nc" id="L51">            .registerSubtype(ListPoliciesRequest.class, PURPOSE.LIST_POLICIES.name())</span>
+<span class="nc" id="L52">            .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name())</span>
+<span class="nc" id="L53">            .registerSubtype(GetPolicyRequest.class, PURPOSE.GET_POLICY.name())</span>
+<span class="nc" id="L54">            .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name())</span>
+<span class="nc" id="L55">            .registerSubtype(AddPipRequest.class, PURPOSE.ADD_PIP.name())</span>
+<span class="nc" id="L56">            .registerSubtype(AddPipResponse.class, PURPOSE.ADD_PIP_RESPONSE.name())</span>
+<span class="nc" id="L57">            .registerSubtype(ErrorResponse.class, PURPOSE.ERROR_RESPONSE.name());</span>
+
+
+    /**
+     * Build a JsonOut object
+     *
+     * @param message     the object containing a request or a response
+     * @param id          the name of the entity communicating with the UCS
+     * @param topic_name  the name of the topic
+     * @param topic_uuid  the unique identifier of the topic
+     * @param commandType the type of command
+     * @return the object to be then serialized and sent to the DHT
+     */
+    public static JsonOut buildOutgoingJsonObject(MessageContent message, String id,
+                                                  String topic_name, String topic_uuid,
+                                                  String commandType) {
+<span class="nc" id="L73">        InnerValue innerValue =</span>
+                new InnerValue(
+                        message,
+                        id,
+                        topic_name,
+                        topic_uuid);
+
+<span class="nc" id="L80">        Command command = new Command(commandType, innerValue);</span>
+
+        // set timestamp
+<span class="nc" id="L83">        OuterValue outerValue = new OuterValue(System.currentTimeMillis(), command);</span>
+
+<span class="nc" id="L85">        RequestPubMessage pubMsg = new RequestPubMessage(outerValue);</span>
+
+<span class="nc" id="L87">        return new JsonOut(pubMsg);</span>
+    }
+
+    /**
+     * Serialize a JsonOut object to a Json string
+     * format accepted by the DHT
+     *
+     * @param jsonOut the object to be serialized
+     * @return the Json string to send to the DHT
+     */
+    public static String serializeOutgoingJson(JsonOut jsonOut) {
+
+<span class="nc" id="L99">        String outgoing = new GsonBuilder()</span>
+<span class="nc" id="L100">                .disableHtmlEscaping()</span>
+<span class="nc" id="L101">                .serializeNulls()</span>
+<span class="nc" id="L102">                .create()</span>
+<span class="nc" id="L103">                .toJson(jsonOut);</span>
+
+<span class="nc" id="L105">        String messageClass = jsonOut</span>
+<span class="nc" id="L106">                .getRequestPubMessage()</span>
+<span class="nc" id="L107">                .getValue()</span>
+<span class="nc" id="L108">                .getCommand()</span>
+<span class="nc" id="L109">                .getValue()</span>
+<span class="nc" id="L110">                .getMessage()</span>
+<span class="nc" id="L111">                .getClass()</span>
+<span class="nc" id="L112">                .getSimpleName();</span>
+
+<span class="nc" id="L114">        System.out.println(&quot;Sending &quot; + messageClass + &quot; message:&quot;);</span>
+<span class="nc" id="L115">        System.out.println(new GsonBuilder()</span>
+<span class="nc" id="L116">                .disableHtmlEscaping()</span>
+<span class="nc" id="L117">                .serializeNulls()</span>
+<span class="nc" id="L118">                .setPrettyPrinting()</span>
+<span class="nc" id="L119">                .create()</span>
+<span class="nc" id="L120">                .toJson(jsonOut));</span>
+<span class="nc" id="L121">        return outgoing;</span>
+    }
+
+
+    /**
+     * Deserialize the Json string coming from the DHT
+     *
+     * @param message The Json string, as received from the DHT
+     * @return the object deserialized from the Json string
+     */
+    public static JsonIn deserializeIncomingJson(String message) {
+<span class="nc" id="L132">        return new GsonBuilder()</span>
+<span class="nc" id="L133">                .registerTypeAdapterFactory(typeFactory)</span>
+<span class="nc" id="L134">                .create().fromJson(message, JsonIn.class);</span>
+    }
+
+    /**
+     * Check if the topic_uuid contained in the deserialized
+     * received message is the one this entity is subscribed to,
+     * as specified in the 'topic' argument
+     *
+     * @param jsonIn the JsonIn object, deserialized from the
+     *               Json received from the DHT
+     * @param topic  the topic this entity is subscribed to
+     * @return true if the topic matches with the one thi
+     * is subscribed to. False otherwise.
+     */
+    public static boolean isTopicOfInterest(JsonIn jsonIn, String topic) {
+        //System.out.println(&quot;Topic does not match the one we are subscribed to: &quot; +
+        //        &quot;Message discarded.&quot;);
+        try {
+<span class="nc" id="L152">            return jsonIn</span>
+<span class="nc" id="L153">                    .getVolatile()</span>
+<span class="nc" id="L154">                    .getValue()</span>
+<span class="nc" id="L155">                    .getCommand()</span>
+<span class="nc" id="L156">                    .getValue()</span>
+<span class="nc" id="L157">                    .getTopic_uuid()</span>
+<span class="nc" id="L158">                    .equals(topic);</span>
+<span class="nc" id="L159">        } catch (Exception e) {</span>
+<span class="nc" id="L160">            throw new JsonSyntaxException(e.getMessage());</span>
+        }
+    }
+
+
+    /**
+     * Wait for a connection to the DHT before proceeding
+     *
+     * @param dhtWebsocketUri the URI of the WebSocket interface for the DHT
+     * @return true when the connection succeeds
+     */
+    public static boolean isDhtReachable(String dhtWebsocketUri, int timeout, int attempts) {
+
+<span class="nc" id="L173">        Socket socket = null;</span>
+<span class="nc" id="L174">        URI dhtUri = URI.create(dhtWebsocketUri);</span>
+
+<span class="nc" id="L176">        long connectionTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">        for (int i = 0; i &lt; attempts; i++) {</span>
+            try {
+<span class="nc" id="L179">                connectionTime = System.currentTimeMillis();</span>
+<span class="nc" id="L180">                socket = new Socket();</span>
+<span class="nc" id="L181">                socket.connect(new InetSocketAddress(dhtUri.getHost(), dhtUri.getPort()), timeout);</span>
+<span class="nc" id="L182">                break;</span>
+<span class="nc" id="L183">            } catch (Exception e) {</span>
+<span class="nc" id="L184">                System.err.println(&quot;Failed: Attempt &quot; + (i + 1) + &quot; of &quot; + attempts + &quot; to reach DHT at: &quot; + dhtWebsocketUri);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">                if (i == attempts - 1) {</span>
+<span class="nc" id="L186">                    return false;</span>
+                }
+                try {
+<span class="nc" id="L189">                    long currentTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                    long timeLeftToSleep = connectionTime + timeout - currentTime &gt; 0 ?</span>
+                            connectionTime + timeout - currentTime : 0L;
+
+<span class="nc" id="L193">                    Thread.sleep(timeLeftToSleep);</span>
+<span class="nc" id="L194">                } catch (InterruptedException ex) {</span>
+<span class="nc" id="L195">                    System.err.println(&quot;Failed to sleep while waiting for the next attempt&quot;);</span>
+<span class="nc" id="L196">                }</span>
+            }
+        }
+        try {
+<span class="nc bnc" id="L200" title="All 2 branches missed.">            assert socket != null;</span>
+<span class="nc" id="L201">            socket.close();</span>
+<span class="nc" id="L202">        } catch (IOException e) {</span>
+<span class="nc" id="L203">            e.printStackTrace();</span>
+<span class="nc" id="L204">        }</span>
+<span class="nc" id="L205">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

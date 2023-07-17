@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PolicyAdministrationPoint.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PolicyAdministrationPoint</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pap</a> &gt; <span class="el_source">PolicyAdministrationPoint.java</span></div><h1>PolicyAdministrationPoint.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.pap;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import it.cnr.iit.ucs.exceptions.PAPException;
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.ucs.properties.components.PapProperties;
+import it.cnr.iit.utility.FileUtility;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
+
+import oasis.names.tc.xacml.core.schema.wd_17.PolicyType;
+
+/**
+ * The PAP is a storage of policies.
+ * All the policies are stored inside a folder, where the name of the file corresponds
+ * to the policy id.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public class PolicyAdministrationPoint implements PAPInterface {
+
+<span class="fc" id="L48">    private Logger log = Logger.getLogger( PolicyAdministrationPoint.class.getName() );</span>
+
+    private PapProperties properties;
+
+    private static final String POLICY_FILE_EXTENSION = &quot;.xml&quot;;
+
+<span class="fc" id="L54">    public PolicyAdministrationPoint( PapProperties properties ) {</span>
+<span class="fc" id="L55">        Reject.ifNull( properties );</span>
+<span class="fc" id="L56">        this.properties = properties;</span>
+<span class="fc" id="L57">    }</span>
+
+
+    /**
+     * Deletes the policy that has as id the policyId passed as parameter
+     *
+     * @param policyId the policyId to be used
+     * @return true if deletion is successful (and the file does not exist anymore).
+     * False, otherwise.
+     */
+    public boolean deletePolicy(String policyId) {
+<span class="fc" id="L68">        String policyFile = properties.getPath() + File.separator + policyId + POLICY_FILE_EXTENSION;</span>
+<span class="fc" id="L69">        File pFile = new File(policyFile);</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">        return (pFile.delete() &amp;&amp; !pFile.exists());</span>
+    }
+
+    /**
+     * Retrieves the policy that has as id the policyId passed as parameter
+     *
+     * @param policyId the policyId to be used
+     * @return the policy in string format
+     */
+    @Override
+    public String retrievePolicy( String policyId ) {
+<span class="fc" id="L81">        Reject.ifBlank( policyId );</span>
+<span class="fc" id="L82">        Path path = getPolicyPath( policyId );</span>
+        try {
+<span class="fc" id="L84">            return new String( Files.readAllBytes( path ) );</span>
+<span class="fc" id="L85">        } catch( Exception e ) {</span>
+<span class="fc" id="L86">            log.log( Level.SEVERE, &quot;Error reading policy file : {0} -&gt; {1}&quot;, new Object[] { path, e.getMessage() } );</span>
+        }
+<span class="fc" id="L88">        return null;</span>
+    }
+
+    /**
+     * Adds a new policy
+     *
+     * @param policy the policy to be added
+     * @return the policyId if everything goes OK, null otherwise
+     */
+    @Override
+    public String addPolicy( String policy ) {
+<span class="fc" id="L99">        Reject.ifBlank( policy );</span>
+        PolicyWrapper policyWrapper;
+        try {
+<span class="fc" id="L102">            policyWrapper = PolicyWrapper.build( policy );</span>
+<span class="fc" id="L103">        } catch( PolicyException e ) {</span>
+<span class="fc" id="L104">            return null;</span>
+<span class="fc" id="L105">        }</span>
+
+<span class="fc" id="L107">        PolicyType policyType = policyWrapper.getPolicyType();</span>
+<span class="fc" id="L108">        String id = policyType.getPolicyId();</span>
+<span class="pc bpc" id="L109" title="2 of 4 branches missed.">        if( id == null || id.isEmpty() ) {</span>
+<span class="nc" id="L110">            return null;</span>
+        }
+
+<span class="fc" id="L113">        Path policyPath = getPolicyPath( id );</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if( policyPath.toFile().exists() ) {</span>
+<span class="nc" id="L115">            log.log( Level.INFO, &quot;Updating policy {0}&quot;, id );</span>
+        }
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if( writePolicy( policyPath, policy ) ) {</span>
+<span class="fc" id="L118">            return id;</span>
+        }
+<span class="nc" id="L120">        return null;</span>
+    }
+
+    private boolean writePolicy( Path path, String policy ) {
+        // TODO UCS-33 NOSONAR
+<span class="fc" id="L125">        try (FileOutputStream fos = new FileOutputStream( path.toString() )) {</span>
+<span class="fc" id="L126">            fos.write( policy.getBytes() );</span>
+<span class="fc" id="L127">            return true;</span>
+<span class="nc" id="L128">        } catch( Exception e ) {</span>
+<span class="nc" id="L129">            log.log( Level.SEVERE, &quot;Error writing policy file : {0} -&gt; {1}&quot;, new Object[] { path, e.getMessage() } );</span>
+<span class="nc" id="L130">            return false;</span>
+        }
+    }
+
+    private Path getPolicyPath( String policyId ) {
+        // TODO UCS-33 NOSONAR
+<span class="fc" id="L136">        return Paths.get( properties.getPath(), policyId + POLICY_FILE_EXTENSION );</span>
+    }
+
+    /**
+     * Retrieves the IDs of the policy stored
+     *
+     * @return the list of the IDs of the policies stored
+     */
+    @Override
+    public List&lt;String&gt; listPolicies() throws PAPException {
+        // TODO UCS-33 NOSONAR
+<span class="fc" id="L147">        File directory = new File( properties.getPath() );</span>
+<span class="fc" id="L148">        File[] files = directory.listFiles( ( dir, name ) -&gt; name.toLowerCase().endsWith( POLICY_FILE_EXTENSION ) );</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if (files != null) {</span>
+<span class="fc" id="L150">            return Arrays.asList( files ).parallelStream()</span>
+<span class="fc" id="L151">                .map( File::getName )</span>
+<span class="fc" id="L152">                .map( FileUtility::stripExtension )</span>
+<span class="fc" id="L153">                .collect( Collectors.toList() );</span>
+        } else {
+<span class="fc" id="L155">            throw new PAPException(&quot;Error retrieving the list of policies&quot;);</span>
+        }
+    }
+
+    @Override
+    public String getPath() {
+<span class="fc" id="L161">        return properties.getPath();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

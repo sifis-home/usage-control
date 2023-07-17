@@ -1,0 +1,535 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ContextHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSCore</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.contexthandler</a> &gt; <span class="el_source">ContextHandler.java</span></div><h1>ContextHandler.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.contexthandler;
+
+import it.cnr.iit.ucs.constants.STATUS;
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.ucs.exceptions.RequestException;
+import it.cnr.iit.ucs.exceptions.StatusException;
+import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
+import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
+import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
+import it.cnr.iit.ucs.pdp.PDPEvaluation;
+import it.cnr.iit.ucs.pdp.PDPResponse;
+import it.cnr.iit.ucs.properties.components.ContextHandlerProperties;
+import it.cnr.iit.ucs.sessionmanager.OnGoingAttributesInterface;
+import it.cnr.iit.ucs.sessionmanager.SessionAttributesBuilder;
+import it.cnr.iit.ucs.sessionmanager.SessionInterface;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.Attribute;
+import it.cnr.iit.xacml.Category;
+import it.cnr.iit.xacml.PolicyTags;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
+import it.cnr.iit.xacml.wrappers.RequestWrapper;
+import oasis.names.tc.xacml.core.schema.wd_17.DecisionType;
+import oasis.names.tc.xacml.core.schema.wd_17.ResponseType;
+import oasis.names.tc.xacml.core.schema.wd_17.ResultType;
+
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * The context handler coordinates the ucs operations and spawns a thread in
+ * charge of monitoring eventual changes in the value of the attributes.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public final class ContextHandler extends AbstractContextHandler {
+
+<span class="fc" id="L58">    private static final Logger log = Logger.getLogger(ContextHandler.class.getName());</span>
+
+    @Deprecated
+    public static final String PEP_ID_SEPARATOR = &quot;#&quot;;
+
+    public ContextHandler(ContextHandlerProperties properties) {
+<span class="fc" id="L64">        super(properties);</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * TryAccess method invoked by the PEP
+     */
+    @Override
+    public TryAccessResponseMessage tryAccess(TryAccessMessage message) throws PolicyException, RequestException {
+<span class="fc" id="L72">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L74">        log.log(Level.INFO, &quot;TryAccess received at {0}&quot;, new Object[]{System.currentTimeMillis()});</span>
+<span class="fc" id="L75">        Reject.ifNull(message, &quot;TryAccessMessage is null&quot;);</span>
+
+<span class="fc" id="L77">        RequestWrapper request = RequestWrapper.build(message.getRequest(), getPipRegistry());</span>
+<span class="fc" id="L78">        RequestStatusEnricher.setAttributeForStatus(request, STATUS.TRY);</span>
+
+//		log.log(Level.INFO, &quot;tryAccess: fattening start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L81">        request.fatten(false);</span>
+//		log.log(Level.INFO, &quot;tryAccess: fattening ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+<span class="fc" id="L84">        log.info(&quot;TryAccess fattened request contents : \n&quot; + request.getRequest());</span>
+<span class="pc bpc" id="L85" title="3 of 4 branches missed.">        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null</span>
+<span class="pc" id="L86">                ? PolicyWrapper.build(getPap(), message)</span>
+<span class="pc" id="L87">                : getPdp().findPolicy(request);</span>
+//		log.info(policy == null || policy.getPolicy() == null ? &quot;No policy found.&quot;
+//				: &quot;Policy found: \n&quot; + policy.getPolicy());
+<span class="pc bpc" id="L90" title="2 of 4 branches missed.">        if (policy == null || policy.getPolicy() == null) {</span>
+<span class="nc" id="L91">            log.info(&quot;No applicable policy found&quot;);</span>
+            //return buildTryAccessResponse(message, null, null);
+<span class="nc" id="L93">            ResultType resultType = new ResultType();</span>
+<span class="nc" id="L94">            resultType.setDecision(DecisionType.NOT_APPLICABLE);</span>
+<span class="nc" id="L95">            List&lt;ResultType&gt; results = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L96">            results.add(resultType);</span>
+<span class="nc" id="L97">            ResponseType responseType = new ResponseType();</span>
+<span class="nc" id="L98">            responseType.setResult(results);</span>
+<span class="nc" id="L99">            return buildTryAccessResponse(message, new PDPResponse(responseType), null);</span>
+
+			/*
+			All this should be done within the PolicyDecisionPoint.
+			In particular, the PolicyFinder should produce the response
+			containing NOT_APPLICABLE.
+			A solution might be calling the evaluate(request, status) method,
+			but, at the moment, this would use the FileSystemPolicyFinderModule,
+			which should be revised.
+			The code in the ContextHandler always (TRY, START, END) ends up using the
+			InputStreamBasedPolicyFinderModule.
+			The downside of using it is that it requires an already-selected policy
+			to be initialized. So, in the START and END cases, this is not a concern
+			since a policy was previously selected. However, in the TRY case, if
+			a policy is not specified, calling evaluate(request, policy) or
+			evaluate(request, policy, status) results in an error.
+
+			The findPolicy(request) method called previously uses the
+			FileSystemPolicyFinderModule and seems to work.
+			 */
+        } else {
+<span class="fc" id="L120">            log.info(&quot;Policy found: \n&quot; + policy.getPolicy());</span>
+        }
+
+//		log.log(Level.INFO, &quot;TryAccess: policy evaluation start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L124">        PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.TRY);</span>
+//		PDPEvaluation evaluation = getPdp().evaluate(request, policy);
+//		log.log(Level.INFO, &quot;TryAccess: policy evaluation ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+<span class="fc" id="L128">        Reject.ifNull(evaluation);</span>
+<span class="fc" id="L129">        log.log(Level.INFO, &quot;TryAccess evaluated at {0} pdp response : {1}&quot;,</span>
+<span class="fc" id="L130">                new Object[]{System.currentTimeMillis(), evaluation.getResult()});</span>
+
+<span class="fc" id="L132">        String sessionId = generateSessionId();</span>
+<span class="fc" id="L133">        getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);</span>
+
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
+            // If access decision is PERMIT create entry in SessionManager
+<span class="nc" id="L137">            RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());</span>
+//			log.log(Level.INFO, &quot;TryAccess: create session start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="nc" id="L139">            createSession(message, origRequest, policy, sessionId);</span>
+//			log.log(Level.INFO, &quot;TryAccess: create session ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+        }
+
+<span class="fc" id="L143">        return buildTryAccessResponse(message, evaluation, sessionId);</span>
+    }
+
+    private TryAccessResponseMessage buildTryAccessResponse(TryAccessMessage message, PDPEvaluation evaluation,
+                                                            String sessionId) {
+<span class="fc" id="L148">        TryAccessResponseMessage response = new TryAccessResponseMessage(uri.getHost(), message.getSource(),</span>
+<span class="fc" id="L149">                message.getMessageId());</span>
+<span class="fc" id="L150">        response.setSessionId(sessionId);</span>
+<span class="fc" id="L151">        response.setEvaluation(evaluation);</span>
+<span class="fc" id="L152">        return response;</span>
+    }
+
+    /**
+     * It creates a new session id
+     *
+     * @return session id to associate to the incoming session during the tryAccess
+     */
+    private String generateSessionId() {
+<span class="fc" id="L161">        return UUID.randomUUID().toString();</span>
+    }
+
+    /**
+     * This function creates a new session in the session manager.
+     *
+     * @param message   the message
+     * @param request   the original request, not the fat one because, whenever we
+     *                  need to re-evaluate the request we will retrieve from the
+     *                  various PIPs a fresh value
+     * @param policy    the policy
+     * @param sessionId the sessionId
+     */
+    private void createSession(TryAccessMessage message, RequestWrapper request, PolicyWrapper policy,
+                               String sessionId) {
+<span class="nc" id="L176">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        policy = policy == null ? getPdp().findPolicy(request) : policy;</span>
+<span class="nc" id="L179">        log.log(Level.INFO, &quot;Creating a new session : {0} &quot;, sessionId);</span>
+
+<span class="nc" id="L181">        String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();</span>
+
+        // retrieve the id of ongoing attributes
+<span class="nc" id="L184">        List&lt;Attribute&gt; onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
+<span class="nc" id="L185">        SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();</span>
+<span class="nc" id="L186">        sessionAttributeBuilder</span>
+<span class="nc" id="L187">                .setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))</span>
+<span class="nc" id="L188">                .setOnGoingAttributesForAction(getAttributeIdsForCategory(onGoingAttributes, Category.ACTION))</span>
+<span class="nc" id="L189">                .setOnGoingAttributesForResource(getAttributeIdsForCategory(onGoingAttributes, Category.RESOURCE))</span>
+<span class="nc" id="L190">                .setOnGoingAttributesForEnvironment(</span>
+<span class="nc" id="L191">                        getAttributeIdsForCategory(onGoingAttributes, Category.ENVIRONMENT));</span>
+<span class="nc" id="L192">        sessionAttributeBuilder.setSubjectName(request.getRequestType().getAttributeValue(Category.SUBJECT))</span>
+<span class="nc" id="L193">                .setResourceName(request.getRequestType().getAttributeValue(Category.RESOURCE))</span>
+<span class="nc" id="L194">                .setActionName(request.getRequestType().getAttributeValue(Category.ACTION));</span>
+<span class="nc" id="L195">        sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())</span>
+<span class="nc" id="L196">                .setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)</span>
+<span class="nc" id="L197">                .setMyIP(uri.getHost());</span>
+
+        // insert all the values inside the session manager
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {</span>
+<span class="nc" id="L201">            log.log(Level.SEVERE, &quot;Session \&quot;{0}\&quot; has not been stored correctly&quot;, sessionId);</span>
+        }
+<span class="nc" id="L203">    }</span>
+
+    /**
+     * Retrieves the AttributeIDs of the attributes used for the ongoing evaluation
+     *
+     * @param onGoingAttributes the list of attributes used for ongoing evaluation
+     * @param category          the category of the attributes
+     * @return the list of the string representing the IDs of the attributes
+     */
+    private List&lt;String&gt; getAttributeIdsForCategory(List&lt;Attribute&gt; onGoingAttributes, Category category) {
+<span class="nc" id="L213">        ArrayList&lt;String&gt; attributeIds = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        for (Attribute attribute : onGoingAttributes) {</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (attribute.getCategory() == category) {</span>
+<span class="nc" id="L216">                attributeIds.add(attribute.getAttributeId());</span>
+            }
+<span class="nc" id="L218">        }</span>
+<span class="nc" id="L219">        return attributeIds;</span>
+    }
+
+    /**
+     * startAccess method invoked by PEP
+     */
+    @Override
+    public StartAccessResponseMessage startAccess(StartAccessMessage message)
+            throws StatusException, PolicyException, RequestException {
+<span class="fc" id="L228">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L230">        log.log(Level.INFO, &quot;StartAccess begin scheduling at {0}&quot;, System.currentTimeMillis());</span>
+
+<span class="fc" id="L232">        Optional&lt;SessionInterface&gt; optSession = getSessionManager().getSessionForId(message.getSessionId());</span>
+<span class="fc" id="L233">        Reject.ifAbsent(optSession, &quot;StartAccess: no session for id &quot; + message.getSessionId());</span>
+<span class="fc" id="L234">        SessionInterface session = optSession.get(); // NOSONAR</span>
+
+        // Check if the session has the correct status
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        if (!session.isStatus(STATUS.TRY.name())) {</span>
+<span class="nc" id="L238">            log.log(Level.SEVERE, &quot;StartAccess: wrong status for session {0}&quot;, message.getSessionId());</span>
+<span class="nc" id="L239">            throw new StatusException(</span>
+<span class="nc" id="L240">                    &quot;StartAccess: tryaccess must be performed yet for session &quot; + message.getSessionId());</span>
+        }
+
+<span class="fc" id="L243">        PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());</span>
+<span class="fc" id="L244">        RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
+<span class="fc" id="L245">        RequestStatusEnricher.setAttributeForStatus(request, STATUS.START);</span>
+//		log.log(Level.INFO, &quot;startAccess: fattening start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L247">        request.fatten(false);</span>
+//		request.fatten(true);
+//		log.log(Level.INFO, &quot;startAccess: fattening ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+//		log.log(Level.INFO, &quot;startAccess: policy evaluation start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L252">        PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);</span>
+//		log.log(Level.INFO, &quot;startAccess: policy evaluation ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+<span class="fc" id="L255">        Reject.ifNull(evaluation);</span>
+<span class="fc" id="L256">        log.log(Level.INFO, &quot;StartAccess evaluated at {0} pdp response : {1}&quot;,</span>
+<span class="fc" id="L257">                new Object[]{System.currentTimeMillis(), evaluation.getResult()});</span>
+
+<span class="fc" id="L259">        getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.TRY);</span>
+
+//		log.log(Level.INFO, &quot;startAccess: update entry start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">            if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {</span>
+<span class="nc" id="L264">                log.log(Level.SEVERE, &quot;StartAccess error, sessionId {0} status update failed&quot;, message.getSessionId());</span>
+            }
+//			log.log(Level.INFO, &quot;startAccess: update entry ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="nc" id="L267">            List&lt;Attribute&gt; attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
+<span class="nc" id="L268">            RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
+<span class="nc" id="L269">            getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);</span>
+<span class="nc" id="L270">        } else {</span>
+<span class="pc bpc" id="L271" title="3 of 4 branches missed.">            if (revoke(session, new ArrayList&lt;&gt;()) &amp;&amp; !getSessionManager().deleteEntry(message.getSessionId())) {</span>
+<span class="nc" id="L272">                log.log(Level.SEVERE, &quot;StartAccess error, sessionId {0} deletion failed&quot;, message.getSessionId());</span>
+            }
+        }
+
+<span class="fc" id="L276">        return buildStartAccessResponse(message, evaluation);</span>
+    }
+
+    private StartAccessResponseMessage buildStartAccessResponse(StartAccessMessage message, PDPEvaluation evaluation) {
+<span class="fc" id="L280">        StartAccessResponseMessage response = new StartAccessResponseMessage(message.getDestination(),</span>
+<span class="fc" id="L281">                message.getSource(), message.getMessageId());</span>
+<span class="fc" id="L282">        response.setEvaluation(evaluation);</span>
+<span class="fc" id="L283">        return response;</span>
+    }
+
+    /**
+     * This is the code for the revoke. A revoke is always triggered by and
+     * EndAccess, in this function, all the attributes are un-subscribed.
+     */
+    private synchronized boolean revoke(SessionInterface session, List&lt;Attribute&gt; attributes) {
+<span class="fc" id="L291">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L293">        log.log(Level.INFO, &quot;Revoke begins at {0}&quot;, System.currentTimeMillis());</span>
+
+<span class="fc" id="L295">        boolean otherSessions = attributesToUnsubscribe(session.getId(), (ArrayList&lt;Attribute&gt;) attributes);</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (!otherSessions) {</span>
+<span class="nc" id="L297">            getPipRegistry().unsubscribeAll(attributes);</span>
+        }
+
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">        if (!getSessionManager().deleteEntry(session.getId())) {</span>
+<span class="fc" id="L301">            log.log(Level.SEVERE, &quot;EndAccess: errors during entry deletion for sessionId {0}&quot;, session.getId());</span>
+<span class="fc" id="L302">            return false;</span>
+        }
+
+<span class="nc" id="L305">        log.log(Level.INFO, &quot;Revoke ends at {0}&quot;, System.currentTimeMillis());</span>
+<span class="nc" id="L306">        return true;</span>
+    }
+
+    /**
+     * This function checks if there are attributes to be unsubscribed. The first
+     * step is to retrieve the list of ongoing attributes, then we have to
+     * unsubscribe all those attributes that are not needed anymore.
+     *
+     * @param sessionId  the id of the session we're revoking
+     * @param attributes the JSON object to be filled by this function
+     * @return true if there are attributes to unsubscribe, false otherwise
+     */
+    private boolean attributesToUnsubscribe(String sessionId, ArrayList&lt;Attribute&gt; attributes) {
+<span class="fc" id="L319">        String subjectName = &quot;&quot;;</span>
+<span class="fc" id="L320">        String resourceName = &quot;&quot;;</span>
+<span class="fc" id="L321">        String actionName = &quot;&quot;;</span>
+        // retrieve ongoing attributes for subject, resource, action and environment
+<span class="fc" id="L323">        Collection&lt;OnGoingAttributesInterface&gt; onGoingAttributes = getSessionManager().getOnGoingAttributes(sessionId);</span>
+<span class="fc" id="L324">        List&lt;OnGoingAttributesInterface&gt; subjectOnGoingAttributesList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L325">        List&lt;OnGoingAttributesInterface&gt; resourceOnGoingAttributesList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L326">        List&lt;OnGoingAttributesInterface&gt; actionOnGoingAttributesList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L327">        List&lt;OnGoingAttributesInterface&gt; environmentOnGoingAttributesList = new LinkedList&lt;&gt;();</span>
+
+        // build attribute lists for subject, resource, action and environment
+<span class="pc bpc" id="L330" title="2 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
+            // fill the correspondent list of ongoingAttributes
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            for (OnGoingAttributesInterface attribute : onGoingAttributes) {</span>
+<span class="nc bnc" id="L333" title="All 4 branches missed.">                if (attribute.getSubjectName() != null &amp;&amp; !attribute.getSubjectName().equals(&quot;null&quot;)) {</span>
+<span class="nc" id="L334">                    subjectOnGoingAttributesList.add(attribute);</span>
+<span class="nc" id="L335">                    subjectName = attribute.getSubjectName();</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">                } else if (attribute.getResourceName() != null &amp;&amp; !attribute.getResourceName().equals(&quot;null&quot;)) {</span>
+<span class="nc" id="L337">                    resourceOnGoingAttributesList.add(attribute);</span>
+<span class="nc" id="L338">                    resourceName = attribute.getResourceName();</span>
+<span class="nc bnc" id="L339" title="All 4 branches missed.">                } else if (attribute.getActionName() != null &amp;&amp; !attribute.getActionName().equals(&quot;null&quot;)) {</span>
+<span class="nc" id="L340">                    actionOnGoingAttributesList.add(attribute);</span>
+<span class="nc" id="L341">                    actionName = attribute.getActionName();</span>
+                } else {
+<span class="nc" id="L343">                    environmentOnGoingAttributesList.add(attribute);</span>
+                }
+<span class="nc" id="L345">            }</span>
+        }
+
+        // builds up the JSON object that is needed to perform unsubscribe
+<span class="fc" id="L349">        boolean otherSessions = true;</span>
+<span class="pc bpc" id="L350" title="2 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
+<span class="nc" id="L351">            otherSessions = buildOnGoingAttributes(Category.RESOURCE, attributes, resourceName, otherSessions,</span>
+                    resourceOnGoingAttributesList);
+<span class="nc" id="L353">            otherSessions = buildOnGoingAttributes(Category.SUBJECT, attributes, subjectName, otherSessions,</span>
+                    subjectOnGoingAttributesList);
+<span class="nc" id="L355">            otherSessions = buildOnGoingAttributes(Category.ACTION, attributes, actionName, otherSessions,</span>
+                    actionOnGoingAttributesList);
+<span class="nc" id="L357">            otherSessions = buildOnGoingAttributes(Category.ENVIRONMENT, attributes, &quot;&quot;, otherSessions,</span>
+                    environmentOnGoingAttributesList);
+        }
+<span class="fc" id="L360">        return otherSessions;</span>
+    }
+
+    private boolean buildOnGoingAttributes(Category category, ArrayList&lt;Attribute&gt; attributes, String name,
+                                           boolean otherSessions, List&lt;OnGoingAttributesInterface&gt; listOngoingAttributes) {
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        for (OnGoingAttributesInterface attribute : listOngoingAttributes) {</span>
+<span class="nc" id="L366">            List&lt;SessionInterface&gt; sessionList = getSessionListForCategory(category, attribute.getAttributeId(), name);</span>
+<span class="nc bnc" id="L367" title="All 6 branches missed.">            if (sessionList == null || sessionList.isEmpty() || sessionList.size() == 1) {</span>
+<span class="nc" id="L368">                otherSessions = false;</span>
+<span class="nc" id="L369">                attributes.add(buildAttribute(attribute, name));</span>
+            }
+<span class="nc" id="L371">        }</span>
+<span class="nc" id="L372">        return otherSessions;</span>
+    }
+
+    private List&lt;SessionInterface&gt; getSessionListForCategory(Category category, String id, String name) {
+<span class="pc bpc" id="L376" title="4 of 5 branches missed.">        switch (category) {</span>
+            case ENVIRONMENT:
+<span class="fc" id="L378">                return getSessionManager().getSessionsForEnvironmentAttributes(id);</span>
+            case ACTION:
+<span class="nc" id="L380">                return getSessionManager().getSessionsForActionAttributes(name, id);</span>
+            case SUBJECT:
+<span class="nc" id="L382">                return getSessionManager().getSessionsForSubjectAttributes(name, id);</span>
+            case RESOURCE:
+<span class="nc" id="L384">                return getSessionManager().getSessionsForResourceAttributes(name, id);</span>
+            default:
+<span class="nc" id="L386">                log.severe(&quot;Invalid attribute passed&quot;);</span>
+<span class="nc" id="L387">                return new ArrayList&lt;&gt;();</span>
+        }
+    }
+
+    private Attribute buildAttribute(OnGoingAttributesInterface ongoingAttribute, String name) {
+<span class="nc" id="L392">        Attribute attribute = new Attribute();</span>
+<span class="nc" id="L393">        attribute.setAttributeId(ongoingAttribute.getAttributeId());</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">        if (!name.isEmpty()) {</span>
+<span class="nc" id="L395">            attribute.setAdditionalInformation(name);</span>
+        }
+<span class="nc" id="L397">        return attribute;</span>
+    }
+
+    /**
+     * endAccess method invoked by PEP
+     */
+    @Override
+    public EndAccessResponseMessage endAccess(EndAccessMessage message)
+            throws StatusException, RequestException, PolicyException {
+<span class="fc" id="L406">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L408">        log.log(Level.INFO, &quot;EndAccess begins at {0}&quot;, System.currentTimeMillis());</span>
+<span class="fc" id="L409">        Reject.ifNull(message, &quot;EndAccessMessage is null&quot;);</span>
+
+<span class="fc" id="L411">        Optional&lt;SessionInterface&gt; optSession = getSessionManager().getSessionForId(message.getSessionId());</span>
+<span class="fc" id="L412">        Reject.ifAbsent(optSession, &quot;EndAccess: no session for id &quot; + message.getSessionId());</span>
+<span class="fc" id="L413">        SessionInterface session = optSession.get(); // NOSONAR</span>
+
+        // Check if the session has the correct status
+<span class="pc bpc" id="L416" title="3 of 4 branches missed.">        if (!(session.isStatus(STATUS.START.name()) || session.isStatus(STATUS.REVOKE.name()))) {</span>
+<span class="nc" id="L417">            log.log(Level.INFO, &quot;EndAccess: wrong status for session {0}&quot;, message.getSessionId());</span>
+<span class="nc" id="L418">            throw new StatusException(&quot;EndAccess: wrong status for session &quot; + message.getSessionId());</span>
+        }
+
+<span class="fc" id="L421">        log.log(Level.INFO, &quot;EndAccess evaluation starts at {0}&quot;, System.currentTimeMillis());</span>
+
+<span class="fc" id="L423">        PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());</span>
+<span class="fc" id="L424">        RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
+<span class="fc" id="L425">        RequestStatusEnricher.setAttributeForStatus(request, STATUS.END);</span>
+<span class="fc" id="L426">        request.fatten(false);</span>
+
+<span class="fc" id="L428">        PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.END);</span>
+<span class="fc" id="L429">        Reject.ifNull(evaluation);</span>
+<span class="fc" id="L430">        log.log(Level.INFO, &quot;EndAccess evaluated at {0} pdp response : {1}&quot;,</span>
+<span class="fc" id="L431">                new Object[]{System.currentTimeMillis(), evaluation.getResult()});</span>
+
+<span class="fc" id="L433">        getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.END);</span>
+
+        // access must be revoked
+<span class="pc bpc" id="L436" title="1 of 2 branches missed.">        if (revoke(session, new ArrayList&lt;&gt;())) {</span>
+<span class="nc" id="L437">            log.log(Level.INFO, &quot;EndAccess evaluation with revoke ends at {0}&quot;, System.currentTimeMillis());</span>
+        }
+
+<span class="fc" id="L440">        return buildEndAccessResponse(message, evaluation);</span>
+    }
+
+    private EndAccessResponseMessage buildEndAccessResponse(EndAccessMessage message, PDPEvaluation evaluation) {
+<span class="fc" id="L444">        EndAccessResponseMessage response = new EndAccessResponseMessage(message.getDestination(), message.getSource(),</span>
+<span class="fc" id="L445">                message.getMessageId());</span>
+<span class="fc" id="L446">        response.setEvaluation(evaluation);</span>
+<span class="fc" id="L447">        return response;</span>
+    }
+
+    /**
+     * This is the function where the effective reevaluation takes place.
+     */
+    public boolean reevaluateSessions(Attribute attribute) {
+<span class="fc" id="L454">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+        try {
+<span class="fc" id="L457">            log.info(&quot;ReevaluateSessions for  attributeId : &quot; + attribute.getAttributeId());</span>
+<span class="fc" id="L458">            List&lt;SessionInterface&gt; sessionList = getSessionListForCategory(attribute.getCategory(),</span>
+<span class="fc" id="L459">                    attribute.getAttributeId(), attribute.getAdditionalInformation());</span>
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">            if (sessionList != null) {</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">                for (SessionInterface session : sessionList) {</span>
+<span class="fc" id="L462">                    reevaluate(session);</span>
+<span class="fc" id="L463">                }</span>
+            }
+<span class="fc" id="L465">            return true;</span>
+<span class="nc" id="L466">        } catch (Exception e) {</span>
+<span class="nc" id="L467">            log.severe(&quot;Error in Reevaluate sessions : &quot; + e.getMessage());</span>
+        }
+<span class="nc" id="L469">        return false;</span>
+    }
+
+    public synchronized void reevaluate(SessionInterface session) throws PolicyException, RequestException {
+<span class="fc" id="L473">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L475">        log.log(Level.INFO, &quot;Reevaluation begins at {0}&quot;, System.currentTimeMillis());</span>
+
+<span class="fc" id="L477">        PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());</span>
+<span class="fc" id="L478">        RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
+//		log.log(Level.INFO, &quot;reevaluate: fattening start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L480">        request.fatten(false);</span>
+//		log.log(Level.INFO, &quot;reevaluate: fattening ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+//		log.log(Level.INFO, &quot;reevaluate: policy evaluation start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="fc" id="L484">        PDPEvaluation evaluation = getPdp().evaluate(request, policy, STATUS.START);</span>
+//		log.log(Level.INFO, &quot;reevaluate: policy evaluation ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+<span class="fc" id="L487">        Reject.ifNull(evaluation);</span>
+<span class="fc" id="L488">        getObligationManager().translateObligations(evaluation, session.getId(), STATUS.END);</span>
+
+<span class="fc" id="L490">        log.log(Level.INFO, &quot;Reevaluate evaluated at {0} pdp response : {1}&quot;,</span>
+<span class="fc" id="L491">                new Object[]{System.currentTimeMillis(), evaluation.getResult()});</span>
+
+<span class="pc bpc" id="L493" title="1 of 4 branches missed.">        if (session.isStatus(STATUS.START.name()) &amp;&amp; evaluation.isDecision(DecisionType.DENY)) {</span>
+<span class="nc" id="L494">            log.log(Level.INFO, &quot;Revoke at {0}&quot;, System.currentTimeMillis());</span>
+//			log.log(Level.INFO, &quot;reevaluate: update entry start: {0}&quot;, new Object[] { System.currentTimeMillis() });
+<span class="nc" id="L496">            getSessionManager().updateEntry(session.getId(), STATUS.REVOKE.name());</span>
+//			log.log(Level.INFO, &quot;reevaluate: update entry ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
+
+<span class="pc bpc" id="L499" title="3 of 4 branches missed.">        } else if (session.isStatus(STATUS.REVOKE.name()) &amp;&amp; evaluation.isDecision(DecisionType.PERMIT)) {</span>
+<span class="nc" id="L500">            log.log(Level.INFO, &quot;Resume at {0}&quot;, System.currentTimeMillis());</span>
+<span class="nc" id="L501">            getSessionManager().updateEntry(session.getId(), STATUS.START.name());</span>
+        } else {
+<span class="fc" id="L503">            log.log(Level.INFO, &quot;Reevaluation ends without change at {0}&quot;, System.currentTimeMillis());</span>
+<span class="fc" id="L504">            return;</span>
+        }
+
+<span class="nc" id="L507">        ReevaluationResponseMessage response = buildReevaluationResponse(session, evaluation);</span>
+<span class="nc" id="L508">        getRequestManager().sendReevaluation(response);</span>
+<span class="nc" id="L509">        log.log(Level.INFO, &quot;Reevaluation ends changing status at {0}&quot;, System.currentTimeMillis());</span>
+<span class="nc" id="L510">    }</span>
+
+    private ReevaluationResponseMessage buildReevaluationResponse(SessionInterface session, PDPEvaluation evaluation) {
+<span class="nc" id="L513">        String[] destSplitted = session.getPepId().split(PEP_ID_SEPARATOR);</span>
+<span class="nc" id="L514">        ReevaluationResponseMessage response = new ReevaluationResponseMessage(uri.getHost(), destSplitted[0]);</span>
+<span class="nc" id="L515">        response.setPepId(destSplitted[destSplitted.length - 1]);</span>
+<span class="nc" id="L516">        response.setSessionId(session.getId());</span>
+<span class="nc" id="L517">        response.setEvaluation(evaluation);</span>
+<span class="nc" id="L518">        return response;</span>
+    }
+
+    @Override
+    public void attributeChanged(AttributeChangeMessage message) {
+<span class="fc" id="L523">        log.setLevel(Level.OFF);</span>
+//		log.setLevel(Level.INFO);
+<span class="fc" id="L525">        log.log(Level.INFO, &quot;Attribute changed received at {0}&quot;, System.currentTimeMillis());</span>
+<span class="fc bfc" id="L526" title="All 2 branches covered.">        for (Attribute attribute : message.getAttributes()) {</span>
+<span class="pc bpc" id="L527" title="1 of 2 branches missed.">            if (!reevaluateSessions(attribute)) {</span>
+<span class="nc" id="L528">                log.log(Level.SEVERE, &quot;Error handling attribute changes&quot;);</span>
+            }
+<span class="fc" id="L530">        }</span>
+
+<span class="fc" id="L532">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

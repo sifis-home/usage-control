@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AbstractRequestManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.requestmanager</a> &gt; <span class="el_source">AbstractRequestManager.java</span></div><h1>AbstractRequestManager.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.requestmanager;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
+
+import it.cnr.iit.ucs.contexthandler.ContextHandlerInterface;
+import it.cnr.iit.ucs.message.Message;
+import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
+import it.cnr.iit.ucs.pep.PEPInterface;
+import it.cnr.iit.ucs.properties.components.RequestManagerProperties;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * This is the abstract class representing the request manager. Since we may
+ * have different flavours of the request manager, each with its own
+ * characteristics (single thread or multiple threads, algorithms used to
+ * prioritise the queue and so on), this is a way to provide all the
+ * RequestManagers the same basics characteristics
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public abstract class AbstractRequestManager implements RequestManagerToCHInterface, RequestManagerInterface {
+
+<span class="fc" id="L43">	protected static final Logger log = Logger.getLogger(AbstractRequestManager.class.getName());</span>
+
+<span class="fc" id="L45">	private final BlockingQueue&lt;Message&gt; queueInput = new LinkedBlockingQueue&lt;&gt;();</span>
+<span class="fc" id="L46">	private final BlockingQueue&lt;Message&gt; queueOutput = new LinkedBlockingQueue&lt;&gt;();</span>
+<span class="fc" id="L47">	private final BlockingQueue&lt;AttributeChangeMessage&gt; retrieveRequests = new LinkedBlockingQueue&lt;&gt;();</span>
+
+	private ContextHandlerInterface contextHandler;
+	private HashMap&lt;String, PEPInterface&gt; pepMap;
+
+	protected RequestManagerProperties properties;
+
+<span class="fc" id="L54">	protected AbstractRequestManager(RequestManagerProperties properties) {</span>
+<span class="fc" id="L55">		Reject.ifNull(properties);</span>
+<span class="fc" id="L56">		this.properties = properties;</span>
+<span class="fc" id="L57">		pepMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L58">	}</span>
+
+	public final void setContextHandler(ContextHandlerInterface contextHandler) {
+<span class="fc" id="L61">		Reject.ifNull(contextHandler);</span>
+<span class="fc" id="L62">		this.contextHandler = contextHandler;</span>
+<span class="fc" id="L63">	}</span>
+
+	protected ContextHandlerInterface getContextHandler() {
+<span class="fc" id="L66">		return contextHandler;</span>
+	}
+
+	public final void setPEPMap(Map&lt;String, PEPInterface&gt; pepMap) {
+<span class="fc" id="L70">		Reject.ifNull(pepMap);</span>
+<span class="fc" id="L71">		this.pepMap.putAll(pepMap);</span>
+<span class="fc" id="L72">	}</span>
+
+	protected HashMap&lt;String, PEPInterface&gt; getPEPMap() {
+<span class="nc" id="L75">		return pepMap;</span>
+	}
+
+	protected BlockingQueue&lt;Message&gt; getQueueInput() {
+<span class="nc" id="L79">		return queueInput;</span>
+	}
+
+	protected BlockingQueue&lt;Message&gt; getQueueOutput() {
+<span class="nc" id="L83">		return queueOutput;</span>
+	}
+
+	protected final BlockingQueue&lt;AttributeChangeMessage&gt; getRetrieveRequestsQueue() {
+<span class="nc" id="L87">		return retrieveRequests;</span>
+	}
+
+	public abstract void startMonitoring();
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

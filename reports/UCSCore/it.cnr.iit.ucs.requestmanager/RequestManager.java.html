@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RequestManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSCore</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.requestmanager</a> &gt; <span class="el_source">RequestManager.java</span></div><h1>RequestManager.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.requestmanager;
+
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.logging.Logger;
+
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.ucs.message.Message;
+import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
+import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
+import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
+import it.cnr.iit.ucs.properties.components.RequestManagerProperties;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * All the requests coming to the context handler have to reach the request
+ * manager first that will choose how to handle them.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public class RequestManager extends AbstractRequestManager {
+
+<span class="fc" id="L41">	private static final Logger log = Logger.getLogger(RequestManager.class.getName());</span>
+<span class="fc" id="L42">	private boolean active = false;</span>
+
+	private ExecutorService inquirers;
+
+	public RequestManager(RequestManagerProperties properties) {
+<span class="fc" id="L47">		super(properties);</span>
+<span class="fc" id="L48">		this.active = properties.isActive();</span>
+<span class="fc" id="L49">		initializeInquirers();</span>
+<span class="fc" id="L50">	}</span>
+
+	/**
+	 * Initialises the request manager with a pool of threads
+	 *
+	 * @return true if everything goes fine, false in case of exceptions
+	 */
+	private void initializeInquirers() {
+		try {
+<span class="fc" id="L59">			inquirers = Executors.newFixedThreadPool(1);</span>
+<span class="nc" id="L60">		} catch (Exception e) {</span>
+<span class="nc" id="L61">			log.severe(&quot;Error initialising the RequestManager inquirers : &quot; + e.getMessage());</span>
+<span class="fc" id="L62">		}</span>
+<span class="fc" id="L63">	}</span>
+
+	@Override
+	public synchronized void sendReevaluation(ReevaluationResponseMessage reevaluation) {
+<span class="nc" id="L67">		Reject.ifNull(reevaluation, &quot;Null message&quot;);</span>
+<span class="nc" id="L68">		log.info(&quot;Sending on going reevaluation.&quot;);</span>
+<span class="nc" id="L69">		getPEPMap().get((reevaluation).getPepId()).onGoingEvaluation(reevaluation);</span>
+<span class="nc" id="L70">	}</span>
+
+	/**
+	 * Handles the case of a message received from outside Once a message coming
+	 * from outside is received from the request manager, it puts it in the priority
+	 * queue of messages
+	 */
+	@Override
+	public synchronized Message sendMessage(Message message) {
+<span class="fc" id="L79">		Reject.ifNull(message, &quot;Null message&quot;);</span>
+		try {
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">			if (!active) {</span>
+<span class="fc" id="L82">				return handleMessage(message);</span>
+			} else {
+<span class="nc" id="L84">				getQueueOutput().put(message);</span>
+			}
+<span class="fc" id="L86">		} catch (Exception e) {</span>
+			//e.printStackTrace();
+<span class="fc" id="L88">			log.severe(&quot;e.getLocalizedMessage()=&quot; + e.getLocalizedMessage());</span>
+			//Thread.currentThread().interrupt();
+<span class="fc" id="L90">			return null;</span>
+<span class="nc" id="L91">		}</span>
+<span class="nc" id="L92">		return null;</span>
+	}
+
+	/**
+	 * The context handler inquirers perform an infinite loop in order to retrieve
+	 * the messages coming to the request manager and sends them to the context
+	 * handler.
+	 */
+<span class="nc" id="L100">	private class ContextHandlerInquirer implements Callable&lt;Message&gt; {</span>
+
+		@Override
+		public Message call() {
+			Message message;
+			try {
+<span class="nc bnc" id="L106" title="All 2 branches missed.">				while ((message = getQueueOutput().take()) != null) {</span>
+<span class="nc" id="L107">					handleMessage(message);</span>
+				}
+<span class="nc" id="L109">			} catch (Exception e) {</span>
+<span class="nc" id="L110">				log.severe(e.getMessage());</span>
+<span class="nc" id="L111">				Thread.currentThread().interrupt();</span>
+<span class="nc" id="L112">			}</span>
+<span class="nc" id="L113">			return null;</span>
+		}
+	}
+
+	private Message handleMessage(Message message) throws Exception {
+<span class="fc" id="L118">		Message responseMessage = null;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">		if (message instanceof AttributeChangeMessage) {</span>
+<span class="fc" id="L120">			getContextHandler().attributeChanged((AttributeChangeMessage) message);</span>
+<span class="fc" id="L121">			return null;</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">		} else if (message.getPurpose() == PURPOSE.TRY) {</span>
+<span class="fc" id="L123">			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">			if (responseMessage == null) {</span>
+<span class="fc" id="L125">				log.severe(&quot;responseMessage is null&quot;);</span>
+			}
+<span class="fc bfc" id="L127" title="All 2 branches covered.">		} else if (message.getPurpose() == PURPOSE.START) {</span>
+<span class="fc" id="L128">			responseMessage = getContextHandler().startAccess((StartAccessMessage) message);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">		} else if (message.getPurpose() == PURPOSE.END) {</span>
+<span class="fc" id="L130">			responseMessage = getContextHandler().endAccess((EndAccessMessage) message);</span>
+		} else {
+<span class="fc" id="L132">			throw new IllegalArgumentException(&quot;Invalid message arrived&quot;);</span>
+		}
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">		if (active) {</span>
+<span class="nc" id="L135">			getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);</span>
+		}
+
+<span class="nc" id="L138">		System.out.println(&quot;responseMessage.toString()=&quot; + responseMessage.toString());</span>
+<span class="nc" id="L139">		return responseMessage;</span>
+	}
+
+	@Override
+	public void startMonitoring() {
+<span class="nc" id="L144">		inquirers.submit(new ContextHandlerInquirer());</span>
+<span class="nc" id="L145">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

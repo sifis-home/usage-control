@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UCSDht.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">UCSDht.java</span></div><h1>UCSDht.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
+
+import com.google.gson.JsonSyntaxException;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
+import it.cnr.iit.ucs.properties.components.PepProperties;
+import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPapProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
+import it.cnr.iit.utility.dht.DHTClient;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
+import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
+import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterRequest;
+import it.cnr.iit.utility.dht.jsondht.registration.RegisterResponse;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
+import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+import it.cnr.iit.xacml.Category;
+import it.cnr.iit.xacml.DataType;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.io.IOException;
+
+import static it.cnr.iit.utility.dht.DHTUtils.*;
+
+<span class="nc" id="L48">public class UCSDht {</span>
+
+    private static DHTClient dhtClientEndPoint;
+<span class="nc" id="L51">    private static String dhtUri = &quot;ws://localhost:3000/ws&quot;;</span>
+    private static UCSClient ucsClient;
+
+    private static final String SUB_COMMAND_TYPE = &quot;ucs-command&quot;;
+    private static final String COMMAND_TYPE = &quot;ucs-command&quot;;
+    private static final String PUB_TOPIC_NAME = &quot;topic-name&quot;;
+    private static final String SUB_TOPIC_UUID = &quot;topic-uuid-the-ucs-is-subscribed-to&quot;;
+<span class="nc" id="L58">    private static final File attributesDir = new File(Utils.getResourcePath(UCSDht.class), &quot;attributes&quot;);</span>
+<span class="nc" id="L59">    private static final File policiesDir = new File(Utils.getResourcePath(UCSDht.class), &quot;policies&quot;);</span>
+
+
+    public static void main(String[] args) {
+
+<span class="nc bnc" id="L64" title="All 4 branches missed.">        if (args.length != 0 &amp;&amp; args[0].equals(&quot;-d&quot;)) {</span>
+<span class="nc" id="L65">            URI parsed = null;</span>
+            try {
+<span class="nc" id="L67">                parsed = new URI(args[1]);</span>
+<span class="nc" id="L68">            } catch (URISyntaxException | ArrayIndexOutOfBoundsException e) {</span>
+                // No URI indicated
+<span class="nc" id="L70">                System.err.println(&quot;Invalid URI after -d option&quot;);</span>
+<span class="nc" id="L71">                return;</span>
+<span class="nc" id="L72">            }</span>
+<span class="nc" id="L73">            dhtUri = parsed.toString();</span>
+        }
+
+<span class="nc" id="L76">        initializeUCS();</span>
+
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (!isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
+<span class="nc" id="L79">            return;</span>
+        }
+
+        try {
+<span class="nc" id="L83">            dhtClientEndPoint = new DHTClient(new URI(dhtUri));</span>
+<span class="nc" id="L84">            dhtClientEndPoint.addMessageHandler(setMessageHandler());</span>
+<span class="nc" id="L85">        } catch (URISyntaxException e) {</span>
+<span class="nc" id="L86">            throw new RuntimeException(e);</span>
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">        System.out.println(&quot;Waiting for commands...&quot;);</span>
+<span class="nc" id="L89">    }</span>
+
+
+    private static void initializeUCS() {
+
+<span class="nc" id="L94">        Utils.createDir(attributesDir);</span>
+<span class="nc" id="L95">        Utils.createDir(policiesDir);</span>
+
+<span class="nc" id="L97">        List&lt;PipProperties&gt; pipPropertiesList = new ArrayList&lt;&gt;();</span>
+
+        // add sample attribute
+<span class="nc" id="L100">        UCSDhtPipReaderProperties pipReader = new UCSDhtPipReaderProperties();</span>
+<span class="nc" id="L101">        pipReader.addAttribute(</span>
+                &quot;urn:oasis:names:tc:xacml:3.0:environment:attribute-1&quot;,
+<span class="nc" id="L103">                Category.ENVIRONMENT.toString(),</span>
+<span class="nc" id="L104">                DataType.STRING.toString(),</span>
+                attributesDir + File.separator + &quot;sample-attribute.txt&quot;);
+<span class="nc" id="L106">        pipReader.setRefreshRate(1000L);</span>
+<span class="nc" id="L107">        pipPropertiesList.add(pipReader);</span>
+
+<span class="nc" id="L109">        setAttributeValue(attributesDir.getAbsolutePath() + File.separator</span>
+                + &quot;sample-attribute.txt&quot;, &quot;attribute-1-value&quot;);
+
+<span class="nc" id="L112">        UCSDhtPapProperties papProperties = new UCSDhtPapProperties(policiesDir.getAbsolutePath());</span>
+
+<span class="nc" id="L114">        ucsClient = new UCSClient(pipPropertiesList, papProperties);</span>
+
+        // add sample policy
+<span class="nc" id="L117">        String examplePolicy = Utils.readContent(Utils.accessFile(UCSDht.class, &quot;example-policy.xml&quot;));</span>
+<span class="nc" id="L118">        ucsClient.addPolicy(examplePolicy);</span>
+
+<span class="nc" id="L120">        System.out.println(&quot;Policies directory: &quot; + policiesDir.getAbsolutePath());</span>
+<span class="nc" id="L121">        System.out.println(&quot;Attributes directory: &quot; + attributesDir.getAbsolutePath());</span>
+
+<span class="nc" id="L123">        System.out.println(&quot;UCS initialization complete&quot;);</span>
+<span class="nc" id="L124">    }</span>
+
+
+    private static MessageContent getMessageFromJson(JsonIn jsonIn) {
+<span class="nc" id="L128">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+    }
+
+
+    private static String getIdFromJson(JsonIn jsonIn) {
+<span class="nc" id="L133">        return jsonIn.getVolatile().getValue().getCommand().getValue().getId();</span>
+    }
+
+
+    private static String getMessageIdFromJson(JsonIn jsonIn) {
+<span class="nc" id="L138">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getMessage_id();</span>
+    }
+
+
+    private static void handleTryAccessRequest(JsonIn jsonIn) {
+        // construct a TryAccess message compliant with what the UCS accepts
+<span class="nc" id="L144">        TryAccessRequest messageIn = (TryAccessRequest) getMessageFromJson(jsonIn);</span>
+
+        // make the actual try access request to the UCS
+<span class="nc" id="L147">        String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));</span>
+<span class="nc" id="L148">        TryAccessResponseMessage response =</span>
+<span class="nc" id="L149">                ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+
+        // build the json object
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="nc" id="L153">                buildErrorResponseMessageForPep(jsonIn, &quot;Error during try access&quot;) :</span>
+<span class="nc" id="L154">                buildTryAccessResponseMessage(jsonIn, response);</span>
+
+<span class="nc" id="L156">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L157">    }</span>
+
+
+    private static JsonOut buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
+<span class="nc" id="L161">        MessageContent messageOut = new TryAccessResponse(</span>
+<span class="nc" id="L162">                response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());</span>
+<span class="nc" id="L163">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+    }
+
+
+    private static void handleStartAccessRequest(JsonIn jsonIn) {
+        // construct a StartAccess message compliant with what the UCS accepts
+<span class="nc" id="L169">        StartAccessRequest messageIn = (StartAccessRequest) getMessageFromJson(jsonIn);</span>
+
+        // make the actual start access request to the UCS
+<span class="nc" id="L172">        StartAccessResponseMessage response =</span>
+<span class="nc" id="L173">                ucsClient.startAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+
+        // build the json object
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="nc" id="L177">                buildErrorResponseMessageForPep(jsonIn, &quot;Error during start access&quot;) :</span>
+<span class="nc" id="L178">                buildStartAccessResponseMessage(jsonIn, response);</span>
+
+<span class="nc" id="L180">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L181">    }</span>
+
+
+    private static JsonOut buildStartAccessResponseMessage(JsonIn jsonIn, StartAccessResponseMessage response) {
+<span class="nc" id="L185">        MessageContent messageOut =</span>
+                new StartAccessResponse(
+<span class="nc" id="L187">                        response.getMessageId(), response.getEvaluation().getResult());</span>
+<span class="nc" id="L188">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+    }
+
+
+    private static void handleEndAccessRequest(JsonIn jsonIn) {
+        // construct an EndAccess message compliant with what the UCS accepts
+<span class="nc" id="L194">        EndAccessRequest messageIn = (EndAccessRequest) getMessageFromJson(jsonIn);</span>
+
+        // make the actual end access request to the UCS
+<span class="nc" id="L197">        EndAccessResponseMessage response =</span>
+<span class="nc" id="L198">                ucsClient.endAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+
+        // build the json object
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="nc" id="L202">                buildErrorResponseMessageForPep(jsonIn, &quot;Error during end access&quot;) :</span>
+<span class="nc" id="L203">                buildEndAccessResponseMessage(jsonIn, response);</span>
+
+<span class="nc" id="L205">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L206">    }</span>
+
+
+    private static JsonOut buildEndAccessResponseMessage(JsonIn jsonIn, EndAccessResponseMessage response) {
+<span class="nc" id="L210">        MessageContent messageOut =</span>
+                new EndAccessResponse(
+<span class="nc" id="L212">                        response.getMessageId(), response.getEvaluation().getResult());</span>
+<span class="nc" id="L213">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+    }
+
+
+    public static void handleReevaluation(JsonOut jsonOut) {
+<span class="nc" id="L218">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L219">    }</span>
+
+    /**
+     * Serialize the JsonOut object passed as argument and publish the
+     * Json string on the DHT.
+     *
+     * @param jsonOut the object to serialize and send
+     */
+    private static void serializeAndSend(JsonOut jsonOut) {
+        // serialize the object to a json string
+<span class="nc" id="L229">        String msg = serializeOutgoingJson(jsonOut);</span>
+
+        // send the request
+<span class="nc bnc" id="L232" title="All 2 branches missed.">        if (!dhtClientEndPoint.sendMessage(msg)) {</span>
+<span class="nc" id="L233">            System.err.println(&quot;Error sending the message to the DHT&quot;);</span>
+        }
+<span class="nc" id="L235">    }</span>
+
+
+    // this method returns OK both when the registration went through successfully
+    // and when the pep was already registered
+    // it returns KO if the pep cannot be registered
+    public static void handleRegisterRequest(JsonIn jsonIn) {
+        JsonOut jsonOut;
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        if (!isPepRegistered(jsonIn)) {</span>
+<span class="nc" id="L244">            RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);</span>
+<span class="nc" id="L245">            String pepId = getIdFromJson(jsonIn);</span>
+<span class="nc" id="L246">            String subTopicName = messageIn.getSub_topic_name();</span>
+<span class="nc" id="L247">            String subTopicUuid = messageIn.getSub_topic_uuid();</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">            if (!ucsClient.addPep(pepId, subTopicName, subTopicUuid)) {</span>
+<span class="nc" id="L250">                jsonOut = buildRegisterResponseMessage(jsonIn, &quot;KO&quot;);</span>
+<span class="nc" id="L251">                serializeAndSend(jsonOut);</span>
+<span class="nc" id="L252">                return;</span>
+            }
+        }
+<span class="nc" id="L255">        jsonOut = buildRegisterResponseMessage(jsonIn, &quot;OK&quot;);</span>
+<span class="nc" id="L256">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L257">    }</span>
+
+
+    private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
+<span class="nc" id="L261">        MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L262">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+    }
+
+
+    private static JsonOut buildJsonOutForPep(MessageContent messageOut, String pepId) {
+<span class="nc" id="L267">        PepProperties pepProperties = ucsClient.getPepProperties(pepId);</span>
+<span class="nc" id="L268">        return buildOutgoingJsonObject(messageOut, pepId,</span>
+<span class="nc" id="L269">                pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);</span>
+    }
+
+
+    private static JsonOut buildErrorResponseMessageForPep(JsonIn jsonIn, String description) {
+<span class="nc" id="L274">        MessageContent messageOut =</span>
+                new ErrorResponse(
+<span class="nc" id="L276">                        getMessageIdFromJson(jsonIn), description);</span>
+<span class="nc" id="L277">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+    }
+
+
+    private static void processPepMessage(JsonIn jsonIn) {
+<span class="nc" id="L282">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">        if (message instanceof RegisterRequest) {</span>
+            // handle register request
+<span class="nc" id="L285">            System.out.println(&quot;handle register request&quot;);</span>
+<span class="nc" id="L286">            handleRegisterRequest(jsonIn);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">        } else if (message instanceof TryAccessRequest) {</span>
+            // handle try access request
+<span class="nc" id="L289">            System.out.println(&quot;handle try access request&quot;);</span>
+<span class="nc" id="L290">            handleTryAccessRequest(jsonIn);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        } else if (message instanceof StartAccessRequest) {</span>
+            // handle start access request
+<span class="nc" id="L293">            System.out.println(&quot;handle start access request&quot;);</span>
+<span class="nc" id="L294">            handleStartAccessRequest(jsonIn);</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
+            // handle end access request
+<span class="nc" id="L297">            System.out.println(&quot;handle end access request&quot;);</span>
+<span class="nc" id="L298">            handleEndAccessRequest(jsonIn);</span>
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+<span class="nc" id="L302">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+        }
+<span class="nc" id="L304">    }</span>
+
+    private static void processPapMessage(JsonIn jsonIn) {
+<span class="nc" id="L307">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (message instanceof AddPolicyRequest) {</span>
+<span class="nc" id="L309">            System.out.println(&quot;handle add policy request&quot;);</span>
+<span class="nc" id="L310">            handleAddPolicyRequest(jsonIn);</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">        } else if (message instanceof DeletePolicyRequest) {</span>
+<span class="nc" id="L312">            System.out.println(&quot;handle delete policy request&quot;);</span>
+<span class="nc" id="L313">            handleDeletePolicyRequest(jsonIn);</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        } else if (message instanceof ListPoliciesRequest) {</span>
+<span class="nc" id="L315">            System.out.println(&quot;handle list policies request&quot;);</span>
+<span class="nc" id="L316">            handleListPoliciesRequest(jsonIn);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        } else if (message instanceof GetPolicyRequest) {</span>
+<span class="nc" id="L318">            System.out.println(&quot;handle get policy request&quot;);</span>
+<span class="nc" id="L319">            handleGetPolicyRequest(jsonIn);</span>
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+<span class="nc" id="L323">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+        }
+<span class="nc" id="L325">    }</span>
+
+    private static void handleAddPolicyRequest(JsonIn jsonIn) {
+<span class="nc" id="L328">        AddPolicyRequest messageIn = (AddPolicyRequest) getMessageFromJson(jsonIn);</span>
+
+        //String policy = messageIn.getPolicy();
+<span class="nc" id="L331">        String policy = new String(Base64.getDecoder().decode(messageIn.getPolicy()));</span>
+
+        JsonOut jsonOut;
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        if (!ucsClient.addPolicy(policy)) {</span>
+<span class="nc" id="L335">            jsonOut = buildAddPolicyResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L337">            jsonOut = buildAddPolicyResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L339">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L340">    }</span>
+
+
+    private static JsonOut buildAddPolicyResponseMessage(JsonIn jsonIn, String code) {
+
+<span class="nc" id="L345">        MessageContent messageOut = new AddPolicyResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L346">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pap-is-subscribed-to&quot;, &quot;topic-uuid-pap-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+
+    private static void handleDeletePolicyRequest(JsonIn jsonIn) {
+<span class="nc" id="L351">        DeletePolicyRequest messageIn = (DeletePolicyRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L353">        String policyId = messageIn.getPolicy_id();</span>
+
+        JsonOut jsonOut;
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        if (!ucsClient.deletePolicy(policyId)) {</span>
+<span class="nc" id="L357">            jsonOut = buildDeletePolicyResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L359">            jsonOut = buildDeletePolicyResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L361">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L362">    }</span>
+
+
+    private static JsonOut buildDeletePolicyResponseMessage(JsonIn jsonIn, String code) {
+
+<span class="nc" id="L367">        MessageContent messageOut = new DeletePolicyResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L368">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pap-is-subscribed-to&quot;, &quot;topic-uuid-pap-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+
+    private static void handleListPoliciesRequest(JsonIn jsonIn) {
+<span class="nc" id="L373">        List&lt;String&gt; policyList = ucsClient.listPolicies();</span>
+
+<span class="nc" id="L375">        JsonOut jsonOut = buildListPoliciesResponseMessage(jsonIn, policyList);</span>
+<span class="nc" id="L376">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L377">    }</span>
+
+
+    private static JsonOut buildListPoliciesResponseMessage(JsonIn jsonIn, List&lt;String&gt; policyList) {
+
+<span class="nc" id="L382">        MessageContent messageOut = new ListPoliciesResponse(getMessageIdFromJson(jsonIn), policyList);</span>
+<span class="nc" id="L383">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pap-is-subscribed-to&quot;, &quot;topic-uuid-pap-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+
+    private static void handleGetPolicyRequest(JsonIn jsonIn) {
+<span class="nc" id="L388">        GetPolicyRequest messageIn = (GetPolicyRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L390">        String policyId = messageIn.getPolicy_id();</span>
+
+<span class="nc" id="L392">        String policy = ucsClient.getPolicy(policyId);</span>
+<span class="nc" id="L393">        String base64Policy = Base64.getEncoder().encodeToString(policy.getBytes());</span>
+
+<span class="nc" id="L395">        JsonOut jsonOut = buildGetPolicyResponseMessage(jsonIn, base64Policy);</span>
+
+<span class="nc" id="L397">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L398">    }</span>
+
+
+    private static JsonOut buildGetPolicyResponseMessage(JsonIn jsonIn, String policy) {
+
+<span class="nc" id="L403">        MessageContent messageOut = new GetPolicyResponse(getMessageIdFromJson(jsonIn), policy);</span>
+<span class="nc" id="L404">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pap-is-subscribed-to&quot;, &quot;topic-uuid-pap-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+
+    private static void processPipMessage(JsonIn jsonIn) {
+<span class="nc" id="L409">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        if (message instanceof AddPipRequest) {</span>
+<span class="nc" id="L411">            System.out.println(&quot;handle add Pip request&quot;);</span>
+<span class="nc" id="L412">            handleAddPipRequest(jsonIn);</span>
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+<span class="nc" id="L416">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+        }
+<span class="nc" id="L418">    }</span>
+
+    private static void handleAddPipRequest(JsonIn jsonIn) {
+<span class="nc" id="L421">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L423">        String pipType = messageIn.getPip_type();</span>
+<span class="nc" id="L424">        String attributeId = messageIn.getAttribute_id();</span>
+<span class="nc" id="L425">        String category = messageIn.getCategory();</span>
+<span class="nc" id="L426">        String dataType = messageIn.getData_type();</span>
+<span class="nc" id="L427">        String attributeValue = messageIn.getAttribute_value();</span>
+<span class="nc" id="L428">        String attributePath = attributesDir + File.separator;</span>
+<span class="nc" id="L429">        String fileName = messageIn.getFile_name();</span>
+<span class="nc" id="L430">        long refreshRate = messageIn.getRefresh_rate();</span>
+
+        JsonOut jsonOut;
+<span class="nc bnc" id="L433" title="All 2 branches missed.">        if (!ucsClient.addPip(pipType, attributeId, category, dataType, attributePath, fileName, refreshRate)) {</span>
+<span class="nc" id="L434">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L436">            setAttributeValue(attributePath + fileName, attributeValue);</span>
+<span class="nc" id="L437">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L439">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L440">    }</span>
+
+
+    private static JsonOut buildAddPipResponseMessage(JsonIn jsonIn, String code) {
+
+<span class="nc" id="L445">        MessageContent messageOut = new AddPipResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L446">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pip-is-subscribed-to&quot;, &quot;topic-uuid-pip-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+    private static JsonOut buildErrorResponseMessage(JsonIn jsonIn, String description) {
+<span class="nc" id="L450">        MessageContent messageOut =</span>
+                new ErrorResponse(
+<span class="nc" id="L452">                        getMessageIdFromJson(jsonIn), description);</span>
+<span class="nc" id="L453">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pap-is-subscribed-to&quot;, &quot;topic-uuid-pap-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+    private static DHTClient.MessageHandler setMessageHandler() {
+<span class="nc" id="L457">        DHTClient.MessageHandler messageHandler = new DHTClient.MessageHandler() {</span>
+            /**
+             * Deserialize the received message and check the topic matches
+             * the one the UCS is subscribed to. If so, process the request
+             * coming from the DHT
+             *
+             * @param message the message, a json string, coming from the DHT
+             */
+            public void handleMessage(String message) {
+                JsonIn jsonIn;
+                try {
+                    // deserialize json
+<span class="nc" id="L469">                    jsonIn = deserializeIncomingJson(message);</span>
+
+                    // check the topic is the one we are subscribed to
+<span class="nc bnc" id="L472" title="All 2 branches missed.">                    if (!isTopicOfInterest(jsonIn, SUB_TOPIC_UUID)) {</span>
+<span class="nc" id="L473">                        return;</span>
+                    }
+<span class="nc" id="L475">                    System.out.println(&quot;Topic matches. Message type: &quot; + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());</span>
+<span class="nc" id="L476">                } catch (JsonSyntaxException e) {</span>
+                    //System.err.println(&quot;Error deserializing Json. Message discarded.&quot;);
+<span class="nc" id="L478">                    return;</span>
+<span class="nc" id="L479">                }</span>
+<span class="nc bnc" id="L480" title="All 4 branches missed.">                switch (jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {</span>
+                    case &quot;pep-command&quot;:
+<span class="nc bnc" id="L482" title="All 4 branches missed.">                        if (!isRegisterRequest(jsonIn) &amp;&amp; !isPepRegistered(jsonIn)) {</span>
+<span class="nc" id="L483">                            System.err.println(&quot;An unregistered PEP tried to make a request. Request discarded.&quot;);</span>
+<span class="nc" id="L484">                            return;</span>
+                        }
+                        try {
+<span class="nc" id="L487">                            processPepMessage(jsonIn);</span>
+<span class="nc" id="L488">                        } catch (Exception e) {</span>
+<span class="nc" id="L489">                            System.err.println(&quot;Error processing PEP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L490">                            JsonOut jsonOut =</span>
+<span class="nc" id="L491">                                    buildErrorResponseMessageForPep(jsonIn, e.getMessage());</span>
+<span class="nc" id="L492">                            serializeAndSend(jsonOut);</span>
+<span class="nc" id="L493">                        }</span>
+<span class="nc" id="L494">                        break;</span>
+                    case &quot;pap-command&quot;:
+                        try {
+<span class="nc" id="L497">                            processPapMessage(jsonIn);</span>
+<span class="nc" id="L498">                        } catch (Exception e) {</span>
+<span class="nc" id="L499">                            System.err.println(&quot;Error processing PAP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L500">                            JsonOut jsonOut =</span>
+<span class="nc" id="L501">                                    buildErrorResponseMessage(jsonIn, e.getMessage());</span>
+<span class="nc" id="L502">                            serializeAndSend(jsonOut);</span>
+<span class="nc" id="L503">                        }</span>
+<span class="nc" id="L504">                        break;</span>
+                    case &quot;pip-command&quot;:
+                        try {
+<span class="nc" id="L507">                            processPipMessage(jsonIn);</span>
+<span class="nc" id="L508">                        } catch (Exception e) {</span>
+<span class="nc" id="L509">                            System.err.println(&quot;Error processing PIP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L510">                            JsonOut jsonOut =</span>
+<span class="nc" id="L511">                                    buildErrorResponseMessage(jsonIn, e.getMessage());</span>
+<span class="nc" id="L512">                            serializeAndSend(jsonOut);</span>
+<span class="nc" id="L513">                        }</span>
+<span class="nc" id="L514">                        break;</span>
+                    default:
+<span class="nc" id="L516">                        System.err.println(&quot;Wrong command type. Request discarded.&quot;);</span>
+                }
+<span class="nc" id="L518">            }</span>
+
+            @Override
+            public void handleError() {
+<span class="nc" id="L522">                System.err.println(&quot;Websocket error occurred&quot;);</span>
+<span class="nc" id="L523">            }</span>
+        };
+<span class="nc" id="L525">        return messageHandler;</span>
+    }
+
+    private static boolean isRegisterRequest(JsonIn jsonIn) {
+<span class="nc" id="L529">        MessageContent messageIn = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc" id="L530">        return messageIn instanceof RegisterRequest;</span>
+    }
+
+    private static boolean isPepRegistered(JsonIn jsonIn) {
+<span class="nc" id="L534">        return (ucsClient.pepMapHas(getIdFromJson(jsonIn)));</span>
+    }
+
+
+    public static void setAttributeValue(String fileName, String value) {
+
+<span class="nc" id="L540">        File file = new File(fileName);</span>
+<span class="nc" id="L541">        FileWriter fw = null;</span>
+        try {
+<span class="nc" id="L543">            fw = new FileWriter(file);</span>
+<span class="nc" id="L544">            fw.write(value);</span>
+<span class="nc" id="L545">            fw.close();</span>
+<span class="nc" id="L546">        } catch (IOException e) {</span>
+<span class="nc" id="L547">            e.printStackTrace();</span>
+<span class="nc" id="L548">        }</span>
+<span class="nc" id="L549">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

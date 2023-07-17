@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RESTUtils.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility</a> &gt; <span class="el_source">RESTUtils.java</span></div><h1>RESTUtils.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.utility;
+
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+
+import it.cnr.iit.utility.errorhandling.Reject;
+
+import reactor.core.publisher.Mono;
+
+/**
+ * This class provides some static methods to perform synchronous or asynchronous
+ * rest operations.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public final class RESTUtils {
+
+<span class="fc" id="L48">    private static final Logger log = Logger.getLogger( RESTUtils.class.getName() );</span>
+
+    private static final String MSG_ERR_POST = &quot;Error posting to : {0}&quot;;
+
+    private RESTUtils() {
+
+    }
+
+    public static Optional&lt;ResponseEntity&lt;Void&gt;&gt; post( String baseUri, String api, Object obj ) {
+<span class="nc" id="L57">        return post( baseUri, api, obj, Void.class );</span>
+    }
+
+    public static Optional&lt;URI&gt; parseUri( String str ) {
+        try {
+<span class="fc" id="L62">            URI uri = new URI( str );</span>
+<span class="fc" id="L63">            return Optional.of( uri );</span>
+<span class="nc" id="L64">        } catch( Exception e ) {</span>
+<span class="nc" id="L65">            log.severe( e.getLocalizedMessage() );</span>
+        }
+<span class="nc" id="L67">        return Optional.empty();</span>
+    }
+
+    public static Optional&lt;String&gt; joinUrl( String base, String api ) {
+        try {
+<span class="nc" id="L72">            return Optional.of( new URL( new URL( base ), api ).toString() );</span>
+<span class="nc" id="L73">        } catch( MalformedURLException e ) {</span>
+<span class="nc" id="L74">            return Optional.empty();</span>
+        }
+    }
+
+    public static &lt;T, E&gt; Optional&lt;ResponseEntity&lt;T&gt;&gt; post( String baseUri, String api, E obj, Class&lt;T&gt; responseClass ) {
+<span class="nc" id="L79">        Optional&lt;String&gt; url = joinUrl( baseUri, api );</span>
+<span class="nc" id="L80">        Reject.ifAbsent( url );</span>
+
+<span class="nc" id="L82">        Optional&lt;String&gt; jsonString = JsonUtility.getJsonStringFromObject( obj, false );</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if( !jsonString.isPresent() ) {</span>
+<span class="nc" id="L84">            return Optional.empty();</span>
+        }
+
+<span class="nc" id="L87">        HttpHeaders headers = new HttpHeaders();</span>
+<span class="nc" id="L88">        headers.setContentType( MediaType.APPLICATION_JSON );</span>
+<span class="nc" id="L89">        HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;( jsonString.get(), headers );</span>
+<span class="nc" id="L90">        RestTemplate restTemplate = new RestTemplate();</span>
+<span class="nc" id="L91">        ResponseEntity&lt;T&gt; responseEntity = restTemplate.postForEntity( url.get(), entity, responseClass ); // NOSONAR</span>
+
+<span class="nc" id="L93">        checkResponesEntity( responseEntity );</span>
+
+<span class="nc" id="L95">        return Optional.of( responseEntity );</span>
+    }
+
+    public static &lt;E&gt; CompletableFuture&lt;ResponseEntity&lt;Void&gt;&gt; asyncPost( String baseUri, String api, E obj ) {
+<span class="nc" id="L99">        return asyncPost( baseUri, api, obj, Void.class );</span>
+    }
+
+    public static &lt;T, E&gt; CompletableFuture&lt;ResponseEntity&lt;T&gt;&gt; asyncPost( String baseUri, String api, E obj, Class&lt;T&gt; clazz ) {
+<span class="nc" id="L103">        Mono&lt;ResponseEntity&lt;T&gt;&gt; response = WebClient</span>
+<span class="nc" id="L104">            .create( baseUri )</span>
+<span class="nc" id="L105">            .post()</span>
+<span class="nc" id="L106">            .uri( api )</span>
+<span class="nc" id="L107">            .contentType( MediaType.APPLICATION_JSON )</span>
+<span class="nc" id="L108">            .body( BodyInserters.fromObject( obj ) )</span>
+<span class="nc" id="L109">            .exchange()</span>
+<span class="nc" id="L110">            .flatMap( r -&gt; r.toEntity( clazz ) );</span>
+
+<span class="nc" id="L112">        return CompletableFuture.supplyAsync( getResponseEntity( response ) );</span>
+    }
+
+    private static &lt;T&gt; Supplier&lt;ResponseEntity&lt;T&gt;&gt; getResponseEntity( Mono&lt;ResponseEntity&lt;T&gt;&gt; response ) {
+<span class="nc" id="L116">        return () -&gt; {</span>
+<span class="nc" id="L117">            ResponseEntity&lt;T&gt; responseEntity = response.block();</span>
+<span class="nc" id="L118">            checkResponesEntity( responseEntity );</span>
+<span class="nc" id="L119">            return responseEntity;</span>
+        };
+    }
+
+    private static &lt;T&gt; void checkResponesEntity( ResponseEntity&lt;T&gt; responseEntity ) {
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if( !responseEntity.getStatusCode().is2xxSuccessful() ) {</span>
+<span class="nc" id="L125">            String uri = responseEntity.getHeaders().getLocation().toString();</span>
+<span class="nc" id="L126">            log.log( Level.SEVERE, MSG_ERR_POST, uri );</span>
+        }
+<span class="nc" id="L128">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

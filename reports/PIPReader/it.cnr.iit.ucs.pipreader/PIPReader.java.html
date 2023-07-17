@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PIPReader.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PIPReader</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pipreader</a> &gt; <span class="el_source">PIPReader.java</span></div><h1>PIPReader.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.pipreader;
+
+import it.cnr.iit.ucs.constants.ENTITIES;
+import it.cnr.iit.ucs.exceptions.PIPException;
+import it.cnr.iit.ucs.journaling.JournalBuilder;
+import it.cnr.iit.ucs.journaling.JournalingInterface;
+import it.cnr.iit.ucs.message.attributechange.AttributeChangeMessage;
+import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
+import it.cnr.iit.ucs.pip.PIPBase;
+import it.cnr.iit.ucs.pip.PIPKeywords;
+import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.utility.FileUtility;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.Attribute;
+import it.cnr.iit.xacml.Category;
+import it.cnr.iit.xacml.DataType;
+import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * The task this PIP is to read data from a file when requested.
+ * The Path to reach the file is passed as parameter to the pip.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public final class PIPReader extends PIPBase {
+
+<span class="fc" id="L54">    private static final Logger log = Logger.getLogger(PIPReader.class.getName());</span>
+    private JournalingInterface journal;
+
+    // list that stores the attributes on which a 'subscribe' has been performed
+<span class="fc" id="L58">    private final BlockingQueue&lt;Attribute&gt; subscriptions = new LinkedBlockingQueue&lt;&gt;();</span>
+
+    /**
+     * Whenever a PIP has to retrieve some information related to an attribute
+     * that is stored inside the request, it has to know in advance all the
+     * information to retrieve that attribute. E.g. if this PIP has to retrieve
+     * information about the subject, it has to know in advance which is the
+     * attribute id qualifying the subject, its category and the data-type used,
+     * otherwise it is not able to retrieve the value of that attribute, hence it
+     * would not be able to communicate with the AM properly
+     */
+    /**
+     * Map having attributeId as key and the expected category as value
+     */
+<span class="fc" id="L72">    private final Map&lt;String, Category&gt; expectedCategoryMap = new HashMap&lt;&gt;();</span>
+
+    public static final String FILE_PATH_KEYWORD = &quot;FILE_PATH&quot;;
+
+    /**
+     * Map having attributeId as key and the file path as value
+     */
+<span class="fc" id="L79">    private final Map&lt;String, String&gt; filePathMap = new HashMap&lt;&gt;();</span>
+
+    public PIPReader(PipProperties properties) {
+<span class="fc" id="L82">        super(properties);</span>
+<span class="fc" id="L83">        Reject.ifFalse(init(properties), &quot;Error initialising pip : &quot; + properties.getId());</span>
+<span class="fc" id="L84">    }</span>
+
+    private boolean init(PipProperties properties) {
+        try {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
+
+<span class="fc" id="L90">                Attribute attribute = new Attribute();</span>
+
+<span class="fc" id="L92">                String attributeId = attributeMap.get(PIPKeywords.ATTRIBUTE_ID);</span>
+<span class="fc" id="L93">                attribute.setAttributeId(attributeId);</span>
+
+<span class="fc" id="L95">                Category category = Category.toCATEGORY(attributeMap.get(PIPKeywords.CATEGORY));</span>
+<span class="fc" id="L96">                attribute.setCategory(category);</span>
+
+<span class="fc" id="L98">                DataType dataType = DataType.toDATATYPE(attributeMap.get(PIPKeywords.DATA_TYPE));</span>
+<span class="fc" id="L99">                attribute.setDataType(dataType);</span>
+
+<span class="fc bfc" id="L101" title="All 2 branches covered.">                if (attribute.getCategory() != Category.ENVIRONMENT) {</span>
+<span class="fc" id="L102">                    Category expectedCategory = Category.toCATEGORY(attributeMap.get(PIPKeywords.EXPECTED_CATEGORY));</span>
+<span class="fc" id="L103">                    Reject.ifNull(expectedCategory, &quot;missing expected category&quot;);</span>
+<span class="fc" id="L104">                    expectedCategoryMap.put(attribute.getAttributeId(), expectedCategory);</span>
+                }
+
+<span class="pc bpc" id="L107" title="1 of 4 branches missed.">                Reject.ifTrue(!attributeMap.containsKey(FILE_PATH_KEYWORD) || attributeMap.get(FILE_PATH_KEYWORD).isEmpty(), &quot;missing file path&quot;);</span>
+<span class="fc" id="L108">                setFilePath(attribute.getAttributeId(), attributeMap.get(FILE_PATH_KEYWORD));</span>
+<span class="fc" id="L109">                addAttribute(attribute);</span>
+<span class="fc" id="L110">                journal = JournalBuilder.build(properties);</span>
+
+<span class="fc" id="L112">                PIPReaderSubscriberTimer subscriberTimer = new PIPReaderSubscriberTimer(this);</span>
+<span class="fc" id="L113">                subscriberTimer.setRate(properties.getRefreshRate());</span>
+<span class="fc" id="L114">                subscriberTimer.start();</span>
+<span class="fc" id="L115">            }</span>
+<span class="fc" id="L116">            return true;</span>
+<span class="fc" id="L117">        } catch (Exception e) {</span>
+<span class="fc" id="L118">            return false;</span>
+        }
+    }
+
+    /**
+     * Performs the retrieve operation.
+     * The retrieve operation is a very basic operation in which the PIP simply
+     * asks the AttributeManager the value in which it is interested into. Once
+     * that value has been retrieved, the PIP will fatten the request.
+     *
+     * @param request this is an in/out parameter
+     */
+    @Override
+    public void retrieve(RequestType request) throws PIPException {
+<span class="fc" id="L132">        Reject.ifNull(request);</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        for (Attribute attribute : getAttributes()) {</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">            if (!isEnvironmentCategory(attribute)) {</span>
+<span class="fc" id="L136">                addAdditionalInformation(request, attribute);</span>
+            }
+            try {
+<span class="fc" id="L139">                String value = retrieve(attribute);</span>
+<span class="fc" id="L140">                request.addAttribute(attribute, value);</span>
+<span class="nc" id="L141">            } catch (Exception e) {</span>
+                //TODO: handle exception
+<span class="nc" id="L143">                System.err.println(e.getMessage());</span>
+<span class="fc" id="L144">            }</span>
+<span class="fc" id="L145">        }</span>
+<span class="fc" id="L146">    }</span>
+
+    /**
+     * Retrieve the value of the attribute passed as argument.
+     * If the value is not of type environment, this method uses the additionalInformation
+     * (which has to be set beforehand) to select the right value from the file.
+     * Then, it sets the value within the attribute, and finally returns a String
+     * containing such a value.
+     */
+    @Override
+    public String retrieve(Attribute attribute) throws PIPException {
+
+<span class="fc" id="L158">        String filePath = this.filePathMap.get(attribute.getAttributeId());</span>
+        String value;
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if (isEnvironmentCategory(attribute)) {</span>
+<span class="fc" id="L161">            value = read(filePath);</span>
+        } else {
+<span class="fc" id="L163">            value = read(filePath, attribute.getAdditionalInformation());</span>
+        }
+<span class="fc" id="L165">        attribute.setValue(attribute.getDataType(), value);</span>
+<span class="fc" id="L166">        return value;</span>
+    }
+
+
+    /**
+     * Performs the subscribe operation. The request passed as input is used
+     * to retrieve the information related to either the subject, resource, or action.
+     * The attributeId is used to select the right attribute from those this PIP
+     * is monitoring.
+     *
+     * @param request     the XACML request containing at least subject-id, resource-id and action-id
+     * @param attributeId the attributeId of the attribute we want this PIP to subscribe to.
+     */
+    @Override
+    public void subscribe(RequestType request, String attributeId) {
+<span class="nc" id="L181">        Reject.ifNull(request);</span>
+
+<span class="nc" id="L183">        Attribute attribute = getAttributes().stream()</span>
+<span class="nc" id="L184">                .filter(attr -&gt; attr.getAttributeId().equals(attributeId)).findAny().orElse(null);</span>
+<span class="nc" id="L185">        Reject.ifNull(attribute);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (!isEnvironmentCategory(attribute)) {</span>
+<span class="nc" id="L187">            addAdditionalInformation(request, attribute);</span>
+        }
+        try {
+<span class="nc" id="L190">            String value = subscribe(attribute);</span>
+<span class="nc" id="L191">            request.addAttribute(attribute, value);</span>
+<span class="nc" id="L192">        } catch (Exception e) {</span>
+            //TODO: handle exception
+<span class="nc" id="L194">            System.err.println(e.getMessage());</span>
+<span class="nc" id="L195">        }</span>
+<span class="nc" id="L196">    }</span>
+
+
+    /**
+     * Performs the subscribe operation. This operation is very similar to the
+     * retrieve operation. The only difference is that in this case we have to
+     * signal to the thread in charge of performing the polling that it has to
+     * poll a new attribute
+     *
+     * @param request IN/OUT parameter
+     */
+    @Override
+    public void subscribe(RequestType request) throws PIPException {
+<span class="fc" id="L209">        Reject.ifNull(request);</span>
+
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        for (Attribute attribute : getAttributes()) {</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if (!isEnvironmentCategory(attribute)) {</span>
+<span class="fc" id="L213">                addAdditionalInformation(request, attribute);</span>
+            }
+            try {
+<span class="fc" id="L216">                String value = subscribe(attribute);</span>
+<span class="fc" id="L217">                request.addAttribute(attribute, value);</span>
+<span class="nc" id="L218">            } catch (Exception e) {</span>
+                //TODO: handle exception
+<span class="nc" id="L220">                System.err.println(e.getMessage());</span>
+<span class="fc" id="L221">            }</span>
+<span class="fc" id="L222">        }</span>
+<span class="fc" id="L223">    }</span>
+
+    /**
+     * This is the function called by the context handler whenever we have a
+     * remote retrieve request
+     */
+    @Override
+    public String subscribe(Attribute attribute) throws PIPException {
+<span class="fc" id="L231">        Reject.ifNull(attribute);</span>
+
+<span class="fc" id="L233">        String value = retrieve(attribute);</span>
+<span class="fc" id="L234">        addSubscription(attribute);</span>
+
+<span class="fc" id="L236">        return value;</span>
+    }
+
+    /**
+     * Given a list of attributes as input, remove from the subscriptions list the attributes
+     * that match.
+     * For the environment attributes, only the attributeId must match in order for an attribute
+     * to be removed from the subscriptions list.
+     * For attributes of other categories, both the attributeId and the additionalInformation must
+     * match in order for an attribute to be removed from the subscriptions list.
+     * This is because, for example, the PIP could be monitoring the attributeId 'subject-role'
+     * for the subject with subject-id 'User1' and for the subject with subject-id 'User2'.
+     * The information 'User1' or 'User2' is contained within the additionalInformation field.
+     *
+     * @param unsubAttributes the list of attributes that must be unsubscribed
+     */
+    @Override
+    public boolean unsubscribe(List&lt;Attribute&gt; unsubAttributes) throws PIPException {
+<span class="fc" id="L254">        Reject.ifEmpty(unsubAttributes);</span>
+
+<span class="fc" id="L256">        boolean atLeastOneAttributeRemoved = false;</span>
+
+        // for each attribute to unsubscribe
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        for (Attribute attributeToUnsubscribe : unsubAttributes) {</span>
+
+            // for each attribute the PIP is subscribed to
+<span class="fc bfc" id="L262" title="All 2 branches covered.">            for (Attribute subscribedAttribute : subscriptions) {</span>
+
+                // if the attributeId matches one of the attributes the PIP has an active subscription
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">                if (subscribedAttribute.getAttributeId().equals(attributeToUnsubscribe.getAttributeId())) {</span>
+                    // if the attribute is of category Environment,
+                    // or if the additionalInformation matches
+<span class="fc bfc" id="L268" title="All 2 branches covered.">                    if (subscribedAttribute.getCategory() == Category.ENVIRONMENT ||</span>
+<span class="fc" id="L269">                            subscribedAttribute.getAdditionalInformation()</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">                                    .equals(attributeToUnsubscribe.getAdditionalInformation())) {</span>
+<span class="fc" id="L271">                        atLeastOneAttributeRemoved = removeAttribute(subscribedAttribute);</span>
+<span class="fc" id="L272">                        break;</span>
+                    }
+                }
+<span class="fc" id="L275">            }</span>
+<span class="fc" id="L276">        }</span>
+<span class="fc" id="L277">        return atLeastOneAttributeRemoved;</span>
+    }
+
+    private boolean removeAttribute(Attribute subscribedAttribute) {
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">        if (!subscriptions.remove(subscribedAttribute)) {</span>
+<span class="nc" id="L282">            throw new IllegalStateException(&quot;Unable to remove attribute from list&quot;);</span>
+        }
+<span class="fc" id="L284">        return true;</span>
+    }
+
+    private void addAdditionalInformation(RequestType request, Attribute attribute) {
+<span class="fc" id="L288">        String filter = request.getAttributeValue(expectedCategoryMap.get(attribute.getAttributeId()));</span>
+<span class="fc" id="L289">        attribute.setAdditionalInformation(filter);</span>
+<span class="fc" id="L290">    }</span>
+
+    public boolean isEnvironmentCategory(Attribute attribute) {
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        return attribute.getCategory() == Category.ENVIRONMENT;</span>
+    }
+
+    /**
+     * Effective retrieval of the monitored value.
+     *
+     * @return the requested value
+     * @throws PIPException
+     */
+    private String read(String filePath) throws PIPException {
+        try {
+<span class="fc" id="L304">            Path path = Paths.get(filePath);</span>
+            // TODO UCS-33 NOSONAR
+<span class="fc" id="L306">            String value = new String(Files.readAllBytes(path));</span>
+<span class="fc" id="L307">            journal.logString(formatJournaling(value));</span>
+<span class="fc" id="L308">            return value;</span>
+<span class="nc" id="L309">        } catch (IOException e) {</span>
+<span class="nc" id="L310">            throw new PIPException(&quot;Attribute Manager error : &quot; + e.getMessage());</span>
+        }
+    }
+
+    /**
+     * Effective retrieval of the monitored value looking for the line containing a filter.
+     * Note that each line of the file MUST be composed of two fields separated
+     * by either one or more spaces or tab, e.g.:
+     * filter attribute
+     * filter   attribute
+     * filter\tattribute.
+     *
+     * @param filter the string to be used to search for the item we're interested into
+     * @return the requested value
+     * @throws PIPException
+     */
+    private String read(String filePath, String filter) throws PIPException {
+        // TODO UCS-33 NOSONAR
+<span class="fc" id="L328">        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">            for (String line; (line = br.readLine()) != null; ) {</span>
+<span class="fc" id="L330">                String key = line.split(&quot;\\s+&quot;)[0];</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">                if (key.equals(filter)) {</span>
+<span class="fc" id="L332">                    String value = line.split(&quot;\\s+&quot;)[1];</span>
+<span class="fc" id="L333">                    journal.logString(formatJournaling(value, filter));</span>
+<span class="fc" id="L334">                    return value;</span>
+                }
+<span class="fc" id="L336">            }</span>
+<span class="nc" id="L337">        } catch (Exception e) {</span>
+<span class="nc" id="L338">            throw new PIPException(&quot;Attribute Manager error: &quot; + e.getMessage());</span>
+<span class="fc" id="L339">        }</span>
+<span class="fc" id="L340">        throw new PIPException(&quot;Attribute Manager: unable to retrieve a value for filter: \&quot;&quot; + filter + &quot;\&quot;\n&quot;);</span>
+    }
+
+    private final void setFilePath(String attributeId, String filePath) {
+<span class="fc" id="L344">        String absFilePath = FileUtility.findFileAbsPathUsingClassLoader(filePath);</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">        if (absFilePath != null) {</span>
+<span class="fc" id="L346">            this.filePathMap.put(attributeId, absFilePath);</span>
+        } else {
+<span class="nc" id="L348">            this.filePathMap.put(attributeId, filePath);</span>
+        }
+<span class="fc" id="L350">        Reject.ifNull(this.filePathMap.get(attributeId));</span>
+<span class="fc" id="L351">    }</span>
+
+    private String formatJournaling(String... strings) {
+<span class="fc" id="L354">        StringBuilder logStringBuilder = new StringBuilder();</span>
+<span class="fc" id="L355">        logStringBuilder.append(&quot;VALUE READ: &quot;).append(strings[0]);</span>
+
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if (strings.length &gt; 1) {</span>
+<span class="fc" id="L358">            logStringBuilder.append(&quot; FOR FILTER: &quot;).append(strings[1]);</span>
+        }
+<span class="fc" id="L360">        return logStringBuilder.toString();</span>
+    }
+
+    @Override
+    public void update(String data) throws PIPException {
+// fixme: who is supposed to call this?
+//        try {
+//            Path path = Paths.get( filePath );
+//            Files.write( path, data.getBytes() );
+//        } catch( IOException e ) {
+//            log.severe( &quot;Error updating attribute : &quot; + e.getMessage() );
+//        }
+<span class="nc" id="L372">        System.err.println(&quot;update() method not implemented&quot;);</span>
+<span class="nc" id="L373">    }</span>
+
+    @Override
+    public void retrieve(RequestType request,
+                         List&lt;Attribute&gt; attributeRetrievals) {
+<span class="nc" id="L378">        log.severe(&quot;Multiple retrieve is unimplemented&quot;);</span>
+<span class="nc" id="L379">    }</span>
+
+    @Override
+    public void subscribe(RequestType request,
+                          List&lt;Attribute&gt; attributeRetrieval) {
+<span class="nc" id="L384">        log.severe(&quot;Multiple subscribe is unimplemented&quot;);</span>
+<span class="nc" id="L385">    }</span>
+
+    @Override
+    public void performObligation(ObligationInterface obligation) {
+<span class="nc bnc" id="L389" title="All 2 branches missed.">        if (obligation != null) {</span>
+<span class="nc" id="L390">            log.severe(&quot;Perform obligation is unimplemented&quot;);</span>
+        }
+<span class="nc" id="L392">    }</span>
+
+    public void addSubscription(Attribute attribute) {
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if (!subscriptions.contains(attribute)) {</span>
+<span class="fc" id="L396">            subscriptions.add(attribute);</span>
+        }
+<span class="fc" id="L398">    }</span>
+
+    /**
+     * Retrieve the value of the
+     */
+    public void checkSubscriptions() {
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        for (Attribute attribute : subscriptions) {</span>
+
+            // first, get the old value as memorized in the attribute
+<span class="fc" id="L407">            String oldValue = attribute.getAttributeValues(attribute.getDataType()).get(0);</span>
+            //get(0) assumes that the attribute has only one value
+
+            String value;
+//            log.log( Level.INFO, &quot;Polling on value of the attribute &quot; + attribute.getAttributeId() + &quot; for change.&quot; );
+
+            // then, retrieve the new value.
+            //   Note that the retrieve method updates the attribute with the value just retrieved
+            try {
+<span class="fc" id="L416">                value = retrieve(attribute);</span>
+<span class="nc" id="L417">            } catch (PIPException e) {</span>
+<span class="nc" id="L418">                log.log(Level.WARNING, &quot;Error reading attribute &quot; + attribute.getAttributeId());</span>
+<span class="nc" id="L419">                return;</span>
+<span class="fc" id="L420">            }</span>
+
+<span class="fc bfc" id="L422" title="All 2 branches covered.">            if (!oldValue.equals(value)) { // if the attribute has changed</span>
+<span class="fc" id="L423">                log.log(Level.INFO,</span>
+                        &quot;Attribute {0}={1}:{2} changed at {3}&quot;,
+<span class="fc" id="L425">                        new Object[]{attribute.getAttributeId(), value,</span>
+<span class="fc" id="L426">                                attribute.getAdditionalInformation(),</span>
+<span class="fc" id="L427">                                System.currentTimeMillis()});</span>
+<span class="fc" id="L428">                attribute.setValue(attribute.getDataType(), value);</span>
+<span class="fc" id="L429">                notifyRequestManager(attribute);</span>
+            }
+<span class="fc" id="L431">        }</span>
+<span class="fc" id="L432">    }</span>
+
+    public void notifyRequestManager(Attribute attribute) {
+<span class="fc" id="L435">        AttributeChangeMessage attrChangeMessage = new AttributeChangeMessage(ENTITIES.PIP.toString(), ENTITIES.CH.toString());</span>
+<span class="fc" id="L436">        ArrayList&lt;Attribute&gt; attrList = new ArrayList&lt;&gt;(Arrays.asList(attribute));</span>
+<span class="fc" id="L437">        attrChangeMessage.setAttributes(attrList);</span>
+<span class="fc" id="L438">        getRequestManager().sendMessage(attrChangeMessage);</span>
+<span class="fc" id="L439">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

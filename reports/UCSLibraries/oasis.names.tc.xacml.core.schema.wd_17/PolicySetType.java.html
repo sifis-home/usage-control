@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PolicySetType.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">PolicySetType.java</span></div><h1>PolicySetType.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementRef;
+import javax.xml.bind.annotation.XmlElementRefs;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = &quot;PolicySetType&quot;, propOrder = {
+    &quot;description&quot;,
+    &quot;policyIssuer&quot;,
+    &quot;policySetDefaults&quot;,
+    &quot;target&quot;,
+    &quot;policySetOrPolicyOrPolicySetIdReference&quot;,
+    &quot;obligationExpressions&quot;,
+    &quot;adviceExpressions&quot;
+} )
+<span class="fc" id="L42">public class PolicySetType {</span>
+
+    @XmlElement( name = &quot;Description&quot; )
+    protected String description;
+    @XmlElement( name = &quot;PolicyIssuer&quot; )
+    protected PolicyIssuerType policyIssuer;
+    @XmlElement( name = &quot;PolicySetDefaults&quot; )
+    protected DefaultsType policySetDefaults;
+    @XmlElement( name = &quot;Target&quot;, required = true )
+    protected TargetType target;
+    @XmlElementRefs( {
+        @XmlElementRef( name = &quot;CombinerParameters&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, type = JAXBElement.class,
+            required = false ),
+        @XmlElementRef( name = &quot;PolicySetIdReference&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;,
+            type = JAXBElement.class, required = false ),
+        @XmlElementRef( name = &quot;Policy&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, type = JAXBElement.class,
+            required = false ),
+        @XmlElementRef( name = &quot;PolicyCombinerParameters&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;,
+            type = JAXBElement.class, required = false ),
+        @XmlElementRef( name = &quot;PolicySet&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, type = JAXBElement.class,
+            required = false ),
+        @XmlElementRef( name = &quot;PolicyIdReference&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, type = JAXBElement.class,
+            required = false ),
+        @XmlElementRef( name = &quot;PolicySetCombinerParameters&quot;, namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;,
+            type = JAXBElement.class, required = false )
+    } )
+    protected List&lt;JAXBElement&lt;?&gt;&gt; policySetOrPolicyOrPolicySetIdReference;
+    @XmlElement( name = &quot;ObligationExpressions&quot; )
+    protected ObligationExpressionsType obligationExpressions;
+    @XmlElement( name = &quot;AdviceExpressions&quot; )
+    protected AdviceExpressionsType adviceExpressions;
+    @XmlAttribute( name = &quot;PolicySetId&quot;, required = true )
+    @XmlSchemaType( name = &quot;anyURI&quot; )
+    protected String policySetId;
+    @XmlAttribute( name = &quot;Version&quot;, required = true )
+    protected String version;
+    @XmlAttribute( name = &quot;PolicyCombiningAlgId&quot;, required = true )
+    @XmlSchemaType( name = &quot;anyURI&quot; )
+    protected String policyCombiningAlgId;
+    @XmlAttribute( name = &quot;MaxDelegationDepth&quot; )
+    protected BigInteger maxDelegationDepth;
+
+    public String getDescription() {
+<span class="fc" id="L85">        return description;</span>
+    }
+
+    public void setDescription( String value ) {
+<span class="nc" id="L89">        this.description = value;</span>
+<span class="nc" id="L90">    }</span>
+
+    public PolicyIssuerType getPolicyIssuer() {
+<span class="fc" id="L93">        return policyIssuer;</span>
+    }
+
+    public void setPolicyIssuer( PolicyIssuerType value ) {
+<span class="nc" id="L97">        this.policyIssuer = value;</span>
+<span class="nc" id="L98">    }</span>
+
+    public DefaultsType getPolicySetDefaults() {
+<span class="fc" id="L101">        return policySetDefaults;</span>
+    }
+
+    public void setPolicySetDefaults( DefaultsType value ) {
+<span class="nc" id="L105">        this.policySetDefaults = value;</span>
+<span class="nc" id="L106">    }</span>
+
+    public TargetType getTarget() {
+<span class="fc" id="L109">        return target;</span>
+    }
+
+    public void setTarget( TargetType value ) {
+<span class="nc" id="L113">        this.target = value;</span>
+<span class="nc" id="L114">    }</span>
+
+    public List&lt;JAXBElement&lt;?&gt;&gt; getPolicySetOrPolicyOrPolicySetIdReference() { // NOSONAR
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if( policySetOrPolicyOrPolicySetIdReference == null ) {</span>
+<span class="fc" id="L118">            policySetOrPolicyOrPolicySetIdReference = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L120">        return this.policySetOrPolicyOrPolicySetIdReference;</span>
+    }
+
+    public ObligationExpressionsType getObligationExpressions() {
+<span class="fc" id="L124">        return obligationExpressions;</span>
+    }
+
+    public void setObligationExpressions( ObligationExpressionsType value ) {
+<span class="nc" id="L128">        this.obligationExpressions = value;</span>
+<span class="nc" id="L129">    }</span>
+
+    public AdviceExpressionsType getAdviceExpressions() {
+<span class="fc" id="L132">        return adviceExpressions;</span>
+    }
+
+    public void setAdviceExpressions( AdviceExpressionsType value ) {
+<span class="nc" id="L136">        this.adviceExpressions = value;</span>
+<span class="nc" id="L137">    }</span>
+
+    public String getPolicySetId() {
+<span class="fc" id="L140">        return policySetId;</span>
+    }
+
+    public void setPolicySetId( String value ) {
+<span class="nc" id="L144">        this.policySetId = value;</span>
+<span class="nc" id="L145">    }</span>
+
+    public String getVersion() {
+<span class="fc" id="L148">        return version;</span>
+    }
+
+    public void setVersion( String value ) {
+<span class="nc" id="L152">        this.version = value;</span>
+<span class="nc" id="L153">    }</span>
+
+    public String getPolicyCombiningAlgId() {
+<span class="fc" id="L156">        return policyCombiningAlgId;</span>
+    }
+
+    public void setPolicyCombiningAlgId( String value ) {
+<span class="nc" id="L160">        this.policyCombiningAlgId = value;</span>
+<span class="nc" id="L161">    }</span>
+
+    public BigInteger getMaxDelegationDepth() {
+<span class="fc" id="L164">        return maxDelegationDepth;</span>
+    }
+
+    public void setMaxDelegationDepth( BigInteger value ) {
+<span class="nc" id="L168">        this.maxDelegationDepth = value;</span>
+<span class="nc" id="L169">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

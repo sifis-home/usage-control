@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PolicyDecisionPoint.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PolicyDecisionPoint</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pdp</a> &gt; <span class="el_source">PolicyDecisionPoint.java</span></div><h1>PolicyDecisionPoint.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.pdp;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBException;
+
+import org.wso2.balana.AbstractPolicy;
+import org.wso2.balana.Balana;
+import org.wso2.balana.PDPConfig;
+import org.wso2.balana.ParsingException;
+import org.wso2.balana.Policy;
+import org.wso2.balana.PolicyReference;
+import org.wso2.balana.PolicySet;
+import org.wso2.balana.PolicyTreeElement;
+import org.wso2.balana.XACMLConstants;
+import org.wso2.balana.combine.CombinerElement;
+import org.wso2.balana.ctx.AbstractRequestCtx;
+import org.wso2.balana.ctx.AbstractResult;
+import org.wso2.balana.ctx.EvaluationCtx;
+import org.wso2.balana.ctx.EvaluationCtxFactory;
+import org.wso2.balana.ctx.RequestCtxFactory;
+import org.wso2.balana.ctx.ResponseCtx;
+import org.wso2.balana.ctx.ResultFactory;
+import org.wso2.balana.ctx.Status;
+import org.wso2.balana.ctx.xacml3.RequestCtx;
+import org.wso2.balana.ctx.xacml3.Result;
+import org.wso2.balana.ctx.xacml3.XACML3EvaluationCtx;
+import org.wso2.balana.finder.PolicyFinder;
+import org.wso2.balana.finder.PolicyFinderModule;
+import org.wso2.balana.finder.PolicyFinderResult;
+import org.wso2.balana.xacml3.MultipleCtxResult;
+
+import it.cnr.iit.ucs.constants.STATUS;
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.ucs.journaling.JournalBuilder;
+import it.cnr.iit.ucs.journaling.JournalingInterface;
+import it.cnr.iit.ucs.properties.components.PdpProperties;
+import it.cnr.iit.utility.JAXBUtility;
+import it.cnr.iit.xacml.PolicyTags;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
+import it.cnr.iit.xacml.wrappers.RequestWrapper;
+import oasis.names.tc.xacml.core.schema.wd_17.ResponseType;
+
+/**
+ * This PDP is a wrapper around the one offered by BALANA. In our implementation
+ * we are able to evaluate single condition policies only, hence we need the
+ * context handler to pass to the PDP only the condition it effectively wants to
+ * be evaluated. This because BALANA is designed for XACML that is slightly
+ * different than UXACML. In particular, in the former, it is allowed to have
+ * only one condition per rule.
+ *
+ * @author Antonio La Marra, Fabio Bindi, Filippo Lauria, Alessandro Rosetti
+ *
+ */
+public final class PolicyDecisionPoint extends AbstractPDP {
+
+<span class="fc" id="L77">	private static Logger log = Logger.getLogger(PolicyDecisionPoint.class.getName());</span>
+
+	private PDPConfig pdpConfig;
+	private JournalingInterface journalInterface;
+
+	public PolicyDecisionPoint(PdpProperties properties) {
+<span class="fc" id="L83">		super(properties);</span>
+<span class="fc" id="L84">		journalInterface = JournalBuilder.build(properties);</span>
+<span class="fc" id="L85">	}</span>
+
+	@Override
+	public PDPEvaluation evaluate(RequestWrapper request, PolicyWrapper policy, STATUS status) {
+<span class="fc bfc" id="L89" title="All 2 branches covered.">		if (policy == null) {</span>
+<span class="fc" id="L90">			return evaluate(request, status);</span>
+		}
+<span class="fc" id="L92">		String conditionName = PolicyTags.getCondition(status);</span>
+		PolicyWrapper policyForCondition;
+		try {
+<span class="fc" id="L95">			policyForCondition = policy.getPolicyForCondition(conditionName);</span>
+<span class="nc" id="L96">		} catch (PolicyException e) {</span>
+<span class="nc" id="L97">			return null;</span>
+<span class="fc" id="L98">		}</span>
+<span class="fc" id="L99">		return evaluate(request, policyForCondition);</span>
+	}
+
+	@Override
+	public PolicyWrapper findPolicy(RequestWrapper request) {
+		try {
+<span class="nc" id="L105">			PolicyFinder policyFinder = getPolicyFinder();</span>
+<span class="nc" id="L106">			AbstractRequestCtx requestCtx = RequestCtxFactory.getFactory()</span>
+<span class="nc" id="L107">					.getRequestCtx(request.getRequest().replaceAll(&quot;&gt;\\s+&lt;&quot;, &quot;&gt;&lt;&quot;));</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			pdpConfig = pdpConfig == null ? Balana.getInstance().getPdpConfig() : pdpConfig;</span>
+<span class="nc" id="L109">			EvaluationCtx evalContext = EvaluationCtxFactory.getFactory().getEvaluationCtx(requestCtx, pdpConfig);</span>
+<span class="nc" id="L110">			PolicyFinderResult policyFinderResult = policyFinder.findPolicy(evalContext);</span>
+<span class="nc bnc" id="L111" title="All 4 branches missed.">			if (policyFinderResult.getPolicy() == null || policyFinderResult.getPolicy().getId() == null) {</span>
+<span class="nc" id="L112">				return null;</span>
+			}
+<span class="nc" id="L114">			return PolicyWrapper.build(getPAP().retrievePolicy(policyFinderResult.getPolicy().getId().toString()));</span>
+<span class="nc" id="L115">		} catch (PolicyException | ParsingException e) {</span>
+<span class="nc" id="L116">			return null;</span>
+		}
+	}
+
+	@Override
+	public PDPEvaluation evaluate(RequestWrapper request, PolicyWrapper policy) {
+		try {
+<span class="fc" id="L123">			PolicyFinder policyFinder = getPolicyFinder(policy);</span>
+<span class="fc" id="L124">			ResponseCtx responseCtx = evaluate(request.getRequest(), policyFinder);</span>
+//			journalInterface.logMultipleStrings(policy.getPolicy(), request.getRequest(), responseCtx.encode());
+<span class="fc" id="L126">			ResponseType responseType = getResponseType(responseCtx.encode());</span>
+<span class="fc" id="L127">			return new PDPResponse(responseType);</span>
+<span class="nc" id="L128">		} catch (Exception e) {</span>
+<span class="nc" id="L129">			log.severe(&quot;Error in evaluation : &quot; + e.getMessage());</span>
+<span class="nc" id="L130">			e.printStackTrace();</span>
+		}
+<span class="nc" id="L132">		return null;</span>
+	}
+
+	private ResponseType getResponseType(String response) throws JAXBException {
+<span class="fc" id="L136">		return JAXBUtility.unmarshalToObject(ResponseType.class, response);</span>
+	}
+
+	@Override
+	public PDPEvaluation evaluate(RequestWrapper request, STATUS status) {
+		try {
+<span class="nc" id="L142">			PolicyFinder policyFinder = getPolicyFinder(status);</span>
+<span class="nc" id="L143">			ResponseCtx responseCtx = evaluate(request.getRequest(), policyFinder);</span>
+<span class="nc" id="L144">			journalInterface.logMultipleStrings(request.getRequest(), responseCtx.encode());</span>
+<span class="nc" id="L145">			ResponseType responseType = getResponseType(responseCtx.encode());</span>
+<span class="nc" id="L146">			return new PDPResponse(responseType);</span>
+<span class="fc" id="L147">		} catch (Exception e) {</span>
+<span class="fc" id="L148">			log.severe(&quot;Error in evaluation : &quot; + e.getMessage());</span>
+		}
+<span class="fc" id="L150">		return null;</span>
+	}
+
+	@Override
+	public PDPEvaluation evaluate(RequestWrapper request) {
+<span class="nc" id="L155">		log.severe(&quot;Error evaluate( request ) not implemented&quot;);</span>
+<span class="nc" id="L156">		return null;</span>
+	}
+
+	private PolicyFinder getPolicyFinder(PolicyWrapper policy) {
+<span class="fc" id="L160">		PolicyFinder policyFinder = new PolicyFinder();</span>
+<span class="fc" id="L161">		Set&lt;PolicyFinderModule&gt; policyFinderModulesSet = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L162">		InputStreamBasedPolicyFinderModule finderModule = new InputStreamBasedPolicyFinderModule(policy.getPolicy());</span>
+<span class="fc" id="L163">		policyFinderModulesSet.add(finderModule);</span>
+<span class="fc" id="L164">		policyFinder.setModules(policyFinderModulesSet);</span>
+<span class="fc" id="L165">		policyFinder.init();</span>
+<span class="fc" id="L166">		return policyFinder;</span>
+	}
+
+	private PolicyFinder getPolicyFinder(STATUS status) {
+<span class="fc" id="L170">		PolicyFinder policyFinder = new PolicyFinder();</span>
+<span class="fc" id="L171">		Set&lt;PolicyFinderModule&gt; policyFinderModulesSet = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L172">		FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule(getPolicyFolder(), status);</span>
+<span class="nc" id="L173">		policyFinderModulesSet.add(finderModule);</span>
+<span class="nc" id="L174">		policyFinder.setModules(policyFinderModulesSet);</span>
+<span class="nc" id="L175">		policyFinder.init();</span>
+<span class="nc" id="L176">		return policyFinder;</span>
+	}
+
+	private PolicyFinder getPolicyFinder() {
+<span class="nc" id="L180">		PolicyFinder policyFinder = new PolicyFinder();</span>
+<span class="nc" id="L181">		Set&lt;PolicyFinderModule&gt; policyFinderModulesSet = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L182">		FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule(getPolicyFolder());</span>
+<span class="nc" id="L183">		policyFinderModulesSet.add(finderModule);</span>
+<span class="nc" id="L184">		policyFinder.setModules(policyFinderModulesSet);</span>
+<span class="nc" id="L185">		policyFinder.init();</span>
+<span class="nc" id="L186">		return policyFinder;</span>
+	}
+
+	/**
+	 * Attempts to evaluate the request against the policies known to this PDP. This
+	 * is really the core method of the entire XACML specification, and for most
+	 * people will provide what you want. If you need any special handling, you
+	 * should look at the version of this method that takes an EvaluationCtx. Note
+	 * that if the request is somehow invalid (it was missing a required attribute,
+	 * it was using an unsupported scope, etc), then the result will be a decision
+	 * of INDETERMINATE.
+	 *
+	 * @param request the request to evaluate
+	 *
+	 * @return a response paired to the request
+	 */
+	private ResponseCtx evaluate(String request, PolicyFinder policyFinder) {
+		try {
+			// TODO UCS-36 NOSONAR
+<span class="fc" id="L205">			AbstractRequestCtx requestCtx = RequestCtxFactory.getFactory()</span>
+<span class="fc" id="L206">					.getRequestCtx(request.replaceAll(&quot;&gt;\\s+&lt;&quot;, &quot;&gt;&lt;&quot;));</span>
+<span class="fc" id="L207">			return evaluate(requestCtx, policyFinder);</span>
+<span class="nc" id="L208">		} catch (ParsingException e) {</span>
+<span class="nc" id="L209">			return getResponseCtx(AbstractResult.DECISION_INDETERMINATE, Status.STATUS_SYNTAX_ERROR,</span>
+<span class="nc" id="L210">					&quot;Invalid request  : &quot; + e.getMessage());</span>
+		}
+	}
+
+	/**
+	 * Attempts to evaluate the request against the policies known to this PDP. This
+	 * is really the core method of the entire XACML specification, and for most
+	 * people will provide what you want. If you need any special handling, you
+	 * should look at the version of this method that takes an EvaluationCtx. Note
+	 * that if the request is somehow invalid (it was missing a required attribute,
+	 * it was using an unsupported scope, etc), then the result will be a decision
+	 * of INDETERMINATE.
+	 *
+	 * @param request the request to evaluate
+	 *
+	 * @return a response paired to the request
+	 */
+	private ResponseCtx evaluate(AbstractRequestCtx request, PolicyFinder policyFinder) {
+<span class="fc" id="L228">		EvaluationCtx evalContext = null;</span>
+		try {
+<span class="fc" id="L230">			Balana balana = Balana.getInstance();</span>
+<span class="fc" id="L231">			pdpConfig = balana.getPdpConfig();</span>
+<span class="fc" id="L232">			evalContext = EvaluationCtxFactory.getFactory().getEvaluationCtx(request, pdpConfig);</span>
+<span class="fc" id="L233">			return evaluate(evalContext, policyFinder);</span>
+<span class="nc" id="L234">		} catch (ParsingException e) {</span>
+<span class="nc" id="L235">			return getResponseCtx(AbstractResult.DECISION_INDETERMINATE, Status.STATUS_SYNTAX_ERROR,</span>
+<span class="nc" id="L236">					&quot;Invalid request : &quot; + e.getMessage());</span>
+		}
+	}
+
+	/**
+	 * Uses the given &lt;code&gt;EvaluationCtx&lt;/code&gt; against the available policies to
+	 * determine a response. If you are starting with a standard XACML Request, then
+	 * you should use the version of this method that takes a
+	 * &lt;code&gt;RequestCtx&lt;/code&gt;. This method should be used only if you have a real
+	 * need to directly construct an evaluation context (or if you need to use an
+	 * &lt;code&gt;EvaluationCtx&lt;/code&gt; implementation other than
+	 * &lt;code&gt;XACML3EvaluationCtx&lt;/code&gt; and &lt;code&gt;XACML2EvaluationCtx&lt;/code&gt;).
+	 *
+	 * @param context representation of the request and the context used for
+	 *                evaluation
+	 *
+	 * @return a response based on the contents of the context
+	 */
+	private ResponseCtx evaluate(EvaluationCtx context, PolicyFinder policyFinder) {
+		// check whether this PDP is configured to support multiple decision profiles
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">		if (pdpConfig.isMultipleRequestHandle()) {</span>
+			Set&lt;EvaluationCtx&gt; evaluationCtxSet;
+<span class="nc" id="L258">			MultipleCtxResult multipleCtxResult = context.getMultipleEvaluationCtx();</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (multipleCtxResult.isIndeterminate()) {</span>
+<span class="nc" id="L260">				return new ResponseCtx(ResultFactory.getFactory().getResult(AbstractResult.DECISION_INDETERMINATE,</span>
+<span class="nc" id="L261">						multipleCtxResult.getStatus(), context));</span>
+			}
+<span class="nc" id="L263">			evaluationCtxSet = multipleCtxResult.getEvaluationCtxSet();</span>
+<span class="nc" id="L264">			HashSet&lt;AbstractResult&gt; results = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			for (EvaluationCtx ctx : evaluationCtxSet) {</span>
+<span class="nc" id="L266">				AbstractResult result = evaluateContext(ctx, policyFinder);</span>
+<span class="nc" id="L267">				results.add(result);</span>
+<span class="nc" id="L268">			}</span>
+<span class="nc" id="L269">			return new ResponseCtx(results, XACMLConstants.XACML_VERSION_3_0);</span>
+		} else {
+			// this is a special case that specific to XACML3 request
+<span class="pc bpc" id="L272" title="2 of 4 branches missed.">			if (context instanceof XACML3EvaluationCtx &amp;&amp; ((XACML3EvaluationCtx) context).isMultipleAttributes()) {</span>
+<span class="nc" id="L273">				return getResponseCtxFor(AbstractResult.DECISION_INDETERMINATE, Status.STATUS_SYNTAX_ERROR,</span>
+						&quot;Usupported multiple decision profile. Multiple AttributesType same Category can exist&quot;,
+						context);
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">			} else if (context instanceof XACML3EvaluationCtx</span>
+<span class="pc bpc" id="L277" title="1 of 2 branches missed.">					&amp;&amp; ((RequestCtx) context.getRequestCtx()).isCombinedDecision()) {</span>
+<span class="nc" id="L278">				return getResponseCtxFor(AbstractResult.DECISION_INDETERMINATE, Status.STATUS_PROCESSING_ERROR,</span>
+						&quot;Unsupported multiple decision profile. Is's not possible to combine them multiple decisions&quot;,
+						context);
+			}
+<span class="fc" id="L282">			return new ResponseCtx(evaluateContext(context, policyFinder));</span>
+		}
+	}
+
+	/**
+	 * A private helper routine that resolves a policy for the given context, and
+	 * then tries to evaluate based on the policy
+	 *
+	 * @param context context
+	 * @return a response
+	 */
+	private AbstractResult evaluateContext(EvaluationCtx context, PolicyFinder policyFinder) {
+<span class="fc" id="L294">		PolicyFinderResult finderResult = policyFinder.findPolicy(context);</span>
+
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">		if (finderResult.notApplicable()) {</span>
+<span class="nc" id="L297">			return ResultFactory.getFactory().getResult(AbstractResult.DECISION_NOT_APPLICABLE, context);</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">		} else if (finderResult.indeterminate()) {</span>
+<span class="nc" id="L299">			return ResultFactory.getFactory().getResult(AbstractResult.DECISION_INDETERMINATE, finderResult.getStatus(),</span>
+					context);
+<span class="pc bpc" id="L301" title="1 of 2 branches missed.">		} else if (context instanceof XACML3EvaluationCtx</span>
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">				&amp;&amp; ((RequestCtx) context.getRequestCtx()).isReturnPolicyIdList()) {</span>
+			// we found a valid policy, list all found policies if XACML 3.0
+<span class="nc" id="L304">			Set&lt;PolicyReference&gt; references = new HashSet&lt;&gt;();</span>
+<span class="nc" id="L305">			processPolicyReferences(finderResult.getPolicy(), references);</span>
+<span class="nc" id="L306">			((XACML3EvaluationCtx) context).setPolicyReferences(references);</span>
+		}
+<span class="fc" id="L308">		return finderResult.getPolicy().evaluate(context);</span>
+	}
+
+	private void processPolicyReferences(AbstractPolicy abstractPolicy, Set&lt;PolicyReference&gt; references) {
+<span class="nc bnc" id="L312" title="All 2 branches missed.">		if (abstractPolicy instanceof Policy) {</span>
+<span class="nc" id="L313">			references.add(new PolicyReference(abstractPolicy.getId(), PolicyReference.POLICY_REFERENCE, null, null));</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">		} else if (abstractPolicy instanceof PolicySet) {</span>
+<span class="nc" id="L315">			List&lt;CombinerElement&gt; elements = abstractPolicy.getChildElements();</span>
+<span class="nc bnc" id="L316" title="All 4 branches missed.">			if (elements != null &amp;&amp; elements.isEmpty()) {</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">				for (CombinerElement element : elements) {</span>
+<span class="nc" id="L318">					PolicyTreeElement treeElement = element.getElement();</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">					if (treeElement instanceof AbstractPolicy) {</span>
+<span class="nc" id="L320">						processPolicyReferences((AbstractPolicy) treeElement, references);</span>
+					} else {
+<span class="nc" id="L322">						references.add(new PolicyReference(abstractPolicy.getId(), PolicyReference.POLICYSET_REFERENCE,</span>
+								null, null));
+					}
+<span class="nc" id="L325">				}</span>
+			}
+		}
+<span class="nc" id="L328">	}</span>
+
+	private ResponseCtx getResponseCtxFor(int result, String code, String message, EvaluationCtx context) {
+<span class="nc" id="L331">		List&lt;String&gt; codeList = new ArrayList&lt;&gt;(Arrays.asList(code));</span>
+<span class="nc" id="L332">		Status status = new Status(codeList, message);</span>
+<span class="nc" id="L333">		return new ResponseCtx(ResultFactory.getFactory().getResult(result, status, context));</span>
+	}
+
+	private ResponseCtx getResponseCtx(int result, String code, String message) {
+<span class="nc" id="L337">		List&lt;String&gt; codeList = new ArrayList&lt;&gt;(Arrays.asList(code));</span>
+<span class="nc" id="L338">		Status status = new Status(codeList, message);</span>
+<span class="nc" id="L339">		return new ResponseCtx(new Result(result, status));</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

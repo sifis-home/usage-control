@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PolicyWrapper.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.xacml.wrappers</a> &gt; <span class="el_source">PolicyWrapper.java</span></div><h1>PolicyWrapper.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.xacml.wrappers;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
+import it.cnr.iit.ucs.pap.PAPInterface;
+import it.cnr.iit.utility.JAXBUtility;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.Attribute;
+import it.cnr.iit.xacml.Category;
+import it.cnr.iit.xacml.DataType;
+import it.cnr.iit.xacml.PolicyTags;
+
+import oasis.names.tc.xacml.core.schema.wd_17.ApplyType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeDesignatorType;
+import oasis.names.tc.xacml.core.schema.wd_17.AttributeValueType;
+import oasis.names.tc.xacml.core.schema.wd_17.ConditionType;
+import oasis.names.tc.xacml.core.schema.wd_17.EffectType;
+import oasis.names.tc.xacml.core.schema.wd_17.PolicyType;
+import oasis.names.tc.xacml.core.schema.wd_17.RuleType;
+
+/**
+ * This is a wrapper for the policy class.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ *
+ */
+public class PolicyWrapper implements PolicyWrapperInterface {
+
+<span class="fc" id="L53">    private static final Logger log = Logger.getLogger( PolicyWrapper.class.getName() );</span>
+
+    private static final int MAX_CONDITION_LENGTH = 20;
+
+    private PolicyType policyType;
+    private String policy;
+
+    private PolicyWrapper() {}
+
+    public static PolicyWrapper build( String policy ) throws PolicyException {
+<span class="fc" id="L63">        PolicyWrapper policyWrapper = new PolicyWrapper();</span>
+        try {
+<span class="fc" id="L65">            PolicyType policyType = unmarshalPolicyType( policy );</span>
+<span class="fc" id="L66">            policyWrapper.setPolicyType( policyType );</span>
+<span class="fc" id="L67">        } catch( JAXBException e ) {</span>
+<span class="fc" id="L68">            throw new PolicyException( &quot;Error unmarshalling policy : {0}&quot; + e.getMessage() );</span>
+<span class="fc" id="L69">        }</span>
+<span class="fc" id="L70">        policyWrapper.setPolicy( policy );</span>
+<span class="fc" id="L71">        return policyWrapper;</span>
+    }
+
+    public static PolicyWrapper build( PolicyType policyType ) throws PolicyException {
+<span class="fc" id="L75">        PolicyWrapper policyWrapper = new PolicyWrapper();</span>
+        try {
+<span class="fc" id="L77">            String policy = marshalPolicyType( policyType );</span>
+<span class="fc" id="L78">            policyWrapper.setPolicy( policy );</span>
+<span class="nc" id="L79">        } catch( JAXBException e ) {</span>
+<span class="nc" id="L80">            throw new PolicyException( &quot;Error marshalling policy : {0}&quot; + e.getMessage() );</span>
+<span class="fc" id="L81">        }</span>
+<span class="fc" id="L82">        policyWrapper.setPolicyType( policyType );</span>
+<span class="fc" id="L83">        return policyWrapper;</span>
+    }
+
+    public static PolicyWrapper build( PAPInterface pap, TryAccessMessage message ) throws PolicyException {
+<span class="fc" id="L87">        String policy = message.getPolicy();</span>
+<span class="pc bpc" id="L88" title="6 of 8 branches missed.">        if( (policy == null || policy.isEmpty()) &amp;&amp; message.getPolicyId() != null &amp;&amp; !message.getPolicyId().isEmpty() ) {</span>
+<span class="nc" id="L89">            policy = pap.retrievePolicy( message.getPolicyId() );</span>
+        }
+<span class="fc" id="L91">        return PolicyWrapper.build( policy );</span>
+    }
+
+    @Override
+    public List&lt;Attribute&gt; getAttributesForCondition( String conditionName ) {
+<span class="nc" id="L96">        Reject.ifBlank( conditionName );</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        Reject.ifTrue( conditionName.length() &gt; MAX_CONDITION_LENGTH );</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        for( RuleType ruleType : policyType.getRuleTypeList() ) {</span>
+<span class="nc" id="L99">            List&lt;ConditionType&gt; conditionTypeList = ruleType.getCondition();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if( conditionTypeList != null ) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                for( ConditionType conditionType : conditionTypeList ) {</span>
+<span class="nc" id="L102">                    List&lt;Attribute&gt; attributeList = getAttributesFromCondition( conditionType, conditionName );</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                    if( !attributeList.isEmpty() ) {</span>
+<span class="nc" id="L104">                        return attributeList;</span>
+                    }
+<span class="nc" id="L106">                }</span>
+            }
+<span class="nc" id="L108">        }</span>
+<span class="nc" id="L109">        log.log( Level.WARNING, &quot;Condition not found : {0}&quot;, conditionName );</span>
+<span class="nc" id="L110">        return new ArrayList&lt;&gt;();</span>
+    }
+
+    private List&lt;Attribute&gt; getAttributesFromCondition( ConditionType conditionType, String conditionName ) {
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        if( conditionType.getDecisionTime() == null ) {</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            if( conditionName.equals( PolicyTags.CONDITION_PRE ) ) {</span>
+<span class="nc" id="L116">                return getAttributesFromCondition( conditionType );</span>
+            }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        } else if( conditionType.getDecisionTime().equals( conditionName ) ) {</span>
+<span class="nc" id="L119">            return getAttributesFromCondition( conditionType );</span>
+        }
+<span class="nc" id="L121">        return new ArrayList&lt;&gt;();</span>
+    }
+
+
+    /**
+     * Given a root node, build a number of lists equal to the number of attributes found within the tree
+     * and save them in the elementList.
+     * Each list should contain exactly one element whose value is of type AttributeDesignatorType, and one
+     * or more elements whose value is of type AttributeValueType.
+     * When this list (auxList) is fully populated, it is cloned and added to the elementList. Then, it is
+     * reset to be used in the next recursive iterations.
+     * @param node the root node we want start the iterations from
+     * @param elementList list containing lists. Each list is related to one attribute and should contain exactly
+     *                    one element whose value is of type AttributeDesignatorType, and one or more elements
+     *                    whose value is of type AttributeValueType.
+     * @param auxList a list that temporarily contains the information related to one attribute. When fully
+     *                populated, this list is cloned and added to the elementList. Then, it is reset to be used
+     *                in the next recursive iterations.
+     */
+    private void recursiveGetChildren(JAXBElement&lt;?&gt; node, List&lt;ArrayList&lt;JAXBElement&lt;?&gt;&gt;&gt; elementList, ArrayList&lt;JAXBElement&lt;?&gt;&gt; auxList) {
+<span class="nc" id="L141">        Object objValue = node.getValue();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if( objValue instanceof ApplyType ) {</span>
+<span class="nc" id="L143">            ApplyType applyType = (ApplyType) objValue;</span>
+<span class="nc" id="L144">            ArrayList&lt;JAXBElement&lt;?&gt;&gt; children = (ArrayList&lt;JAXBElement&lt;?&gt;&gt;) applyType.getExpression();</span>
+<span class="nc" id="L145">            boolean hasAnAttributeValueTypeChild = false;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
+<span class="nc" id="L147">                Object child = jaxbElement.getValue();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                if (child instanceof AttributeValueType) {</span>
+                    // At least one direct child of this node is of type AttributeValueType
+<span class="nc" id="L150">                    hasAnAttributeValueTypeChild = true;</span>
+                }
+<span class="nc" id="L152">            }</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
+<span class="nc" id="L154">                recursiveGetChildren(jaxbElement, elementList, auxList);</span>
+<span class="nc" id="L155">            }</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (hasAnAttributeValueTypeChild) {</span>
+                // if we get here it means that the node is of type ApplyType, it has at least
+                // one child of type AttributeValueType, and the recursion of this node is terminated,
+                // i.e., all its child nodes have been visited and the attributeList has been fully
+                // populated.
+<span class="nc" id="L161">                elementList.add((ArrayList&lt;JAXBElement&lt;?&gt;&gt;) auxList.clone());</span>
+<span class="nc" id="L162">                auxList.clear();</span>
+            }
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        } else if (objValue instanceof AttributeValueType) {</span>
+<span class="nc" id="L165">            auxList.add(node);</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        } else if (objValue instanceof AttributeDesignatorType) {</span>
+<span class="nc" id="L167">            auxList.add(node);</span>
+        }
+<span class="nc" id="L169">    }</span>
+
+
+    /**
+     * Function that effectively extracts the attributes from the condition.
+     * The attribute object we have built up, embeds two different complex types
+     * in the xsd: one is the AttributeDesignator, the other is the attribute
+     * value.
+     *
+     * @param conditionType the condition we are analysing
+     * @return the list of attributes contained in this condition.
+     */
+    private List&lt;Attribute&gt; getAttributesFromCondition( ConditionType conditionType ) {
+<span class="nc" id="L182">        List&lt;ArrayList&lt;JAXBElement&lt;?&gt;&gt;&gt; elementList = new ArrayList&lt;&gt;();</span>
+
+        // populate the elementList as a list of lists. Each list contains
+        // one or more elements whose value is of type AttributeValueType
+        // and only one element whose value is of type AttributeDesignatorType
+<span class="nc" id="L187">        recursiveGetChildren(conditionType.getExpression(), elementList, new ArrayList&lt;&gt;());</span>
+
+<span class="nc" id="L189">        ArrayList&lt;Attribute&gt; attributesList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (ArrayList&lt;JAXBElement&lt;?&gt;&gt; attributeValuesAndDesignatorList : elementList) {</span>
+<span class="nc" id="L192">            List&lt;List&lt;Object&gt;&gt; dataTypeAndValuesList = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L194">            Attribute attribute = new Attribute();</span>
+
+            // get the attribute values from the elements whose value is of type AttributeValueType
+            // and store them in the dataTypeAndValuesList
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (jaxbElement.getValue() instanceof AttributeValueType) {</span>
+<span class="nc" id="L200">                    AttributeValueType attributeValueType = (AttributeValueType) jaxbElement.getValue();</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">                    for (Object obj : attributeValueType.getContent()) {</span>
+<span class="nc" id="L202">                        dataTypeAndValuesList.add(Arrays.asList(attributeValueType.getDataType(), obj));</span>
+<span class="nc" id="L203">                    }</span>
+                }
+<span class="nc" id="L205">            }</span>
+
+            // get the other info from the element whose value is of type AttributeDesignatorType,
+            // build the attribute of type Attribute, and add it to the list that will be returned
+<span class="nc bnc" id="L209" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">                if (jaxbElement.getValue() instanceof AttributeDesignatorType) {</span>
+<span class="nc" id="L211">                    AttributeDesignatorType attrDesignatorType = (AttributeDesignatorType) jaxbElement.getValue();</span>
+
+<span class="nc" id="L213">                    attribute.setAttributeId(attrDesignatorType.getAttributeId());</span>
+<span class="nc" id="L214">                    attribute.setCategory(Category.toCATEGORY(attrDesignatorType.getCategory()));</span>
+<span class="nc" id="L215">                    attribute.setDataType(DataType.toDATATYPE(attrDesignatorType.getDataType()));</span>
+
+<span class="nc bnc" id="L217" title="All 2 branches missed.">                    for (List&lt;Object&gt; o : dataTypeAndValuesList) {</span>
+                        // the first element of the list is the datatype, while the second is the attribute value
+<span class="nc" id="L219">                        attribute.setAttributeValues(o.get(0).toString(), o.get(1).toString());</span>
+<span class="nc" id="L220">                    }</span>
+<span class="nc" id="L221">                    attributesList.add(attribute);</span>
+                }
+<span class="nc" id="L223">            }</span>
+<span class="nc" id="L224">        }</span>
+<span class="nc" id="L225">        return attributesList;</span>
+    }
+
+
+    @Override
+    public String retrieveObligations() {
+<span class="nc" id="L231">        log.log( Level.WARNING, &quot;retrieveObligations is unimplemented&quot; );</span>
+<span class="nc" id="L232">        return null;</span>
+    }
+
+    @Override
+    public String getRuleCombiningAlgorithmId() {
+<span class="nc" id="L237">        return policyType.getRuleCombiningAlgId();</span>
+    }
+
+    /**
+     * In UXACML we may have 3 types of conditions: pre, ongoing and post.
+     * This function retrieves the policy with the required condition.
+     *
+     * @param conditionName
+     *          the required condition
+     * @return a copy of the policyType containing only the required condition
+     * @throws PolicyException
+     */
+    @Override
+    public PolicyWrapper getPolicyForCondition( String conditionName ) throws PolicyException {
+<span class="fc" id="L251">        PolicyType clonedPolicyType = clonePolicyTypeWithoutRules();</span>
+<span class="fc" id="L252">        List&lt;Object&gt; objectList = policyType.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition();</span>
+<span class="fc" id="L253">        List&lt;Object&gt; clonedObjectList = clonedPolicyType.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition();</span>
+
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        for( Object obj : objectList ) {</span>
+<span class="fc" id="L256">            RuleType ruleType = (RuleType) obj;</span>
+            /* If this list of objects contains a ruleType with a condition list it must be analysed.
+              In any other case the object will be copied inside cloned list. */
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">            if( !( obj instanceof RuleType ) ||</span>
+<span class="pc bpc" id="L260" title="1 of 4 branches missed.">                    ( ruleType.getCondition() == null || ruleType.getCondition().isEmpty() ) ) {</span>
+<span class="fc" id="L261">                clonedObjectList.add( obj );</span>
+<span class="fc" id="L262">                continue;</span>
+            }
+<span class="fc" id="L264">            analyseRuleType( clonedObjectList, ruleType, conditionName );</span>
+<span class="fc" id="L265">        }</span>
+
+<span class="fc" id="L267">        return PolicyWrapper.build( clonedPolicyType );</span>
+    }
+
+    private void analyseRuleType( List&lt;Object&gt; objectList, RuleType ruleType, String conditionName ) {
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        for( ConditionType conditionType : ruleType.getCondition() ) {</span>
+            RuleType clonedRuleType;
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">            if( conditionType.getDecisionTime() == null ) {</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">                if( conditionName.equals( PolicyTags.CONDITION_PRE ) ) {</span>
+<span class="nc" id="L275">                    clonedRuleType = cloneRuleType( ruleType, conditionType );</span>
+                } else {
+<span class="nc" id="L277">                    clonedRuleType = getDefaultRuleType( &quot;def-permit&quot;, EffectType.PERMIT );</span>
+<span class="nc" id="L278">                    clonedRuleType.setObligationExpressions( ruleType.getObligationExpressions() );</span>
+                }
+<span class="nc" id="L280">                objectList.add( clonedRuleType );</span>
+<span class="fc bfc" id="L281" title="All 2 branches covered.">            } else if( conditionType.getDecisionTime().equals( conditionName ) ) {</span>
+<span class="fc" id="L282">                clonedRuleType = cloneRuleType( ruleType, conditionType );</span>
+<span class="fc" id="L283">                objectList.add( clonedRuleType );</span>
+<span class="fc" id="L284">                break;</span>
+            }
+<span class="fc" id="L286">        }</span>
+<span class="fc" id="L287">    }</span>
+
+    public String getPolicy() {
+<span class="fc" id="L290">        return policy;</span>
+    }
+
+    public void setPolicy( String policy ) {
+<span class="fc" id="L294">        this.policy = policy;</span>
+<span class="fc" id="L295">    }</span>
+
+    public PolicyType getPolicyType() {
+<span class="fc" id="L298">        return policyType;</span>
+    }
+
+    public void setPolicyType( PolicyType policyType ) {
+<span class="fc" id="L302">        this.policyType = policyType;</span>
+<span class="fc" id="L303">    }</span>
+
+    private RuleType getDefaultRuleType( String id, EffectType effectType ) {
+<span class="nc" id="L306">        RuleType ruleType = new RuleType();</span>
+<span class="nc" id="L307">        ruleType.setEffect( effectType );</span>
+<span class="nc" id="L308">        ruleType.setRuleId( id );</span>
+<span class="nc" id="L309">        return ruleType;</span>
+    }
+
+    /**
+     * Performs a copy of the ruleType object.
+     *
+     * @param ruleType
+     *          the ruleType object we want to copy
+     * @param conditionType
+     *          the condition to be put inside the new ruleType object
+     * @return the ruleType object built in this way
+     */
+    private RuleType cloneRuleType( RuleType ruleType, ConditionType conditionType ) {
+<span class="fc" id="L322">        RuleType newRuleType = new RuleType();</span>
+<span class="fc" id="L323">        newRuleType.getCondition().add( conditionType );</span>
+<span class="fc" id="L324">        newRuleType.setAdviceExpressions( ruleType.getAdviceExpressions() );</span>
+<span class="fc" id="L325">        newRuleType.setDescription( ruleType.getDescription() );</span>
+<span class="fc" id="L326">        newRuleType.setObligationExpressions( ruleType.getObligationExpressions() );</span>
+<span class="fc" id="L327">        newRuleType.setEffect( ruleType.getEffect() );</span>
+<span class="fc" id="L328">        newRuleType.setRuleId( ruleType.getRuleId() );</span>
+<span class="fc" id="L329">        newRuleType.setTarget( ruleType.getTarget() );</span>
+
+<span class="fc" id="L331">        return newRuleType;</span>
+    }
+
+    /**
+     * Performs a partial copy of the policyType object.
+     *
+     * @return the PolicyType object that is the copy of the one stored in this
+     *         object
+     */
+    private PolicyType clonePolicyTypeWithoutRules() {
+<span class="fc" id="L341">        PolicyType newPolicyType = new PolicyType();</span>
+<span class="fc" id="L342">        newPolicyType.setDescription( policyType.getDescription() );</span>
+<span class="fc" id="L343">        newPolicyType.setPolicyId( policyType.getPolicyId() );</span>
+<span class="fc" id="L344">        newPolicyType.setPolicyIssuer( policyType.getPolicyIssuer() );</span>
+<span class="fc" id="L345">        newPolicyType.setAdviceExpressions( policyType.getAdviceExpressions() );</span>
+<span class="fc" id="L346">        newPolicyType.setMaxDelegationDepth( policyType.getMaxDelegationDepth() );</span>
+<span class="fc" id="L347">        newPolicyType.setPolicyDefaults( policyType.getPolicyDefaults() );</span>
+<span class="fc" id="L348">        newPolicyType.setRuleCombiningAlgId( policyType.getRuleCombiningAlgId() );</span>
+<span class="fc" id="L349">        newPolicyType.setTarget( policyType.getTarget() );</span>
+<span class="fc" id="L350">        newPolicyType.setVersion( policyType.getVersion() );</span>
+<span class="fc" id="L351">        newPolicyType.setObligationExpressions( policyType.getObligationExpressions() );</span>
+<span class="fc" id="L352">        return newPolicyType;</span>
+    }
+
+    private static PolicyType unmarshalPolicyType( String policy ) throws JAXBException {
+<span class="fc" id="L356">        return JAXBUtility.unmarshalToObject( PolicyType.class, policy );</span>
+    }
+
+    private static String marshalPolicyType( PolicyType policy ) throws JAXBException {
+<span class="fc" id="L360">        return JAXBUtility.marshalToString( PolicyType.class, policy, PolicyTags.POLICY, JAXBUtility.SCHEMA );</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

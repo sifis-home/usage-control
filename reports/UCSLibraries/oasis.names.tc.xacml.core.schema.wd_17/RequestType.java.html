@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RequestType.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">RequestType.java</span></div><h1>RequestType.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import it.cnr.iit.xacml.Attribute;
+import it.cnr.iit.xacml.Category;
+
+import javax.xml.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.logging.Logger;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = &quot;RequestType&quot;,
+        propOrder = {&quot;requestDefaults&quot;, &quot;attributes&quot;, &quot;multiRequests&quot;})
+<span class="fc" id="L30">public final class RequestType {</span>
+
+<span class="fc" id="L32">    private static final Logger log = Logger.getLogger(RequestType.class.getName());</span>
+
+    @XmlElement(name = &quot;RequestDefaults&quot;)
+    protected RequestDefaultsType requestDefaults;
+    @XmlElement(name = &quot;Attributes&quot;, required = true)
+    protected List&lt;AttributesType&gt; attributes;
+    @XmlElement(name = &quot;MultiRequests&quot;)
+    protected MultiRequestsType multiRequests;
+    @XmlAttribute(name = &quot;ReturnPolicyIdList&quot;, required = true)
+    protected boolean returnPolicyIdList;
+    @XmlAttribute(name = &quot;CombinedDecision&quot;, required = true)
+    protected boolean combinedDecision;
+
+    public RequestDefaultsType getRequestDefaults() {
+<span class="fc" id="L46">        return requestDefaults;</span>
+    }
+
+    public void setRequestDefaults(RequestDefaultsType value) {
+<span class="nc" id="L50">        this.requestDefaults = value;</span>
+<span class="nc" id="L51">    }</span>
+
+    public List&lt;AttributesType&gt; getAttributes() {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (attributes == null) {</span>
+<span class="fc" id="L55">            attributes = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L57">        return this.attributes;</span>
+    }
+
+    public MultiRequestsType getMultiRequests() {
+<span class="fc" id="L61">        return multiRequests;</span>
+    }
+
+    public void setMultiRequests(MultiRequestsType value) {
+<span class="nc" id="L65">        this.multiRequests = value;</span>
+<span class="nc" id="L66">    }</span>
+
+    public boolean isReturnPolicyIdList() {
+<span class="fc" id="L69">        return returnPolicyIdList;</span>
+    }
+
+    public void setReturnPolicyIdList(boolean value) {
+<span class="nc" id="L73">        this.returnPolicyIdList = value;</span>
+<span class="nc" id="L74">    }</span>
+
+    public boolean isCombinedDecision() {
+<span class="fc" id="L77">        return combinedDecision;</span>
+    }
+
+    public void setCombinedDecision(boolean value) {
+<span class="nc" id="L81">        this.combinedDecision = value;</span>
+<span class="nc" id="L82">    }</span>
+
+    /**
+     * Given a category, retrieve the attribute value of either the subject-id,
+     * the resource-id, or the action-id from the request.
+     * The method first extracts the attributes of the provided category and
+     * then filters them to get the value of either the subject-id, resource-id,
+     * or action-id, based on the provided category. If that attribute is not
+     * found, it returns an empty string.
+     * Note that this function assumes that the attribute has only one value.
+     * Technically, it returns only the value of first element of the
+     * AttributeType object.
+     *
+     * @param category the category we are interested into
+     * @return the value of the attribute, an empty String otherwise
+     */
+    public String getAttributeValue(Category category) {
+        try {
+            // select the attributes of category 'category'
+<span class="fc" id="L101">            AttributesType attributesType = attributes.stream()</span>
+<span class="fc" id="L102">                    .filter(attrs -&gt; category.toString().equals(attrs.getCategory())).findAny().orElse(null);</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if (attributesType == null) return &quot;&quot;;</span>
+
+            // select the attributeId based on the category
+            String attributeId;
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            if (category.equals(Category.SUBJECT)) {</span>
+<span class="fc" id="L108">                attributeId = &quot;urn:oasis:names:tc:xacml:1.0:subject:subject-id&quot;;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            } else if (category.equals(Category.RESOURCE)) {</span>
+<span class="fc" id="L110">                attributeId = &quot;urn:oasis:names:tc:xacml:1.0:resource:resource-id&quot;;</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            } else if (category.equals(Category.ACTION)) {</span>
+<span class="fc" id="L112">                attributeId = &quot;urn:oasis:names:tc:xacml:1.0:action:action-id&quot;;</span>
+            } else {
+<span class="nc" id="L114">                return &quot;&quot;;</span>
+            }
+
+<span class="fc" id="L117">            final String attrId = attributeId;</span>
+
+            // get the value of the attribute with category 'category' and attributeId as selected above
+<span class="fc" id="L120">            AttributeType attributeType = attributesType.getAttribute().stream()</span>
+<span class="fc" id="L121">                    .filter(attr -&gt; attrId.equals(attr.getAttributeId())).findAny().orElse(null);</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">            if (attributeType == null) return &quot;&quot;;</span>
+
+<span class="fc" id="L124">            return attributeType.getAttributeValue().get(0).getContent().get(0).toString();</span>
+
+<span class="nc" id="L126">        } catch (Exception e) {</span>
+<span class="nc" id="L127">            log.severe(&quot;error getting attribute value : &quot; + e.getMessage());</span>
+        }
+
+<span class="nc" id="L130">        return &quot;&quot;;</span>
+    }
+
+    public String getAttribute(String category, String attributeId) {
+<span class="nc" id="L134">        String res = null;</span>
+
+<span class="nc" id="L136">        AttributesType attbs = attributes.stream()</span>
+<span class="nc" id="L137">                .filter(a -&gt; a.getCategory().endsWith(category)).findFirst()</span>
+<span class="nc" id="L138">                .orElse(null);</span>
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (attbs != null) {</span>
+<span class="nc" id="L141">            AttributeType attr = attbs.getAttribute().stream()</span>
+<span class="nc" id="L142">                    .filter(a -&gt; a.getAttributeId().endsWith(attributeId)).findFirst()</span>
+<span class="nc" id="L143">                    .orElse(null);</span>
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            if (attr != null) {</span>
+<span class="nc" id="L146">                res = attr.getAttributeValue().get(0).getContent().get(0).toString();</span>
+            }
+        }
+
+<span class="nc" id="L150">        return res;</span>
+    }
+
+    public boolean addAttribute(Attribute attribute, String value) {
+<span class="fc" id="L154">        return addAttribute(attribute.getCategory().toString(),</span>
+<span class="fc" id="L155">                attribute.getDataType().toString(),</span>
+<span class="fc" id="L156">                attribute.getAttributeId(), value);</span>
+    }
+
+    public boolean removeAttribute(Category category, String attributeId) {
+<span class="pc bpc" id="L160" title="3 of 4 branches missed.">        return this.attributes.removeIf(a -&gt; Objects.equals(a.getCategory(), category.toString()) &amp;&amp; Objects.equals(a.getId(), attributeId));</span>
+    }
+
+    public boolean addAttribute(String category, String dataType,
+                                String attributeId, String value) {
+
+<span class="fc" id="L166">        AttributeValueType attributeValueType = new AttributeValueType();</span>
+<span class="fc" id="L167">        attributeValueType.setDataType(dataType);</span>
+<span class="fc" id="L168">        attributeValueType.getContent().add(value);</span>
+<span class="fc" id="L169">        AttributeType attributeType = new AttributeType();</span>
+<span class="fc" id="L170">        attributeType.setAttributeId(attributeId);</span>
+<span class="fc" id="L171">        attributeType.setIncludeInResult(false);</span>
+<span class="fc" id="L172">        attributeType.setIssuer(&quot;false&quot;);</span>
+<span class="fc" id="L173">        attributeType.getAttributeValue().add(attributeValueType);</span>
+<span class="fc" id="L174">        AttributesType attributesType = new AttributesType();</span>
+<span class="fc" id="L175">        attributesType.setCategory(category);</span>
+<span class="fc" id="L176">        attributesType.getAttribute().add(attributeType);</span>
+<span class="fc" id="L177">        boolean added = false;</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        for (AttributesType at : this.getAttributes()) {</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            if (at.getCategory().equals(category)) {</span>
+<span class="fc" id="L180">                at.getAttribute().add(attributeType);</span>
+<span class="fc" id="L181">                added = true;</span>
+            }
+<span class="fc" id="L183">        }</span>
+<span class="fc bfc" id="L184" title="All 2 branches covered.">        if (!added) {</span>
+<span class="fc" id="L185">            this.getAttributes().add(attributesType);</span>
+        }
+
+<span class="fc" id="L188">        return true;</span>
+    }
+
+    public boolean addAttribute(String category, String dataType,
+                                String attributeId, List&lt;String&gt; value) {
+<span class="nc" id="L193">        AttributeValueType attributeValueType = new AttributeValueType();</span>
+<span class="nc" id="L194">        attributeValueType.setDataType(dataType);</span>
+<span class="nc" id="L195">        attributeValueType.getContent().addAll(value);</span>
+<span class="nc" id="L196">        AttributeType attributeType = new AttributeType();</span>
+<span class="nc" id="L197">        attributeType.setAttributeId(attributeId);</span>
+<span class="nc" id="L198">        attributeType.setIncludeInResult(false);</span>
+<span class="nc" id="L199">        attributeType.setIssuer(&quot;false&quot;);</span>
+<span class="nc" id="L200">        attributeType.getAttributeValue().add(attributeValueType);</span>
+<span class="nc" id="L201">        AttributesType attributesType = new AttributesType();</span>
+<span class="nc" id="L202">        attributesType.setCategory(category);</span>
+<span class="nc" id="L203">        attributesType.getAttribute().add(attributeType);</span>
+<span class="nc" id="L204">        boolean added = false;</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for (AttributesType at : this.getAttributes()) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">            if (at.getCategory().equals(category)) {</span>
+<span class="nc" id="L207">                at.getAttribute().add(attributeType);</span>
+<span class="nc" id="L208">                added = true;</span>
+            }
+<span class="nc" id="L210">        }</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (!added) {</span>
+<span class="nc" id="L212">            this.getAttributes().add(attributesType);</span>
+        }
+
+<span class="nc" id="L215">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

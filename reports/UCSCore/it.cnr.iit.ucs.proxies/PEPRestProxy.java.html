@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PEPRestProxy.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSCore</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.proxies</a> &gt; <span class="el_source">PEPRestProxy.java</span></div><h1>PEPRestProxy.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.proxies;
+
+import java.net.URI;
+import java.util.Optional;
+import java.util.logging.Logger;
+
+import it.cnr.iit.ucs.constants.OperationName;
+import it.cnr.iit.ucs.message.Message;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
+import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
+import it.cnr.iit.ucs.pep.PEPInterface;
+import it.cnr.iit.ucs.properties.components.PepProperties;
+import it.cnr.iit.utility.RESTUtils;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * This is a proxy towards a PEP that uses REST.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public class PEPRestProxy implements PEPInterface {
+
+<span class="nc" id="L40">    private static final Logger log = Logger.getLogger( PEPRestProxy.class.getName() );</span>
+
+    private PepProperties properties;
+    private URI uri;
+
+<span class="nc" id="L45">    public PEPRestProxy( PepProperties properties ) {</span>
+<span class="nc" id="L46">        Reject.ifNull( properties );</span>
+<span class="nc" id="L47">        this.properties = properties;</span>
+<span class="nc" id="L48">        Optional&lt;URI&gt; opturi = RESTUtils.parseUri( properties.getUri() );</span>
+<span class="nc" id="L49">        Reject.ifAbsent( opturi, &quot;error parsing uri&quot; );</span>
+<span class="nc" id="L50">        this.uri = opturi.get(); // NOSONAR</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    // TODO return actual response.
+    public Message onGoingEvaluation( ReevaluationResponseMessage message ) {
+<span class="nc" id="L56">        RESTUtils.asyncPost( uri.toString(), OperationName.ONGOINGRESPONSE_REST, message );</span>
+<span class="nc" id="L57">        return null;</span>
+    }
+
+    @Override
+    // TODO return actual response.
+    public String receiveResponse( Message message ) {
+<span class="nc" id="L63">        Optional&lt;String&gt; api = getApiForMessage( message );</span>
+        try {
+<span class="nc" id="L65">            RESTUtils.asyncPost( uri.toString(), api.get(), message ); // NOSONAR</span>
+<span class="nc" id="L66">        } catch( Exception e ) {</span>
+<span class="nc" id="L67">            log.severe( &quot;Error posting message : &quot; + api );</span>
+<span class="nc" id="L68">            return &quot;KO&quot;;</span>
+<span class="nc" id="L69">        }</span>
+<span class="nc" id="L70">        return &quot;OK&quot;;</span>
+    }
+
+    private Optional&lt;String&gt; getApiForMessage( Message message ) {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        if( message instanceof TryAccessResponseMessage ) {</span>
+<span class="nc" id="L75">            return Optional.of( properties.getApiTryAccessResponse() );</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        } else if( message instanceof StartAccessResponseMessage ) {</span>
+<span class="nc" id="L77">            return Optional.of( properties.getApiStartAccessResponse() );</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        } else if( message instanceof EndAccessResponseMessage ) {</span>
+<span class="nc" id="L79">            return Optional.of( properties.getApiEndAccessResponse() );</span>
+        }
+<span class="nc" id="L81">        return Optional.empty();</span>
+    }
+
+    @Override
+    public PepProperties getProperties() {
+<span class="nc" id="L86">        return properties;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UCSDhtPepProperties.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht.properties</a> &gt; <span class="el_source">UCSDhtPepProperties.java</span></div><h1>UCSDhtPepProperties.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht.properties;
+
+import java.util.Map;
+
+import it.cnr.iit.ucs.properties.components.PepProperties;
+
+<span class="nc" id="L7">public class UCSDhtPepProperties implements PepProperties {</span>
+
+	// the identifier of the pep
+<span class="nc" id="L10">	String pepId = &quot;pep-default&quot;;</span>
+
+	// the topic name this pep is subscribed to
+<span class="nc" id="L13">	String subTopicName = &quot;topic-name-the-pep-is-subscribed-to&quot;;</span>
+
+	// the topic uuid this pep is subscribed to
+<span class="nc" id="L16">	String subTopicUuid = &quot;topic-uuid-the-pep-is-subscribed-to&quot;;</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L20">		return &quot;it.cnr.iit.ucsdht.PEPDhtUCSSide&quot;;</span>
+	}
+
+	@Override
+	public Map&lt;String, String&gt; getAdditionalProperties() {
+<span class="nc" id="L25">		return null;</span>
+	}
+
+	@Override
+	public String getId() {
+<span class="nc" id="L30">		return this.pepId;</span>
+	}
+
+	public void setId(String pepId) {
+<span class="nc" id="L34">		this.pepId = pepId;</span>
+<span class="nc" id="L35">	}</span>
+
+	@Override
+	public String getUri() {
+<span class="nc" id="L39">		return &quot;http://localhost:9400&quot;;</span>
+	}
+
+	@Override
+	public String getRevokeType() {
+<span class="nc" id="L44">		return &quot;HARD&quot;;</span>
+	}
+
+	@Override
+	public String getApiOngoingEvaluation() {
+<span class="nc" id="L49">		return &quot;onGoingEvaluation&quot;;</span>
+	}
+
+	@Override
+	public String getApiTryAccessResponse() {
+<span class="nc" id="L54">		return &quot;tryAccessResponse&quot;;</span>
+	}
+
+	@Override
+	public String getApiStartAccessResponse() {
+<span class="nc" id="L59">		return &quot;startAccessResponse&quot;;</span>
+	}
+
+	@Override
+	public String getApiEndAccessResponse() {
+<span class="nc" id="L64">		return &quot;endAccessResponse&quot;;</span>
+	}
+
+	@Override
+	public String getSubTopicName() {
+<span class="nc" id="L69">		return this.subTopicName;</span>
+	}
+
+	@Override
+	public String getSubTopicUuid() {
+<span class="nc" id="L74">		return this.subTopicUuid;</span>
+	}
+
+	public void setSubTopicName(String subTopicName) {
+<span class="nc" id="L78">		this.subTopicName = subTopicName;</span>
+<span class="nc" id="L79">	}</span>
+
+	public void setSubTopicUuid(String subTopicUuid) {
+<span class="nc" id="L82">		this.subTopicUuid = subTopicUuid;</span>
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	public String getCommandType() {
+<span class="nc" id="L87">		return &quot;ucs-command&quot;;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

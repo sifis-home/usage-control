@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ObjectFactory.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">ObjectFactory.java</span></div><h1>ObjectFactory.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.namespace.QName;
+
+@XmlRegistry
+public class ObjectFactory {
+
+    private static final String SCHEMA_STRING = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;;
+
+<span class="fc" id="L28">    private static final QName _Target_QNAME = new QName( SCHEMA_STRING, &quot;Target&quot; );</span>
+<span class="fc" id="L29">    private static final QName _AttributeDesignator_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AttributeDesignator&quot; );
+<span class="fc" id="L31">    private static final QName _Function_QNAME = new QName( SCHEMA_STRING, &quot;Function&quot; );</span>
+<span class="fc" id="L32">    private static final QName _ObligationExpression_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;ObligationExpression&quot; );
+<span class="fc" id="L34">    private static final QName _AttributeAssignmentExpression_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AttributeAssignmentExpression&quot; );
+<span class="fc" id="L36">    private static final QName _Attribute_QNAME = new QName( SCHEMA_STRING, &quot;Attribute&quot; );</span>
+<span class="fc" id="L37">    private static final QName _PolicySetCombinerParameters_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicySetCombinerParameters&quot; );
+<span class="fc" id="L39">    private static final QName _Description_QNAME = new QName( SCHEMA_STRING, &quot;Description&quot; );</span>
+<span class="fc" id="L40">    private static final QName _PolicyCombinerParameters_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicyCombinerParameters&quot; );
+<span class="fc" id="L42">    private static final QName _PolicySetDefaults_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicySetDefaults&quot; );
+<span class="fc" id="L44">    private static final QName _PolicySet_QNAME = new QName( SCHEMA_STRING, &quot;PolicySet&quot; );</span>
+<span class="fc" id="L45">    private static final QName _Match_QNAME = new QName( SCHEMA_STRING, &quot;Match&quot; );</span>
+<span class="fc" id="L46">    private static final QName _CombinerParameter_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;CombinerParameter&quot; );
+<span class="fc" id="L48">    private static final QName _Expression_QNAME = new QName( SCHEMA_STRING, &quot;Expression&quot; );</span>
+<span class="fc" id="L49">    private static final QName _AssociatedAdvice_QNAME = new QName( SCHEMA_STRING, &quot;AssociatedAdvice&quot; );</span>
+<span class="fc" id="L50">    private static final QName _Response_QNAME = new QName( SCHEMA_STRING, &quot;Response&quot; );</span>
+<span class="fc" id="L51">    private static final QName _AllOf_QNAME = new QName( SCHEMA_STRING, &quot;AllOf&quot; );</span>
+<span class="fc" id="L52">    private static final QName _XPathVersion_QNAME = new QName( SCHEMA_STRING, &quot;XPathVersion&quot; );</span>
+<span class="fc" id="L53">    private static final QName _AdviceExpressions_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AdviceExpressions&quot; );
+<span class="fc" id="L55">    private static final QName _VariableReference_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;VariableReference&quot; );
+<span class="fc" id="L57">    private static final QName _RequestReference_QNAME = new QName( SCHEMA_STRING, &quot;RequestReference&quot; );</span>
+<span class="fc" id="L58">    private static final QName _Condition_QNAME = new QName( SCHEMA_STRING, &quot;Condition&quot; );</span>
+<span class="fc" id="L59">    private static final QName _Decision_QNAME = new QName( SCHEMA_STRING, &quot;Decision&quot; );</span>
+<span class="fc" id="L60">    private static final QName _StatusMessage_QNAME = new QName( SCHEMA_STRING, &quot;StatusMessage&quot; );</span>
+<span class="fc" id="L61">    private static final QName _Request_QNAME = new QName( SCHEMA_STRING, &quot;Request&quot; );</span>
+<span class="fc" id="L62">    private static final QName _PolicyIssuer_QNAME = new QName( SCHEMA_STRING, &quot;PolicyIssuer&quot; );</span>
+<span class="fc" id="L63">    private static final QName _RuleCombinerParameters_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;RuleCombinerParameters&quot; );
+<span class="fc" id="L65">    private static final QName _PolicyDefaults_QNAME = new QName( SCHEMA_STRING, &quot;PolicyDefaults&quot; );</span>
+<span class="fc" id="L66">    private static final QName _Apply_QNAME = new QName( SCHEMA_STRING, &quot;Apply&quot; );</span>
+<span class="fc" id="L67">    private static final QName _Obligation_QNAME = new QName( SCHEMA_STRING, &quot;Obligation&quot; );</span>
+<span class="fc" id="L68">    private static final QName _AnyOf_QNAME = new QName( SCHEMA_STRING, &quot;AnyOf&quot; );</span>
+<span class="fc" id="L69">    private static final QName _VariableDefinition_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;VariableDefinition&quot; );
+<span class="fc" id="L71">    private static final QName _AttributeValue_QNAME = new QName( SCHEMA_STRING, &quot;AttributeValue&quot; );</span>
+<span class="fc" id="L72">    private static final QName _AttributesReference_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AttributesReference&quot; );
+<span class="fc" id="L74">    private static final QName _Policy_QNAME = new QName( SCHEMA_STRING, &quot;Policy&quot; );</span>
+<span class="fc" id="L75">    private static final QName _Result_QNAME = new QName( SCHEMA_STRING, &quot;Result&quot; );</span>
+<span class="fc" id="L76">    private static final QName _StatusCode_QNAME = new QName( SCHEMA_STRING, &quot;StatusCode&quot; );</span>
+<span class="fc" id="L77">    private static final QName _PolicyIdentifierList_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicyIdentifierList&quot; );
+<span class="fc" id="L79">    private static final QName _PolicyIdReference_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicyIdReference&quot; );
+<span class="fc" id="L81">    private static final QName _Attributes_QNAME = new QName( SCHEMA_STRING, &quot;Attributes&quot; );</span>
+<span class="fc" id="L82">    private static final QName _Content_QNAME = new QName( SCHEMA_STRING, &quot;Content&quot; );</span>
+<span class="fc" id="L83">    private static final QName _CombinerParameters_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;CombinerParameters&quot; );
+<span class="fc" id="L85">    private static final QName _PolicySetIdReference_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;PolicySetIdReference&quot; );
+<span class="fc" id="L87">    private static final QName _StatusDetail_QNAME = new QName( SCHEMA_STRING, &quot;StatusDetail&quot; );</span>
+<span class="fc" id="L88">    private static final QName _Obligations_QNAME = new QName( SCHEMA_STRING, &quot;Obligations&quot; );</span>
+<span class="fc" id="L89">    private static final QName _Advice_QNAME = new QName( SCHEMA_STRING, &quot;Advice&quot; );</span>
+<span class="fc" id="L90">    private static final QName _Rule_QNAME = new QName( SCHEMA_STRING, &quot;Rule&quot; );</span>
+<span class="fc" id="L91">    private static final QName _ObligationExpressions_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;ObligationExpressions&quot; );
+<span class="fc" id="L93">    private static final QName _AdviceExpression_QNAME = new QName( SCHEMA_STRING, &quot;AdviceExpression&quot; );</span>
+<span class="fc" id="L94">    private static final QName _MissingAttributeDetail_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;MissingAttributeDetail&quot; );
+<span class="fc" id="L96">    private static final QName _Status_QNAME = new QName( SCHEMA_STRING, &quot;Status&quot; );</span>
+<span class="fc" id="L97">    private static final QName _AttributeAssignment_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AttributeAssignment&quot; );
+<span class="fc" id="L99">    private static final QName _AttributeSelector_QNAME = new QName( SCHEMA_STRING,</span>
+        &quot;AttributeSelector&quot; );
+<span class="fc" id="L101">    private static final QName _RequestDefaults_QNAME = new QName( SCHEMA_STRING, &quot;RequestDefaults&quot; );</span>
+<span class="fc" id="L102">    private static final QName _MultiRequests_QNAME = new QName( SCHEMA_STRING, &quot;MultiRequests&quot; );</span>
+
+<span class="fc" id="L104">    public ObjectFactory() {} // NOSONAR</span>
+
+    public PolicyType createPolicyType() {
+<span class="nc" id="L107">        return new PolicyType();</span>
+    }
+
+    public AttributeValueType createAttributeValueType() {
+<span class="nc" id="L111">        return new AttributeValueType();</span>
+    }
+
+    public AttributesReferenceType createAttributesReferenceType() {
+<span class="nc" id="L115">        return new AttributesReferenceType();</span>
+    }
+
+    public ObligationType createObligationType() {
+<span class="nc" id="L119">        return new ObligationType();</span>
+    }
+
+    public AnyOfType createAnyOfType() {
+<span class="nc" id="L123">        return new AnyOfType();</span>
+    }
+
+    public VariableDefinitionType createVariableDefinitionType() {
+<span class="nc" id="L127">        return new VariableDefinitionType();</span>
+    }
+
+    public ApplyType createApplyType() {
+<span class="nc" id="L131">        return new ApplyType();</span>
+    }
+
+    public AttributesType createAttributesType() {
+<span class="nc" id="L135">        return new AttributesType();</span>
+    }
+
+    public PolicyIdentifierListType createPolicyIdentifierListType() {
+<span class="nc" id="L139">        return new PolicyIdentifierListType();</span>
+    }
+
+    public IdReferenceType createIdReferenceType() {
+<span class="nc" id="L143">        return new IdReferenceType();</span>
+    }
+
+    public StatusCodeType createStatusCodeType() {
+<span class="nc" id="L147">        return new StatusCodeType();</span>
+    }
+
+    public ResultType createResultType() {
+<span class="nc" id="L151">        return new ResultType();</span>
+    }
+
+    public RuleCombinerParametersType createRuleCombinerParametersType() {
+<span class="nc" id="L155">        return new RuleCombinerParametersType();</span>
+    }
+
+    public PolicyIssuerType createPolicyIssuerType() {
+<span class="nc" id="L159">        return new PolicyIssuerType();</span>
+    }
+
+    public DefaultsType createDefaultsType() {
+<span class="nc" id="L163">        return new DefaultsType();</span>
+    }
+
+    public StatusType createStatusType() {
+<span class="nc" id="L167">        return new StatusType();</span>
+    }
+
+    public AttributeAssignmentType createAttributeAssignmentType() {
+<span class="nc" id="L171">        return new AttributeAssignmentType();</span>
+    }
+
+    public AdviceExpressionType createAdviceExpressionType() {
+<span class="nc" id="L175">        return new AdviceExpressionType();</span>
+    }
+
+    public MissingAttributeDetailType createMissingAttributeDetailType() {
+<span class="nc" id="L179">        return new MissingAttributeDetailType();</span>
+    }
+
+    public RequestDefaultsType createRequestDefaultsType() {
+<span class="nc" id="L183">        return new RequestDefaultsType();</span>
+    }
+
+    public MultiRequestsType createMultiRequestsType() {
+<span class="nc" id="L187">        return new MultiRequestsType();</span>
+    }
+
+    public AttributeSelectorType createAttributeSelectorType() {
+<span class="nc" id="L191">        return new AttributeSelectorType();</span>
+    }
+
+    public ObligationsType createObligationsType() {
+<span class="nc" id="L195">        return new ObligationsType();</span>
+    }
+
+    public ContentType createContentType() {
+<span class="nc" id="L199">        return new ContentType();</span>
+    }
+
+    public CombinerParametersType createCombinerParametersType() {
+<span class="nc" id="L203">        return new CombinerParametersType();</span>
+    }
+
+    public StatusDetailType createStatusDetailType() {
+<span class="nc" id="L207">        return new StatusDetailType();</span>
+    }
+
+    public ObligationExpressionsType createObligationExpressionsType() {
+<span class="nc" id="L211">        return new ObligationExpressionsType();</span>
+    }
+
+    public AdviceType createAdviceType() {
+<span class="nc" id="L215">        return new AdviceType();</span>
+    }
+
+    public RuleType createRuleType() {
+<span class="nc" id="L219">        return new RuleType();</span>
+    }
+
+    public PolicyCombinerParametersType createPolicyCombinerParametersType() {
+<span class="nc" id="L223">        return new PolicyCombinerParametersType();</span>
+    }
+
+    public AttributeType createAttributeType() {
+<span class="nc" id="L227">        return new AttributeType();</span>
+    }
+
+    public PolicySetCombinerParametersType createPolicySetCombinerParametersType() {
+<span class="nc" id="L231">        return new PolicySetCombinerParametersType();</span>
+    }
+
+    public CombinerParameterType createCombinerParameterType() {
+<span class="nc" id="L235">        return new CombinerParameterType();</span>
+    }
+
+    public PolicySetType createPolicySetType() {
+<span class="nc" id="L239">        return new PolicySetType();</span>
+    }
+
+    public MatchType createMatchType() {
+<span class="nc" id="L243">        return new MatchType();</span>
+    }
+
+    public FunctionType createFunctionType() {
+<span class="nc" id="L247">        return new FunctionType();</span>
+    }
+
+    public TargetType createTargetType() {
+<span class="nc" id="L251">        return new TargetType();</span>
+    }
+
+    public AttributeDesignatorType createAttributeDesignatorType() {
+<span class="nc" id="L255">        return new AttributeDesignatorType();</span>
+    }
+
+    public AttributeAssignmentExpressionType createAttributeAssignmentExpressionType() {
+<span class="nc" id="L259">        return new AttributeAssignmentExpressionType();</span>
+    }
+
+    public ObligationExpressionType createObligationExpressionType() {
+<span class="nc" id="L263">        return new ObligationExpressionType();</span>
+    }
+
+    public ConditionType createConditionType() {
+<span class="nc" id="L267">        return new ConditionType();</span>
+    }
+
+    public VariableReferenceType createVariableReferenceType() {
+<span class="nc" id="L271">        return new VariableReferenceType();</span>
+    }
+
+    public RequestReferenceType createRequestReferenceType() {
+<span class="nc" id="L275">        return new RequestReferenceType();</span>
+    }
+
+    public RequestType createRequestType() {
+<span class="nc" id="L279">        return new RequestType();</span>
+    }
+
+    public ResponseType createResponseType() {
+<span class="nc" id="L283">        return new ResponseType();</span>
+    }
+
+    public AssociatedAdviceType createAssociatedAdviceType() {
+<span class="nc" id="L287">        return new AssociatedAdviceType();</span>
+    }
+
+    public AdviceExpressionsType createAdviceExpressionsType() {
+<span class="nc" id="L291">        return new AdviceExpressionsType();</span>
+    }
+
+    public AllOfType createAllOfType() {
+<span class="nc" id="L295">        return new AllOfType();</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Target&quot; )
+    public JAXBElement&lt;TargetType&gt; createTarget( TargetType value ) {
+<span class="nc" id="L300">        return new JAXBElement&lt;&gt;( _Target_QNAME, TargetType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributeDesignator&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;AttributeDesignatorType&gt; createAttributeDesignator( AttributeDesignatorType value ) {
+<span class="nc" id="L306">        return new JAXBElement&lt;&gt;( _AttributeDesignator_QNAME, AttributeDesignatorType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Function&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;FunctionType&gt; createFunction( FunctionType value ) {
+<span class="nc" id="L312">        return new JAXBElement&lt;&gt;( _Function_QNAME, FunctionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;ObligationExpression&quot; )
+    public JAXBElement&lt;ObligationExpressionType&gt; createObligationExpression( ObligationExpressionType value ) {
+<span class="nc" id="L317">        return new JAXBElement&lt;&gt;( _ObligationExpression_QNAME, ObligationExpressionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributeAssignmentExpression&quot; )
+    public JAXBElement&lt;AttributeAssignmentExpressionType&gt; createAttributeAssignmentExpression( AttributeAssignmentExpressionType value ) {
+<span class="nc" id="L322">        return new JAXBElement&lt;&gt;( _AttributeAssignmentExpression_QNAME,</span>
+            AttributeAssignmentExpressionType.class, null, value );
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Attribute&quot; )
+    public JAXBElement&lt;AttributeType&gt; createAttribute( AttributeType value ) {
+<span class="nc" id="L328">        return new JAXBElement&lt;&gt;( _Attribute_QNAME, AttributeType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicySetCombinerParameters&quot; )
+    public JAXBElement&lt;PolicySetCombinerParametersType&gt; createPolicySetCombinerParameters( PolicySetCombinerParametersType value ) {
+<span class="nc" id="L333">        return new JAXBElement&lt;&gt;( _PolicySetCombinerParameters_QNAME, PolicySetCombinerParametersType.class,</span>
+            null, value );
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Description&quot; )
+    public JAXBElement&lt;String&gt; createDescription( String value ) {
+<span class="nc" id="L339">        return new JAXBElement&lt;&gt;( _Description_QNAME, String.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicyCombinerParameters&quot; )
+    public JAXBElement&lt;PolicyCombinerParametersType&gt; createPolicyCombinerParameters( PolicyCombinerParametersType value ) {
+<span class="nc" id="L344">        return new JAXBElement&lt;&gt;( _PolicyCombinerParameters_QNAME, PolicyCombinerParametersType.class, null,</span>
+            value );
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicySetDefaults&quot; )
+    public JAXBElement&lt;DefaultsType&gt; createPolicySetDefaults( DefaultsType value ) {
+<span class="nc" id="L350">        return new JAXBElement&lt;&gt;( _PolicySetDefaults_QNAME, DefaultsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicySet&quot; )
+    public JAXBElement&lt;PolicySetType&gt; createPolicySet( PolicySetType value ) {
+<span class="nc" id="L355">        return new JAXBElement&lt;&gt;( _PolicySet_QNAME, PolicySetType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Match&quot; )
+    public JAXBElement&lt;MatchType&gt; createMatch( MatchType value ) {
+<span class="nc" id="L360">        return new JAXBElement&lt;&gt;( _Match_QNAME, MatchType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;CombinerParameter&quot; )
+    public JAXBElement&lt;CombinerParameterType&gt; createCombinerParameter( CombinerParameterType value ) {
+<span class="nc" id="L365">        return new JAXBElement&lt;&gt;( _CombinerParameter_QNAME, CombinerParameterType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Expression&quot; )
+    public JAXBElement&lt;ExpressionType&gt; createExpression( ExpressionType value ) {
+<span class="nc" id="L370">        return new JAXBElement&lt;&gt;( _Expression_QNAME, ExpressionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AssociatedAdvice&quot; )
+    public JAXBElement&lt;AssociatedAdviceType&gt; createAssociatedAdvice( AssociatedAdviceType value ) {
+<span class="nc" id="L375">        return new JAXBElement&lt;&gt;( _AssociatedAdvice_QNAME, AssociatedAdviceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Response&quot; )
+    public JAXBElement&lt;ResponseType&gt; createResponse( ResponseType value ) {
+<span class="nc" id="L380">        return new JAXBElement&lt;&gt;( _Response_QNAME, ResponseType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AllOf&quot; )
+    public JAXBElement&lt;AllOfType&gt; createAllOf( AllOfType value ) {
+<span class="nc" id="L385">        return new JAXBElement&lt;&gt;( _AllOf_QNAME, AllOfType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;XPathVersion&quot; )
+    public JAXBElement&lt;String&gt; createXPathVersion( String value ) {
+<span class="nc" id="L390">        return new JAXBElement&lt;&gt;( _XPathVersion_QNAME, String.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AdviceExpressions&quot; )
+    public JAXBElement&lt;AdviceExpressionsType&gt; createAdviceExpressions( AdviceExpressionsType value ) {
+<span class="nc" id="L395">        return new JAXBElement&lt;&gt;( _AdviceExpressions_QNAME, AdviceExpressionsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;VariableReference&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;VariableReferenceType&gt; createVariableReference( VariableReferenceType value ) {
+<span class="nc" id="L401">        return new JAXBElement&lt;&gt;( _VariableReference_QNAME, VariableReferenceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;RequestReference&quot; )
+    public JAXBElement&lt;RequestReferenceType&gt; createRequestReference( RequestReferenceType value ) {
+<span class="nc" id="L406">        return new JAXBElement&lt;&gt;( _RequestReference_QNAME, RequestReferenceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Condition&quot; )
+    public JAXBElement&lt;ConditionType&gt; createCondition( ConditionType value ) {
+<span class="nc" id="L411">        return new JAXBElement&lt;&gt;( _Condition_QNAME, ConditionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Decision&quot; )
+    public JAXBElement&lt;DecisionType&gt; createDecision( DecisionType value ) {
+<span class="nc" id="L416">        return new JAXBElement&lt;&gt;( _Decision_QNAME, DecisionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;StatusMessage&quot; )
+    public JAXBElement&lt;String&gt; createStatusMessage( String value ) {
+<span class="nc" id="L421">        return new JAXBElement&lt;&gt;( _StatusMessage_QNAME, String.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Request&quot; )
+    public JAXBElement&lt;RequestType&gt; createRequest( RequestType value ) {
+<span class="nc" id="L426">        return new JAXBElement&lt;&gt;( _Request_QNAME, RequestType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicyIssuer&quot; )
+    public JAXBElement&lt;PolicyIssuerType&gt; createPolicyIssuer( PolicyIssuerType value ) {
+<span class="nc" id="L431">        return new JAXBElement&lt;&gt;( _PolicyIssuer_QNAME, PolicyIssuerType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;RuleCombinerParameters&quot; )
+    public JAXBElement&lt;RuleCombinerParametersType&gt; createRuleCombinerParameters( RuleCombinerParametersType value ) {
+<span class="nc" id="L436">        return new JAXBElement&lt;&gt;( _RuleCombinerParameters_QNAME, RuleCombinerParametersType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicyDefaults&quot; )
+    public JAXBElement&lt;DefaultsType&gt; createPolicyDefaults( DefaultsType value ) {
+<span class="nc" id="L441">        return new JAXBElement&lt;&gt;( _PolicyDefaults_QNAME, DefaultsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Apply&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;ApplyType&gt; createApply( ApplyType value ) {
+<span class="nc" id="L447">        return new JAXBElement&lt;&gt;( _Apply_QNAME, ApplyType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Obligation&quot; )
+    public JAXBElement&lt;ObligationType&gt; createObligation( ObligationType value ) {
+<span class="nc" id="L452">        return new JAXBElement&lt;&gt;( _Obligation_QNAME, ObligationType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AnyOf&quot; )
+    public JAXBElement&lt;AnyOfType&gt; createAnyOf( AnyOfType value ) {
+<span class="nc" id="L457">        return new JAXBElement&lt;&gt;( _AnyOf_QNAME, AnyOfType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;VariableDefinition&quot; )
+    public JAXBElement&lt;VariableDefinitionType&gt; createVariableDefinition( VariableDefinitionType value ) {
+<span class="nc" id="L462">        return new JAXBElement&lt;&gt;( _VariableDefinition_QNAME, VariableDefinitionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributeValue&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;AttributeValueType&gt; createAttributeValue( AttributeValueType value ) {
+<span class="nc" id="L468">        return new JAXBElement&lt;&gt;( _AttributeValue_QNAME, AttributeValueType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributesReference&quot; )
+    public JAXBElement&lt;AttributesReferenceType&gt; createAttributesReference( AttributesReferenceType value ) {
+<span class="nc" id="L473">        return new JAXBElement&lt;&gt;( _AttributesReference_QNAME, AttributesReferenceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Policy&quot; )
+    public JAXBElement&lt;PolicyType&gt; createPolicy( PolicyType value ) {
+<span class="nc" id="L478">        return new JAXBElement&lt;&gt;( _Policy_QNAME, PolicyType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Result&quot; )
+    public JAXBElement&lt;ResultType&gt; createResult( ResultType value ) {
+<span class="nc" id="L483">        return new JAXBElement&lt;&gt;( _Result_QNAME, ResultType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;StatusCode&quot; )
+    public JAXBElement&lt;StatusCodeType&gt; createStatusCode( StatusCodeType value ) {
+<span class="nc" id="L488">        return new JAXBElement&lt;&gt;( _StatusCode_QNAME, StatusCodeType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicyIdentifierList&quot; )
+    public JAXBElement&lt;PolicyIdentifierListType&gt; createPolicyIdentifierList( PolicyIdentifierListType value ) {
+<span class="nc" id="L493">        return new JAXBElement&lt;&gt;( _PolicyIdentifierList_QNAME, PolicyIdentifierListType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicyIdReference&quot; )
+    public JAXBElement&lt;IdReferenceType&gt; createPolicyIdReference( IdReferenceType value ) {
+<span class="nc" id="L498">        return new JAXBElement&lt;&gt;( _PolicyIdReference_QNAME, IdReferenceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Attributes&quot; )
+    public JAXBElement&lt;AttributesType&gt; createAttributes( AttributesType value ) {
+<span class="nc" id="L503">        return new JAXBElement&lt;&gt;( _Attributes_QNAME, AttributesType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Content&quot; )
+    public JAXBElement&lt;ContentType&gt; createContent( ContentType value ) {
+<span class="nc" id="L508">        return new JAXBElement&lt;&gt;( _Content_QNAME, ContentType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;CombinerParameters&quot; )
+    public JAXBElement&lt;CombinerParametersType&gt; createCombinerParameters( CombinerParametersType value ) {
+<span class="nc" id="L513">        return new JAXBElement&lt;&gt;( _CombinerParameters_QNAME, CombinerParametersType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;PolicySetIdReference&quot; )
+    public JAXBElement&lt;IdReferenceType&gt; createPolicySetIdReference( IdReferenceType value ) {
+<span class="nc" id="L518">        return new JAXBElement&lt;&gt;( _PolicySetIdReference_QNAME, IdReferenceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;StatusDetail&quot; )
+    public JAXBElement&lt;StatusDetailType&gt; createStatusDetail( StatusDetailType value ) {
+<span class="nc" id="L523">        return new JAXBElement&lt;&gt;( _StatusDetail_QNAME, StatusDetailType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Obligations&quot; )
+    public JAXBElement&lt;ObligationsType&gt; createObligations( ObligationsType value ) {
+<span class="nc" id="L528">        return new JAXBElement&lt;&gt;( _Obligations_QNAME, ObligationsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Advice&quot; )
+    public JAXBElement&lt;AdviceType&gt; createAdvice( AdviceType value ) {
+<span class="nc" id="L533">        return new JAXBElement&lt;&gt;( _Advice_QNAME, AdviceType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Rule&quot; )
+    public JAXBElement&lt;RuleType&gt; createRule( RuleType value ) {
+<span class="nc" id="L538">        return new JAXBElement&lt;&gt;( _Rule_QNAME, RuleType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;ObligationExpressions&quot; )
+    public JAXBElement&lt;ObligationExpressionsType&gt; createObligationExpressions( ObligationExpressionsType value ) {
+<span class="nc" id="L543">        return new JAXBElement&lt;&gt;( _ObligationExpressions_QNAME, ObligationExpressionsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AdviceExpression&quot; )
+    public JAXBElement&lt;AdviceExpressionType&gt; createAdviceExpression( AdviceExpressionType value ) {
+<span class="nc" id="L548">        return new JAXBElement&lt;&gt;( _AdviceExpression_QNAME, AdviceExpressionType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;MissingAttributeDetail&quot; )
+    public JAXBElement&lt;MissingAttributeDetailType&gt; createMissingAttributeDetail( MissingAttributeDetailType value ) {
+<span class="nc" id="L553">        return new JAXBElement&lt;&gt;( _MissingAttributeDetail_QNAME, MissingAttributeDetailType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;Status&quot; )
+    public JAXBElement&lt;StatusType&gt; createStatus( StatusType value ) {
+<span class="nc" id="L558">        return new JAXBElement&lt;&gt;( _Status_QNAME, StatusType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributeAssignment&quot; )
+    public JAXBElement&lt;AttributeAssignmentType&gt; createAttributeAssignment( AttributeAssignmentType value ) {
+<span class="nc" id="L563">        return new JAXBElement&lt;&gt;( _AttributeAssignment_QNAME, AttributeAssignmentType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;AttributeSelector&quot;,
+        substitutionHeadNamespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, substitutionHeadName = &quot;Expression&quot; )
+    public JAXBElement&lt;AttributeSelectorType&gt; createAttributeSelector( AttributeSelectorType value ) {
+<span class="nc" id="L569">        return new JAXBElement&lt;&gt;( _AttributeSelector_QNAME, AttributeSelectorType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;RequestDefaults&quot; )
+    public JAXBElement&lt;RequestDefaultsType&gt; createRequestDefaults( RequestDefaultsType value ) {
+<span class="nc" id="L574">        return new JAXBElement&lt;&gt;( _RequestDefaults_QNAME, RequestDefaultsType.class, null, value );</span>
+    }
+
+    @XmlElementDecl( namespace = &quot;urn:oasis:names:tc:xacml:3.0:core:schema:wd-17&quot;, name = &quot;MultiRequests&quot; )
+    public JAXBElement&lt;MultiRequestsType&gt; createMultiRequests( MultiRequestsType value ) {
+<span class="nc" id="L579">        return new JAXBElement&lt;&gt;( _MultiRequests_QNAME, MultiRequestsType.class, null, value );</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Message.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.message</a> &gt; <span class="el_source">Message.java</span></div><h1>Message.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.message;
+
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import it.cnr.iit.ucs.constants.CONNECTION;
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * A message contains basic information needed by the actors that are communicating.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+@JsonIgnoreProperties( ignoreUnknown = true )
+public class Message {
+
+    private String messageId;
+    protected String source;
+    protected String destination;
+    private CONNECTION connection;
+    protected PURPOSE purpose;
+    protected Object callback;
+
+    public static final String MESSAGE_ID_PREFIX = &quot;ID:&quot;;
+
+<span class="fc" id="L43">    public Message( String source, String destination ) {</span>
+<span class="fc" id="L44">        Reject.ifBlank( source );</span>
+<span class="fc" id="L45">        Reject.ifBlank( destination );</span>
+<span class="fc" id="L46">        this.source = source;</span>
+<span class="fc" id="L47">        this.destination = destination;</span>
+<span class="fc" id="L48">        setRandomMessageId();</span>
+<span class="fc" id="L49">    }</span>
+
+    public Message( String source, String destination, String messageId ) {
+<span class="fc" id="L52">        this( source, destination );</span>
+<span class="fc" id="L53">        Reject.ifBlank( messageId );</span>
+<span class="fc" id="L54">        this.messageId = messageId;</span>
+<span class="fc" id="L55">    }</span>
+
+<span class="fc" id="L57">    public Message() {</span>
+<span class="fc" id="L58">        setRandomMessageId();</span>
+<span class="fc" id="L59">    }</span>
+
+    public final String getSource() {
+<span class="fc" id="L62">        return source;</span>
+    }
+
+    public void setSource( String source ) {
+<span class="nc" id="L66">        this.source = source;</span>
+<span class="nc" id="L67">    }</span>
+
+    public final String getDestination() {
+<span class="fc" id="L70">        return destination;</span>
+    }
+
+    public void setDestination( String destination ) {
+<span class="nc" id="L74">        this.destination = destination;</span>
+<span class="nc" id="L75">    }</span>
+
+    public void setConnection( CONNECTION connection ) {
+<span class="nc" id="L78">        this.connection = connection;</span>
+<span class="nc" id="L79">    }</span>
+
+    public CONNECTION getConnection() {
+<span class="nc" id="L82">        return connection;</span>
+    }
+
+    public PURPOSE getPurpose() {
+<span class="fc" id="L86">        return purpose;</span>
+    }
+
+    public void setPurpose( PURPOSE purpose ) {
+<span class="nc" id="L90">        this.purpose = purpose;</span>
+<span class="nc" id="L91">    }</span>
+
+    public String getMessageId() {
+<span class="fc" id="L94">        return messageId;</span>
+    }
+
+    public void setMessageId( String id ) {
+<span class="fc" id="L98">        this.messageId = id;</span>
+<span class="fc" id="L99">    }</span>
+
+    private void setRandomMessageId() {
+<span class="fc" id="L102">        setMessageId( MESSAGE_ID_PREFIX + UUID.randomUUID() );</span>
+<span class="fc" id="L103">    }</span>
+
+    public void setCallback( Object callback, CONNECTION connection ) {
+<span class="nc" id="L106">        this.callback = callback;</span>
+<span class="nc" id="L107">        this.connection = connection;</span>
+<span class="nc" id="L108">    }</span>
+
+    public Object getCallback() {
+<span class="nc" id="L111">        return callback;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AttributeValueType.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">AttributeValueType.java</span></div><h1>AttributeValueType.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyAttribute;
+import javax.xml.bind.annotation.XmlAnyElement;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlMixed;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
+
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = &quot;AttributeValueType&quot;, propOrder = {
+    &quot;content&quot;
+} )
+@XmlSeeAlso( {
+    AttributeAssignmentType.class
+} )
+<span class="fc" id="L41">public class AttributeValueType {</span>
+
+    @XmlMixed
+    @XmlAnyElement( lax = true )
+    protected List&lt;Object&gt; content;
+    @XmlAttribute( name = &quot;DataType&quot;, required = true )
+    @XmlSchemaType( name = &quot;anyURI&quot; )
+    protected String dataType;
+<span class="fc" id="L49">    @XmlAnyAttribute</span>
+    private Map&lt;QName, String&gt; otherAttributes = new HashMap&lt;&gt;();
+
+    public List&lt;Object&gt; getContent() {
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        if( content == null ) {</span>
+<span class="fc" id="L54">            content = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L56">        return this.content;</span>
+    }
+
+    public String getDataType() {
+<span class="fc" id="L60">        return dataType;</span>
+    }
+
+    public void setDataType( String value ) {
+<span class="fc" id="L64">        this.dataType = value;</span>
+<span class="fc" id="L65">    }</span>
+
+    public Map&lt;QName, String&gt; getOtherAttributes() {
+<span class="fc" id="L68">        return otherAttributes;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

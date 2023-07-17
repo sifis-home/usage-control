@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>ObligationManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">ObligationManager</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.obligationmanager</a> &gt; <span class="el_source">ObligationManager.java</span></div><h1>ObligationManager.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.obligationmanager;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import it.cnr.iit.ucs.constants.STATUS;
+import it.cnr.iit.ucs.pdp.PDPEvaluation;
+import it.cnr.iit.ucs.pip.PIPOMInterface;
+import it.cnr.iit.ucs.properties.components.ObligationManagerProperties;
+import it.cnr.iit.utility.JsonUtility;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * The obligation manager is the component in charge of handling the various
+ * obligations we can have in the policy. An obligation manager can handle
+ * two different types of obligations, one directed to the PEP and the other
+ * directed to the PIPs.
+ * Upon receiving the result of the PDP:
+ * Asks to the PIPs to perform the obligations directed to them.
+ * Removes the sent obligations from the list of pending obligations.
+ * Other obligations will be sent to the PEP along with the result of the evaluation.
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+public final class ObligationManager implements ObligationManagerInterface {
+
+<span class="nc" id="L46">    private final Logger log = Logger.getLogger( ObligationManager.class.getName() );</span>
+
+    private List&lt;PIPOMInterface&gt; pipList;
+    private ObligationManagerProperties properties; // NOSONAR
+
+<span class="nc" id="L51">    public ObligationManager( ObligationManagerProperties properties ) {</span>
+<span class="nc" id="L52">        Reject.ifNull( properties );</span>
+<span class="nc" id="L53">        this.properties = properties;</span>
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    public void setPIPs( List&lt;PIPOMInterface&gt; pips ) {
+<span class="nc" id="L58">        Reject.ifEmpty( pips );</span>
+<span class="nc" id="L59">        pipList = pips;</span>
+<span class="nc" id="L60">    }</span>
+
+    /**
+     * Translates the obligation from String to an Object that can be passed to a
+     * PIP
+     *
+     * @param evaluation
+     *          the evaluation returned by the PDP
+     * @param status
+     *          the status of the given session
+     *          obligation to the PIP
+     */
+    @Override
+    public void translateObligations( PDPEvaluation evaluation, String sessionId, STATUS status ) {
+<span class="nc" id="L74">        Reject.ifNull( evaluation );</span>
+<span class="nc" id="L75">        Reject.ifNull( sessionId );</span>
+<span class="nc" id="L76">        Reject.ifNull( status );</span>
+
+<span class="nc" id="L78">        List&lt;String&gt; obligationsList = evaluation.getObligations();</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if( obligationsList == null ) {</span>
+<span class="nc" id="L80">            return;</span>
+        }
+
+<span class="nc" id="L83">        StringBuilder pipName = new StringBuilder();</span>
+<span class="nc" id="L84">        HashMap&lt;String, ObligationInterface&gt; obligationMap = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        for( String obligationString : obligationsList ) {</span>
+<span class="nc" id="L86">            ObligationInterface obligation = (ObligationInterface) createObjectFromString( obligationString, pipName );</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if( obligation != null ) {</span>
+<span class="nc" id="L88">                obligation.setSessionId( sessionId );</span>
+<span class="nc" id="L89">                obligation.setStep( status.name() );</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                if( obligation.getAttributeId() == null ) {</span>
+<span class="nc" id="L91">                    obligationMap.put( pipName.toString(), obligation );</span>
+                } else {
+<span class="nc" id="L93">                    obligationMap.put( obligation.getAttributeId(), obligation );</span>
+                }
+            }
+<span class="nc" id="L96">        }</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        for( PIPOMInterface pip : pipList ) {</span>
+<span class="nc" id="L99">            pip.performObligation( obligationMap.get( pipName.toString() ) );</span>
+<span class="nc" id="L100">        }</span>
+<span class="nc" id="L101">    }</span>
+
+    /**
+     * Given the string representing the whole obligation, this function extracts
+     * the name of the class and, from there, it will create the related object
+     *
+     * @param obligation
+     *          the obligation in string format
+     * @return an object representing the obligation the PIP has to perform
+     */
+    @Deprecated
+    private Object createObjectFromString( String obligation, StringBuilder classNameBuilder ) {
+<span class="nc" id="L113">        String className = extractClassName( obligation );</span>
+        Class&lt;?&gt; clazz;
+        try {
+            // TODO UCS-32 NOSONAR
+<span class="nc" id="L117">            clazz = Class.forName( className );</span>
+<span class="nc" id="L118">            classNameBuilder.append( className );</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            if( clazz.isInstance( ObligationInterface.class ) ) {</span>
+<span class="nc" id="L120">                throw new IllegalArgumentException( &quot;Invalid class provided: &quot; + className );</span>
+            }
+<span class="nc" id="L122">        } catch( ClassNotFoundException e ) {</span>
+<span class="nc" id="L123">            log.log( Level.SEVERE, &quot;Error unmarshalling json : {0}&quot;, e.getMessage() );</span>
+<span class="nc" id="L124">            return null;</span>
+<span class="nc" id="L125">        }</span>
+<span class="nc" id="L126">        String json = getJson( obligation );</span>
+<span class="nc" id="L127">        return JsonUtility.loadObjectFromJsonString( json, clazz );</span>
+    }
+
+    @Deprecated
+    private String extractClassName( String obligation ) {
+<span class="nc" id="L132">        String className = obligation.split( &quot;=&quot; )[0];</span>
+<span class="nc" id="L133">        return &quot;it.cnr.iit.ucs.obligationmanager.obligationobjects.&quot;</span>
+                + className;
+    }
+
+    /**
+     * Given the string in the obligation, it decodes it in order to obtain a
+     * string that can be converted into a JSON format
+     *
+     * @param obligation
+     *          the obligation to be performed
+     * @return a String that can be converted into JSON
+     */
+    private String getJson( String obligation ) {
+        try {
+<span class="nc" id="L147">            return URLDecoder.decode( obligation.split( &quot;=&quot; )[1], &quot;UTF-8&quot; );</span>
+<span class="nc" id="L148">        } catch( UnsupportedEncodingException e ) {</span>
+<span class="nc" id="L149">            log.log( Level.SEVERE, &quot;Error decoding obligation : {0}&quot;, e.getMessage() );</span>
+<span class="nc" id="L150">            return null;</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PolicyType.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">PolicyType.java</span></div><h1>PolicyType.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = &quot;PolicyType&quot;,
+    propOrder = { &quot;description&quot;, &quot;policyIssuer&quot;, &quot;policyDefaults&quot;, &quot;target&quot;,
+        &quot;combinerParametersOrRuleCombinerParametersOrVariableDefinition&quot;,
+        &quot;obligationExpressions&quot;, &quot;adviceExpressions&quot; } )
+<span class="fc" id="L36">public class PolicyType {</span>
+
+    @XmlElement( name = &quot;Description&quot; )
+    protected String description;
+    @XmlElement( name = &quot;PolicyIssuer&quot; )
+    protected PolicyIssuerType policyIssuer;
+    @XmlElement( name = &quot;PolicyDefaults&quot; )
+    protected DefaultsType policyDefaults;
+    @XmlElement( name = &quot;Target&quot;, required = true )
+    protected TargetType target;
+    @XmlElements( {
+        @XmlElement( name = &quot;CombinerParameters&quot;,
+            type = CombinerParametersType.class ),
+        @XmlElement( name = &quot;RuleCombinerParameters&quot;,
+            type = RuleCombinerParametersType.class ),
+        @XmlElement( name = &quot;VariableDefinition&quot;,
+            type = VariableDefinitionType.class ),
+        @XmlElement( name = &quot;Rule&quot;, type = RuleType.class ) } )
+    protected List&lt;Object&gt; combinerParametersOrRuleCombinerParametersOrVariableDefinition;
+    @XmlElement( name = &quot;ObligationExpressions&quot; )
+    protected ObligationExpressionsType obligationExpressions;
+    @XmlElement( name = &quot;AdviceExpressions&quot; )
+    protected AdviceExpressionsType adviceExpressions;
+    @XmlAttribute( name = &quot;PolicyId&quot;, required = true )
+    @XmlSchemaType( name = &quot;anyURI&quot; )
+    protected String policyId;
+    @XmlAttribute( name = &quot;Version&quot;, required = true )
+    protected String version;
+    @XmlAttribute( name = &quot;RuleCombiningAlgId&quot;, required = true )
+    @XmlSchemaType( name = &quot;anyURI&quot; )
+    protected String ruleCombiningAlgId;
+    @XmlAttribute( name = &quot;MaxDelegationDepth&quot; )
+    protected BigInteger maxDelegationDepth;
+
+    public String getDescription() {
+<span class="fc" id="L71">        return description;</span>
+    }
+
+    public void setDescription( String value ) {
+<span class="fc" id="L75">        this.description = value;</span>
+<span class="fc" id="L76">    }</span>
+
+    public PolicyIssuerType getPolicyIssuer() {
+<span class="fc" id="L79">        return policyIssuer;</span>
+    }
+
+    public void setPolicyIssuer( PolicyIssuerType value ) {
+<span class="fc" id="L83">        this.policyIssuer = value;</span>
+<span class="fc" id="L84">    }</span>
+
+    public DefaultsType getPolicyDefaults() {
+<span class="fc" id="L87">        return policyDefaults;</span>
+    }
+
+    public void setPolicyDefaults( DefaultsType value ) {
+<span class="fc" id="L91">        this.policyDefaults = value;</span>
+<span class="fc" id="L92">    }</span>
+
+    public TargetType getTarget() {
+<span class="fc" id="L95">        return target;</span>
+    }
+
+    public void setTarget( TargetType value ) {
+<span class="fc" id="L99">        this.target = value;</span>
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * This accessory method returns a reference to the live list, not a snapshot.
+     * Therefore any modification you make to the returned list will be present
+     * inside the JAXB object.
+     */
+    public List&lt;Object&gt; getCombinerParametersOrRuleCombinerParametersOrVariableDefinition() {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if( combinerParametersOrRuleCombinerParametersOrVariableDefinition == null ) {</span>
+<span class="fc" id="L109">            combinerParametersOrRuleCombinerParametersOrVariableDefinition = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L111">        return this.combinerParametersOrRuleCombinerParametersOrVariableDefinition;</span>
+    }
+
+    public ObligationExpressionsType getObligationExpressions() {
+<span class="fc" id="L115">        return obligationExpressions;</span>
+    }
+
+    public void setObligationExpressions( ObligationExpressionsType value ) {
+<span class="fc" id="L119">        this.obligationExpressions = value;</span>
+<span class="fc" id="L120">    }</span>
+
+    public AdviceExpressionsType getAdviceExpressions() {
+<span class="fc" id="L123">        return adviceExpressions;</span>
+    }
+
+    public void setAdviceExpressions( AdviceExpressionsType value ) {
+<span class="fc" id="L127">        this.adviceExpressions = value;</span>
+<span class="fc" id="L128">    }</span>
+
+    public String getPolicyId() {
+<span class="fc" id="L131">        return policyId;</span>
+    }
+
+    public void setPolicyId( String value ) {
+<span class="fc" id="L135">        this.policyId = value;</span>
+<span class="fc" id="L136">    }</span>
+
+    public String getVersion() {
+<span class="fc" id="L139">        return version;</span>
+    }
+
+    public void setVersion( String value ) {
+<span class="fc" id="L143">        this.version = value;</span>
+<span class="fc" id="L144">    }</span>
+
+    public String getRuleCombiningAlgId() {
+<span class="fc" id="L147">        return ruleCombiningAlgId;</span>
+    }
+
+    public void setRuleCombiningAlgId( String value ) {
+<span class="fc" id="L151">        this.ruleCombiningAlgId = value;</span>
+<span class="fc" id="L152">    }</span>
+
+    public BigInteger getMaxDelegationDepth() {
+<span class="fc" id="L155">        return maxDelegationDepth;</span>
+    }
+
+    public void setMaxDelegationDepth( BigInteger value ) {
+<span class="fc" id="L159">        this.maxDelegationDepth = value;</span>
+<span class="fc" id="L160">    }</span>
+
+    public List&lt;RuleType&gt; getRuleTypeList() {
+<span class="nc" id="L163">        return getObjectsOfTypeToList( RuleType.class );</span>
+    }
+
+    public List&lt;ObligationsType&gt; getObligationsTypeList() {
+<span class="nc" id="L167">        return getObjectsOfTypeToList( ObligationsType.class );</span>
+    }
+
+    private &lt;T&gt; List&lt;T&gt; getObjectsOfTypeToList( Class&lt;T&gt; clazz ) {
+<span class="nc" id="L171">        List&lt;Object&gt; list = this.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition();</span>
+<span class="nc" id="L172">        return (List&lt;T&gt;) list.stream()</span>
+<span class="nc" id="L173">            .filter( o -&gt; clazz.isInstance( o ) )</span>
+<span class="nc" id="L174">            .collect( Collectors.toList() );</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

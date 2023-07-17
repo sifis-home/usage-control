@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UCSCoreService.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSCore</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.core</a> &gt; <span class="el_source">UCSCoreService.java</span></div><h1>UCSCoreService.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package it.cnr.iit.ucs.core;
+
+import it.cnr.iit.ucs.contexthandler.AbstractContextHandler;
+import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
+import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessMessage;
+import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
+import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
+import it.cnr.iit.ucs.obligationmanager.ObligationManagerInterface;
+import it.cnr.iit.ucs.pap.PAPInterface;
+import it.cnr.iit.ucs.pdp.PDPInterface;
+import it.cnr.iit.ucs.pep.PEPInterface;
+import it.cnr.iit.ucs.pip.PIPBase;
+import it.cnr.iit.ucs.requestmanager.AbstractRequestManager;
+import it.cnr.iit.ucs.sessionmanager.SessionManagerInterface;
+import it.cnr.iit.ucs.ucs.UCSInterface;
+import it.cnr.iit.utility.errorhandling.Reject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * This class contains all the components
+ *
+ * @author Antonio La Marra, Alessandro Rosetti
+ */
+<span class="nc" id="L44">public class UCSCoreService implements UCSInterface {</span>
+
+    AbstractContextHandler contextHandler;
+    AbstractRequestManager requestManager;
+    ObligationManagerInterface obligationManager;
+    SessionManagerInterface sessionManager;
+    PDPInterface pdp;
+    PAPInterface pap;
+    List&lt;PIPBase&gt; pipList;
+    HashMap&lt;String, PEPInterface&gt; pepMap;
+
+    @Override
+    public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
+<span class="nc" id="L57">        Reject.ifNull(tryAccessMessage);</span>
+<span class="nc" id="L58">        TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);</span>
+        // this is null
+//		Reject.ifNull(response);
+<span class="nc" id="L61">        return response;</span>
+    }
+
+    @Override
+    public StartAccessResponseMessage startAccess(StartAccessMessage startAccessMessage) {
+<span class="nc" id="L66">        return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);</span>
+    }
+
+    @Override
+    public EndAccessResponseMessage endAccess(EndAccessMessage endAccessMessage) {
+<span class="nc" id="L71">        return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);</span>
+    }
+
+    public AbstractContextHandler getContextHandler() {
+<span class="nc" id="L75">        return contextHandler;</span>
+    }
+
+    public AbstractRequestManager getRequestManager() {
+<span class="nc" id="L79">        return requestManager;</span>
+    }
+
+    public ObligationManagerInterface getObligationManager() {
+<span class="nc" id="L83">        return obligationManager;</span>
+    }
+
+    public SessionManagerInterface getSessionManager() {
+<span class="nc" id="L87">        return sessionManager;</span>
+    }
+
+    public PDPInterface getPdp() {
+<span class="nc" id="L91">        return pdp;</span>
+    }
+
+    public PAPInterface getPap() {
+<span class="nc" id="L95">        return pap;</span>
+    }
+
+    public List&lt;PIPBase&gt; getPipList() {
+<span class="nc" id="L99">        return pipList;</span>
+    }
+
+    public Map&lt;String, PEPInterface&gt; getPEPMap() {
+<span class="nc" id="L103">        return this.pepMap;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

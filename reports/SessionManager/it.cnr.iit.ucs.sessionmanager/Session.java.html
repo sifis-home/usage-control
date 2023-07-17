@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Session.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">SessionManager</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.sessionmanager</a> &gt; <span class="el_source">Session.java</span></div><h1>Session.java</h1><pre class="source lang-java linenums">/*
+ * CNR - IIT (2015-2016)
+ *
+ * @authors Fabio Bindi and Filippo Lauria
+ */
+package it.cnr.iit.ucs.sessionmanager;
+
+import com.j256.ormlite.dao.ForeignCollection;
+import com.j256.ormlite.field.DataType;
+import com.j256.ormlite.field.DatabaseField;
+import com.j256.ormlite.field.ForeignCollectionField;
+import com.j256.ormlite.table.DatabaseTable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+/**
+ * Creates Session objects. It configures OrmLite annotations to persist these
+ * objects in the sessions table of the database.
+ *
+ * @author Fabio Bindi, Filippo Lauria and Antonio La Marra
+ */
+@DatabaseTable(tableName = &quot;sessions&quot;)
+public final class Session implements SessionInterface {
+
+<span class="fc" id="L27">    private static final Logger log = Logger.getLogger(Session.class.getName());</span>
+
+    public static final String ID_FIELD_NAME = &quot;id&quot;;
+    public static final String POLICYSET_FIELD_NAME = &quot;policy_set&quot;;
+    public static final String ORIGINALREQUEST_FIELD_NAME = &quot;original_request&quot;;
+    public static final String STATUS_FIELD_NAME = &quot;status&quot;;
+    public static final String PEPURI_FIELD_NAME = &quot;pep_uri&quot;;
+    public static final String MYIP_FIELD = &quot;myip&quot;;
+
+    @DatabaseField(id = true, columnName = ID_FIELD_NAME)
+    private String id;
+
+    @DatabaseField(columnName = POLICYSET_FIELD_NAME, dataType = DataType.LONG_STRING)
+    private String policySet;
+
+    @DatabaseField(columnName = ORIGINALREQUEST_FIELD_NAME, dataType = DataType.LONG_STRING)
+    private String originalRequest;
+
+    @DatabaseField(columnName = STATUS_FIELD_NAME)
+    private String status;
+
+    @DatabaseField(columnName = PEPURI_FIELD_NAME)
+    private String pepURI;
+
+    @DatabaseField(columnName = MYIP_FIELD)
+    private String myIP;
+
+    @ForeignCollectionField(eager = true, columnName = OnGoingAttribute.ATTRIBUTEID_FIELD)
+    private ForeignCollection&lt;OnGoingAttribute&gt; onGoingAttributes;
+
+<span class="fc" id="L57">    public Session() {</span>
+
+<span class="fc" id="L59">    }</span>
+
+    /**
+     * @param id              session ID
+     * @param policySet       policy containing all the mutable attributes needed during the session
+     * @param originalRequest original XAML request containing information about the subject/object
+     * @param status          status of the session
+     * @param pepURI          URI of the PEP that started the session
+     */
+    public Session(String id, String policySet, String originalRequest, String status, String pepURI,
+<span class="fc" id="L69">                   String myIP) {</span>
+<span class="fc" id="L70">        this.id = id;</span>
+<span class="fc" id="L71">        this.policySet = policySet;</span>
+<span class="fc" id="L72">        this.originalRequest = originalRequest;</span>
+<span class="fc" id="L73">        this.status = status;</span>
+<span class="fc" id="L74">        this.pepURI = pepURI;</span>
+<span class="fc" id="L75">        this.myIP = myIP;</span>
+<span class="fc" id="L76">    }</span>
+
+    /**
+     * Retrieves session ID
+     *
+     * @return session ID
+     */
+    @Override
+    public String getId() {
+<span class="fc" id="L85">        return id;</span>
+    }
+
+    /**
+     * Sets the session ID
+     *
+     * @param id session ID to be set
+     */
+    public void setId(String id) {
+<span class="nc" id="L94">        this.id = id;</span>
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Retrieves the PolicySet
+     *
+     * @return policySet
+     */
+    @Override
+    public String getPolicySet() {
+<span class="nc" id="L104">        return policySet;</span>
+    }
+
+    /**
+     * Sets the policySet
+     *
+     * @param policySet policySet to set
+     */
+    public void setPolicySet(String policySet) {
+<span class="nc" id="L113">        this.policySet = policySet;</span>
+<span class="nc" id="L114">    }</span>
+
+    /**
+     * Retrieves the originalRequest
+     *
+     * @return originalRequest
+     */
+    @Override
+    public String getOriginalRequest() {
+<span class="nc" id="L123">        return originalRequest;</span>
+    }
+
+    /**
+     * Sets the originalRequest
+     *
+     * @param originalRequest originalRequest to be set
+     */
+    public void setOriginalRequest(String originalRequest) {
+<span class="nc" id="L132">        this.originalRequest = originalRequest;</span>
+<span class="nc" id="L133">    }</span>
+
+    /**
+     * Retrieves the status of the session
+     *
+     * @return status
+     */
+    @Override
+    public String getStatus() {
+<span class="fc" id="L142">        return status;</span>
+    }
+
+    /**
+     * Sets the status of the session
+     *
+     * @param status status to be set
+     */
+    public void setStatus(String status) {
+<span class="fc" id="L151">        this.status = status;</span>
+<span class="fc" id="L152">    }</span>
+
+    @Override
+    public boolean isStatus(String status) {
+<span class="fc" id="L156">        return this.status.equalsIgnoreCase(status);</span>
+    }
+
+    /**
+     * Sets the URI of the PEP
+     *
+     * @param pepURI URI of the PEP to be set
+     */
+    public void setPepURI(String pepURI) {
+<span class="nc" id="L165">        this.pepURI = pepURI;</span>
+<span class="nc" id="L166">    }</span>
+
+    public void setMyIP(String ip) {
+<span class="nc" id="L169">        this.myIP = ip;</span>
+<span class="nc" id="L170">    }</span>
+
+    /**
+     * Retrieves the list of mutable attributes of the session
+     *
+     * @return list of mutable attributes
+     */
+    @Override
+    public List&lt;OnGoingAttributesInterface&gt; getOnGoingAttributes() {
+<span class="nc" id="L179">        List&lt;OnGoingAttributesInterface&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        for (OnGoingAttribute onGoingAttribute : onGoingAttributes) {</span>
+<span class="nc" id="L181">            list.add(onGoingAttribute);</span>
+<span class="nc" id="L182">        }</span>
+<span class="nc" id="L183">        return list;</span>
+    }
+
+    /**
+     * Retrieves the list of mutable attributes of the session
+     *
+     * @return list of mutable attributes
+     */
+    public List&lt;OnGoingAttributesInterface&gt; getOnGoingAttribute() {
+<span class="fc" id="L192">        List&lt;OnGoingAttributesInterface&gt; list = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        for (OnGoingAttributesInterface onGoingAttribute : onGoingAttributes) {</span>
+<span class="fc" id="L194">            list.add(onGoingAttribute);</span>
+<span class="fc" id="L195">        }</span>
+<span class="fc" id="L196">        return list;</span>
+    }
+
+    /**
+     * Retrieves the list of mutable attributes of the session
+     *
+     * @return list of mutable attributes
+     */
+    public ForeignCollection&lt;OnGoingAttribute&gt; getOnGoingAttributesAsForeign() {
+<span class="fc" id="L205">        return onGoingAttributes;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L210">        StringBuilder stringBuilder = new StringBuilder();</span>
+<span class="fc" id="L211">        stringBuilder.append(&quot;SessionId = &quot;).append(id).append(&quot;\nPolicySet = &quot;).append(policySet).append(&quot;\n&quot;);</span>
+<span class="fc" id="L212">        stringBuilder.append(&quot;OriginalRequest = &quot;).append(originalRequest).append(&quot;\n&quot;);</span>
+<span class="fc" id="L213">        stringBuilder.append(&quot;Status = &quot;).append(status).append(&quot;\npepURI = &quot;).append(pepURI).append(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if (onGoingAttributes != null) {</span>
+<span class="fc" id="L215">            stringBuilder.append(&quot;OnGoingAttributes = &quot;);</span>
+            try {
+<span class="pc bpc" id="L217" title="1 of 2 branches missed.">                for (OnGoingAttribute a : onGoingAttributes) {</span>
+<span class="nc" id="L218">                    stringBuilder.append(a.toString()).append(&quot; &quot;);</span>
+<span class="nc" id="L219">                }</span>
+<span class="nc" id="L220">            } catch (NullPointerException e) {</span>
+<span class="nc" id="L221">                log.warning(&quot;Error null ongoing attributes&quot;);</span>
+<span class="fc" id="L222">            }</span>
+        }
+<span class="fc" id="L224">        return stringBuilder.toString();</span>
+    }
+
+    @Override
+    public String getPepId() {
+<span class="nc" id="L229">        return pepURI;</span>
+    }
+
+    @Override
+    public String getIP() {
+<span class="nc" id="L234">        return myIP;</span>
+    }
+
+    @Override
+    public void setRequest(String request) {
+<span class="nc" id="L239">        this.originalRequest = request;</span>
+<span class="nc" id="L240">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

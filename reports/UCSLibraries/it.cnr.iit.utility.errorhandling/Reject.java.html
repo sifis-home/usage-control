@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Reject.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility.errorhandling</a> &gt; <span class="el_source">Reject.java</span></div><h1>Reject.java</h1><pre class="source lang-java linenums">package it.cnr.iit.utility.errorhandling;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
+
+import it.cnr.iit.utility.errorhandling.exception.PreconditionException;
+
+/**
+ * Utility class to make it easier and better readable to check parameters at the beginning of methods
+ *
+ * Note: DO NOT REFACTOR DUPLICATED CODE IN THIS CLASS WITHOUT VERIFYING THE CODE-ANALYZE FEATURES OF IDEs.
+ *
+ * Methods are simplified as much as possible, so that code analyze of IDEs can detect null and other checks.
+ * Methods should be simple enough for the code analyze. Avoid using of:
+ *  - many method calls
+ *  - enclosed if-statements
+ *  - local variables
+ */
+public class Reject {
+    private Reject() {}
+
+    public static PreconditionException always( @NonNull String description ) {
+<span class="nc" id="L29">        throw always( description, null );</span>
+    }
+
+    public static PreconditionException alwaysBecauseOfMissingSwitchCase( @NonNull Object missingCase ) {
+<span class="nc" id="L33">        throw always( &quot;Unhandled value in switch statement: &quot; + missingCase );</span>
+    }
+
+    public static PreconditionException alwaysFormat( @NonNull String formatString, Object... formatArgs ) {
+<span class="nc" id="L37">        throw always( formatOrNull( formatString, formatArgs ), null );</span>
+    }
+
+    public static PreconditionException always( @NonNull String description, Throwable ex ) {
+<span class="nc" id="L41">        throw new PreconditionException( description, ex );</span>
+    }
+
+    public static void ifTrue( boolean condition ) {
+<span class="nc" id="L45">        ifTrue( condition, &quot;ifTrue&quot; );</span>
+<span class="nc" id="L46">    }</span>
+
+    public static void ifTrue( boolean condition, @NonNull String description ) {
+<span class="fc" id="L49">        ifBoolean( condition, false, description );</span>
+<span class="fc" id="L50">    }</span>
+
+    public static void ifTrueFormat( boolean condition, @NonNull String description, Object... args ) {
+<span class="nc" id="L53">        ifBoolean( condition, false, description, args );</span>
+<span class="nc" id="L54">    }</span>
+
+    public static void ifFalse( boolean condition ) {
+<span class="fc" id="L57">        ifFalse( condition, &quot;ifFalse&quot; );</span>
+<span class="fc" id="L58">    }</span>
+
+    public static void ifFalse( boolean condition, @NonNull String description ) {
+<span class="fc" id="L61">        ifBoolean( condition, true, description );</span>
+<span class="fc" id="L62">    }</span>
+
+    public static void ifFalseFormat( boolean condition, @NonNull String description, Object... args ) {
+<span class="nc" id="L65">        ifBoolean( condition, true, description, args );</span>
+<span class="nc" id="L66">    }</span>
+
+    private static void ifBoolean( boolean condition, boolean expected, @NonNull String description ) {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if( condition != expected ) {</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            String defaultText = expected ? &quot;: expected true, was false&quot; : &quot;: expected false, was true&quot;;</span>
+<span class="fc" id="L71">            throw new PreconditionException( description + defaultText );</span>
+        }
+<span class="fc" id="L73">    }</span>
+
+    private static void ifBoolean( boolean condition, boolean expected, @NonNull String description, Object... args ) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if( condition != expected ) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            String defaultText = expected ? &quot;: expected true, was false&quot; : &quot;: expected false, was true&quot;;</span>
+<span class="nc" id="L78">            throw new PreconditionException( formatOrNull( description, args ) + defaultText );</span>
+        }
+<span class="nc" id="L80">    }</span>
+
+    public static void ifNull( Object objectToTest ) {
+<span class="fc" id="L83">        ifNull( objectToTest, &quot;ifNull&quot; );</span>
+<span class="fc" id="L84">    }</span>
+
+    public static void ifNull( Object objectToTest, @NonNull String description ) {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if( objectToTest == null ) {</span>
+<span class="fc" id="L88">            throw new PreconditionException( description + &quot;: expected to be not null, but is null&quot; );</span>
+        }
+<span class="fc" id="L90">    }</span>
+
+    public static void ifNullFormat( Object objectToTest, @NonNull String description, Object... formatArgs ) {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if( objectToTest == null ) {</span>
+<span class="nc" id="L94">            throw new PreconditionException( formatOrNull( description, formatArgs ) + &quot;: expected to be not null, but is null&quot; );</span>
+        }
+<span class="nc" id="L96">    }</span>
+
+    public static &lt;T&gt; void ifElementIsNull( Iterable&lt;T&gt; objectsToTest ) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        for( Object objectToTest : objectsToTest ) {</span>
+<span class="nc" id="L100">            ifNull( objectToTest );</span>
+<span class="nc" id="L101">        }</span>
+<span class="nc" id="L102">    }</span>
+
+    public static void ifElementIsNull( Object... objectsToTest ) {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        for( Object objectToTest : objectsToTest ) {</span>
+<span class="nc" id="L106">            ifNull( objectToTest );</span>
+        }
+<span class="nc" id="L108">    }</span>
+
+    public static void ifNotNull( Object objectToTest ) {
+<span class="nc" id="L111">        ifNotNull( objectToTest, &quot;ifNotNull&quot; );</span>
+<span class="nc" id="L112">    }</span>
+
+    public static void ifNotNull( Object objectToTest, @NonNull String description ) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if( objectToTest != null ) {</span>
+<span class="nc" id="L116">            throw new PreconditionException( description + &quot;: expected to be null, but is non-null&quot; );</span>
+        }
+<span class="nc" id="L118">    }</span>
+
+    public static &lt;T&gt; T checkNotNull( T objectToTest ) {
+<span class="nc" id="L121">        ifNull( objectToTest );</span>
+<span class="nc" id="L122">        return objectToTest;</span>
+    }
+
+    public static void ifBlank( String stringToTest ) {
+<span class="fc" id="L126">        ifBlank( stringToTest, &quot;ifBlank&quot; );</span>
+<span class="fc" id="L127">    }</span>
+
+    public static void ifBlank( String stringToTest, @NonNull String description ) {
+<span class="fc" id="L130">        ifTrue( StringUtils.isEmpty( stringToTest ), description );</span>
+<span class="fc" id="L131">    }</span>
+
+    public static &lt;T&gt; void ifEquals( T actual, @NonNull T unexpected ) {
+<span class="nc" id="L134">        ifEquals( actual, unexpected, &quot;ifEquals&quot; );</span>
+<span class="nc" id="L135">    }</span>
+
+    public static &lt;T&gt; void ifEquals( T actual, @NonNull T unexpected, @NonNull String description ) {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        if( unexpected.equals( actual ) ) {</span>
+<span class="nc" id="L139">            throw new PreconditionException( description + &quot;: expected anything but &lt;&quot; + unexpected + &quot;&gt;, but was &lt;&quot; + actual + &quot;&gt;&quot; );</span>
+        }
+<span class="nc" id="L141">    }</span>
+
+    public static &lt;T&gt; void ifNotEquals( T actual, @NonNull T expected ) {
+<span class="nc" id="L144">        ifNotEquals( actual, expected, &quot;ifNotEquals&quot; );</span>
+<span class="nc" id="L145">    }</span>
+
+    public static &lt;T&gt; void ifNotEquals( T actual, @NonNull T expected, @NonNull String description ) {
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        if( !expected.equals( actual ) ) {</span>
+<span class="nc" id="L149">            throw new PreconditionException( description + &quot;: expected &lt;&quot; + expected + &quot;&gt; but was &lt;&quot; + actual + &quot;&gt;&quot; );</span>
+        }
+<span class="nc" id="L151">    }</span>
+
+    public static &lt;T&gt; void ifEmpty( T[] array, @NonNull String description ) {
+<span class="nc bnc" id="L154" title="All 4 branches missed.">        if( array == null || array.length == 0 ) {</span>
+<span class="nc" id="L155">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L157">    }</span>
+
+    public static void ifEmpty( Map&lt;?, ?&gt; map, @NonNull String description ) {
+<span class="nc bnc" id="L160" title="All 4 branches missed.">        if( map == null || map.isEmpty() ) {</span>
+<span class="nc" id="L161">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L163">    }</span>
+
+    public static void ifEmpty( Collection&lt;?&gt; collection ) {
+<span class="fc" id="L166">        ifEmpty( collection, &quot;ifEmptyCollection&quot; );</span>
+<span class="fc" id="L167">    }</span>
+
+    public static void ifEmpty( Map&lt;?, ?&gt; map ) {
+<span class="nc" id="L170">        ifEmpty( map, &quot;ifEmptyMap&quot; );</span>
+<span class="nc" id="L171">    }</span>
+
+    public static void ifEmpty( Collection&lt;?&gt; collection, @NonNull String description ) {
+<span class="pc bpc" id="L174" title="2 of 4 branches missed.">        if( collection == null || collection.isEmpty() ) {</span>
+<span class="nc" id="L175">            throw new PreconditionException( description );</span>
+        }
+<span class="fc" id="L177">    }</span>
+
+    public static &lt;T&gt; void ifNotEmpty( T[] array, @NonNull String description ) {
+<span class="nc bnc" id="L180" title="All 4 branches missed.">        if( array == null || array.length != 0 ) {</span>
+<span class="nc" id="L181">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L183">    }</span>
+
+    public static void ifNotEmpty( Collection&lt;?&gt; collection, @NonNull String description ) {
+<span class="nc bnc" id="L186" title="All 4 branches missed.">        if( collection == null || !collection.isEmpty() ) {</span>
+<span class="nc" id="L187">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L189">    }</span>
+
+    public static &lt;T&gt; void ifIn( @NonNull Collection&lt;T&gt; collection, T item, @NonNull String description ) {
+<span class="nc" id="L192">        ifTrue( collection.contains( item ), description );</span>
+<span class="nc" id="L193">    }</span>
+
+    public static &lt;T&gt; void ifNotIn( @NonNull Collection&lt;T&gt; collection, T item ) {
+<span class="nc" id="L196">        ifNotIn( collection, item, &quot;ifNotIn&quot; );</span>
+<span class="nc" id="L197">    }</span>
+
+    public static &lt;T&gt; void ifNotIn( @NonNull Collection&lt;T&gt; collection, T item, @NonNull String description ) {
+<span class="nc" id="L200">        ifNotInFormat( collection, item, description );</span>
+<span class="nc" id="L201">    }</span>
+
+    public static &lt;T&gt; void ifNotInFormat( @NonNull Collection&lt;T&gt; collection, T item, @NonNull String description, Object... args ) {
+<span class="nc" id="L204">        ifFalseFormat( collection.contains( item ), description, args );</span>
+<span class="nc" id="L205">    }</span>
+
+    public static void ifNegative( long value, @NonNull String description ) {
+<span class="nc" id="L208">        ifLessThan( value, 0, description );</span>
+<span class="nc" id="L209">    }</span>
+
+    public static void ifLessThan( long value, long minValue ) {
+<span class="nc" id="L212">        ifLessThan( value, minValue, &quot;Expected a value &gt;= &quot; + minValue + &quot;, but got &quot; + value );</span>
+<span class="nc" id="L213">    }</span>
+
+    public static void ifLessThan( long value, long minValue, @NonNull String description ) {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if( value &lt; minValue ) {</span>
+<span class="nc" id="L217">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L219">    }</span>
+
+    public static void ifGreaterThan( long value, long maxValue, @NonNull String description ) {
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if( value &gt; maxValue ) {</span>
+<span class="nc" id="L223">            throw new PreconditionException( description );</span>
+        }
+<span class="nc" id="L225">    }</span>
+
+    public static void ifGreaterThanFormat( long value, long maxValue, @NonNull String description, Object... formatArgs ) {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        if( value &gt; maxValue ) {</span>
+<span class="nc" id="L229">            throw new PreconditionException( formatOrNull( description, formatArgs ) );</span>
+        }
+<span class="nc" id="L231">    }</span>
+
+    public static void ifPresent( @NonNull Optional&lt;?&gt; optional ) {
+<span class="nc" id="L234">        ifPresent( optional, &quot;ifPresent&quot; );</span>
+<span class="nc" id="L235">    }</span>
+
+    public static void ifPresent( @NonNull Optional&lt;?&gt; optional, @NonNull String description ) {
+<span class="nc" id="L238">        ifTrue( optional.isPresent(), description );</span>
+<span class="nc" id="L239">    }</span>
+
+    public static void ifAbsent( @NonNull Optional&lt;?&gt; optional ) {
+<span class="fc" id="L242">        ifAbsent( optional, &quot;ifAbsent&quot; );</span>
+<span class="fc" id="L243">    }</span>
+
+    public static void ifAbsent( @NonNull Optional&lt;?&gt; optional, @NonNull String description ) {
+<span class="fc" id="L246">        ifFalse( optional.isPresent(), description );</span>
+<span class="fc" id="L247">    }</span>
+
+    public static void ifAbsentFormat( Optional&lt;?&gt; optional, String description, Object... args ) {
+<span class="nc" id="L250">        ifFalseFormat( optional.isPresent(), description, args );</span>
+<span class="nc" id="L251">    }</span>
+
+    private static String formatOrNull( String formatString, Object[] formatArgs ) {
+<span class="nc bnc" id="L254" title="All 6 branches missed.">        if( formatString == null || formatArgs == null || formatArgs.length == 0 ) {</span>
+<span class="nc" id="L255">            return formatString;</span>
+        }
+<span class="nc" id="L257">        return String.format( formatString, formatArgs );</span>
+    }
+
+    public static void ifInvalidObjectState( boolean initialized, String objectName, Logger log ) {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if( !initialized ) {</span>
+<span class="nc" id="L262">            log.log( Level.SEVERE, &quot;Object {0} not initialized&quot;, objectName );</span>
+<span class="nc" id="L263">            throw new IllegalStateException( &quot;Object &quot; + objectName + &quot; not initialized&quot; );</span>
+        }
+<span class="nc" id="L265">    }</span>
+
+    public static void ifNull( Object... objects ) {
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        for( Object object : objects ) {</span>
+<span class="fc" id="L269">            ifNull( object );</span>
+        }
+<span class="fc" id="L271">    }</span>
+
+    public static void ifNullStringArray( String... objects ) {
+<span class="fc bfc" id="L274" title="All 2 branches covered.">        for( String object : objects ) {</span>
+<span class="fc" id="L275">            ifNull( object );</span>
+        }
+<span class="fc" id="L277">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

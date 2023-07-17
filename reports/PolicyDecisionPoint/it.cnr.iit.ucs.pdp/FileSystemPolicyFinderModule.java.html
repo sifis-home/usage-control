@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>FileSystemPolicyFinderModule.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PolicyDecisionPoint</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pdp</a> &gt; <span class="el_source">FileSystemPolicyFinderModule.java</span></div><h1>FileSystemPolicyFinderModule.java</h1><pre class="source lang-java linenums">/*
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the &quot;License&quot;); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * &quot;AS IS&quot; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+package it.cnr.iit.ucs.pdp;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.wso2.balana.AbstractPolicy;
+import org.wso2.balana.MatchResult;
+import org.wso2.balana.Policy;
+import org.wso2.balana.PolicyMetaData;
+import org.wso2.balana.PolicyReference;
+import org.wso2.balana.PolicySet;
+import org.wso2.balana.VersionConstraints;
+import org.wso2.balana.combine.PolicyCombiningAlgorithm;
+import org.wso2.balana.combine.xacml2.DenyOverridesPolicyAlg;
+import org.wso2.balana.ctx.EvaluationCtx;
+import org.wso2.balana.ctx.Status;
+import org.wso2.balana.finder.PolicyFinder;
+import org.wso2.balana.finder.PolicyFinderModule;
+import org.wso2.balana.finder.PolicyFinderResult;
+
+import it.cnr.iit.ucs.constants.STATUS;
+import it.cnr.iit.ucs.exceptions.PolicyException;
+import it.cnr.iit.utility.FileUtility;
+import it.cnr.iit.xacml.PolicyTags;
+import it.cnr.iit.xacml.wrappers.PolicyWrapper;
+
+/**
+ * This is file based policy repository. Policies can be inside the directory in
+ * a file system. Then you can set directory location using
+ * &quot;ucs.policy-administration-point.path&quot; JAVA property
+ *
+ * @author Gabriele Baldi
+ *
+ */
+
+public class FileSystemPolicyFinderModule extends PolicyFinderModule {
+
+<span class="fc" id="L67">	private static final Logger log = Logger.getLogger(FileSystemPolicyFinderModule.class.getName());</span>
+
+<span class="nc" id="L69">	private PolicyFinder finder = null;</span>
+
+	private static final String POLICY_FILE_EXTENSION = &quot;.xml&quot;;
+
+<span class="nc" id="L73">	private String POLICY_FILE_FOLDER = null;</span>
+
+	private Map&lt;URI, AbstractPolicy&gt; policies;
+
+	private PolicyCombiningAlgorithm combiningAlg;
+
+	private DocumentBuilderFactory documentBuilderFactory;
+
+	private String policyCondition;
+
+<span class="nc" id="L83">	public FileSystemPolicyFinderModule(String policyFolderPath) {</span>
+<span class="nc" id="L84">		policies = new HashMap&lt;URI, AbstractPolicy&gt;();</span>
+<span class="nc" id="L85">		POLICY_FILE_FOLDER = policyFolderPath;</span>
+		try {
+<span class="nc" id="L87">			documentBuilderFactory = DocumentBuilderFactory.newInstance();</span>
+<span class="nc" id="L88">			documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</span>
+<span class="nc" id="L89">			documentBuilderFactory.setIgnoringComments(true);</span>
+<span class="nc" id="L90">			documentBuilderFactory.setNamespaceAware(true);</span>
+<span class="nc" id="L91">			documentBuilderFactory.setValidating(false);</span>
+<span class="nc" id="L92">		} catch (Exception e) {</span>
+<span class="nc" id="L93">			log.severe(e.getMessage());</span>
+<span class="nc" id="L94">			throw new IllegalStateException(&quot;Unable to protect against XXE&quot;);</span>
+<span class="nc" id="L95">		}</span>
+<span class="nc" id="L96">		loadPolicies();</span>
+<span class="nc" id="L97">	}</span>
+
+	public FileSystemPolicyFinderModule(String policyFolderPath, STATUS status) {
+<span class="nc" id="L100">		this(policyFolderPath);</span>
+<span class="nc" id="L101">		this.policyCondition = PolicyTags.getCondition(status);</span>
+<span class="nc" id="L102">	}</span>
+
+	@Override
+	public void init(PolicyFinder finder) {
+<span class="nc" id="L106">		this.finder = finder;</span>
+<span class="nc" id="L107">		combiningAlg = new DenyOverridesPolicyAlg();</span>
+<span class="nc" id="L108">	}</span>
+
+	@Override
+	public PolicyFinderResult findPolicy(EvaluationCtx context) {
+
+<span class="nc" id="L113">		ArrayList&lt;AbstractPolicy&gt; selectedPolicies = new ArrayList&lt;AbstractPolicy&gt;();</span>
+<span class="nc" id="L114">		Set&lt;Map.Entry&lt;URI, AbstractPolicy&gt;&gt; entrySet = policies.entrySet();</span>
+
+		// iterate through all the policies we currently have loaded
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		for (Map.Entry&lt;URI, AbstractPolicy&gt; entry : entrySet) {</span>
+
+<span class="nc" id="L119">			AbstractPolicy policy = entry.getValue();</span>
+<span class="nc" id="L120">			MatchResult match = policy.match(context);</span>
+<span class="nc" id="L121">			int result = match.getResult();</span>
+
+			// if target matching was indeterminate, then return the error
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			if (result == MatchResult.INDETERMINATE) {</span>
+<span class="nc" id="L125">				return new PolicyFinderResult(match.getStatus());</span>
+			}
+
+			// see if the target matched
+<span class="nc bnc" id="L129" title="All 2 branches missed.">			if (result == MatchResult.MATCH) {</span>
+
+<span class="nc bnc" id="L131" title="All 4 branches missed.">				if ((combiningAlg == null) &amp;&amp; (selectedPolicies.size() &gt; 0)) {</span>
+					// we found a match before, so this is an error
+<span class="nc" id="L133">					ArrayList&lt;String&gt; code = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L134">					code.add(Status.STATUS_PROCESSING_ERROR);</span>
+<span class="nc" id="L135">					Status status = new Status(code, &quot;too many applicable &quot; + &quot;top-level policies&quot;);</span>
+<span class="nc" id="L136">					return new PolicyFinderResult(status);</span>
+				}
+
+				// this is the first match we've found, so remember it
+<span class="nc bnc" id="L140" title="All 2 branches missed.">				if (selectedPolicies.size() == 0) {</span>
+					// sort of hack to prevent policyset
+<span class="nc" id="L142">					selectedPolicies.add(policy);</span>
+				}
+			}
+<span class="nc" id="L145">		}</span>
+
+		// no errors happened during the search, so now take the right
+		// action based on how many policies we found
+<span class="nc bnc" id="L149" title="All 3 branches missed.">		switch (selectedPolicies.size()) {</span>
+		case 0:
+<span class="nc" id="L151">			log.info(&quot;No matching XACML policy found&quot;);</span>
+<span class="nc" id="L152">			return new PolicyFinderResult();</span>
+		case 1:
+<span class="nc" id="L154">			return new PolicyFinderResult((selectedPolicies.get(0)));</span>
+		default:
+<span class="nc" id="L156">			return new PolicyFinderResult(new PolicySet(null, combiningAlg, null, selectedPolicies));</span>
+		}
+	}
+
+	@Override
+	public PolicyFinderResult findPolicy(URI idReference, int type, VersionConstraints constraints,
+			PolicyMetaData parentMetaData) {
+
+<span class="nc" id="L164">		AbstractPolicy policy = policies.get(idReference);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		if (policy != null) {</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">			if (type == PolicyReference.POLICY_REFERENCE) {</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">				if (policy instanceof Policy) {</span>
+<span class="nc" id="L168">					return new PolicyFinderResult(policy);</span>
+				}
+			} else {
+<span class="nc bnc" id="L171" title="All 2 branches missed.">				if (policy instanceof PolicySet) {</span>
+<span class="nc" id="L172">					return new PolicyFinderResult(policy);</span>
+				}
+			}
+		}
+
+		// if there was an error loading the policy, return the error
+<span class="nc" id="L178">		ArrayList&lt;String&gt; code = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L179">		code.add(Status.STATUS_PROCESSING_ERROR);</span>
+<span class="nc" id="L180">		Status status = new Status(code, &quot;couldn't load referenced policy&quot;);</span>
+<span class="nc" id="L181">		return new PolicyFinderResult(status);</span>
+	}
+
+	@Override
+	public boolean isIdReferenceSupported() {
+<span class="nc" id="L186">		return true;</span>
+	}
+
+	@Override
+	public boolean isRequestSupported() {
+<span class="nc" id="L191">		return true;</span>
+	}
+
+	/**
+	 * Re-sets the policies known to this module to those contained in the given
+	 * database.
+	 *
+	 * @return
+	 */
+	public Integer loadPolicies() {
+		// Load all policy from fs folder
+<span class="nc" id="L202">		policies.clear();</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		if (POLICY_FILE_FOLDER == null) {</span>
+<span class="nc" id="L204">			throw new IllegalStateException(&quot;Policy folder path not set.&quot;);</span>
+		}
+<span class="nc" id="L206">		log.severe(&quot;POLICY_FILE_FOLDER = &quot; + POLICY_FILE_FOLDER);</span>
+
+		// TODO: still &quot;premature end of file&quot;, maybe problem is when the file is saved?
+
+//		try {
+//			Files.walk(Paths.get(POLICY_FILE_FOLDER)).filter(Files::isRegularFile).map(Path::toString)
+//					.filter(path -&gt; path.endsWith(POLICY_FILE_EXTENSION)).map(FileUtility::readFileAsString)
+//					.forEach(policy -&gt; loadPolicy(policy, finder));
+//		} catch (IOException e) {
+//			throw new IllegalStateException(&quot;Unable to read policies from filesystem&quot;);
+//		}
+
+<span class="nc" id="L218">		File dir = new File(POLICY_FILE_FOLDER);</span>
+<span class="nc" id="L219">		File[] directoryListing = dir.listFiles();</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">		if (directoryListing != null) {</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">			for (File policy : directoryListing) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {</span>
+<span class="nc" id="L223">					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);</span>
+
+				}
+			}
+		} else {
+<span class="nc" id="L228">			log.severe(&quot;directoryListing is null&quot;);</span>
+		}
+
+<span class="nc" id="L231">		return policies.size();</span>
+	}
+
+	/**
+	 * Private helper that tries to load the given policy, and returns null if any
+	 * error occurs.
+	 *
+	 * @param policy file path to policy
+	 * @param finder policy finder
+	 * @return org.w3c.dom.Element
+	 */
+	protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
+<span class="nc" id="L243">		AbstractPolicy abstractPolicy = null;</span>
+
+		try {
+<span class="nc bnc" id="L246" title="All 2 branches missed.">			policy = policyCondition == null ? policy</span>
+<span class="nc" id="L247">					: PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();</span>
+<span class="nc" id="L248">		} catch (PolicyException e) {</span>
+<span class="nc" id="L249">			return abstractPolicy;</span>
+<span class="nc" id="L250">		}</span>
+
+<span class="nc" id="L252">		try (InputStream stream = new ByteArrayInputStream(policy.getBytes())) {</span>
+
+<span class="nc" id="L254">			DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();</span>
+<span class="nc" id="L255">			Document doc = db.parse(stream);</span>
+<span class="nc" id="L256">			Element root = doc.getDocumentElement();</span>
+<span class="nc" id="L257">			String name = root.getLocalName();</span>
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (name.equals(&quot;Policy&quot;)) {</span>
+<span class="nc" id="L260">				abstractPolicy = Policy.getInstance(root);</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">			} else if (name.equals(&quot;PolicySet&quot;)) {</span>
+<span class="nc" id="L262">				abstractPolicy = PolicySet.getInstance(root, finder);</span>
+			}
+<span class="nc" id="L264">		} catch (Exception e) {</span>
+<span class="nc" id="L265">			log.severe(&quot;fail to load UXACML policy : &quot; + e.getLocalizedMessage());</span>
+<span class="nc" id="L266">			e.printStackTrace();</span>
+<span class="nc" id="L267">		}</span>
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		if (abstractPolicy != null) {</span>
+<span class="nc" id="L270">			policies.put(abstractPolicy.getId(), abstractPolicy);</span>
+		}
+
+<span class="nc" id="L273">		return abstractPolicy;</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>RuleType.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">oasis.names.tc.xacml.core.schema.wd_17</a> &gt; <span class="el_source">RuleType.java</span></div><h1>RuleType.java</h1><pre class="source lang-java linenums">/*******************************************************************************
+ * Copyright 2018 IIT-CNR
+ *
+ * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ ******************************************************************************/
+package oasis.names.tc.xacml.core.schema.wd_17;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType( XmlAccessType.FIELD )
+@XmlType( name = &quot;RuleType&quot;, propOrder = {
+    &quot;description&quot;,
+    &quot;target&quot;,
+    &quot;condition&quot;,
+    &quot;obligationExpressions&quot;,
+    &quot;adviceExpressions&quot;
+} )
+<span class="fc" id="L35">public class RuleType {</span>
+
+    @XmlElement( name = &quot;Description&quot; )
+    protected String description;
+    @XmlElement( name = &quot;Target&quot; )
+    protected TargetType target;
+    @XmlElement( name = &quot;Condition&quot; )
+    protected List&lt;ConditionType&gt; condition;
+    @XmlElement( name = &quot;ObligationExpressions&quot; )
+    protected ObligationExpressionsType obligationExpressions;
+    @XmlElement( name = &quot;AdviceExpressions&quot; )
+    protected AdviceExpressionsType adviceExpressions;
+    @XmlAttribute( name = &quot;RuleId&quot;, required = true )
+    protected String ruleId;
+    @XmlAttribute( name = &quot;Effect&quot;, required = true )
+    protected EffectType effect;
+
+    public String getDescription() {
+<span class="fc" id="L53">        return description;</span>
+    }
+
+    public void setDescription( String value ) {
+<span class="fc" id="L57">        this.description = value;</span>
+<span class="fc" id="L58">    }</span>
+
+    public TargetType getTarget() {
+<span class="fc" id="L61">        return target;</span>
+    }
+
+    public void setTarget( TargetType value ) {
+<span class="fc" id="L65">        this.target = value;</span>
+<span class="fc" id="L66">    }</span>
+
+    public List&lt;ConditionType&gt; getCondition() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if( condition == null ) {</span>
+<span class="fc" id="L70">            condition = new ArrayList&lt;&gt;();</span>
+        }
+<span class="fc" id="L72">        return this.condition;</span>
+    }
+
+    public ObligationExpressionsType getObligationExpressions() {
+<span class="fc" id="L76">        return obligationExpressions;</span>
+    }
+
+    public void setObligationExpressions( ObligationExpressionsType value ) {
+<span class="fc" id="L80">        this.obligationExpressions = value;</span>
+<span class="fc" id="L81">    }</span>
+
+    public AdviceExpressionsType getAdviceExpressions() {
+<span class="fc" id="L84">        return adviceExpressions;</span>
+    }
+
+    public void setAdviceExpressions( AdviceExpressionsType value ) {
+<span class="fc" id="L88">        this.adviceExpressions = value;</span>
+<span class="fc" id="L89">    }</span>
+
+    public String getRuleId() {
+<span class="fc" id="L92">        return ruleId;</span>
+    }
+
+    public void setRuleId( String value ) {
+<span class="fc" id="L96">        this.ruleId = value;</span>
+<span class="fc" id="L97">    }</span>
+
+    public EffectType getEffect() {
+<span class="fc" id="L100">        return effect;</span>
+    }
+
+    public void setEffect( EffectType value ) {
+<span class="fc" id="L104">        this.effect = value;</span>
+<span class="fc" id="L105">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

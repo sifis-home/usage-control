@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>Attribute.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.xacml</a> &gt; <span class="el_source">Attribute.java</span></div><h1>Attribute.java</h1><pre class="source lang-java linenums">/*
+ * CNR - IIT (2015-2016)
+ *
+ * @authors Fabio Bindi and Filippo Lauria and Antonio La Marra
+ */
+package it.cnr.iit.xacml;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import it.cnr.iit.utility.errorhandling.Reject;
+
+/**
+ * Creates an Attribute object compliant with the XACML standard Embeds
+ * AttributeDesignator and AttributeValue.
+ *
+ * @author Fabio Bindi, Filippo Lauria, Antonio La Marra, Alessandro Rosetti
+ */
+public final class Attribute implements Cloneable {
+<span class="fc" id="L29">	private final Logger log = Logger.getLogger(Attribute.class.getName());</span>
+
+	private String attributeId;
+
+	private String issuer;
+
+	private boolean includeInResult;
+
+	private DataType dataType;
+
+	private Category category;
+
+	/**
+	 * Map having the dataType of the attribute as key, and a list of attribute values as value.
+	 */
+	private final HashMap&lt;String, List&lt;String&gt;&gt; attributeValueMap;
+
+<span class="fc" id="L46">	private String additionalInformation = &quot;&quot;;</span>
+
+<span class="fc" id="L48">	public Attribute() {</span>
+<span class="fc" id="L49">		attributeValueMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L50">	}</span>
+
+	public String getAttributeId() {
+<span class="fc" id="L53">		return attributeId;</span>
+	}
+
+	public void setAttributeId(String attributeId) {
+<span class="fc" id="L57">		Reject.ifBlank(attributeId, &quot;Can't set a blank attributeId&quot;);</span>
+<span class="fc" id="L58">		this.attributeId = attributeId;</span>
+<span class="fc" id="L59">	}</span>
+
+	public DataType getDataType() {
+<span class="fc" id="L62">		return dataType;</span>
+	}
+
+	public void setDataType(DataType dataType) {
+<span class="fc" id="L66">		Reject.ifNull(dataType, &quot;Can't set a null dataType&quot;);</span>
+<span class="fc" id="L67">		this.dataType = dataType;</span>
+<span class="fc" id="L68">	}</span>
+
+	public String getIssuer() {
+<span class="fc" id="L71">		return issuer;</span>
+	}
+
+	public void setIssuer(String issuer) {
+<span class="fc" id="L75">		Reject.ifBlank(issuer, &quot;Can't set a blank issuer&quot;);</span>
+<span class="fc" id="L76">		this.issuer = issuer;</span>
+<span class="fc" id="L77">	}</span>
+
+	/**
+	 * Retrieves the value of the IncludeInResult element of the attribute
+	 *
+	 * @return Issuer element value (true or false)
+	 */
+	public boolean isIncludeInResult() {
+<span class="fc" id="L85">		return includeInResult;</span>
+	}
+
+	/**
+	 * Creates the IncludeInResult element of the attribute
+	 *
+	 * @param includeInResult Issuer element value (true or false)
+	 */
+	public void setIncludeInResult(boolean includeInResult) {
+<span class="fc" id="L94">		this.includeInResult = includeInResult;</span>
+<span class="fc" id="L95">	}</span>
+
+	/**
+	 * Retrieves attribute values of a certain type
+	 *
+	 * @param dataType a string representing the attribute type
+	 * @return a list of attribute values
+	 */
+	public List&lt;String&gt; getAttributeValues(DataType dataType) {
+<span class="fc" id="L104">		Reject.ifNull(dataType);</span>
+<span class="fc" id="L105">		return attributeValueMap.get(dataType.toString());</span>
+	}
+
+	/**
+	 * Retrieves attribute values of a certain type
+	 *
+	 * @param dataType a string representing the attribute type
+	 * @return a list of attribute values
+	 */
+	public List&lt;String&gt; getAttributeValues(String dataType) {
+<span class="nc" id="L115">		checkValidDataType(dataType);</span>
+<span class="nc" id="L116">		return attributeValueMap.get(dataType);</span>
+	}
+
+	/**
+	 * Retrieves the map of attributes of each type
+	 *
+	 * @return attribute values map
+	 */
+	public Map&lt;String, List&lt;String&gt;&gt; getAttributeValueMap() {
+<span class="fc" id="L125">		return attributeValueMap;</span>
+	}
+
+	/**
+	 * Creates the values of an attribute given its type
+	 *
+	 * @param type  a string representing the attribute type
+	 * @param value value to set
+	 */
+	public void setAttributeValues(String type, String value) {
+<span class="nc" id="L135">		checkValidDataType(type);</span>
+<span class="nc" id="L136">		Reject.ifBlank(value);</span>
+<span class="nc" id="L137">		List&lt;String&gt; valueList = attributeValueMap.get(type);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		if (valueList == null) {</span>
+<span class="nc" id="L139">			valueList = new LinkedList&lt;&gt;();</span>
+		}
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		for (int i = 0; i &lt; valueList.size(); i++) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (valueList.get(i).isEmpty()) {</span>
+<span class="nc" id="L143">				valueList.set(i, value);</span>
+<span class="nc" id="L144">				attributeValueMap.put(type, valueList);</span>
+<span class="nc" id="L145">				return;</span>
+			}
+		}
+<span class="nc" id="L148">		valueList.add(value);</span>
+<span class="nc" id="L149">		attributeValueMap.put(type, valueList);</span>
+<span class="nc" id="L150">	}</span>
+
+	private void checkValidDataType(String type) {
+<span class="nc" id="L153">		Reject.ifBlank(type);</span>
+<span class="nc" id="L154">		DataType tmpDataType = DataType.toDATATYPE(type);</span>
+<span class="nc" id="L155">		Reject.ifNull(tmpDataType);</span>
+<span class="nc" id="L156">	}</span>
+
+	/**
+	 * Creates the values of an attribute given its type
+	 *
+	 * @param dataType a DataType object representing the attribute type
+	 * @param value
+	 */
+	public void setAttributeValues(DataType dataType, String value) {
+<span class="fc" id="L165">		List&lt;String&gt; valueList = attributeValueMap.get(dataType.toString());</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">		if (valueList == null) {</span>
+<span class="fc" id="L167">			valueList = new LinkedList&lt;&gt;();</span>
+		}
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">		for (int i = 0; i &lt; valueList.size(); i++) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">			if (valueList.get(i).isEmpty()) {</span>
+<span class="nc" id="L171">				valueList.set(i, value);</span>
+<span class="nc" id="L172">				attributeValueMap.put(dataType.toString(), valueList);</span>
+<span class="nc" id="L173">				return;</span>
+			}
+		}
+<span class="fc" id="L176">		valueList.add(value);</span>
+<span class="fc" id="L177">		attributeValueMap.put(dataType.toString(), valueList);</span>
+<span class="fc" id="L178">	}</span>
+
+	/**
+	 * Retrieves the attribute with its elements
+	 *
+	 * @return a string representing the attribute compliant with the XACML standard
+	 */
+	@Override
+	public String toString() {
+<span class="fc" id="L187">		StringBuilder resultBuilder = new StringBuilder();</span>
+<span class="fc" id="L188">		resultBuilder.append(&quot;\nAttributeID=&quot;).append(attributeId);</span>
+<span class="fc" id="L189">		resultBuilder.append(&quot;,Issuer=&quot;).append(issuer);</span>
+<span class="fc" id="L190">		resultBuilder.append(&quot;,IncludeInResult=&quot;).append(includeInResult).append(&quot;\n&quot;);</span>
+
+<span class="fc bfc" id="L192" title="All 2 branches covered.">		for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : attributeValueMap.entrySet()) {</span>
+<span class="fc" id="L193">			List&lt;String&gt; values = entry.getValue();</span>
+<span class="fc" id="L194">			resultBuilder.append(&quot;DataType=&quot;).append(entry.getKey()).append(&quot;:&quot;);</span>
+
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">			if (values != null) {</span>
+<span class="fc" id="L197">				resultBuilder.append(&quot;Value=&quot;).append(values);</span>
+			}
+<span class="fc" id="L199">			resultBuilder.append(&quot;\tAdditionalInfo: &quot;).append(additionalInformation);</span>
+<span class="fc" id="L200">		}</span>
+<span class="fc" id="L201">		return resultBuilder.toString();</span>
+	}
+
+	/**
+	 * Creating an Attribute node compliant with the XACML standard
+	 *
+	 * @param doc Document used to retrieve XACML elements to ser
+	 * @return a new Node containing the Attribute information
+	 */
+	public Node createAttributeNode(Document doc) {
+<span class="nc" id="L211">		Element elem = doc.createElement(&quot;Attribute&quot;);</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		if (issuer != null) {</span>
+<span class="nc" id="L213">			elem.setAttribute(&quot;Issuer&quot;, issuer);</span>
+		}
+<span class="nc" id="L215">		elem.setAttribute(&quot;IncludeInResult&quot;, String.valueOf(includeInResult));</span>
+<span class="nc" id="L216">		elem.setAttribute(&quot;AttributeId&quot;, attributeId);</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : attributeValueMap.entrySet()) {</span>
+<span class="nc" id="L218">			List&lt;String&gt; values = entry.getValue();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">			if (values != null) {</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">				for (String value : values) {</span>
+<span class="nc" id="L221">					Element attributeValue = doc.createElement(&quot;AttributeValue&quot;);</span>
+<span class="nc" id="L222">					attributeValue.setAttribute(&quot;DataType&quot;, entry.getKey());</span>
+<span class="nc" id="L223">					attributeValue.setAttribute(&quot;Category&quot;, category.toString());</span>
+<span class="nc" id="L224">					attributeValue.setTextContent(value);</span>
+<span class="nc" id="L225">					elem.appendChild(attributeValue);</span>
+<span class="nc" id="L226">				}</span>
+			}
+<span class="nc" id="L228">		}</span>
+<span class="nc" id="L229">		return elem;</span>
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+<span class="fc bfc" id="L234" title="All 2 branches covered.">		if (this == obj) {</span>
+<span class="fc" id="L235">			return true;</span>
+<span class="pc bpc" id="L236" title="2 of 4 branches missed.">		} else if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="nc" id="L237">			return false;</span>
+		}
+<span class="fc" id="L239">		final Attribute other = (Attribute) obj;</span>
+<span class="fc" id="L240">		return toString().equalsIgnoreCase(other.toString());</span>
+	}
+
+	@Override
+	public int hashCode() {
+<span class="nc" id="L245">		return this.toString().hashCode();</span>
+	}
+
+	@Override
+	public Attribute clone() throws CloneNotSupportedException { // NOSONAR
+<span class="nc" id="L250">		super.clone();</span>
+<span class="nc" id="L251">		Attribute clone = new Attribute();</span>
+<span class="nc" id="L252">		clone.setAttributeId(attributeId);</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">		for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : attributeValueMap.entrySet()) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">			for (String s : entry.getValue()) {</span>
+<span class="nc" id="L255">				clone.setAttributeValues(entry.getKey(), s);</span>
+<span class="nc" id="L256">			}</span>
+<span class="nc" id="L257">		}</span>
+
+<span class="nc" id="L259">		return clone;</span>
+	}
+
+	public void setCategory(Category category) {
+<span class="fc" id="L263">		Reject.ifNull(category, &quot;Can't set a null category&quot;);</span>
+<span class="fc" id="L264">		this.category = category;</span>
+<span class="fc" id="L265">	}</span>
+
+	public Category getCategory() {
+<span class="fc" id="L268">		return category;</span>
+	}
+
+	public String getAdditionalInformation() {
+<span class="fc" id="L272">		return additionalInformation;</span>
+	}
+
+	public void setAdditionalInformation(String additionalInformation) {
+<span class="fc" id="L276">		this.additionalInformation = additionalInformation;</span>
+<span class="fc" id="L277">	}</span>
+
+	public void setValue(DataType dataType, String... values) {
+<span class="fc" id="L280">		Reject.ifNull(dataType);</span>
+<span class="fc" id="L281">		Reject.ifNullStringArray(values);</span>
+
+<span class="fc" id="L283">		ArrayList&lt;String&gt; list = new ArrayList&lt;&gt;(Arrays.asList(values));</span>
+<span class="fc" id="L284">		attributeValueMap.put(dataType.toString(), list);</span>
+<span class="fc" id="L285">	}</span>
+
+	public void setAttributevalueMap(Map&lt;String, ArrayList&lt;String&gt;&gt; map) {
+<span class="nc bnc" id="L288" title="All 2 branches missed.">		for (Map.Entry&lt;String, ArrayList&lt;String&gt;&gt; entry : map.entrySet()) {</span>
+<span class="nc" id="L289">			DataType datatype = DataType.toDATATYPE(entry.getKey());</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">			if (datatype == null) {</span>
+<span class="nc" id="L291">				log.severe(&quot;Error in retrieving the DataType&quot;);</span>
+<span class="nc" id="L292">				return;</span>
+			}
+<span class="nc" id="L294">			attributeValueMap.put(datatype.toString(), entry.getValue());</span>
+<span class="nc" id="L295">		}</span>
+<span class="nc" id="L296">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
