@@ -15,11 +15,14 @@
 	<version>sifis-home-0.0.1-SNAPSHOT</version>
 
     <properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
         <springfox.version>2.9.2</springfox.version>
         <swagger.version>1.5.22</swagger.version>
         <ormlite.version>5.1</ormlite.version>
-    </properties>
-    
+	</properties>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
