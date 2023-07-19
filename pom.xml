@@ -76,6 +76,22 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Delete folders that are created during build phases -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <followSymLinks>false</followSymLinks>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}/apps</directory>
+                            <directory>${basedir}/docker-build</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
