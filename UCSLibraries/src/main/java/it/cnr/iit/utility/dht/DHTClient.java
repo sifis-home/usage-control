@@ -8,10 +8,6 @@ import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Juneau
- */
 @ClientEndpoint
 public class DHTClient {
 

@@ -33,7 +33,7 @@ public class PEPDhtUCSSide implements PEPInterface {
                 properties.getSubTopicUuid(),
                 properties.getCommandType());
 
-        UCSDht.handleReevaluation(jsonOut);
+        PEPMessageManager.handleReevaluation(jsonOut);
 
         return null;
     }

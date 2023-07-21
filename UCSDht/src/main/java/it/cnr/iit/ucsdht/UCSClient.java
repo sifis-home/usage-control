@@ -36,7 +36,7 @@ public class UCSClient {
 
     private final UCSDhtProperties properties;
 
-    private UCSCoreService ucs;
+    private final UCSCoreService ucs;
 
     private final String papPath;
 
