@@ -2,22 +2,28 @@ package it.cnr.iit.ucsdht.properties;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 
 public class UCSDhtPepProperties implements PepProperties {
 
+	private String name = "it.cnr.iit.ucsdht.PEPDhtUCSSide";
+
 	// the identifier of the pep
-	String pepId = "pep-default";
+	private String pepId = "pep-default";
 
 	// the topic name this pep is subscribed to
-	String subTopicName = "topic-name-the-pep-is-subscribed-to";
+	private String subTopicName = "topic-name-the-pep-is-subscribed-to";
 
 	// the topic uuid this pep is subscribed to
-	String subTopicUuid = "topic-uuid-the-pep-is-subscribed-to";
+	private String subTopicUuid = "topic-uuid-the-pep-is-subscribed-to";
+
+	private String commandType = "ucs-command";
+
 
 	@Override
 	public String getName() {
-		return "it.cnr.iit.ucsdht.PEPDhtUCSSide";
+		return this.name;
 	}
 
 	@Override
@@ -34,31 +40,37 @@ public class UCSDhtPepProperties implements PepProperties {
 		this.pepId = pepId;
 	}
 
+	@JsonIgnore
 	@Override
 	public String getUri() {
 		return "http://localhost:9400";
 	}
 
+	@JsonIgnore
 	@Override
 	public String getRevokeType() {
 		return "HARD";
 	}
 
+	@JsonIgnore
 	@Override
 	public String getApiOngoingEvaluation() {
 		return "onGoingEvaluation";
 	}
 
+	@JsonIgnore
 	@Override
 	public String getApiTryAccessResponse() {
 		return "tryAccessResponse";
 	}
 
+	@JsonIgnore
 	@Override
 	public String getApiStartAccessResponse() {
 		return "startAccessResponse";
 	}
 
+	@JsonIgnore
 	@Override
 	public String getApiEndAccessResponse() {
 		return "endAccessResponse";
@@ -84,6 +96,6 @@ public class UCSDhtPepProperties implements PepProperties {
 
 	@Override
 	public String getCommandType() {
-		return "ucs-command";
+		return this.commandType;
 	}
 }
