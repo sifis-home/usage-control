@@ -6,6 +6,8 @@ import it.cnr.iit.ucs.properties.components.SessionManagerProperties;
 
 public class UCSDhtSessionManagerProperties implements SessionManagerProperties {
 
+	private String dbUri = "jdbc:sqlite:file::memory:?cache=shared";
+
 	@Override
 	public String getName() {
 		return "it.cnr.iit.ucs.sessionmanager.SessionManager";
@@ -23,7 +25,10 @@ public class UCSDhtSessionManagerProperties implements SessionManagerProperties 
 
 	@Override
 	public String getDbUri() {
-		return "jdbc:sqlite:file::memory:?cache=shared";
+		return dbUri;
 	}
 
+	public void setDbUri(String dbUri) {
+		this.dbUri = dbUri;
+	}
 }
