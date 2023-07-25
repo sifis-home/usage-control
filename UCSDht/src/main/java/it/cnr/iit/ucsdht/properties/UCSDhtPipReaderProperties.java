@@ -1,5 +1,6 @@
 package it.cnr.iit.ucsdht.properties;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 
 import java.util.ArrayList;
@@ -9,43 +10,50 @@ import java.util.Map;
 
 public class UCSDhtPipReaderProperties implements PipProperties {
 
+	private String id;
+	private String name = "it.cnr.iit.ucs.pipreader.PIPReader";
+	private String journalProtocol = "file";
+	private String journalPath = "/tmp/ucf";
 	List<Map<String, String>> attributes = new ArrayList<>();
+	private long refreshRate;
 
-	public String getName() {
-		return "it.cnr.iit.ucs.pipreader.PIPReader";
-	}
-
-	@Override
-	public Map<String, String> getAdditionalProperties() {
-		return null;
-	}
+	private Map<String, String> additionalProperties = new HashMap<>();
 
 	@Override
 	public String getId() {
-		return "1";
+		return this.id;
 	}
 
-	@Override
-	public String getJournalPath() {
-		return "/tmp/ucf";
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	@Override
 	public String getJournalProtocol() {
-		return "file";
+		return this.journalProtocol;
+	}
+
+	public void setJournalProtocol(String journalProtocol) {
+		this.journalProtocol = journalProtocol;
 	}
 
 	@Override
-	public Map<String, String> getJournalAdditionalProperties() {
-		return null;
+	public String getJournalPath() {
+		return this.journalPath;
+	}
+
+	public void setJournalPath(String journalPath) {
+		this.journalPath = journalPath;
 	}
 
 	@Override
 	public List<Map<String, String>> getAttributes() {
 		return new ArrayList<>(attributes);
 	}
-
-	private long refreshRate;
 
 	public void addAttribute(String id, String category, String dataType, String filePath) {
 		Map<String,String> attributeMap = new HashMap<>();
@@ -70,16 +78,32 @@ public class UCSDhtPipReaderProperties implements PipProperties {
 	}
 
 	@Override
-	public boolean isMultiAttribute() {
-		return this.attributes.size() > 1;
-	}
-
-	@Override
 	public long getRefreshRate() {
 		return refreshRate;
 	}
 
 	public void setRefreshRate(long refreshRate) {
 		this.refreshRate = refreshRate;
+	}
+
+	@Override
+	@JsonIgnore
+	public boolean isMultiAttribute() {
+		return this.attributes.size() > 1;
+	}
+
+	@Override
+	@JsonIgnore
+	public Map<String, String> getJournalAdditionalProperties() {
+		return null;
+	}
+
+	@Override
+	public Map<String, String> getAdditionalProperties() {
+		return additionalProperties;
+	}
+
+	public void setAdditionalProperties(Map<String, String> additionalProperties) {
+		this.additionalProperties = additionalProperties;
 	}
 }
