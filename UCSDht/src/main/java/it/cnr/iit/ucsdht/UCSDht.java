@@ -32,9 +32,20 @@ public class UCSDht {
 
     static final String PIP_SUB_TOPIC_NAME = "topic-name-pip-is-subscribed-to";
     static final String PIP_SUB_TOPIC_UUID = "topic-uuid-pip-is-subscribed-to";
-    static final File attributesDir = new File(Utils.getResourcePath(UCSDht.class), "attributes");
+    static final File pipsDir = new File(Utils.getResourcePath(UCSDht.class), "pips");
     static final File policiesDir = new File(Utils.getResourcePath(UCSDht.class), "policies");
+    static final File pepsDir = new File(Utils.getResourcePath(UCSDht.class), "peps");
 
+
+    static final List<PipProperties> pipPropertiesList = new ArrayList<>();
+    static final UCSDhtPapProperties papProperties = new UCSDhtPapProperties(policiesDir.getAbsolutePath());
+    static final UCSDhtSessionManagerProperties sessionManagerProperties = new UCSDhtSessionManagerProperties();
+    static final List<PepProperties> pepPropertiesList = new ArrayList<>();
+
+    static List<SessionInterface> sessionsWithStatusStartOrRevoke = new ArrayList<>();
+
+    static boolean softReset = false;
+    static boolean hardReset = false;
 
     public static void main(String[] args) {
 

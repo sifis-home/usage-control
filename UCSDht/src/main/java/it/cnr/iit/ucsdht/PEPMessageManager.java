@@ -4,6 +4,8 @@ import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
 import it.cnr.iit.ucs.message.startaccess.StartAccessResponseMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.properties.components.PepProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
+import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
@@ -17,6 +19,7 @@ import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
 import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
 
+import java.io.File;
 import java.util.Base64;
 
 import static it.cnr.iit.ucsdht.ManagerUtils.*;
@@ -136,15 +139,23 @@ public class PEPMessageManager {
     // it returns KO if the pep cannot be registered
     private static void handleRegisterRequest(JsonIn jsonIn) {
         JsonOut jsonOut;
+        boolean isAdded = false;
+
         if (!isPepRegistered(jsonIn)) {
             RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);
             String pepId = getIdFromJson(jsonIn);
             String subTopicName = messageIn.getSub_topic_name();
             String subTopicUuid = messageIn.getSub_topic_uuid();
 
-            if (!ucsClient.addPep(pepId, subTopicName, subTopicUuid)) {
+            isAdded = ucsClient.addPep(pepId, subTopicName, subTopicUuid);
+            if (!isAdded) {
                 jsonOut = buildRegisterResponseMessage(jsonIn, "KO");
                 serializeAndSend(jsonOut);
+                return;
+            } else {
+                jsonOut = buildRegisterResponseMessage(jsonIn, "OK");
+                serializeAndSend(jsonOut);
+                serializePepToFile(pepId, subTopicName, subTopicUuid);
                 return;
             }
         }
@@ -152,6 +163,15 @@ public class PEPMessageManager {
         serializeAndSend(jsonOut);
     }
 
+    private static void serializePepToFile(String id, String subTopicName, String subTopicUuid) {
+        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();
+        pepProperties.setId(id);
+        pepProperties.setSubTopicName(subTopicName);
+        pepProperties.setSubTopicUuid(subTopicUuid);
+
+        JsonUtility.dumpObjectToJsonFile(pepProperties,
+                pepsDir + File.separator + id + ".json", true);
+    }
 
     private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
         MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);

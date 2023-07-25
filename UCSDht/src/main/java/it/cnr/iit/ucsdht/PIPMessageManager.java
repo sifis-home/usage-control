@@ -1,5 +1,7 @@
 package it.cnr.iit.ucsdht;
 
+import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
+import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.jsondht.JsonIn;
 import it.cnr.iit.utility.dht.jsondht.JsonOut;
 import it.cnr.iit.utility.dht.jsondht.MessageContent;
@@ -8,6 +10,8 @@ import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
 import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import static it.cnr.iit.ucsdht.ManagerUtils.*;
 import static it.cnr.iit.ucsdht.UCSDht.*;
@@ -34,18 +38,28 @@ public class PIPMessageManager {
         String category = messageIn.getCategory();
         String dataType = messageIn.getData_type();
         String attributeValue = messageIn.getAttribute_value();
-        String attributePath = attributesDir + File.separator;
+        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;
         String fileName = messageIn.getFile_name();
         long refreshRate = messageIn.getRefresh_rate();
 
         JsonOut jsonOut;
-        if (!ucsClient.addPip(pipType, attributeId, category, dataType, attributePath, fileName, refreshRate)) {
+
+        boolean isAdded = ucsClient.addPip(
+                pipType, attributeId, category, dataType, attributePath, fileName, refreshRate);
+
+        if (!isAdded) {
             jsonOut = buildAddPipResponseMessage(jsonIn, "KO");
         } else {
+            Utils.createDir(new File(attributePath));
             setAttributeValue(attributePath + fileName, attributeValue);
             jsonOut = buildAddPipResponseMessage(jsonIn, "OK");
         }
         serializeAndSend(jsonOut);
+
+        if (isAdded) {
+            serializePipToFile(getIdFromJson(jsonIn), attributeId, category,
+                    dataType, fileName, refreshRate, attributeValue);
+        }
     }
 
 
@@ -60,5 +74,23 @@ public class PIPMessageManager {
                 new ErrorResponse(getMessageIdFromJson(jsonIn), description);
         return buildOutgoingJsonObject(
                 messageOut, getIdFromJson(jsonIn), PIP_SUB_TOPIC_NAME, PIP_SUB_TOPIC_UUID, COMMAND_TYPE);
+    }
+
+    // method specific for PIPReader. Need to make it general if we are going to use different PIP types
+    // note that when serializing, we specify as "FILE_PATH" the file name only. It's up to who loads
+    // the PIP from the json file to prepend the correct path.
+    protected static void serializePipToFile(String id, String attributeId, String category,
+                                             String dataType, String fileName, long refreshRate, String attributeValue) {
+        UCSDhtPipReaderProperties pipReaderProperties = new UCSDhtPipReaderProperties();
+
+        pipReaderProperties.setId(id);
+        pipReaderProperties.addAttribute(attributeId, category, dataType, fileName);
+        pipReaderProperties.setRefreshRate(refreshRate);
+        Map<String, String> additionalProperties = new HashMap<>();
+        additionalProperties.put("value", attributeValue);
+        pipReaderProperties.setAdditionalProperties(additionalProperties);
+
+        JsonUtility.dumpObjectToJsonFile(pipReaderProperties,
+                pipsDir + File.separator + id + File.separator + id + ".json", true);
     }
 }
