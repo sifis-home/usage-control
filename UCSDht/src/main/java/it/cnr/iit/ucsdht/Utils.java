@@ -30,6 +30,13 @@ public class Utils {
         return directoryToBeDeleted.delete();
     }
 
+    public static boolean createDirIfNotExists(File dir) {
+        if (dir.exists()) {
+            return false;
+        }
+        return dir.mkdir();
+    }
+
     public static String getResourcePath(Class<?> clazz) {
 
         URL input = clazz.getProtectionDomain().getCodeSource().getLocation();
