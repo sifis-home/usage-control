@@ -56,7 +56,8 @@ public class DHTClient {
 //        } catch (IOException ex){
 //            System.out.println(ex);
 //        }
-        System.out.println("Connected to " + wsURI);
+        System.out.println("Established websocket connection at " + wsURI);
+        System.out.println();
     }
 
     @OnError
