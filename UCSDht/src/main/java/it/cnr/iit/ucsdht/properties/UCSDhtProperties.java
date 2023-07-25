@@ -8,12 +8,19 @@ import java.util.List;
 
 public class UCSDhtProperties implements UCSProperties {
 
-    private List<PipProperties> pipPropertiesList;
-    private PapProperties papProperties;
+    private final List<PipProperties> pipPropertiesList;
+    private final PapProperties papProperties;
+    private final SessionManagerProperties sessionManagerProperties;
+    private final List<PepProperties> pepPropertiesList;
 
-    public UCSDhtProperties(List<PipProperties> pipPropertiesList, PapProperties papProperties) {
+    public UCSDhtProperties(List<PipProperties> pipPropertiesList,
+                            PapProperties papProperties,
+                            SessionManagerProperties sessionManagerProperties,
+                            List<PepProperties> pepPropertiesList) {
         this.pipPropertiesList = pipPropertiesList;
         this.papProperties = papProperties;
+        this.sessionManagerProperties = sessionManagerProperties;
+        this.pepPropertiesList = pepPropertiesList;
     }
 
     @Override
@@ -33,7 +40,7 @@ public class UCSDhtProperties implements UCSProperties {
 
     @Override
     public SessionManagerProperties getSessionManager() {
-        return new UCSDhtSessionManagerProperties();
+        return sessionManagerProperties;
     }
 
     @Override
@@ -58,9 +65,7 @@ public class UCSDhtProperties implements UCSProperties {
 
     @Override
     public List<PepProperties> getPepList() {
-        List<PepProperties> res = new ArrayList<>();
-        res.add(new UCSDhtPepProperties());
-        return res;
+        return this.pepPropertiesList;
     }
 
 }

@@ -1,5 +1,6 @@
 package it.cnr.iit.ucsdht;
 
+import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
 import it.cnr.iit.ucs.exceptions.PAPException;
@@ -16,6 +17,7 @@ import it.cnr.iit.ucs.pipreader.PIPReader;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.ucs.properties.components.SessionManagerProperties;
 import it.cnr.iit.ucs.ucs.UCSInterface;
 import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
@@ -40,12 +42,14 @@ public class UCSClient {
 
     private final String papPath;
 
-    public UCSClient(List<PipProperties> pipPropertiesList, PapProperties papProperties) {
-        properties = new UCSDhtProperties(pipPropertiesList, papProperties);
+    public UCSClient(List<PipProperties> pipPropertiesList, PapProperties papProperties,
+                     SessionManagerProperties smProperties, List<PepProperties> pepPropertiesList) {
+        properties = new UCSDhtProperties(pipPropertiesList, papProperties, smProperties, pepPropertiesList);
         try {
             ucs = new UCSCoreServiceBuilder().setProperties(properties).build();
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            throw new RuntimeException(e);
         }
         papPath = properties.getPolicyAdministrationPoint().getPath();
     }
@@ -199,5 +203,9 @@ public class UCSClient {
 
     public PepProperties getPepProperties(String pepId) {
         return ucs.getPEPMap().get(pepId).getProperties();
+    }
+
+    public PIPRegistryInterface getPipRegistry() {
+        return ucs.getContextHandler().getPipRegistry();
     }
 }
