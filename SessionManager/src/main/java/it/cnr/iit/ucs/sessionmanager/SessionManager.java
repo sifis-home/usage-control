@@ -104,6 +104,8 @@ public final class SessionManager implements SessionManagerInterface {
             log.severe( MSG_ERR_SQL + e.getMessage() ) ;
             initialized = false;
             throw new IllegalStateException( "SessionManager not in a valid state anymore" );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return true;
     }
