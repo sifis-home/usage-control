@@ -8,59 +8,64 @@ import java.util.List;
 
 public class UCSDhtProperties implements UCSProperties {
 
-    private List&lt;PipProperties&gt; pipPropertiesList;
-    private PapProperties papProperties;
+    private final List&lt;PipProperties&gt; pipPropertiesList;
+    private final PapProperties papProperties;
+    private final SessionManagerProperties sessionManagerProperties;
+    private final List&lt;PepProperties&gt; pepPropertiesList;
 
-<span class="nc" id="L14">    public UCSDhtProperties(List&lt;PipProperties&gt; pipPropertiesList, PapProperties papProperties) {</span>
-<span class="nc" id="L15">        this.pipPropertiesList = pipPropertiesList;</span>
-<span class="nc" id="L16">        this.papProperties = papProperties;</span>
-<span class="nc" id="L17">    }</span>
+    public UCSDhtProperties(List&lt;PipProperties&gt; pipPropertiesList,
+                            PapProperties papProperties,
+                            SessionManagerProperties sessionManagerProperties,
+<span class="nc" id="L19">                            List&lt;PepProperties&gt; pepPropertiesList) {</span>
+<span class="nc" id="L20">        this.pipPropertiesList = pipPropertiesList;</span>
+<span class="nc" id="L21">        this.papProperties = papProperties;</span>
+<span class="nc" id="L22">        this.sessionManagerProperties = sessionManagerProperties;</span>
+<span class="nc" id="L23">        this.pepPropertiesList = pepPropertiesList;</span>
+<span class="nc" id="L24">    }</span>
 
     @Override
     public CoreProperties getCore() {
-<span class="nc" id="L21">        return new UCSDhtCoreProperties();</span>
+<span class="nc" id="L28">        return new UCSDhtCoreProperties();</span>
     }
 
     @Override
     public ContextHandlerProperties getContextHandler() {
-<span class="nc" id="L26">        return new UCSDhtContextHandlerProperties();</span>
+<span class="nc" id="L33">        return new UCSDhtContextHandlerProperties();</span>
     }
 
     @Override
     public RequestManagerProperties getRequestManager() {
-<span class="nc" id="L31">        return new UCSDhtRequestManagerProperties();</span>
+<span class="nc" id="L38">        return new UCSDhtRequestManagerProperties();</span>
     }
 
     @Override
     public SessionManagerProperties getSessionManager() {
-<span class="nc" id="L36">        return new UCSDhtSessionManagerProperties();</span>
+<span class="nc" id="L43">        return sessionManagerProperties;</span>
     }
 
     @Override
     public PdpProperties getPolicyDecisionPoint() {
-<span class="nc" id="L41">        return new UCSDhtPdpProperties();</span>
+<span class="nc" id="L48">        return new UCSDhtPdpProperties();</span>
     }
 
     @Override
     public PapProperties getPolicyAdministrationPoint() {
-<span class="nc" id="L46">        return this.papProperties;</span>
+<span class="nc" id="L53">        return this.papProperties;</span>
     }
 
     @Override
     public ObligationManagerProperties getObligationManager() {
-<span class="nc" id="L51">        return new UCSDhtObligationManagerProperties();</span>
+<span class="nc" id="L58">        return new UCSDhtObligationManagerProperties();</span>
     }
 
     @Override
     public List&lt;PipProperties&gt; getPipList() {
-<span class="nc" id="L56">        return this.pipPropertiesList;</span>
+<span class="nc" id="L63">        return this.pipPropertiesList;</span>
     }
 
     @Override
     public List&lt;PepProperties&gt; getPepList() {
-<span class="nc" id="L61">        List&lt;PepProperties&gt; res = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L62">        res.add(new UCSDhtPepProperties());</span>
-<span class="nc" id="L63">        return res;</span>
+<span class="nc" id="L68">        return this.pepPropertiesList;</span>
     }
 
 }

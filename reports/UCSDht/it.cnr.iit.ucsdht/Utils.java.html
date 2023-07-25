@@ -30,37 +30,44 @@ import java.util.stream.Collectors;
 <span class="nc" id="L30">        return directoryToBeDeleted.delete();</span>
     }
 
+    public static boolean createDirIfNotExists(File dir) {
+<span class="nc bnc" id="L34" title="All 2 branches missed.">        if (dir.exists()) {</span>
+<span class="nc" id="L35">            return false;</span>
+        }
+<span class="nc" id="L37">        return dir.mkdir();</span>
+    }
+
     public static String getResourcePath(Class&lt;?&gt; clazz) {
 
-<span class="nc" id="L35">        URL input = clazz.getProtectionDomain().getCodeSource().getLocation();</span>
+<span class="nc" id="L42">        URL input = clazz.getProtectionDomain().getCodeSource().getLocation();</span>
 
         try {
-<span class="nc" id="L38">            File myfile = new File(input.toURI());</span>
-<span class="nc" id="L39">            File dir = myfile.getParentFile(); // strip off .jar file</span>
-<span class="nc" id="L40">            return dir.getAbsolutePath();</span>
-<span class="nc" id="L41">        } catch (URISyntaxException e) {</span>
-<span class="nc" id="L42">            throw new RuntimeException(e);</span>
+<span class="nc" id="L45">            File myfile = new File(input.toURI());</span>
+<span class="nc" id="L46">            File dir = myfile.getParentFile(); // strip off .jar file</span>
+<span class="nc" id="L47">            return dir.getAbsolutePath();</span>
+<span class="nc" id="L48">        } catch (URISyntaxException e) {</span>
+<span class="nc" id="L49">            throw new RuntimeException(e);</span>
         }
     }
 
     public static String readContent(InputStream input) {
-<span class="nc" id="L47">        return new BufferedReader(</span>
+<span class="nc" id="L54">        return new BufferedReader(</span>
                 new InputStreamReader(input, StandardCharsets.UTF_8))
-<span class="nc" id="L49">                .lines()</span>
-<span class="nc" id="L50">                .collect(Collectors.joining(&quot;\n&quot;));</span>
+<span class="nc" id="L56">                .lines()</span>
+<span class="nc" id="L57">                .collect(Collectors.joining(&quot;\n&quot;));</span>
     }
 
     public static InputStream accessFile(Class&lt;?&gt; clazz, String fileName) {
 
         // this is the path within the jar file
-<span class="nc" id="L56">        InputStream input = clazz.getResourceAsStream(</span>
+<span class="nc" id="L63">        InputStream input = clazz.getResourceAsStream(</span>
                 File.separator + &quot;resources&quot; + File.separator + fileName);
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if (input == null) {</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if (input == null) {</span>
             // this is how we load file within editor
-<span class="nc" id="L60">            input = clazz.getClassLoader().getResourceAsStream(fileName);</span>
+<span class="nc" id="L67">            input = clazz.getClassLoader().getResourceAsStream(fileName);</span>
         }
 
-<span class="nc" id="L63">        return input;</span>
+<span class="nc" id="L70">        return input;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PIPMessageManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">PIPMessageManager.java</span></div><h1>PIPMessageManager.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
+
+import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
+import it.cnr.iit.utility.JsonUtility;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
+import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
+import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import static it.cnr.iit.ucsdht.ManagerUtils.*;
+import static it.cnr.iit.ucsdht.UCSDht.*;
+import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
+
+<span class="nc" id="L20">public class PIPMessageManager {</span>
+    protected static void processMessage(JsonIn jsonIn) {
+<span class="nc" id="L22">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (message instanceof AddPipRequest) {</span>
+<span class="nc" id="L24">            System.out.println(&quot;handle add Pip request&quot;);</span>
+<span class="nc" id="L25">            handleAddPipRequest(jsonIn);</span>
+        } else {
+            // class not recognized. Handle case
+            // this should not happen since the deserialization would already have thrown an exception
+<span class="nc" id="L29">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+        }
+<span class="nc" id="L31">    }</span>
+
+    private static void handleAddPipRequest(JsonIn jsonIn) {
+<span class="nc" id="L34">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L36">        String pipType = messageIn.getPip_type();</span>
+<span class="nc" id="L37">        String attributeId = messageIn.getAttribute_id();</span>
+<span class="nc" id="L38">        String category = messageIn.getCategory();</span>
+<span class="nc" id="L39">        String dataType = messageIn.getData_type();</span>
+<span class="nc" id="L40">        String attributeValue = messageIn.getAttribute_value();</span>
+<span class="nc" id="L41">        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;</span>
+<span class="nc" id="L42">        String fileName = messageIn.getFile_name();</span>
+<span class="nc" id="L43">        long refreshRate = messageIn.getRefresh_rate();</span>
+
+        JsonOut jsonOut;
+
+<span class="nc" id="L47">        boolean isAdded = ucsClient.addPip(</span>
+                pipType, attributeId, category, dataType, attributePath, fileName, refreshRate);
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (!isAdded) {</span>
+<span class="nc" id="L51">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L53">            Utils.createDir(new File(attributePath));</span>
+<span class="nc" id="L54">            setAttributeValue(attributePath + fileName, attributeValue);</span>
+<span class="nc" id="L55">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L57">        serializeAndSend(jsonOut);</span>
+
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (isAdded) {</span>
+<span class="nc" id="L60">            serializePipToFile(getIdFromJson(jsonIn), attributeId, category,</span>
+                    dataType, fileName, refreshRate, attributeValue);
+        }
+<span class="nc" id="L63">    }</span>
+
+
+    private static JsonOut buildAddPipResponseMessage(JsonIn jsonIn, String code) {
+
+<span class="nc" id="L68">        MessageContent messageOut = new AddPipResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L69">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pip-is-subscribed-to&quot;, &quot;topic-uuid-pip-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+    }
+
+    protected static JsonOut buildErrorResponseMessage(JsonIn jsonIn, String description) {
+<span class="nc" id="L73">        MessageContent messageOut =</span>
+<span class="nc" id="L74">                new ErrorResponse(getMessageIdFromJson(jsonIn), description);</span>
+<span class="nc" id="L75">        return buildOutgoingJsonObject(</span>
+<span class="nc" id="L76">                messageOut, getIdFromJson(jsonIn), PIP_SUB_TOPIC_NAME, PIP_SUB_TOPIC_UUID, COMMAND_TYPE);</span>
+    }
+
+    // method specific for PIPReader. Need to make it general if we are going to use different PIP types
+    // note that when serializing, we specify as &quot;FILE_PATH&quot; the file name only. It's up to who loads
+    // the PIP from the json file to prepend the correct path.
+    protected static void serializePipToFile(String id, String attributeId, String category,
+                                             String dataType, String fileName, long refreshRate, String attributeValue) {
+<span class="nc" id="L84">        UCSDhtPipReaderProperties pipReaderProperties = new UCSDhtPipReaderProperties();</span>
+
+<span class="nc" id="L86">        pipReaderProperties.setId(id);</span>
+<span class="nc" id="L87">        pipReaderProperties.addAttribute(attributeId, category, dataType, fileName);</span>
+<span class="nc" id="L88">        pipReaderProperties.setRefreshRate(refreshRate);</span>
+<span class="nc" id="L89">        Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L90">        additionalProperties.put(&quot;value&quot;, attributeValue);</span>
+<span class="nc" id="L91">        pipReaderProperties.setAdditionalProperties(additionalProperties);</span>
+
+<span class="nc" id="L93">        JsonUtility.dumpObjectToJsonFile(pipReaderProperties,</span>
+                pipsDir + File.separator + id + File.separator + id + &quot;.json&quot;, true);
+<span class="nc" id="L95">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

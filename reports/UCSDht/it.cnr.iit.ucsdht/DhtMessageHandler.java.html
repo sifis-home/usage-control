@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>DhtMessageHandler.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">DhtMessageHandler.java</span></div><h1>DhtMessageHandler.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
+
+import com.google.gson.JsonSyntaxException;
+import it.cnr.iit.utility.dht.DHTClient;
+import it.cnr.iit.utility.dht.jsondht.JsonIn;
+import it.cnr.iit.utility.dht.jsondht.JsonOut;
+
+import static it.cnr.iit.ucsdht.ManagerUtils.serializeAndSend;
+import static it.cnr.iit.ucsdht.PEPMessageManager.isPepRegistered;
+import static it.cnr.iit.ucsdht.PEPMessageManager.isRegisterRequest;
+import static it.cnr.iit.ucsdht.UCSDht.UCS_SUB_TOPIC_UUID;
+import static it.cnr.iit.utility.dht.DHTUtils.deserializeIncomingJson;
+import static it.cnr.iit.utility.dht.DHTUtils.isTopicOfInterest;
+
+<span class="nc" id="L15">public class DhtMessageHandler implements DHTClient.MessageHandler {</span>
+
+
+    /**
+     * Deserialize the received message and check the topic matches
+     * the one the UCS is subscribed to. If so, process the request
+     * coming from the DHT
+     *
+     * @param message the message, a json string, coming from the DHT
+     */
+    public void handleMessage(String message) {
+        JsonIn jsonIn;
+        try {
+            // deserialize json
+<span class="nc" id="L29">            jsonIn = deserializeIncomingJson(message);</span>
+
+            // check the topic is the one we are subscribed to
+<span class="nc bnc" id="L32" title="All 2 branches missed.">            if (!isTopicOfInterest(jsonIn, UCS_SUB_TOPIC_UUID)) {</span>
+<span class="nc" id="L33">                return;</span>
+            }
+<span class="nc" id="L35">            System.out.println(&quot;Topic matches. Message type: &quot; + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());</span>
+<span class="nc" id="L36">        } catch (JsonSyntaxException e) {</span>
+            //System.err.println(&quot;Error deserializing Json. Message discarded.&quot;);
+<span class="nc" id="L38">            return;</span>
+<span class="nc" id="L39">        }</span>
+<span class="nc bnc" id="L40" title="All 4 branches missed.">        switch (jsonIn.getVolatile().getValue().getCommand().getCommand_type()) {</span>
+            case &quot;pep-command&quot;:
+<span class="nc bnc" id="L42" title="All 4 branches missed.">                if (!isRegisterRequest(jsonIn) &amp;&amp; !isPepRegistered(jsonIn)) {</span>
+<span class="nc" id="L43">                    System.err.println(&quot;An unregistered PEP tried to make a request. Request discarded.&quot;);</span>
+<span class="nc" id="L44">                    return;</span>
+                }
+                try {
+<span class="nc" id="L47">                    PEPMessageManager.processMessage(jsonIn);</span>
+<span class="nc" id="L48">                } catch (Exception e) {</span>
+<span class="nc" id="L49">                    System.err.println(&quot;Error processing PEP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L50">                    JsonOut jsonOut =</span>
+<span class="nc" id="L51">                            PEPMessageManager.buildErrorResponseMessage(jsonIn, e.getMessage());</span>
+<span class="nc" id="L52">                    serializeAndSend(jsonOut);</span>
+<span class="nc" id="L53">                }</span>
+<span class="nc" id="L54">                break;</span>
+            case &quot;pap-command&quot;:
+                try {
+<span class="nc" id="L57">                    PAPMessageManager.processMessage(jsonIn);</span>
+<span class="nc" id="L58">                } catch (Exception e) {</span>
+<span class="nc" id="L59">                    System.err.println(&quot;Error processing PAP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L60">                    JsonOut jsonOut =</span>
+<span class="nc" id="L61">                            PAPMessageManager.buildErrorResponseMessage(jsonIn, e.getMessage());</span>
+<span class="nc" id="L62">                    serializeAndSend(jsonOut);</span>
+<span class="nc" id="L63">                }</span>
+<span class="nc" id="L64">                break;</span>
+            case &quot;pip-command&quot;:
+                try {
+<span class="nc" id="L67">                    PIPMessageManager.processMessage(jsonIn);</span>
+<span class="nc" id="L68">                } catch (Exception e) {</span>
+<span class="nc" id="L69">                    System.err.println(&quot;Error processing PIP request: &quot; + e.getMessage());</span>
+<span class="nc" id="L70">                    JsonOut jsonOut =</span>
+<span class="nc" id="L71">                            PIPMessageManager.buildErrorResponseMessage(jsonIn, e.getMessage());</span>
+<span class="nc" id="L72">                    serializeAndSend(jsonOut);</span>
+<span class="nc" id="L73">                }</span>
+<span class="nc" id="L74">                break;</span>
+            default:
+<span class="nc" id="L76">                System.err.println(&quot;Wrong command type. Request discarded.&quot;);</span>
+        }
+<span class="nc" id="L78">    }</span>
+
+    @Override
+    public void handleError() {
+<span class="nc" id="L82">        System.err.println(&quot;Websocket error occurred&quot;);</span>
+<span class="nc" id="L83">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

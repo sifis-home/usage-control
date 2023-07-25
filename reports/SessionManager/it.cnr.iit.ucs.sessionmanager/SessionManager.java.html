@@ -104,8 +104,10 @@ public final class SessionManager implements SessionManagerInterface {
 <span class="nc" id="L104">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
 <span class="nc" id="L105">            initialized = false;</span>
 <span class="nc" id="L106">            throw new IllegalStateException( &quot;SessionManager not in a valid state anymore&quot; );</span>
-<span class="fc" id="L107">        }</span>
-<span class="fc" id="L108">        return true;</span>
+<span class="nc" id="L107">        } catch (Exception e) {</span>
+<span class="nc" id="L108">            throw new RuntimeException(e);</span>
+<span class="fc" id="L109">        }</span>
+<span class="fc" id="L110">        return true;</span>
     }
 
     /**
@@ -120,17 +122,17 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public Boolean updateEntry( String sessionId, String status ) {
-<span class="fc" id="L123">        Reject.ifBlank( status );</span>
-<span class="fc" id="L124">        Reject.ifBlank( sessionId );</span>
+<span class="fc" id="L125">        Reject.ifBlank( status );</span>
+<span class="fc" id="L126">        Reject.ifBlank( sessionId );</span>
         try {
-<span class="fc" id="L126">            Session s = sessionDao.queryForId( sessionId );</span>
-<span class="fc" id="L127">            s.setStatus( status );</span>
-<span class="fc" id="L128">            sessionDao.update( s );</span>
-<span class="nc" id="L129">        } catch( SQLException e ) {</span>
-<span class="nc" id="L130">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
-<span class="nc" id="L131">            return false;</span>
-<span class="fc" id="L132">        }</span>
-<span class="fc" id="L133">        return true;</span>
+<span class="fc" id="L128">            Session s = sessionDao.queryForId( sessionId );</span>
+<span class="fc" id="L129">            s.setStatus( status );</span>
+<span class="fc" id="L130">            sessionDao.update( s );</span>
+<span class="nc" id="L131">        } catch( SQLException e ) {</span>
+<span class="nc" id="L132">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L133">            return false;</span>
+<span class="fc" id="L134">        }</span>
+<span class="fc" id="L135">        return true;</span>
     }
 
     /**
@@ -142,24 +144,24 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public Boolean deleteEntry( String sessionId ) {
-<span class="fc" id="L145">        validStateAndArguments( sessionId );</span>
+<span class="fc" id="L147">        validStateAndArguments( sessionId );</span>
         try {
             ForeignCollection&lt;OnGoingAttribute&gt; a;
             try {
-<span class="fc" id="L149">                a = sessionDao.queryForId(sessionId)</span>
-<span class="fc" id="L150">                        .getOnGoingAttributesAsForeign();</span>
-<span class="nc" id="L151">            } catch (NullPointerException e) {</span>
-<span class="nc" id="L152">                return false;</span>
-<span class="fc" id="L153">            }</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">            for( OnGoingAttribute attribute : a ) {</span>
-<span class="fc" id="L155">                attributesDao.deleteById( attribute.getId() );</span>
-<span class="fc" id="L156">            }</span>
-<span class="fc" id="L157">            a.clear();</span>
-<span class="fc" id="L158">            sessionDao.deleteById( sessionId );</span>
-<span class="nc" id="L159">        } catch( SQLException ex ) {</span>
-<span class="nc" id="L160">            return false;</span>
-<span class="fc" id="L161">        }</span>
-<span class="fc" id="L162">        return true;</span>
+<span class="fc" id="L151">                a = sessionDao.queryForId(sessionId)</span>
+<span class="fc" id="L152">                        .getOnGoingAttributesAsForeign();</span>
+<span class="nc" id="L153">            } catch (NullPointerException e) {</span>
+<span class="nc" id="L154">                return false;</span>
+<span class="fc" id="L155">            }</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">            for( OnGoingAttribute attribute : a ) {</span>
+<span class="fc" id="L157">                attributesDao.deleteById( attribute.getId() );</span>
+<span class="fc" id="L158">            }</span>
+<span class="fc" id="L159">            a.clear();</span>
+<span class="fc" id="L160">            sessionDao.deleteById( sessionId );</span>
+<span class="nc" id="L161">        } catch( SQLException ex ) {</span>
+<span class="nc" id="L162">            return false;</span>
+<span class="fc" id="L163">        }</span>
+<span class="fc" id="L164">        return true;</span>
     }
 
     /**
@@ -172,54 +174,54 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public Boolean createEntry( SessionAttributes parameterObject ) {
-<span class="fc" id="L175">        Reject.ifNull( parameterObject );</span>
+<span class="fc" id="L177">        Reject.ifNull( parameterObject );</span>
         try {
-<span class="fc" id="L177">            Session s = prepareSession( parameterObject );</span>
+<span class="fc" id="L179">            Session s = prepareSession( parameterObject );</span>
 
-<span class="fc bfc" id="L179" title="All 2 branches covered.">            if( sessionDao.idExists( parameterObject.getSessionId() ) ) {</span>
-<span class="fc" id="L180">                log.severe( &quot;ID already exists&quot; );</span>
-<span class="fc" id="L181">                return false;</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">            if( sessionDao.idExists( parameterObject.getSessionId() ) ) {</span>
+<span class="fc" id="L182">                log.severe( &quot;ID already exists&quot; );</span>
+<span class="fc" id="L183">                return false;</span>
             }
-<span class="fc" id="L183">            sessionDao.create( s );</span>
-<span class="fc" id="L184">            Session sessionResult = sessionDao.queryForId( parameterObject.getSessionId() );</span>
-<span class="fc" id="L185">            ForeignCollection&lt;OnGoingAttribute&gt; attributes = sessionResult</span>
-<span class="fc" id="L186">                .getOnGoingAttributesAsForeign();</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForSubject() != null ) {</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForSubject() ) {</span>
-<span class="fc" id="L189">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getSubjectName(), COLUMN.SUBJECT );</span>
-<span class="fc" id="L190">                    attributes.add( a );</span>
-<span class="fc" id="L191">                }</span>
+<span class="fc" id="L185">            sessionDao.create( s );</span>
+<span class="fc" id="L186">            Session sessionResult = sessionDao.queryForId( parameterObject.getSessionId() );</span>
+<span class="fc" id="L187">            ForeignCollection&lt;OnGoingAttribute&gt; attributes = sessionResult</span>
+<span class="fc" id="L188">                .getOnGoingAttributesAsForeign();</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForSubject() != null ) {</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForSubject() ) {</span>
+<span class="fc" id="L191">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getSubjectName(), COLUMN.SUBJECT );</span>
+<span class="fc" id="L192">                    attributes.add( a );</span>
+<span class="fc" id="L193">                }</span>
             }
-<span class="fc bfc" id="L193" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForResource() != null ) {</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForResource() ) {</span>
-<span class="fc" id="L195">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getResourceName(),</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForResource() != null ) {</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForResource() ) {</span>
+<span class="fc" id="L197">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getResourceName(),</span>
                         COLUMN.RESOURCE );
-<span class="fc" id="L197">                    attributes.add( a );</span>
-<span class="fc" id="L198">                }</span>
+<span class="fc" id="L199">                    attributes.add( a );</span>
+<span class="fc" id="L200">                }</span>
             }
-<span class="fc bfc" id="L200" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForAction() != null ) {</span>
-<span class="fc bfc" id="L201" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForAction() ) {</span>
-<span class="fc" id="L202">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getActionName(), COLUMN.ACTION );</span>
-<span class="fc" id="L203">                    attributes.add( a );</span>
-<span class="fc" id="L204">                }</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForAction() != null ) {</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForAction() ) {</span>
+<span class="fc" id="L204">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, parameterObject.getActionName(), COLUMN.ACTION );</span>
+<span class="fc" id="L205">                    attributes.add( a );</span>
+<span class="fc" id="L206">                }</span>
             }
-<span class="fc bfc" id="L206" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForEnvironment() != null ) {</span>
-<span class="fc bfc" id="L207" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForEnvironment() ) {</span>
-<span class="fc" id="L208">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, &quot;&quot;, COLUMN.ENVIRONMENT );</span>
-<span class="fc" id="L209">                    attributes.add( a );</span>
-<span class="fc" id="L210">                }</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">            if( parameterObject.getOnGoingAttributesForEnvironment() != null ) {</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                for( String attr : parameterObject.getOnGoingAttributesForEnvironment() ) {</span>
+<span class="fc" id="L210">                    OnGoingAttribute a = OnGoingAttribute.createOnGoingAttribute( attr, &quot;&quot;, COLUMN.ENVIRONMENT );</span>
+<span class="fc" id="L211">                    attributes.add( a );</span>
+<span class="fc" id="L212">                }</span>
             }
-<span class="nc" id="L212">        } catch( SQLException e ) {</span>
-<span class="nc" id="L213">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
-<span class="nc" id="L214">            return false;</span>
-<span class="fc" id="L215">        }</span>
-<span class="fc" id="L216">        return true;</span>
+<span class="nc" id="L214">        } catch( SQLException e ) {</span>
+<span class="nc" id="L215">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L216">            return false;</span>
+<span class="fc" id="L217">        }</span>
+<span class="fc" id="L218">        return true;</span>
     }
 
     private Session prepareSession( SessionAttributes parameterObject ) {
-<span class="fc" id="L220">        return new Session( parameterObject.getSessionId(), parameterObject.getPolicySet(), parameterObject.getOriginalRequest(),</span>
-<span class="fc" id="L221">            parameterObject.getStatus(),</span>
-<span class="fc" id="L222">            parameterObject.getPepURI(), parameterObject.getMyIP() );</span>
+<span class="fc" id="L222">        return new Session( parameterObject.getSessionId(), parameterObject.getPolicySet(), parameterObject.getOriginalRequest(),</span>
+<span class="fc" id="L223">            parameterObject.getStatus(),</span>
+<span class="fc" id="L224">            parameterObject.getPepURI(), parameterObject.getMyIP() );</span>
     }
 
     /**
@@ -231,27 +233,27 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public List&lt;SessionInterface&gt; getSessionsForAttribute( String attributeId ) {
-<span class="fc" id="L234">        validStateAndArguments( attributeId );</span>
+<span class="fc" id="L236">        validStateAndArguments( attributeId );</span>
         try {
-<span class="fc" id="L236">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
-<span class="fc" id="L237">                .queryBuilder();</span>
-<span class="fc" id="L238">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
-<span class="fc" id="L239">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).query();</span>
+<span class="fc" id="L238">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
+<span class="fc" id="L239">                .queryBuilder();</span>
+<span class="fc" id="L240">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
+<span class="fc" id="L241">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).query();</span>
 
-<span class="fc" id="L241">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
-<span class="fc bfc" id="L242" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
+<span class="fc" id="L243">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
                 // add the considered session only if its status is equal to 's'
-<span class="pc bpc" id="L244" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
-<span class="nc bnc" id="L245" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
-<span class="fc" id="L246">                    sessions.add( attr.getSession() );</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
+<span class="fc" id="L248">                    sessions.add( attr.getSession() );</span>
                 }
-<span class="fc" id="L248">            }</span>
-<span class="fc" id="L249">            return sessions;</span>
+<span class="fc" id="L250">            }</span>
+<span class="fc" id="L251">            return sessions;</span>
 
-<span class="nc" id="L251">        } catch( SQLException e ) {</span>
-<span class="nc" id="L252">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L253">        } catch( SQLException e ) {</span>
+<span class="nc" id="L254">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
         }
-<span class="nc" id="L254">        return new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L256">        return new ArrayList&lt;&gt;();</span>
     }
 
     /**
@@ -269,35 +271,35 @@ public final class SessionManager implements SessionManagerInterface {
     @Override
     public List&lt;SessionInterface&gt; getSessionsForSubjectAttributes(
             String subjectName, String attributeId ) {
-<span class="fc" id="L272">        validStateAndArguments( subjectName, attributeId );</span>
+<span class="fc" id="L274">        validStateAndArguments( subjectName, attributeId );</span>
         try {
-<span class="fc" id="L274">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
-<span class="fc" id="L275">                .queryBuilder();</span>
-<span class="fc" id="L276">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
-<span class="fc" id="L277">                .isNotNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
-<span class="fc" id="L278">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
-<span class="fc" id="L279">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
-<span class="fc" id="L280">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
-<span class="fc" id="L281">                .eq( OnGoingAttribute.SUBJECTNAME_FIELD, subjectName ).query();</span>
+<span class="fc" id="L276">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
+<span class="fc" id="L277">                .queryBuilder();</span>
+<span class="fc" id="L278">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
+<span class="fc" id="L279">                .isNotNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
+<span class="fc" id="L280">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
+<span class="fc" id="L281">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
+<span class="fc" id="L282">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
+<span class="fc" id="L283">                .eq( OnGoingAttribute.SUBJECTNAME_FIELD, subjectName ).query();</span>
 
-<span class="pc bpc" id="L283" title="1 of 2 branches missed.">            if( attributes == null ) {</span>
-<span class="nc" id="L284">                return new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">            if( attributes == null ) {</span>
+<span class="nc" id="L286">                return new ArrayList&lt;&gt;();</span>
             }
 
-<span class="fc" id="L287">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
-<span class="fc bfc" id="L288" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
+<span class="fc" id="L289">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
                 // add the considered session only if its status is equal to 's'
-<span class="pc bpc" id="L290" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
-<span class="nc bnc" id="L291" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
-<span class="fc" id="L292">                    sessions.add( attr.getSession() );</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
+<span class="fc" id="L294">                    sessions.add( attr.getSession() );</span>
                 }
-<span class="fc" id="L294">            }</span>
-<span class="fc" id="L295">            return sessions;</span>
+<span class="fc" id="L296">            }</span>
+<span class="fc" id="L297">            return sessions;</span>
 
-<span class="nc" id="L297">        } catch( SQLException e ) {</span>
-<span class="nc" id="L298">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L299">        } catch( SQLException e ) {</span>
+<span class="nc" id="L300">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
         }
-<span class="nc" id="L300">        return new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L302">        return new ArrayList&lt;&gt;();</span>
     }
 
     /**
@@ -315,30 +317,30 @@ public final class SessionManager implements SessionManagerInterface {
     @Override
     public List&lt;SessionInterface&gt; getSessionsForResourceAttributes(
             String resourceName, String attributeId ) {
-<span class="fc" id="L318">        validStateAndArguments( resourceName, attributeId );</span>
+<span class="fc" id="L320">        validStateAndArguments( resourceName, attributeId );</span>
         try {
-<span class="fc" id="L320">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
-<span class="fc" id="L321">                .queryBuilder();</span>
-<span class="fc" id="L322">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
-<span class="fc" id="L323">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
-<span class="fc" id="L324">                .isNotNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
-<span class="fc" id="L325">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
-<span class="fc" id="L326">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
-<span class="fc" id="L327">                .eq( OnGoingAttribute.RESOURCENAME_FIELD, resourceName ).query();</span>
+<span class="fc" id="L322">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
+<span class="fc" id="L323">                .queryBuilder();</span>
+<span class="fc" id="L324">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
+<span class="fc" id="L325">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
+<span class="fc" id="L326">                .isNotNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
+<span class="fc" id="L327">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
+<span class="fc" id="L328">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
+<span class="fc" id="L329">                .eq( OnGoingAttribute.RESOURCENAME_FIELD, resourceName ).query();</span>
 
-<span class="fc" id="L329">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
-<span class="fc bfc" id="L330" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
-<span class="pc bpc" id="L331" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
-<span class="nc bnc" id="L332" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
-<span class="fc" id="L333">                    sessions.add( attr.getSession() );</span>
+<span class="fc" id="L331">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
+<span class="pc bpc" id="L333" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
+<span class="fc" id="L335">                    sessions.add( attr.getSession() );</span>
                 }
-<span class="fc" id="L335">            }</span>
-<span class="fc" id="L336">            return sessions;</span>
+<span class="fc" id="L337">            }</span>
+<span class="fc" id="L338">            return sessions;</span>
 
-<span class="nc" id="L338">        } catch( SQLException e ) {</span>
-<span class="nc" id="L339">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L340">        } catch( SQLException e ) {</span>
+<span class="nc" id="L341">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
         }
-<span class="nc" id="L341">        return new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L343">        return new ArrayList&lt;&gt;();</span>
     }
 
     /**
@@ -356,30 +358,30 @@ public final class SessionManager implements SessionManagerInterface {
     @Override
     public List&lt;SessionInterface&gt; getSessionsForActionAttributes(
             String actionName, String attributeId ) {
-<span class="fc" id="L359">        validStateAndArguments( actionName, attributeId );</span>
+<span class="fc" id="L361">        validStateAndArguments( actionName, attributeId );</span>
         try {
-<span class="fc" id="L361">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
-<span class="fc" id="L362">                .queryBuilder();</span>
-<span class="fc" id="L363">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
-<span class="fc" id="L364">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
-<span class="fc" id="L365">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
-<span class="fc" id="L366">                .isNotNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
-<span class="fc" id="L367">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
-<span class="fc" id="L368">                .eq( OnGoingAttribute.ACTIONNAME_FIELD, actionName ).query();</span>
+<span class="fc" id="L363">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
+<span class="fc" id="L364">                .queryBuilder();</span>
+<span class="fc" id="L365">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
+<span class="fc" id="L366">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
+<span class="fc" id="L367">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
+<span class="fc" id="L368">                .isNotNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
+<span class="fc" id="L369">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).and()</span>
+<span class="fc" id="L370">                .eq( OnGoingAttribute.ACTIONNAME_FIELD, actionName ).query();</span>
 
-<span class="fc" id="L370">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
-<span class="fc bfc" id="L371" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
-<span class="pc bpc" id="L372" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
-<span class="nc bnc" id="L373" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
-<span class="fc" id="L374">                    sessions.add( attr.getSession() );</span>
+<span class="fc" id="L372">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
+<span class="pc bpc" id="L374" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
+<span class="fc" id="L376">                    sessions.add( attr.getSession() );</span>
                 }
-<span class="fc" id="L376">            }</span>
-<span class="fc" id="L377">            return sessions;</span>
+<span class="fc" id="L378">            }</span>
+<span class="fc" id="L379">            return sessions;</span>
 
-<span class="nc" id="L379">        } catch( SQLException e ) {</span>
-<span class="nc" id="L380">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L381">        } catch( SQLException e ) {</span>
+<span class="nc" id="L382">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
         }
-<span class="nc" id="L382">        return new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L384">        return new ArrayList&lt;&gt;();</span>
     }
 
     /**
@@ -391,12 +393,12 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public Optional&lt;SessionInterface&gt; getSessionForId( String sessionId ) {
-<span class="fc" id="L394">        validStateAndArguments( sessionId );</span>
+<span class="fc" id="L396">        validStateAndArguments( sessionId );</span>
         try {
-<span class="fc" id="L396">            return Optional.ofNullable( sessionDao.queryForId( sessionId ) );</span>
-<span class="nc" id="L397">        } catch( SQLException e ) {</span>
-<span class="nc" id="L398">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
-<span class="nc" id="L399">            return Optional.empty();</span>
+<span class="fc" id="L398">            return Optional.ofNullable( sessionDao.queryForId( sessionId ) );</span>
+<span class="nc" id="L399">        } catch( SQLException e ) {</span>
+<span class="nc" id="L400">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L401">            return Optional.empty();</span>
         }
     }
 
@@ -409,19 +411,19 @@ public final class SessionManager implements SessionManagerInterface {
      */
     @Override
     public List&lt;SessionInterface&gt; getSessionsForStatus( String status ) {
-<span class="fc" id="L412">        validStateAndArguments( status );</span>
+<span class="fc" id="L414">        validStateAndArguments( status );</span>
         try {
-<span class="fc" id="L414">            QueryBuilder&lt;Session, String&gt; qbSessions = sessionDao.queryBuilder();</span>
-<span class="fc" id="L415">            List&lt;Session&gt; list = qbSessions.where()</span>
-<span class="fc" id="L416">                .eq( Session.STATUS_FIELD_NAME, status ).query();</span>
-<span class="fc" id="L417">            List&lt;SessionInterface&gt; returnList = new ArrayList&lt;&gt;( list.size() );</span>
-<span class="fc bfc" id="L418" title="All 2 branches covered.">            for( Session session : list ) {</span>
-<span class="fc" id="L419">                returnList.add( session );</span>
-<span class="fc" id="L420">            }</span>
-<span class="fc" id="L421">            return returnList;</span>
-<span class="nc" id="L422">        } catch( SQLException e ) {</span>
-<span class="nc" id="L423">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
-<span class="nc" id="L424">            return new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L416">            QueryBuilder&lt;Session, String&gt; qbSessions = sessionDao.queryBuilder();</span>
+<span class="fc" id="L417">            List&lt;Session&gt; list = qbSessions.where()</span>
+<span class="fc" id="L418">                .eq( Session.STATUS_FIELD_NAME, status ).query();</span>
+<span class="fc" id="L419">            List&lt;SessionInterface&gt; returnList = new ArrayList&lt;&gt;( list.size() );</span>
+<span class="fc bfc" id="L420" title="All 2 branches covered.">            for( Session session : list ) {</span>
+<span class="fc" id="L421">                returnList.add( session );</span>
+<span class="fc" id="L422">            }</span>
+<span class="fc" id="L423">            return returnList;</span>
+<span class="nc" id="L424">        } catch( SQLException e ) {</span>
+<span class="nc" id="L425">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L426">            return new ArrayList&lt;&gt;();</span>
         }
     }
 
@@ -436,83 +438,83 @@ public final class SessionManager implements SessionManagerInterface {
     @Override
     public List&lt;SessionInterface&gt; getSessionsForEnvironmentAttributes(
             String attributeId ) {
-<span class="fc" id="L439">        validStateAndArguments( attributeId );</span>
+<span class="fc" id="L441">        validStateAndArguments( attributeId );</span>
         try {
-<span class="fc" id="L441">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
-<span class="fc" id="L442">                .queryBuilder();</span>
-<span class="fc" id="L443">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
-<span class="fc" id="L444">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
-<span class="fc" id="L445">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
-<span class="fc" id="L446">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
-<span class="fc" id="L447">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).query();</span>
+<span class="fc" id="L443">            QueryBuilder&lt;OnGoingAttribute, String&gt; qbAttributes = attributesDao</span>
+<span class="fc" id="L444">                .queryBuilder();</span>
+<span class="fc" id="L445">            List&lt;OnGoingAttribute&gt; attributes = qbAttributes.where()</span>
+<span class="fc" id="L446">                .isNull( OnGoingAttribute.SUBJECTNAME_FIELD ).and()</span>
+<span class="fc" id="L447">                .isNull( OnGoingAttribute.RESOURCENAME_FIELD ).and()</span>
+<span class="fc" id="L448">                .isNull( OnGoingAttribute.ACTIONNAME_FIELD ).and()</span>
+<span class="fc" id="L449">                .eq( OnGoingAttribute.ATTRIBUTEID_FIELD, attributeId ).query();</span>
 
-<span class="fc" id="L449">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
-<span class="fc bfc" id="L450" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
+<span class="fc" id="L451">            List&lt;SessionInterface&gt; sessions = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L452" title="All 2 branches covered.">            for( OnGoingAttribute attr : attributes ) {</span>
                 // add the considered session only if its status is equal to 's'
-<span class="pc bpc" id="L452" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
-<span class="nc bnc" id="L453" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
-<span class="fc" id="L454">                    sessions.add( attr.getSession() );</span>
+<span class="pc bpc" id="L454" title="1 of 2 branches missed.">                if( attr.getSession().isStatus( STATUS.START.name() )</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">                        || attr.getSession().isStatus( STATUS.REVOKE.name() ) ) {</span>
+<span class="fc" id="L456">                    sessions.add( attr.getSession() );</span>
                 }
-<span class="fc" id="L456">            }</span>
-<span class="fc" id="L457">            return sessions;</span>
+<span class="fc" id="L458">            }</span>
+<span class="fc" id="L459">            return sessions;</span>
 
-<span class="nc" id="L459">        } catch( SQLException e ) {</span>
-<span class="nc" id="L460">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="nc" id="L461">        } catch( SQLException e ) {</span>
+<span class="nc" id="L462">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
         }
-<span class="nc" id="L462">        return new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L464">        return new ArrayList&lt;&gt;();</span>
     }
 
     @Override
     public List&lt;OnGoingAttributesInterface&gt; getOnGoingAttributes( String sessionId ) {
-<span class="fc" id="L467">        validStateAndArguments( sessionId );</span>
+<span class="fc" id="L469">        validStateAndArguments( sessionId );</span>
         try {
-<span class="fc" id="L469">            Session session = sessionDao.queryForId( sessionId );</span>
-<span class="fc" id="L470">            return session.getOnGoingAttribute();</span>
-<span class="fc" id="L471">        } catch( Exception e ) {</span>
-<span class="fc" id="L472">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
-<span class="fc" id="L473">            return new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L471">            Session session = sessionDao.queryForId( sessionId );</span>
+<span class="fc" id="L472">            return session.getOnGoingAttribute();</span>
+<span class="fc" id="L473">        } catch( Exception e ) {</span>
+<span class="fc" id="L474">            log.severe( MSG_ERR_SQL + e.getMessage() ) ;</span>
+<span class="fc" id="L475">            return new ArrayList&lt;&gt;();</span>
         }
     }
 
     @Override
     public REEV_STATUS checkSession( String sessionId, Attribute attribute ) {
-<span class="nc" id="L479">        return null;</span>
+<span class="nc" id="L481">        return null;</span>
     }
 
     @Override
     public boolean insertSession( SessionInterface session, Attribute attribute ) {
-<span class="nc" id="L484">        return false;</span>
+<span class="nc" id="L486">        return false;</span>
     }
 
     @Override
     public boolean stopSession( SessionInterface session ) {
-<span class="nc" id="L489">        return false;</span>
+<span class="nc" id="L491">        return false;</span>
     }
 
     private void validStateAndArguments( Object... objects ) {
-<span class="fc" id="L493">        isInitialized();</span>
-<span class="fc" id="L494">        checkObjectsNotNull( objects );</span>
-<span class="fc" id="L495">    }</span>
+<span class="fc" id="L495">        isInitialized();</span>
+<span class="fc" id="L496">        checkObjectsNotNull( objects );</span>
+<span class="fc" id="L497">    }</span>
 
     @Override
     public boolean isInitialized() {
-<span class="fc" id="L499">        Reject.ifFalse( initialized, &quot;SessionManager was not correctly initialized&quot; );</span>
-<span class="fc" id="L500">        return initialized;</span>
+<span class="fc" id="L501">        Reject.ifFalse( initialized, &quot;SessionManager was not correctly initialized&quot; );</span>
+<span class="fc" id="L502">        return initialized;</span>
     }
 
     private boolean checkObjectsNotNull( Object... objects ) {
-<span class="pc bpc" id="L504" title="1 of 2 branches missed.">        if( objects == null ) {</span>
-<span class="nc" id="L505">            return false;</span>
+<span class="pc bpc" id="L506" title="1 of 2 branches missed.">        if( objects == null ) {</span>
+<span class="nc" id="L507">            return false;</span>
         }
-<span class="fc bfc" id="L507" title="All 2 branches covered.">        for( Object object : objects ) {</span>
-<span class="pc bpc" id="L508" title="1 of 2 branches missed.">            if( object == null ) {</span>
-<span class="nc" id="L509">                return false;</span>
+<span class="fc bfc" id="L509" title="All 2 branches covered.">        for( Object object : objects ) {</span>
+<span class="pc bpc" id="L510" title="1 of 2 branches missed.">            if( object == null ) {</span>
+<span class="nc" id="L511">                return false;</span>
             }
-<span class="pc bpc" id="L511" title="1 of 2 branches missed.">            if( object instanceof String ) {</span>
-<span class="fc" id="L512">                Reject.ifBlank( (String) object );</span>
+<span class="pc bpc" id="L513" title="1 of 2 branches missed.">            if( object instanceof String ) {</span>
+<span class="fc" id="L514">                Reject.ifBlank( (String) object );</span>
             }
         }
-<span class="fc" id="L515">        return true;</span>
+<span class="fc" id="L517">        return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

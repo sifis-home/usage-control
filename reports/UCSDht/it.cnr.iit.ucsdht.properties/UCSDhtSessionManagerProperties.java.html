@@ -6,25 +6,30 @@ import it.cnr.iit.ucs.properties.components.SessionManagerProperties;
 
 <span class="nc" id="L7">public class UCSDhtSessionManagerProperties implements SessionManagerProperties {</span>
 
+<span class="nc" id="L9">	private String dbUri = &quot;jdbc:sqlite:file::memory:?cache=shared&quot;;</span>
+
 	@Override
 	public String getName() {
-<span class="nc" id="L11">		return &quot;it.cnr.iit.ucs.sessionmanager.SessionManager&quot;;</span>
+<span class="nc" id="L13">		return &quot;it.cnr.iit.ucs.sessionmanager.SessionManager&quot;;</span>
 	}
 
 	@Override
 	public Map&lt;String, String&gt; getAdditionalProperties() {
-<span class="nc" id="L16">		return null;</span>
+<span class="nc" id="L18">		return null;</span>
 	}
 
 	@Override
 	public String getId() {
-<span class="nc" id="L21">		return &quot;1&quot;;</span>
+<span class="nc" id="L23">		return &quot;1&quot;;</span>
 	}
 
 	@Override
 	public String getDbUri() {
-<span class="nc" id="L26">		return &quot;jdbc:sqlite:file::memory:?cache=shared&quot;;</span>
+<span class="nc" id="L28">		return dbUri;</span>
 	}
 
+	public void setDbUri(String dbUri) {
+<span class="nc" id="L32">		this.dbUri = dbUri;</span>
+<span class="nc" id="L33">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

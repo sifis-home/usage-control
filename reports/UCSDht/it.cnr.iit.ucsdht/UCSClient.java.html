@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>UCSClient.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">UCSClient.java</span></div><h1>UCSClient.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
 
+import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
 import it.cnr.iit.ucs.exceptions.PAPException;
@@ -16,6 +17,7 @@ import it.cnr.iit.ucs.pipreader.PIPReader;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.ucs.properties.components.SessionManagerProperties;
 import it.cnr.iit.ucs.ucs.UCSInterface;
 import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
@@ -32,173 +34,179 @@ import java.util.logging.Logger;
  */
 public class UCSClient {
 
-<span class="nc" id="L35">    private static final Logger LOGGER = Logger.getLogger(UCSClient.class.getName());</span>
+<span class="nc" id="L37">    private static final Logger LOGGER = Logger.getLogger(UCSClient.class.getName());</span>
 
     private final UCSDhtProperties properties;
 
-    private UCSCoreService ucs;
+    private final UCSCoreService ucs;
 
     private final String papPath;
 
-<span class="nc" id="L43">    public UCSClient(List&lt;PipProperties&gt; pipPropertiesList, PapProperties papProperties) {</span>
-<span class="nc" id="L44">        properties = new UCSDhtProperties(pipPropertiesList, papProperties);</span>
+    public UCSClient(List&lt;PipProperties&gt; pipPropertiesList, PapProperties papProperties,
+<span class="nc" id="L46">                     SessionManagerProperties smProperties, List&lt;PepProperties&gt; pepPropertiesList) {</span>
+<span class="nc" id="L47">        properties = new UCSDhtProperties(pipPropertiesList, papProperties, smProperties, pepPropertiesList);</span>
         try {
-<span class="nc" id="L46">            ucs = new UCSCoreServiceBuilder().setProperties(properties).build();</span>
-<span class="nc" id="L47">        } catch (Exception e) {</span>
-<span class="nc" id="L48">            e.printStackTrace();</span>
-<span class="nc" id="L49">        }</span>
-<span class="nc" id="L50">        papPath = properties.getPolicyAdministrationPoint().getPath();</span>
-<span class="nc" id="L51">    }</span>
+<span class="nc" id="L49">            ucs = new UCSCoreServiceBuilder().setProperties(properties).build();</span>
+<span class="nc" id="L50">        } catch (Exception e) {</span>
+            // e.printStackTrace();
+<span class="nc" id="L52">            throw new RuntimeException(e);</span>
+<span class="nc" id="L53">        }</span>
+<span class="nc" id="L54">        papPath = properties.getPolicyAdministrationPoint().getPath();</span>
+<span class="nc" id="L55">    }</span>
 
     public TryAccessResponseMessage tryAccess(String request, String policy, String pepId, String messageId) {
-<span class="nc" id="L54">        TryAccessMessage message = buildTryAccessMessage(request, policy, pepId, messageId);</span>
-<span class="nc" id="L55">        return ucs.tryAccess(message);</span>
+<span class="nc" id="L58">        TryAccessMessage message = buildTryAccessMessage(request, policy, pepId, messageId);</span>
+<span class="nc" id="L59">        return ucs.tryAccess(message);</span>
     }
 
     public StartAccessResponseMessage startAccess(String sessionId, String pepId, String messageId) {
-<span class="nc" id="L59">        StartAccessMessage message = buildStartAccessMessage(sessionId, pepId, messageId);</span>
-<span class="nc" id="L60">        return ucs.startAccess(message);</span>
+<span class="nc" id="L63">        StartAccessMessage message = buildStartAccessMessage(sessionId, pepId, messageId);</span>
+<span class="nc" id="L64">        return ucs.startAccess(message);</span>
     }
 
     public EndAccessResponseMessage endAccess(String sessionId, String pepId, String messageId) {
-<span class="nc" id="L64">        EndAccessMessage message = buildEndAccessMessage(sessionId, pepId, messageId);</span>
-<span class="nc" id="L65">        return ucs.endAccess(message);</span>
+<span class="nc" id="L68">        EndAccessMessage message = buildEndAccessMessage(sessionId, pepId, messageId);</span>
+<span class="nc" id="L69">        return ucs.endAccess(message);</span>
     }
 
     private TryAccessMessage buildTryAccessMessage(String request, String policy, String pepId, String messageId) {
-<span class="nc" id="L69">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
+<span class="nc" id="L73">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
 //        TryAccessMessage message = new TryAccessMessage(pepProperties.getId(), pepProperties.getUri());
         // todo: find out what 'destination' (second parameter of the TryAccessMessage method) should be.
         //       In existing invocations, once is the ucsUri and once the pep.Uri contained in the pepProperties.
         //       I can't figure out its purpose yet.
-<span class="nc" id="L74">        TryAccessMessage message = new TryAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
-<span class="nc" id="L75">        message.setRequest(request);</span>
+<span class="nc" id="L78">        TryAccessMessage message = new TryAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
+<span class="nc" id="L79">        message.setRequest(request);</span>
 //        message.setPolicy(policy);
-<span class="nc" id="L77">        return message;</span>
+<span class="nc" id="L81">        return message;</span>
     }
 
     private StartAccessMessage buildStartAccessMessage(String sessionId, String pepId, String messageId) {
-<span class="nc" id="L81">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
+<span class="nc" id="L85">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
         // todo: same as in buildTryAccessMessage
-<span class="nc" id="L83">        StartAccessMessage message = new StartAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
-<span class="nc" id="L84">        message.setSessionId(sessionId);</span>
-<span class="nc" id="L85">        return message;</span>
+<span class="nc" id="L87">        StartAccessMessage message = new StartAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
+<span class="nc" id="L88">        message.setSessionId(sessionId);</span>
+<span class="nc" id="L89">        return message;</span>
     }
 
     private EndAccessMessage buildEndAccessMessage(String sessionId, String pepId, String messageId) {
-<span class="nc" id="L89">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
+<span class="nc" id="L93">        PepProperties pepProperties = ucs.getPEPMap().get(pepId).getProperties();</span>
         // todo: same as in buildTryAccessMessage
-<span class="nc" id="L91">        EndAccessMessage message = new EndAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
-<span class="nc" id="L92">        message.setSessionId(sessionId);</span>
-<span class="nc" id="L93">        return message;</span>
+<span class="nc" id="L95">        EndAccessMessage message = new EndAccessMessage(pepId, pepProperties.getUri(), messageId);</span>
+<span class="nc" id="L96">        message.setSessionId(sessionId);</span>
+<span class="nc" id="L97">        return message;</span>
     }
 
     public boolean addPolicy(String policy) {
         // todo: check that policyId and the policy identifier within the policy match. If not, return false
-<span class="nc" id="L98">        String id = ucs.getPap().addPolicy(policy);</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">        return id != null;</span>
+<span class="nc" id="L102">        String id = ucs.getPap().addPolicy(policy);</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        return id != null;</span>
     }
 
     public boolean deletePolicy(String policyId) {
-<span class="nc" id="L103">        return ucs.getPap().deletePolicy(policyId);</span>
+<span class="nc" id="L107">        return ucs.getPap().deletePolicy(policyId);</span>
     }
 
     public List&lt;String&gt; listPolicies() {
         try {
-<span class="nc" id="L108">            return ucs.getPap().listPolicies();</span>
-<span class="nc" id="L109">        } catch (PAPException e) {</span>
-<span class="nc" id="L110">            throw new RuntimeException(e.getMessage());</span>
+<span class="nc" id="L112">            return ucs.getPap().listPolicies();</span>
+<span class="nc" id="L113">        } catch (PAPException e) {</span>
+<span class="nc" id="L114">            throw new RuntimeException(e.getMessage());</span>
         }
     }
 
     public String getPolicy(String policyId) {
-<span class="nc" id="L115">        return ucs.getPap().retrievePolicy(policyId);</span>
+<span class="nc" id="L119">        return ucs.getPap().retrievePolicy(policyId);</span>
     }
 
     public UCSInterface getInterface() {
-<span class="nc" id="L119">        return ucs;</span>
+<span class="nc" id="L123">        return ucs;</span>
     }
 
     public UCSDhtProperties getProperties() {
-<span class="nc" id="L123">        return properties;</span>
+<span class="nc" id="L127">        return properties;</span>
     }
 
     public String findPolicy(String req) {
         RequestWrapper request;
         try {
-<span class="nc" id="L129">            request = RequestWrapper.build(req);</span>
-<span class="nc" id="L130">        } catch (RequestException e) {</span>
-<span class="nc" id="L131">            LOGGER.info(&quot;Unable to create request wrapper&quot;);</span>
-<span class="nc" id="L132">            return null;</span>
-<span class="nc" id="L133">        }</span>
-<span class="nc" id="L134">        PolicyWrapper policy = ucs.getPdp().findPolicy(request);</span>
-<span class="nc" id="L135">        return policy.getPolicyType().getPolicyId();</span>
+<span class="nc" id="L133">            request = RequestWrapper.build(req);</span>
+<span class="nc" id="L134">        } catch (RequestException e) {</span>
+<span class="nc" id="L135">            LOGGER.info(&quot;Unable to create request wrapper&quot;);</span>
+<span class="nc" id="L136">            return null;</span>
+<span class="nc" id="L137">        }</span>
+<span class="nc" id="L138">        PolicyWrapper policy = ucs.getPdp().findPolicy(request);</span>
+<span class="nc" id="L139">        return policy.getPolicyType().getPolicyId();</span>
     }
 
     public String getPapPath() {
-<span class="nc" id="L139">        return papPath;</span>
+<span class="nc" id="L143">        return papPath;</span>
     }
 
     public boolean addPep(String pepId, String subTopicName, String subTopicUuid) {
-<span class="nc" id="L143">        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();</span>
-<span class="nc" id="L144">        pepProperties.setId(pepId);</span>
-<span class="nc" id="L145">        pepProperties.setSubTopicName(subTopicName);</span>
-<span class="nc" id="L146">        pepProperties.setSubTopicUuid(subTopicUuid);</span>
-<span class="nc" id="L147">        PEPInterface pep = new PEPDhtUCSSide(pepProperties);</span>
+<span class="nc" id="L147">        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();</span>
+<span class="nc" id="L148">        pepProperties.setId(pepId);</span>
+<span class="nc" id="L149">        pepProperties.setSubTopicName(subTopicName);</span>
+<span class="nc" id="L150">        pepProperties.setSubTopicUuid(subTopicUuid);</span>
+<span class="nc" id="L151">        PEPInterface pep = new PEPDhtUCSSide(pepProperties);</span>
         try {
-<span class="nc" id="L149">            ucs.getPEPMap().put(pepId, pep);</span>
-<span class="nc" id="L150">            ucs.getRequestManager().setPEPMap(ucs.getPEPMap());</span>
-<span class="nc" id="L151">        } catch (Exception e) {</span>
-<span class="nc" id="L152">            e.printStackTrace();</span>
-<span class="nc" id="L153">            return false;</span>
-<span class="nc" id="L154">        }</span>
-<span class="nc" id="L155">        return true;</span>
+<span class="nc" id="L153">            ucs.getPEPMap().put(pepId, pep);</span>
+<span class="nc" id="L154">            ucs.getRequestManager().setPEPMap(ucs.getPEPMap());</span>
+<span class="nc" id="L155">        } catch (Exception e) {</span>
+<span class="nc" id="L156">            e.printStackTrace();</span>
+<span class="nc" id="L157">            return false;</span>
+<span class="nc" id="L158">        }</span>
+<span class="nc" id="L159">        return true;</span>
     }
 
     public boolean addPip(String pipType, String attributeId, String category,
                           String dataType, String attributePath, String fileName, long refreshRate) {
-<span class="nc bnc" id="L160" title="All 2 branches missed.">        if (!pipType.equals(&quot;PIPReader&quot;)) {</span>
-<span class="nc" id="L161">            System.err.println(&quot;pip_type differs from PIPReader: &quot; +</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (!pipType.equals(&quot;PIPReader&quot;)) {</span>
+<span class="nc" id="L165">            System.err.println(&quot;pip_type differs from PIPReader: &quot; +</span>
                     &quot;at the moment, PIPReader is the only type of PIP supported&quot;);
-<span class="nc" id="L163">            return false;</span>
+<span class="nc" id="L167">            return false;</span>
         }
 
-<span class="nc" id="L166">        checkIfAttributeIdAlreadyMonitored(attributeId);</span>
+<span class="nc" id="L170">        checkIfAttributeIdAlreadyMonitored(attributeId);</span>
 
         // need to check it here since in the properties we concatenate the attributePath and the fileName.
         // Therefore, when the PIP gets initialized, the fileName will never be empty, but it possibly
         // contains only the attributePath if the fileName happened to be empty.
-<span class="nc" id="L171">        Reject.ifTrue(fileName.isEmpty(), &quot;'file_name' cannot be empty&quot;);</span>
+<span class="nc" id="L175">        Reject.ifTrue(fileName.isEmpty(), &quot;'file_name' cannot be empty&quot;);</span>
 
-<span class="nc" id="L173">        UCSDhtPipReaderProperties pipProperties = new UCSDhtPipReaderProperties();</span>
+<span class="nc" id="L177">        UCSDhtPipReaderProperties pipProperties = new UCSDhtPipReaderProperties();</span>
 
-<span class="nc" id="L175">        pipProperties.addAttribute(attributeId, category, dataType, attributePath + fileName);</span>
-<span class="nc" id="L176">        pipProperties.setRefreshRate(refreshRate);</span>
+<span class="nc" id="L179">        pipProperties.addAttribute(attributeId, category, dataType, attributePath + fileName);</span>
+<span class="nc" id="L180">        pipProperties.setRefreshRate(refreshRate);</span>
 
-<span class="nc" id="L178">        PIPBase pip = new PIPReader(pipProperties);</span>
+<span class="nc" id="L182">        PIPBase pip = new PIPReader(pipProperties);</span>
         try {
-<span class="nc" id="L180">            ucs.getPipList().add(pip);</span>
-<span class="nc" id="L181">            pip.setRequestManager(ucs.getRequestManager());</span>
-<span class="nc" id="L182">        } catch (Exception e) {</span>
-<span class="nc" id="L183">            e.printStackTrace();</span>
-<span class="nc" id="L184">            return false;</span>
-<span class="nc" id="L185">        }</span>
-<span class="nc" id="L186">        return true;</span>
+<span class="nc" id="L184">            ucs.getPipList().add(pip);</span>
+<span class="nc" id="L185">            pip.setRequestManager(ucs.getRequestManager());</span>
+<span class="nc" id="L186">        } catch (Exception e) {</span>
+<span class="nc" id="L187">            e.printStackTrace();</span>
+<span class="nc" id="L188">            return false;</span>
+<span class="nc" id="L189">        }</span>
+<span class="nc" id="L190">        return true;</span>
     }
 
     private void checkIfAttributeIdAlreadyMonitored(String attributeId) {
-<span class="nc bnc" id="L190" title="All 2 branches missed.">        for (PIPBase pip : ucs.getPipList()) {</span>
-<span class="nc" id="L191">            Reject.ifTrue(pip.getAttributeIds().contains(attributeId),</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        for (PIPBase pip : ucs.getPipList()) {</span>
+<span class="nc" id="L195">            Reject.ifTrue(pip.getAttributeIds().contains(attributeId),</span>
                     &quot;Another PIP is already monitoring the same attributeId&quot;);
-<span class="nc" id="L193">        }</span>
-<span class="nc" id="L194">    }</span>
+<span class="nc" id="L197">        }</span>
+<span class="nc" id="L198">    }</span>
 
     public boolean pepMapHas(String pepId) {
-<span class="nc" id="L197">        return ucs.getPEPMap().containsKey(pepId);</span>
+<span class="nc" id="L201">        return ucs.getPEPMap().containsKey(pepId);</span>
     }
 
     public PepProperties getPepProperties(String pepId) {
-<span class="nc" id="L201">        return ucs.getPEPMap().get(pepId).getProperties();</span>
+<span class="nc" id="L205">        return ucs.getPEPMap().get(pepId).getProperties();</span>
+    }
+
+    public PIPRegistryInterface getPipRegistry() {
+<span class="nc" id="L209">        return ucs.getContextHandler().getPipRegistry();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
