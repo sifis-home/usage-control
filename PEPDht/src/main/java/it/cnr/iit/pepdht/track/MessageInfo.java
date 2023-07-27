@@ -1,13 +1,13 @@
 package it.cnr.iit.pepdht.track;
 
-import it.cnr.iit.utility.dht.jsondht.EvaluatedMessageContent;
-import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessRequest;
-import it.cnr.iit.utility.dht.jsondht.endaccess.EndAccessResponse;
-import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
-import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessRequest;
-import it.cnr.iit.utility.dht.jsondht.startaccess.StartAccessResponse;
-import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessRequest;
-import it.cnr.iit.utility.dht.jsondht.tryaccess.TryAccessResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.EvaluatedMessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.endaccess.EndAccessRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.endaccess.EndAccessResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.startaccess.StartAccessRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.startaccess.StartAccessResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.tryaccess.TryAccessRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.tryaccess.TryAccessResponse;
 
 public class MessageInfo {
 

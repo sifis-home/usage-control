@@ -2,12 +2,12 @@ package it.cnr.iit.ucsdht;
 
 import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
 import it.cnr.iit.utility.JsonUtility;
-import it.cnr.iit.utility.dht.jsondht.JsonIn;
-import it.cnr.iit.utility.dht.jsondht.JsonOut;
-import it.cnr.iit.utility.dht.jsondht.MessageContent;
-import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
-import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
-import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.addpip.AddPipResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.error.ErrorResponse;
 
 import java.io.File;
 import java.util.HashMap;

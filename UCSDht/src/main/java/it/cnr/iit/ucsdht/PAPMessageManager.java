@@ -1,17 +1,17 @@
 package it.cnr.iit.ucsdht;
 
-import it.cnr.iit.utility.dht.jsondht.JsonIn;
-import it.cnr.iit.utility.dht.jsondht.JsonOut;
-import it.cnr.iit.utility.dht.jsondht.MessageContent;
-import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyRequest;
-import it.cnr.iit.utility.dht.jsondht.addpolicy.AddPolicyResponse;
-import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyRequest;
-import it.cnr.iit.utility.dht.jsondht.deletepolicy.DeletePolicyResponse;
-import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
-import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyRequest;
-import it.cnr.iit.utility.dht.jsondht.getpolicy.GetPolicyResponse;
-import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesRequest;
-import it.cnr.iit.utility.dht.jsondht.listpolicies.ListPoliciesResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.addpolicy.AddPolicyRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.addpolicy.AddPolicyResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.deletepolicy.DeletePolicyRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.deletepolicy.DeletePolicyResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.error.ErrorResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.getpolicy.GetPolicyRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.getpolicy.GetPolicyResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.listpolicies.ListPoliciesRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.listpolicies.ListPoliciesResponse;
 
 import java.util.Base64;
 import java.util.List;
