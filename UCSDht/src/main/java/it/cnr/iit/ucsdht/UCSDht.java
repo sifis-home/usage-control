@@ -71,12 +71,11 @@ public class UCSDht {
 
     public static void main(String[] args) {
 
-        if (args[0].equals("--help")) {
-            printUsage();
-            System.exit(0);
-        }
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
+                case "--help":
+                    printUsage();
+                    System.exit(0);
                 case "--dht":
                     URI parsed = null;
                     try {
