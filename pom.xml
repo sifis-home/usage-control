@@ -87,6 +87,8 @@
                     <filesets>
                         <fileset>
                             <directory>${basedir}/apps</directory>
+                        </fileset>
+                        <fileset>
                             <directory>${basedir}/docker-build</directory>
                         </fileset>
                     </filesets>
