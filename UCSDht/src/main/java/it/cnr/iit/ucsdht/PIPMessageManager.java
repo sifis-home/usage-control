@@ -87,7 +87,7 @@ public class PIPMessageManager {
         pipReaderProperties.addAttribute(attributeId, category, dataType, fileName);
         pipReaderProperties.setRefreshRate(refreshRate);
         Map<String, String> additionalProperties = new HashMap<>();
-        additionalProperties.put("value", attributeValue);
+        additionalProperties.put(fileName, attributeValue);
         pipReaderProperties.setAdditionalProperties(additionalProperties);
 
         JsonUtility.dumpObjectToJsonFile(pipReaderProperties,

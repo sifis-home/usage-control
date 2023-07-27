@@ -1,5 +1,6 @@
 package it.cnr.iit.ucsdht;
 
+import com.google.gson.GsonBuilder;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -16,6 +17,9 @@ import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtSessionManagerProperties;
 import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.DHTClient;
+import it.cnr.iit.utility.dht.DHTPersistentMessageClient;
+import it.cnr.iit.utility.dht.PersistUtility;
+import it.cnr.iit.utility.dht.jsonpersistent.*;
 import it.cnr.iit.xacml.Attribute;
 import it.cnr.iit.xacml.Category;
 import it.cnr.iit.xacml.DataType;
@@ -36,10 +40,6 @@ public class UCSDht {
     static DHTClient dhtClientEndPoint;
     static UCSClient ucsClient;
 
-    private static String dhtUri = "ws://localhost:3000/ws";
-    private static String dbUri = "jdbc:sqlite:file::memory:?cache=shared";
-
-
     static final String COMMAND_TYPE = "ucs-command";
     static final String UCS_SUB_TOPIC_UUID = "topic-uuid-the-ucs-is-subscribed-to";
 
@@ -51,6 +51,10 @@ public class UCSDht {
     static final File pipsDir = new File(Utils.getResourcePath(UCSDht.class), "pips");
     static final File policiesDir = new File(Utils.getResourcePath(UCSDht.class), "policies");
     static final File pepsDir = new File(Utils.getResourcePath(UCSDht.class), "peps");
+    static final File databaseDir = new File(Utils.getResourcePath(UCSDht.class), "database");
+
+    private static String dhtUri = "ws://localhost:3000/ws";
+    private static final String dbUri = "jdbc:sqlite:" + databaseDir + File.separator + "database.db";
 
 
     static final List<PipProperties> pipPropertiesList = new ArrayList<>();
@@ -63,8 +67,14 @@ public class UCSDht {
     static boolean softReset = false;
     static boolean hardReset = false;
 
+    static DHTPersistentMessageClient client = new DHTPersistentMessageClient(dhtUri);
+
     public static void main(String[] args) {
 
+        if (args[0].equals("--help")) {
+            printUsage();
+            System.exit(0);
+        }
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
                 case "--dht":
@@ -73,24 +83,11 @@ public class UCSDht {
                         parsed = new URI(args[i + 1]);
                     } catch (URISyntaxException | ArrayIndexOutOfBoundsException e) {
                         // No URI indicated
-                        System.err.println("Invalid URI after --dht option");
+                        System.err.println("Invalid URI after --dht option\n");
+                        printUsage();
                         System.exit(1);
                     }
                     dhtUri = parsed.toString();
-                    i = i + 1;
-                    break;
-                case "--db":
-                    try {
-                        dbUri = args[i + 1];
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.err.println("Invalid database URI after --db option");
-                        System.exit(1);
-                    }
-                    if (!dbUri.startsWith("jdbc:")) {
-                        System.err.println("Invalid database URL after --db option");
-                        System.err.println("Database URL was expected to start with jdbc: but was " + dbUri);
-                        System.exit(1);
-                    }
                     i = i + 1;
                     break;
                 case "--soft-reset":
@@ -102,15 +99,22 @@ public class UCSDht {
                     hardReset = true;
                     break;
                 default:
-                    System.err.println("Unknown option");
+                    System.err.println("Unknown option " + args[i] + "\n");
+                    printUsage();
                     System.exit(1);
             }
         }
 
+        if (hardReset) {
+            performHardReset();
+        } else if (softReset) {
+            performSoftReset();
+        } else {
+            reloadState();
+        }
+
         try {
-            restoreUCSState();
             initializeUCS();
-            restorePIPsSubscriptions();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -118,14 +122,11 @@ public class UCSDht {
 
         System.out.println();
         System.out.println("UCS initialization complete");
-        System.out.println("  Policies directory: " + policiesDir.getAbsolutePath());
+        System.out.println("  Database directory: " + databaseDir.getAbsolutePath());
         System.out.println("  PIPs directory: " + pipsDir.getAbsolutePath());
         System.out.println("  PEPs directory: " + pepsDir.getAbsolutePath());
+        System.out.println("  Policies directory: " + policiesDir.getAbsolutePath());
         System.out.println();
-
-        if (!isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
-            System.exit(1);
-        }
 
         try {
             dhtClientEndPoint = new DHTClient(new URI(dhtUri));
@@ -133,56 +134,369 @@ public class UCSDht {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+
+        StatusWatcher watcher = null;
+        try {
+            watcher = new StatusWatcher(Arrays.asList(
+                    databaseDir.toPath(), pipsDir.toPath(), pepsDir.toPath(), policiesDir.toPath()));
+            watcher.startMonitoring();
+        } catch (IOException e) {
+            if (watcher != null) {
+                watcher.stopMonitoring();
+            }
+            throw new RuntimeException(e);
+        }
+
+        try {
+            restorePIPsSubscriptions();
+            reevaluateSessions();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
         System.out.println("Waiting for commands...");
         System.out.println();
     }
 
+    public static void printUsage() {
+        System.out.println(
+                "Usage Control Engine\n" +
+                "\n" +
+                "Options:\n" +
+                "--dht <dhtUri> The websocket URI of the DHT  \n" +
+                "               (default: ws://localhost:3000/ws)\n" +
+                "\n" +
+                "--hard-reset   The UCS is initialized with a new database,\n" +
+                "               all PIPs, PEPs, and policies are deleted.\n" +
+                "               The new state is saved on the DHT right after \n" +
+                "               the initialization.\n" +
+                "\n" +
+                "--soft-reset   The UCS is initialized with a new database,\n" +
+                "               but all PIPs, PEPs, and policies are preserved.\n" +
+                "               The new state is saved on the DHT right after \n" +
+                "               the initialization.\n" +
+                "\n" +
+                "               If both --hard-reset and --soft-reset are specified,\n" +
+                "               --hard-reset prevails.");
 
-    /**
-     * Load PIPs and PEPs if no hard reset is specified; otherwise remove them.
-     * Then, if any kind of reset is specified, wipe the database (drop the tables);
-     * otherwise, extract the sessions with status START and REVOKE.
-     */
-    private static void restoreUCSState() {
-        // if --hard-reset option is set, we empty PIPs, PEPs, and policies folders.
-        // Else, we create the folders only if they don't exist, thus we preserve
-        // the files possibly contained in them. Then, we load PIPs and PEPs by
-        // deserializing the related json files.
-        if (hardReset) {
-            Utils.createDir(pipsDir);
-            Utils.createDir(policiesDir);
-            Utils.createDir(pepsDir);
+    }
+
+    public static void performHardReset() {
+        System.out.println("Performing hard reset...");
+        // reset everything
+        initializeDb();
+        Utils.createDir(pipsDir);
+        Utils.createDir(pepsDir);
+        Utils.createDir(policiesDir);
+
+        // save the new state to the dht
+        uploadStatus();
+    }
+
+    public static void performSoftReset() {
+        System.out.println("Performing soft reset...");
+        // get the state from the dht
+        Value status = downloadStatus();
+        if (status == null) {
+            // if there is no state
+            //   perform hard reset
+            performHardReset();
         } else {
-            Utils.createDirIfNotExists(pipsDir);
-            Utils.createDirIfNotExists(policiesDir);
-            Utils.createDirIfNotExists(pepsDir);
+            initializeDb();
+            restorePips(status.getPips());
+            restorePeps(status.getPeps());
+            restorePolicies(status.getPolicies());
 
-            loadPips();
-            loadPeps();
-        }
-
-        // If either --soft-reset or --hard-reset is set, the 'sessions' table and
-        // the 'on_going_attributes' table are deleted from the database.
-        // Otherwise, the sessions with status START and REVOKE are retrieved from
-        // the 'sessions' table. This is needed to restore the PIPs' subscriptions
-        // and has to be done after the UCS is initialized.
-        if (softReset || hardReset) {
-            try (ConnectionSource connectionSource = new JdbcConnectionSource(dbUri)) {
-                TableUtils.dropTable(connectionSource, Session.class, true);
-                TableUtils.dropTable(connectionSource, OnGoingAttribute.class, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            UCSDhtSessionManagerProperties smProp = new UCSDhtSessionManagerProperties();
-            smProp.setDbUri(dbUri);
-            SessionManager sessionManager = new SessionManager(smProp);
-            sessionManager.start();
-            sessionsWithStatusStartOrRevoke.addAll(sessionManager.getSessionsForStatus(STATUS.START.toString()));
-            sessionsWithStatusStartOrRevoke.addAll(sessionManager.getSessionsForStatus(STATUS.REVOKE.toString()));
-            sessionManager.stop();
+            // save the new state to the dht
+            uploadStatus();
         }
     }
+
+    public static void reloadState() {
+        System.out.println("Reloading state...");
+        // get the state from the dht
+        Value status = downloadStatus();
+        if (status == null) {
+            // if there is no state
+            //   perform hard reset
+            performHardReset();
+        } else {
+            restoreDb(status.getDatabase());
+            restorePips(status.getPips());
+            restorePeps(status.getPeps());
+            restorePolicies(status.getPolicies());
+
+            // do not save the new state to the dht since nothing changed
+        }
+    }
+
+
+    /**
+     * Create a new database file with empty tables
+     */
+    public static void initializeDb() {
+        Utils.createDir(databaseDir);
+        try (ConnectionSource connectionSource = new JdbcConnectionSource(dbUri)) {
+            TableUtils.dropTable(connectionSource, Session.class, true);
+            TableUtils.dropTable(connectionSource, OnGoingAttribute.class, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
+     * Create the database file using the string obtained from the dht.
+     * Then, extract the sessions with status START and REVOKED to be used after
+     * the UCS is initialized in order to restore pips subscriptions.
+     * @param dbString the base64 string representing the database file
+     */
+    public static void restoreDb(String dbString) {
+        // write the database to file
+        Utils.createDir(databaseDir);
+        PersistUtility.base64StringToFile(dbString, databaseDir + File.separator + "database.db");
+        System.out.println("[DATABASE] Database correctly retrieved from the DHT and saved to file");
+
+        // save the sessions with status START and REVOKE
+        UCSDhtSessionManagerProperties smProp = new UCSDhtSessionManagerProperties();
+        smProp.setDbUri(dbUri);
+        SessionManager sessionManager = new SessionManager(smProp);
+        sessionManager.start();
+        sessionsWithStatusStartOrRevoke.addAll(sessionManager.getSessionsForStatus(STATUS.START.toString()));
+        sessionsWithStatusStartOrRevoke.addAll(sessionManager.getSessionsForStatus(STATUS.REVOKE.toString()));
+        sessionManager.stop();
+        System.out.println("[DATABASE] Sessions with status START and REVOKED gathered. "
+                + sessionsWithStatusStartOrRevoke.size() + " sessions found.");
+    }
+
+
+    /**
+     * Create the pip properties files using the strings obtained from the dht.
+     * Then, load the pip properties in memory to be used during the UCS initialization.
+     * @param pipsString the list of base64 strings representing the pip properties files
+     */
+    public static void restorePips(List<String> pipsString) {
+        // write pip folders and files
+        Utils.createDir(pipsDir);
+        for (String pipString : pipsString) {
+            // extract pip id
+            PipProperties pipProperties =
+                    PersistUtility.getPipPropertiesFromBase64String(pipString, UCSDhtPipReaderProperties.class);
+            assert pipProperties != null;
+            String pipId = pipProperties.getId();
+
+            // create pip properties json file
+            Utils.createDir(new File(pipsDir.getAbsolutePath(), pipId));
+            PersistUtility.base64StringToFile(pipString, pipsDir + File.separator + pipId + File.separator + pipId + ".json");
+
+            // create the file(s) with the attribute value
+            for (Map<String, String> attribute : pipProperties.getAttributes()) {
+                String attributeFilePath = attribute.get("FILE_PATH");
+                String attributeValue = pipProperties.getAdditionalProperties().get(attributeFilePath);
+                setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId + File.separator + attributeFilePath, attributeValue);
+            }
+        }
+
+        // load the pips' properties in memory from the json files
+        loadPips();
+    }
+
+
+    /**
+     * Create the pep properties files using the strings obtained from the dht.
+     * Then, load the pep properties in memory to be used during the UCS initialization.
+     * @param pepsString the list of base64 strings representing the pep properties files
+     */
+    public static void restorePeps(List<String> pepsString) {
+        // write pep files
+        Utils.createDir(pepsDir);
+        for (String pepString : pepsString) {
+            // extract pep id
+            PepProperties pepProperties = PersistUtility.getPepPropertiesFromBase64String(pepString, UCSDhtPepProperties.class);
+            assert pepProperties != null;
+            String pepId = pepProperties.getId();
+
+            // create pep properties json file
+            PersistUtility.base64StringToFile(pepString, pepsDir + File.separator + pepId + ".json");
+        }
+
+        // load the peps' properties in memory from the json files
+        loadPeps();
+    }
+
+
+    /**
+     * Create the policies files using the strings obtained from the dht.
+     * @param policiesString the list of base64 strings representing the policy files
+     */
+    public static void restorePolicies(List<String> policiesString) {
+        // write policies files
+        Utils.createDir(policiesDir);
+        for (String policyString : policiesString) {
+            // extract policy id
+            String policyId = PersistUtility.getPolicyIdFromBase64String(policyString);
+
+            // create policy file
+            PersistUtility.base64StringToFile(policyString, policiesDir + File.separator + policyId + ".xml");
+        }
+    }
+
+
+    /**
+     * Transform the database file into a string in order to be stored in the dht.
+     * @return a base64 string representing the database, or null if the file does
+     * not exist
+     */
+    public static String saveDbToString() {
+        File targetFile = new File(databaseDir, "database.db");
+        if (targetFile.exists() && targetFile.isFile()) {
+            return PersistUtility.fileToBase64String(databaseDir + File.separator + "database.db");
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Transform the pip properties json files into strings in order to be stored in the dht
+     * @return a list of base64 strings representing the pip properties files
+     */
+    public static List<String> savePipsToString() {
+
+        List<String> pipStrings = new ArrayList<>();
+
+        if (pipsDir.exists() && pipsDir.isDirectory()) {
+            File[] subDirs = pipsDir.listFiles(File::isDirectory);
+            if (subDirs != null) {
+                for (File subDir : subDirs) {
+                    File targetFile = new File(subDir, subDir.getName() + ".json");
+                    if (targetFile.exists() && targetFile.isFile()) {
+                        pipStrings.add(PersistUtility.fileToBase64String(
+                                subDir.getAbsolutePath() + File.separator + subDir.getName() + ".json"));
+                    } else {
+                        System.out.println("Target file not found in subfolder: " + subDir.getAbsolutePath());
+                    }
+                }
+            }
+        } else {
+            System.out.println("PIPs folder not found or is not a directory.");
+        }
+        return pipStrings;
+    }
+
+
+    /**
+     * Transform the pep properties json files into strings in order to be stored in the dht
+     * @return a list of base64 strings representing the pep properties files
+     */
+    public static List<String> savePepsToString() {
+
+        List<String> pepStrings = new ArrayList<>();
+
+        if (pepsDir.exists() && pepsDir.isDirectory()) {
+            File[] files = pepsDir.listFiles(File::isFile);
+            if (files != null) {
+                for (File targetFile : files) {
+                    pepStrings.add(PersistUtility.fileToBase64String(targetFile.getAbsolutePath()));
+                }
+            }
+        } else {
+            System.out.println("PEPs folder not found or is not a directory.");
+        }
+        return pepStrings;
+    }
+
+
+    /**
+     * Transform the policies into strings in order to be stored in the dht
+     * @return a list of base64 strings representing the policy files
+     */
+    public static List<String> savePoliciesToString() {
+
+        List<String> policiesStrings = new ArrayList<>();
+
+        if (policiesDir.exists() && policiesDir.isDirectory()) {
+            File[] files = policiesDir.listFiles(File::isFile);
+            if (files != null) {
+                for (File targetFile : files) {
+                    policiesStrings.add(PersistUtility.fileToBase64String(targetFile.getAbsolutePath()));
+                }
+            }
+        } else {
+            System.out.println("Policies folder not found or is not a directory.");
+        }
+        return policiesStrings;
+    }
+
+    /**
+     * Obtain the UCS status from the dht.
+     * @return the inner value field of the received response containing the base64 string
+     * representations of the database, pips, peps, and policies
+     */
+    public static Value downloadStatus() {
+        // get the status from the dht
+        String response = null;
+        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
+            RequestGetTopicUuid requestGetTopicUuid =
+                    new RequestGetTopicUuid("SIFIS:UCS", "status");
+
+            JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);
+            String request = new GsonBuilder()
+                    .disableHtmlEscaping()
+                    .serializeNulls()
+                    .create()
+                    .toJson(jsonOut);
+
+            response = client.sendRequestAndWaitForResponse(request);
+            client.closeConnection();
+        } else {
+            System.exit(1);
+        }
+
+        JsonInResponse jsonInResponse = new GsonBuilder().create().fromJson(response, JsonInResponse.class);
+
+        return jsonInResponse.getResponse().getValue().getValue();
+    }
+
+
+    /**
+     * Save the UCS status to the dht
+     */
+    public static void uploadStatus() {
+
+        Value value = new Value(
+                saveDbToString(),
+                savePipsToString(),
+                savePepsToString(),
+                savePoliciesToString());
+        RequestPostTopicUuid requestPostTopicUuid =
+                new RequestPostTopicUuid(value, "SIFIS:UCS", "status");
+        JsonOutRequestPostTopicUuid jsonOut = new JsonOutRequestPostTopicUuid(requestPostTopicUuid);
+        String request = new GsonBuilder()
+                .disableHtmlEscaping()
+                .serializeNulls()
+                .create()
+                .toJson(jsonOut);
+
+        String response = null;
+        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
+            response = client.sendRequestAndWaitForResponse(request);
+            client.closeConnection();
+        } else {
+            System.exit(1);
+        }
+
+        JsonInPersistent jsonInPersistent = new GsonBuilder().create().fromJson(response, JsonInPersistent.class);
+
+        // fixme: sort of check to assess if the received response is invalid. Does it make sense?
+        if (jsonInPersistent.getPersistent().isDeleted()) {
+            System.err.println("The received response is marked as deleted");
+            System.exit(1);
+        } else {
+            System.out.println("Current state correctly stored on the dht");
+        }
+    }
+
 
     /**
      * Add a sample PIP monitoring an environment attribute; then, initialize
@@ -215,19 +529,38 @@ public class UCSDht {
      * to.
      */
     public static void restorePIPsSubscriptions() {
-        if (!(softReset || hardReset)) {
-            // restore PIPs' subscriptions
-            for (SessionInterface session : sessionsWithStatusStartOrRevoke) {
-                try {
-                    PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
-                    List<Attribute> attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
-                    RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), ucsClient.getPipRegistry());
-                    ucsClient.getPipRegistry().subscribe(request.getRequestType(), attributes);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+        // restore PIPs' subscriptions
+        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {
+            try {
+                PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());
+                List<Attribute> attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));
+                RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), ucsClient.getPipRegistry());
+                ucsClient.getPipRegistry().subscribe(request.getRequestType(), attributes);
+            } catch (Exception e) {
+                System.err.println("Error restoring PIPs' subscriptions");
+                throw new RuntimeException(e);
             }
-            System.out.println("PIPs' subscriptions restored.");
+        }
+        System.out.println("PIPs' subscriptions restored.");
+    }
+
+    /**
+     * Reevaluate the sessions with status START and REVOKE. This has to be
+     * done because the value of mutable attributes that led either to the
+     * status START or REVOKE might have changed while the UCS was down, i.e.,
+     * since the last status was saved to (and now loaded from) the dht and
+     * the current time.
+     * Possibly, some reevaluation will lead to a change of its status. If
+     * this happens, a REEVALUATION message is sent to the interested pep.
+     */
+    public static void reevaluateSessions() {
+        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {
+            try {
+                ucsClient.getContextHandler().reevaluate(session);
+            } catch (Exception e) {
+                System.err.println("Error reevaluating sessions");
+                throw new RuntimeException(e);
+            }
         }
     }
 

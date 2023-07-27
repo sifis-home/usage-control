@@ -1,5 +1,6 @@
 package it.cnr.iit.ucsdht;
 
+import it.cnr.iit.ucs.contexthandler.ContextHandler;
 import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
@@ -207,5 +208,9 @@ public class UCSClient {
 
     public PIPRegistryInterface getPipRegistry() {
         return ucs.getContextHandler().getPipRegistry();
+    }
+
+    public ContextHandler getContextHandler() {
+        return (ContextHandler) ucs.getContextHandler();
     }
 }
