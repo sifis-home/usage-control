@@ -1,8 +1,8 @@
 package it.cnr.iit.ucsdht;
 
-import it.cnr.iit.utility.dht.jsondht.JsonIn;
-import it.cnr.iit.utility.dht.jsondht.JsonOut;
-import it.cnr.iit.utility.dht.jsondht.MessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 import static it.cnr.iit.ucsdht.UCSDht.dhtClientEndPoint;
 import static it.cnr.iit.utility.dht.DHTUtils.serializeOutgoingJson;

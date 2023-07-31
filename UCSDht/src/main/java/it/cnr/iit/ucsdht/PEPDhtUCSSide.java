@@ -4,9 +4,9 @@ import it.cnr.iit.ucs.message.Message;
 import it.cnr.iit.ucs.message.reevaluation.ReevaluationResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
 import it.cnr.iit.ucs.properties.components.PepProperties;
-import it.cnr.iit.utility.dht.jsondht.JsonOut;
-import it.cnr.iit.utility.dht.jsondht.MessageContent;
-import it.cnr.iit.utility.dht.jsondht.reevaluation.ReevaluationResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.reevaluation.ReevaluationResponse;
 import it.cnr.iit.utility.errorhandling.Reject;
 
 import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
