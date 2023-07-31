@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AddPipRequest.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility.dht.jsonvolatile.addpip</a> &gt; <span class="el_source">AddPipRequest.java</span></div><h1>AddPipRequest.java</h1><pre class="source lang-java linenums">package it.cnr.iit.utility.dht.jsonvolatile.addpip;
+
+import it.cnr.iit.ucs.constants.PURPOSE;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
+
+public class AddPipRequest implements MessageContent {
+
+<span class="nc" id="L8">    public final String purpose = PURPOSE.ADD_PIP.name();</span>
+    private String message_id;
+    private String pip_type;
+    private String attribute_id;
+    private String category;
+    private String data_type;
+    private String attribute_value;
+    private String file_name;
+    private long refresh_rate;
+
+<span class="nc" id="L18">    public AddPipRequest() {</span>
+<span class="nc" id="L19">    }</span>
+
+    public AddPipRequest(String message_id, String pip_type, String attribute_id, String category,
+<span class="nc" id="L22">                         String data_type, String attribute_value, String file_name, long refresh_rate) {</span>
+<span class="nc" id="L23">        this.message_id = message_id;</span>
+<span class="nc" id="L24">        this.pip_type = pip_type;</span>
+<span class="nc" id="L25">        this.attribute_id = attribute_id;</span>
+<span class="nc" id="L26">        this.category = category;</span>
+<span class="nc" id="L27">        this.data_type = data_type;</span>
+<span class="nc" id="L28">        this.attribute_value = attribute_value;</span>
+<span class="nc" id="L29">        this.file_name = file_name;</span>
+<span class="nc" id="L30">        this.refresh_rate = refresh_rate;</span>
+<span class="nc" id="L31">    }</span>
+    @Override
+    public String getMessage_id() {
+<span class="nc" id="L34">        return message_id;</span>
+    }
+
+    @Override
+    public void setMessage_id(String message_id) {
+<span class="nc" id="L39">        this.message_id = message_id;</span>
+<span class="nc" id="L40">    }</span>
+
+
+    public String getPip_type() {
+<span class="nc" id="L44">        return pip_type;</span>
+    }
+
+    public void setPip_type(String pip_type) {
+<span class="nc" id="L48">        this.pip_type = pip_type;</span>
+<span class="nc" id="L49">    }</span>
+
+    public String getAttribute_id() {
+<span class="nc" id="L52">        return attribute_id;</span>
+    }
+
+    public void setAttribute_id(String attribute_id) {
+<span class="nc" id="L56">        this.attribute_id = attribute_id;</span>
+<span class="nc" id="L57">    }</span>
+
+    public String getCategory() {
+<span class="nc" id="L60">        return category;</span>
+    }
+
+    public void setCategory(String category) {
+<span class="nc" id="L64">        this.category = category;</span>
+<span class="nc" id="L65">    }</span>
+
+    public String getData_type() {
+<span class="nc" id="L68">        return data_type;</span>
+    }
+
+    public void setData_type(String data_type) {
+<span class="nc" id="L72">        this.data_type = data_type;</span>
+<span class="nc" id="L73">    }</span>
+
+    public String getAttribute_value() {
+<span class="nc" id="L76">        return attribute_value;</span>
+    }
+
+    public void setAttribute_value(String attribute_value) {
+<span class="nc" id="L80">        this.attribute_value = attribute_value;</span>
+<span class="nc" id="L81">    }</span>
+
+    public String getFile_name() {
+<span class="nc" id="L84">        return file_name;</span>
+    }
+
+    public void setFile_name(String file_name) {
+<span class="nc" id="L88">        this.file_name = file_name;</span>
+<span class="nc" id="L89">    }</span>
+
+    public long getRefresh_rate() {
+<span class="nc" id="L92">        return refresh_rate;</span>
+    }
+
+    public void setRefresh_rate(long refresh_rate) {
+<span class="nc" id="L96">        this.refresh_rate = refresh_rate;</span>
+<span class="nc" id="L97">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>JsonOut.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility.dht.jsonvolatile</a> &gt; <span class="el_source">JsonOut.java</span></div><h1>JsonOut.java</h1><pre class="source lang-java linenums">package it.cnr.iit.utility.dht.jsonvolatile;
+
+// example of try access request sent by a PEP
+// {
+//  &quot;RequestPubMessage&quot;: {
+//    &quot;value&quot;: {
+//      &quot;timestamp&quot;: 1684402025463,
+//      &quot;command&quot;: {
+//        &quot;command_type&quot;: &quot;pep-command&quot;,
+//        &quot;value&quot;: {
+//          &quot;message&quot;: {
+//            &quot;purpose&quot;: &quot;TRY&quot;,
+//            &quot;request&quot;: &quot;request&quot;,
+//            &quot;policy&quot;: &quot;policy&quot;
+//          },
+//          &quot;pep_id&quot;: &quot;pep-0&quot;,
+//          &quot;message_id&quot;: &quot;random123-msg_id&quot;,
+//          &quot;topic_name&quot;: &quot;topic-name&quot;,
+//          &quot;topic_uuid&quot;: &quot;topic-uuid-the-ucs-is-subscribed-to&quot;
+//        }
+//      }
+//    }
+//  }
+// }
+public class JsonOut {
+
+    private RequestPubMessage RequestPubMessage;
+
+<span class="nc" id="L29">    public JsonOut() {</span>
+<span class="nc" id="L30">    }</span>
+
+<span class="nc" id="L32">    public JsonOut(RequestPubMessage requestPubMessage) {</span>
+<span class="nc" id="L33">        this.RequestPubMessage = requestPubMessage;</span>
+<span class="nc" id="L34">    }</span>
+
+    public void setRequestPubMessage(RequestPubMessage requestPubMessage) {
+<span class="nc" id="L37">        RequestPubMessage = requestPubMessage;</span>
+<span class="nc" id="L38">    }</span>
+
+    public RequestPubMessage getRequestPubMessage() {
+<span class="nc" id="L41">        return RequestPubMessage;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

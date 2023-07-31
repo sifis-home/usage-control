@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PersistUtility.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.utility.dht</a> &gt; <span class="el_source">PersistUtility.java</span></div><h1>PersistUtility.java</h1><pre class="source lang-java linenums">package it.cnr.iit.utility.dht;
+
+import it.cnr.iit.ucs.properties.components.PepProperties;
+import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.utility.JAXBUtility;
+import it.cnr.iit.utility.JsonUtility;
+import oasis.names.tc.xacml.core.schema.wd_17.PolicyType;
+
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.Optional;
+
+<span class="nc" id="L16">public class PersistUtility {</span>
+
+    /**
+     * Convert the content of a file into a base64 string.
+     * @param sourceFilePath the path of the file to convert
+     * @return the base64 string representing the content of the file
+     */
+    public static String fileToBase64String(String sourceFilePath) {
+        // Read the content of the source file
+        byte[] bytes;
+        try {
+<span class="nc" id="L27">            bytes = Files.readAllBytes(Paths.get(sourceFilePath));</span>
+<span class="nc" id="L28">        } catch (IOException e) {</span>
+<span class="nc" id="L29">            throw new RuntimeException(e);</span>
+<span class="nc" id="L30">        }</span>
+<span class="nc" id="L31">        return new String(Base64.getEncoder().encode(bytes));</span>
+    }
+
+    /**
+     * Decode a base64 string and save it as the content of the file whose
+     * path and file name is specified as argument.
+     * @param base64String the base64 string
+     * @param destinationFilePath the file path of the destination file
+     */
+    public static void base64StringToFile(String base64String, String destinationFilePath) {
+        byte[] bytes;
+        try {
+<span class="nc" id="L43">            bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="nc" id="L44">            Files.write(Paths.get(destinationFilePath), bytes);</span>
+<span class="nc" id="L45">        } catch (IOException e) {</span>
+<span class="nc" id="L46">            throw new RuntimeException(e);</span>
+<span class="nc" id="L47">        }</span>
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * Extract the pip properties from a base64 string. The decoded base64 string must
+     * have a json structure matching that of a class that extends PipProperties.
+     * @param base64String the base64 string
+     * @param clazz the class that extends PipProperties
+     * @return the PipProperties object
+     */
+    public static PipProperties getPipPropertiesFromBase64String(String base64String, Class&lt;? extends PipProperties&gt; clazz) {
+<span class="nc" id="L58">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="nc" id="L59">        String jsonString = new String(bytes);</span>
+<span class="nc" id="L60">        Optional&lt;? extends PipProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
+<span class="nc" id="L61">        return object.orElse(null);</span>
+    }
+
+    /**
+     * Extract the pep properties from a base64 string. The decoded base64 string must
+     * have a json structure matching that of a class that extends PepProperties.
+     * @param base64String the base64 string
+     * @param clazz the class that extends PepProperties
+     * @return the PepProperties object
+     */
+    public static PepProperties getPepPropertiesFromBase64String(String base64String, Class&lt;? extends PepProperties&gt; clazz) {
+<span class="nc" id="L72">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="nc" id="L73">        String jsonString = new String(bytes);</span>
+<span class="nc" id="L74">        Optional&lt;? extends PepProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
+<span class="nc" id="L75">        return object.orElse(null);</span>
+    }
+
+    /**
+     * Extract the policyId from a base64 string. The decoded base64 string must be a
+     * valid policy that can be unmarshalled to a PolicyType object.
+     * Once unmarshalled, the policyId is returned.
+     * @param base64String the base64 string
+     * @return the string containing the policyId
+     */
+    public static String getPolicyIdFromBase64String(String base64String) {
+<span class="nc" id="L86">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="nc" id="L87">        String xmlString = new String(bytes);</span>
+        PolicyType policy;
+        try {
+<span class="nc" id="L90">            policy = JAXBUtility.unmarshalToObject(PolicyType.class, xmlString);</span>
+<span class="nc" id="L91">        } catch (JAXBException e) {</span>
+<span class="nc" id="L92">            throw new RuntimeException(e);</span>
+<span class="nc" id="L93">        }</span>
+<span class="nc" id="L94">        return policy.getPolicyId();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

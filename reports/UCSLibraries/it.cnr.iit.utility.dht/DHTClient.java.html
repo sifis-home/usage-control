@@ -40,49 +40,35 @@ public class DHTClient {
     private void connect(URI endpointURI) throws RuntimeException {
         try {
 <span class="nc" id="L42">            container = ContainerProvider.getWebSocketContainer();</span>
-            //container.setDefaultMaxTextMessageBufferSize(200);
-<span class="nc" id="L44">            session = container.connectToServer(this, endpointURI);</span>
-<span class="nc" id="L45">        } catch (Exception e) {</span>
-<span class="nc" id="L46">            throw new RuntimeException(&quot;Unable to connect to &quot; + wsURI.toString() + &quot;. &quot; + e.getMessage());</span>
-<span class="nc" id="L47">        }</span>
-<span class="nc" id="L48">        isLoggingEnabled = true;</span>
-<span class="nc" id="L49">    }</span>
+<span class="nc" id="L43">            session = container.connectToServer(this, endpointURI);</span>
+<span class="nc" id="L44">        } catch (Exception e) {</span>
+<span class="nc" id="L45">            throw new RuntimeException(&quot;Unable to connect to &quot; + wsURI.toString() + &quot;. &quot; + e.getMessage());</span>
+<span class="nc" id="L46">        }</span>
+<span class="nc" id="L47">        isLoggingEnabled = true;</span>
+<span class="nc" id="L48">    }</span>
 
     @OnOpen
     public void onOpen(Session session) {
-<span class="nc" id="L53">        this.session = session;</span>
-//        try {
-//            //session.getBasicRemote().sendText(&quot;Opening connection&quot;);
-//        } catch (IOException ex){
-//            System.out.println(ex);
-//        }
-<span class="nc" id="L59">        System.out.println(&quot;Established websocket connection at &quot; + wsURI);</span>
-<span class="nc" id="L60">        System.out.println();</span>
-<span class="nc" id="L61">    }</span>
+<span class="nc" id="L52">        this.session = session;</span>
+<span class="nc" id="L53">        System.out.println(&quot;Established websocket connection at &quot; + wsURI);</span>
+<span class="nc" id="L54">        System.out.println();</span>
+<span class="nc" id="L55">    }</span>
 
     @OnError
     public void onError(Session session, Throwable throwable) {
-<span class="nc" id="L65">        System.err.println(&quot;There was an error for session: &quot; + session.getId());</span>
-<span class="nc" id="L66">        handler.handleError();</span>
-<span class="nc" id="L67">    }</span>
+<span class="nc" id="L59">        System.err.println(&quot;There was an error for session: &quot; + session.getId());</span>
+<span class="nc" id="L60">        handler.handleError();</span>
+<span class="nc" id="L61">    }</span>
 
     public void addMessageHandler(MessageHandler msgHandler) {
-<span class="nc" id="L70">        this.handler = msgHandler;</span>
-<span class="nc" id="L71">    }</span>
+<span class="nc" id="L64">        this.handler = msgHandler;</span>
+<span class="nc" id="L65">    }</span>
 
     @OnMessage
     public void onMessage(String message) {
-<span class="nc" id="L75">        handler.handleMessage(message);</span>
+<span class="nc" id="L69">        handler.handleMessage(message);</span>
         //System.out.println(&quot;Received message in client: &quot; + message);
-<span class="nc" id="L77">    }</span>
-
-//    public void sendMessage(String message) {
-//        try {
-//            this.session.getBasicRemote().sendText(message);
-//        } catch (IOException ex) {
-//            Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
+<span class="nc" id="L71">    }</span>
 
 
     /**
@@ -92,30 +78,30 @@ public class DHTClient {
      public boolean sendMessage(String jsonOut) {
 
         // Return if DHT logging is not used
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if (!isLoggingEnabled) {</span>
-<span class="nc" id="L96">            return false;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if (!isLoggingEnabled) {</span>
+<span class="nc" id="L82">            return false;</span>
         }
 
         // If a connection is not established yet (which should
         // have been done from the application), do it now
-<span class="nc bnc" id="L101" title="All 4 branches missed.">        if (container == null || session == null) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">        if (container == null || session == null) {</span>
             try {
-<span class="nc" id="L103">                connect(wsURI);</span>
-<span class="nc" id="L104">            } catch (RuntimeException e) {</span>
-<span class="nc" id="L105">                return false;</span>
-<span class="nc" id="L106">            }</span>
+<span class="nc" id="L89">                connect(wsURI);</span>
+<span class="nc" id="L90">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L91">                return false;</span>
+<span class="nc" id="L92">            }</span>
         }
 
         // Now send the payload to the DHT
         try {
-<span class="nc" id="L111">            session.getBasicRemote().sendText(jsonOut);</span>
-<span class="nc" id="L112">        } catch (IOException e) {</span>
-<span class="nc" id="L113">            System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);</span>
-<span class="nc" id="L114">            Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, e);</span>
-<span class="nc" id="L115">            e.printStackTrace();</span>
-<span class="nc" id="L116">            return false;</span>
-<span class="nc" id="L117">        }</span>
-<span class="nc" id="L118">        return true;</span>
+<span class="nc" id="L97">            session.getBasicRemote().sendText(jsonOut);</span>
+<span class="nc" id="L98">        } catch (IOException e) {</span>
+<span class="nc" id="L99">            System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);</span>
+<span class="nc" id="L100">            Logger.getLogger(DHTClient.class.getName()).log(Level.SEVERE, null, e);</span>
+<span class="nc" id="L101">            e.printStackTrace();</span>
+<span class="nc" id="L102">            return false;</span>
+<span class="nc" id="L103">        }</span>
+<span class="nc" id="L104">        return true;</span>
     }
 
     public interface MessageHandler {
@@ -123,191 +109,4 @@ public class DHTClient {
          void handleError();
     }
 }
-//
-//import java.io.IOException;
-//import java.net.URI;
-//import java.net.URISyntaxException;
-//
-//import jakarta.websocket.*;
-//import org.glassfish.tyrus.client.ClientManager;
-//
-//@ClientEndpoint
-//public class DHTClient {
-//
-//    private static ClientManager dhtClient = null;
-//    private static Session session = null;
-//
-//    private static String websocketUri = &quot;ws://localhost:3000/ws&quot;;
-//
-//    private static boolean isLoggingEnabled;
-//
-//    private MessageHandler handler;
-//
-//    public DHTClient(URI endpointURI) {
-//        try {
-//            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-//            container.connectToServer(this, endpointURI);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-//
-//    /**
-//     * Sends a logging message to the DHT
-//     *
-//     */
-//     public void sendMessage(String jsonOut) {
-//
-//        // Return if DHT logging is not used
-//        if (!isLoggingEnabled) {
-//            return;
-//        }
-//
-//        // If a connection is not established yet (which should
-//        // have been done from the application), do it now
-//        if (dhtClient == null || session == null) {
-//            boolean dhtConnected = establishConnection();
-//
-//            // If the connection failed to be established, return
-//            if (!dhtConnected) {
-//                return;
-//            }
-//        }
-//
-//        // Now send the payload to the DHT
-//        try {
-//            session.getBasicRemote().sendText(jsonOut);
-//        } catch (IOException e) {
-//            System.err.println(&quot;Error: Sending logging payload to DHT failed&quot;);
-//            e.printStackTrace();
-//        }
-//    }
-//
-//
-//    /**
-//     * Enable or disable logging to the DHT
-//     *
-//     * @param logging true/false
-//     */
-//    static public void setLogging(boolean logging) {
-//        isLoggingEnabled = logging;
-//    }
-//
-//    /**
-//     * Retrieve logging status
-//     *
-//     */
-//    static public boolean isLoggingEnabled() {
-//        return isLoggingEnabled;
-//    }
-//
-//    /**
-//     * Retrieve the client instance connected to the DHT.
-//     *
-//     * @return the client
-//     */
-//    public static ClientManager getClientInstance() {
-//
-//        if (dhtClient == null || session == null) {
-//            establishConnection();
-//        }
-//
-//        return dhtClient;
-//    }
-//
-//    /**
-//     * Retrieve the session instance associated with the connection to the DHT.
-//     *
-//     * @return the session
-//     */
-//    public static Session getSessionInstance() {
-//
-//        if (dhtClient == null || session == null) {
-//            establishConnection();
-//        }
-//
-//        return session;
-//    }
-//
-//    /**
-//     * Get the URI used for the WebSocket connection to the DHT.
-//     *
-//     * @return the URI
-//     */
-//    public static String getWebsocketUri() {
-//        return websocketUri;
-//    }
-//
-//    /**
-//     * Set the URI to use for the WebSocket connection to the DHT.
-//     *
-//     * @param websocketUri the desired URI
-//     */
-//    public static void setWebsocketUri(String websocketUri) {
-//        DHTClient.websocketUri = websocketUri;
-//    }
-//
-//    /**
-//     * Establish the connection to the DHT.
-//     *
-//     * @return if the connection was successfully established
-//     */
-//    public static boolean establishConnection() {
-//
-//        System.out.println(&quot;Connecting to DHT for logging&quot;);
-//
-//        //CountDownLatch latch = new CountDownLatch(1);
-//        dhtClient = ClientManager.createClient();
-//        try {
-//            URI uri = new URI(websocketUri);
-//            session = dhtClient.connectToServer(DHTClient.class, uri);
-//            //latch.await();
-//        } catch (DeploymentException | URISyntaxException | IOException e) {
-//            System.err.println(&quot;Error: Failed to connect to DHT for logging&quot;);
-//            e.printStackTrace();
-//            return false;
-//        }
-//
-//        return true;
-//    }
-//
-//    /**
-//     * Establish the connection to the DHT.
-//     *
-//     * @param dhtWebsocketUri the URI to connect to the DHT using WebSocket
-//     * @return if the connection was successfully established
-//     */
-//    public static boolean establishConnection(String dhtWebsocketUri) {
-//        setWebsocketUri(dhtWebsocketUri);
-//        return establishConnection();
-//    }
-//
-//    @OnOpen
-//    public void onOpen(Session session) {
-//        System.out.println(&quot;--- Connected &quot; + session.getId());
-//
-//    }
-//
-//    @OnMessage
-//    public String onMessage(String message, Session session) {
-//        // Do nothing for incoming messages from DHT
-//        System.out.println(&quot;Received message&quot;);
-//        return null;
-//    }
-//
-//    @OnClose
-//    public void onClose(Session session, CloseReason closeReason) {
-//        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed because &quot; + closeReason);
-//        //    latch.countDown();
-//    }
-//
-//    public void addMessageHandler(MessageHandler msgHandler) {
-//        this.handler = msgHandler;
-//    }
-//
-//    public static interface MessageHandler {
-//
-//        public void handleMessage(String message);
-//    }
-//}
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

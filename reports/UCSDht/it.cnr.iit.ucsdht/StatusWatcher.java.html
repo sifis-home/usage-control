@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>StatusWatcher.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">StatusWatcher.java</span></div><h1>StatusWatcher.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
+
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class StatusWatcher {
+
+    private final List&lt;Path&gt; directories;
+    private final ExecutorService executorService;
+    private final WatchService watchService;
+
+<span class="nc" id="L15">    public StatusWatcher(List&lt;Path&gt; directories) throws IOException {</span>
+<span class="nc" id="L16">        this.directories = directories;</span>
+<span class="nc" id="L17">        this.watchService = FileSystems.getDefault().newWatchService();</span>
+<span class="nc" id="L18">        this.executorService = Executors.newFixedThreadPool(1);</span>
+<span class="nc" id="L19">    }</span>
+
+    public void startMonitoring() throws IOException {
+
+<span class="nc bnc" id="L23" title="All 2 branches missed.">        for(Path directory : directories) {</span>
+<span class="nc" id="L24">            directory.register(watchService,</span>
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_MODIFY,
+                    StandardWatchEventKinds.ENTRY_DELETE);
+<span class="nc" id="L28">        }</span>
+
+<span class="nc" id="L30">        executorService.submit(() -&gt; {</span>
+            try {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">                while (!Thread.currentThread().isInterrupted()) {</span>
+<span class="nc" id="L33">                    WatchKey key = watchService.take(); // Wait for events</span>
+
+<span class="nc bnc" id="L35" title="All 2 branches missed.">                    for (WatchEvent&lt;?&gt; event : key.pollEvents()) {</span>
+<span class="nc" id="L36">                        WatchEvent.Kind&lt;?&gt; kind = event.kind();</span>
+
+<span class="nc bnc" id="L38" title="All 2 branches missed.">                        if (kind == StandardWatchEventKinds.OVERFLOW) {</span>
+<span class="nc" id="L39">                            continue;</span>
+                        }
+
+<span class="nc" id="L42">                        Path eventPath = (Path) event.context();</span>
+
+                        // Ignore hidden files (files starting with '.')
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                        if (!eventPath.getFileName().toString().startsWith(&quot;.&quot;)) {</span>
+                            // Handle different event types
+<span class="nc bnc" id="L47" title="All 2 branches missed.">                            if (kind == StandardWatchEventKinds.ENTRY_CREATE) {</span>
+<span class="nc" id="L48">                                System.out.println(&quot;File created: &quot; + eventPath.getFileName());</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">                            } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {</span>
+<span class="nc" id="L50">                                System.out.println(&quot;File modified: &quot; + eventPath.getFileName());</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">                            } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {</span>
+<span class="nc" id="L52">                                System.out.println(&quot;File deleted: &quot; + eventPath.getFileName());</span>
+                            }
+<span class="nc" id="L54">                            UCSDht.uploadStatus();</span>
+                        }
+<span class="nc" id="L56">                    }</span>
+
+<span class="nc" id="L58">                    key.reset();</span>
+<span class="nc" id="L59">                }</span>
+<span class="nc" id="L60">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L61">                System.out.println(&quot;Folder monitoring thread interrupted.&quot;);</span>
+<span class="nc" id="L62">            }</span>
+<span class="nc" id="L63">        });</span>
+<span class="nc" id="L64">    }</span>
+
+    public void stopMonitoring() {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (executorService != null) {</span>
+<span class="nc" id="L68">            executorService.shutdownNow();</span>
+        }
+<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (watchService != null) {</span>
+            try {
+<span class="nc" id="L72">                watchService.close();</span>
+<span class="nc" id="L73">            } catch (IOException e) {</span>
+<span class="nc" id="L74">                e.printStackTrace();</span>
+<span class="nc" id="L75">            }</span>
+        }
+<span class="nc" id="L77">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -2,12 +2,12 @@
 
 import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
 import it.cnr.iit.utility.JsonUtility;
-import it.cnr.iit.utility.dht.jsondht.JsonIn;
-import it.cnr.iit.utility.dht.jsondht.JsonOut;
-import it.cnr.iit.utility.dht.jsondht.MessageContent;
-import it.cnr.iit.utility.dht.jsondht.addpip.AddPipRequest;
-import it.cnr.iit.utility.dht.jsondht.addpip.AddPipResponse;
-import it.cnr.iit.utility.dht.jsondht.error.ErrorResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
+import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
+import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
+import it.cnr.iit.utility.dht.jsonvolatile.addpip.AddPipRequest;
+import it.cnr.iit.utility.dht.jsonvolatile.addpip.AddPipResponse;
+import it.cnr.iit.utility.dht.jsonvolatile.error.ErrorResponse;
 
 import java.io.File;
 import java.util.HashMap;
@@ -87,7 +87,7 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
 <span class="nc" id="L87">        pipReaderProperties.addAttribute(attributeId, category, dataType, fileName);</span>
 <span class="nc" id="L88">        pipReaderProperties.setRefreshRate(refreshRate);</span>
 <span class="nc" id="L89">        Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L90">        additionalProperties.put(&quot;value&quot;, attributeValue);</span>
+<span class="nc" id="L90">        additionalProperties.put(fileName, attributeValue);</span>
 <span class="nc" id="L91">        pipReaderProperties.setAdditionalProperties(additionalProperties);</span>
 
 <span class="nc" id="L93">        JsonUtility.dumpObjectToJsonFile(pipReaderProperties,</span>
