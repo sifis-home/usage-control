@@ -66,6 +66,18 @@
         </dependency>
 
         <dependency>
+            <groupId>it.cnr.iit.ucs</groupId>
+            <artifactId>PIPTime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>it.cnr.iit.ucs</groupId>
+            <artifactId>PIPWebSocket</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.j256.ormlite</groupId>
             <artifactId>ormlite-jdbc</artifactId>
             <version>6.1</version>

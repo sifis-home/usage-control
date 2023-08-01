@@ -5,6 +5,7 @@ import it.cnr.iit.ucs.contexthandler.pipregistry.PIPRegistryInterface;
 import it.cnr.iit.ucs.core.UCSCoreService;
 import it.cnr.iit.ucs.core.UCSCoreServiceBuilder;
 import it.cnr.iit.ucs.exceptions.PAPException;
+import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.exceptions.RequestException;
 import it.cnr.iit.ucs.message.endaccess.EndAccessMessage;
 import it.cnr.iit.ucs.message.endaccess.EndAccessResponseMessage;
@@ -14,20 +15,22 @@ import it.cnr.iit.ucs.message.tryaccess.TryAccessMessage;
 import it.cnr.iit.ucs.message.tryaccess.TryAccessResponseMessage;
 import it.cnr.iit.ucs.pep.PEPInterface;
 import it.cnr.iit.ucs.pip.PIPBase;
-import it.cnr.iit.ucs.pipreader.PIPReader;
 import it.cnr.iit.ucs.properties.components.PapProperties;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.ucs.properties.components.SessionManagerProperties;
 import it.cnr.iit.ucs.ucs.UCSInterface;
 import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
-import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
+import it.cnr.iit.ucsdht.properties.UCSDhtPipProperties;
 import it.cnr.iit.ucsdht.properties.UCSDhtProperties;
+import it.cnr.iit.utility.ReflectionsUtility;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.wrappers.PolicyWrapper;
 import it.cnr.iit.xacml.wrappers.RequestWrapper;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -161,35 +164,60 @@ public class UCSClient {
     }
 
     public boolean addPip(String pipType, String attributeId, String category,
-                          String dataType, String attributePath, String fileName, long refreshRate) {
-        if (!pipType.equals("PIPReader")) {
-            System.err.println("pip_type differs from PIPReader: " +
-                    "at the moment, PIPReader is the only type of PIP supported");
-            return false;
-        }
+                          String dataType, long refreshRate,
+                          Map<String, String> additionalProperties) {
 
         checkIfAttributeIdAlreadyMonitored(attributeId);
 
-        // need to check it here since in the properties we concatenate the attributePath and the fileName.
-        // Therefore, when the PIP gets initialized, the fileName will never be empty, but it possibly
-        // contains only the attributePath if the fileName happened to be empty.
-        Reject.ifTrue(fileName.isEmpty(), "'file_name' cannot be empty");
-
-        UCSDhtPipReaderProperties pipProperties = new UCSDhtPipReaderProperties();
-
-        pipProperties.addAttribute(attributeId, category, dataType, attributePath + fileName);
+        UCSDhtPipProperties pipProperties = new UCSDhtPipProperties();
+        pipProperties.setName(pipType);
+        pipProperties.addAttribute(attributeId, category, dataType);
         pipProperties.setRefreshRate(refreshRate);
+        pipProperties.setAdditionalProperties(additionalProperties);
 
-        PIPBase pip = new PIPReader(pipProperties);
+        // build the PIP
+        PIPBase pip;
         try {
-            ucs.getPipList().add(pip);
+            pip = buildPip(pipProperties, pipType);
+        } catch (PIPException e) {
+            System.err.println(e.getMessage());
+            return false;
+        }
+
+        // setup PIP connections
+        try {
             pip.setRequestManager(ucs.getRequestManager());
+            ucs.getPipList().add(pip);
+            //ucs.getContextHandler().setPIPs(ucs.getPipList());
+            getPipRegistry().add(pip);
+            // ucs.getObligationManager().setPIPs(ucs.getPipList()); // todo: provide the OM with a method to set the pips
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
         return true;
     }
+
+    private PIPBase buildPip(PipProperties pipProperties, String pipType) throws PIPException {
+        // Verify that the class is found and extends PIPBase
+        Class<?> cls;
+        try {
+            cls = Class.forName(pipType);
+            if (!PIPBase.class.isAssignableFrom(cls)) {
+                throw new PIPException("pip_type class not supported");
+            }
+        } catch (ClassNotFoundException e) {
+            throw new PIPException("pip_type class not found");
+        }
+
+        // build the PIP
+        Optional<?> pipComponent = ReflectionsUtility.buildComponent(pipProperties, cls);
+        if (!pipComponent.isPresent()) {
+            throw new PIPException("Unable to add PIP: " + pipProperties.getId());
+        }
+        return (PIPBase) pipComponent.get();
+    }
+
 
     private void checkIfAttributeIdAlreadyMonitored(String attributeId) {
         for (PIPBase pip : ucs.getPipList()) {
