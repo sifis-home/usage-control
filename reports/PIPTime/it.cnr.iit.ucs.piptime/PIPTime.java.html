@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PIPTime.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PIPTime</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.piptime</a> &gt; <span class="el_source">PIPTime.java</span></div><h1>PIPTime.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.piptime;
+
+import it.cnr.iit.ucs.exceptions.PIPException;
+import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
+import it.cnr.iit.ucs.pip.PIPBase;
+import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.Attribute;
+import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
+import org.wso2.balana.attr.TimeAttribute;
+
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Logger;
+
+public class PIPTime extends PIPBase {
+
+<span class="nc" id="L18">    private static final Logger log = Logger.getLogger(PIPTime.class.getName());</span>
+
+    public PIPTime(PipProperties properties) {
+<span class="nc" id="L21">        super(properties);</span>
+<span class="nc" id="L22">        Reject.ifFalse(init(properties), &quot;Error initialising pip : &quot; + properties.getId());</span>
+<span class="nc" id="L23">    }</span>
+
+
+    /**
+     * Get the current time and use the TimeAttribute class to encode it.
+     * This guarantees that the value is compliant with the standard.
+     * Then, this method sets the value within the attribute, and finally
+     * returns a String containing such a value.
+     *
+     * @param attribute the attribute for which we want retrieve the value
+     * @return the retrieved value
+     */
+    @Override
+    public String retrieve(Attribute attribute) {
+<span class="nc" id="L37">        System.out.println(&quot;PIPTime custom retrieve method triggered&quot;);</span>
+        // Get the current time
+<span class="nc" id="L39">        long seconds = new Date().getTime() / 1000;</span>
+<span class="nc" id="L40">        long millisWithZeroedMillis = seconds * 1000;</span>
+<span class="nc" id="L41">        TimeAttribute t = new TimeAttribute(new Date(millisWithZeroedMillis));</span>
+<span class="nc" id="L42">        String value = t.encode();</span>
+
+<span class="nc" id="L44">        attribute.setValue(attribute.getDataType(), value);</span>
+<span class="nc" id="L45">        return value;</span>
+    }
+
+    @Override
+    public void update(String data) throws PIPException {
+<span class="nc" id="L50">        log.severe(&quot;update() method not implemented&quot;);</span>
+<span class="nc" id="L51">    }</span>
+
+    @Override
+    public void retrieve(RequestType request,
+                         List&lt;Attribute&gt; attributeRetrievals) {
+<span class="nc" id="L56">        log.severe(&quot;Multiple retrieve is unimplemented&quot;);</span>
+<span class="nc" id="L57">    }</span>
+
+    @Override
+    public void subscribe(RequestType request,
+                          List&lt;Attribute&gt; attributeRetrieval) {
+<span class="nc" id="L62">        log.severe(&quot;Multiple subscribe is unimplemented&quot;);</span>
+<span class="nc" id="L63">    }</span>
+
+    @Override
+    public void performObligation(ObligationInterface obligation) {
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (obligation != null) {</span>
+<span class="nc" id="L68">            log.severe(&quot;Perform obligation is unimplemented&quot;);</span>
+        }
+<span class="nc" id="L70">    }</span>
+
+    @Override
+    protected Logger getLogger() {
+<span class="nc" id="L74">        return log;</span>
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

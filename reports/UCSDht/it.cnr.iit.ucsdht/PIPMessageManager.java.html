@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PIPMessageManager.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSDht</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucsdht</a> &gt; <span class="el_source">PIPMessageManager.java</span></div><h1>PIPMessageManager.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucsdht;
 
-import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
+import it.cnr.iit.ucs.pip.AbstractPIPWebSocket;
+import it.cnr.iit.ucs.pipreader.PIPReader;
+import it.cnr.iit.ucs.piptime.PIPTime;
+import it.cnr.iit.ucs.pipwebsocket.*;
+// Do not remove &quot;import it.cnr.iit.ucs.pipwebsocket.*;&quot;
+// The IDE identifies it as an unused import, but it is needed to recognize classes that extend AbstractPIPWebSocket
+import it.cnr.iit.ucsdht.properties.UCSDhtPipProperties;
 import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
 import it.cnr.iit.utility.dht.jsonvolatile.JsonOut;
@@ -17,81 +23,198 @@ import static it.cnr.iit.ucsdht.ManagerUtils.*;
 import static it.cnr.iit.ucsdht.UCSDht.*;
 import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
 
-<span class="nc" id="L20">public class PIPMessageManager {</span>
+<span class="nc" id="L26">public class PIPMessageManager {</span>
     protected static void processMessage(JsonIn jsonIn) {
-<span class="nc" id="L22">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
-<span class="nc bnc" id="L23" title="All 2 branches missed.">        if (message instanceof AddPipRequest) {</span>
-<span class="nc" id="L24">            System.out.println(&quot;handle add Pip request&quot;);</span>
-<span class="nc" id="L25">            handleAddPipRequest(jsonIn);</span>
+<span class="nc" id="L28">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (message instanceof AddPipRequest) {</span>
+<span class="nc" id="L30">            System.out.println(&quot;handle add Pip request&quot;);</span>
+<span class="nc" id="L31">            handleAddPipRequest(jsonIn);</span>
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-<span class="nc" id="L29">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+<span class="nc" id="L35">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
         }
-<span class="nc" id="L31">    }</span>
+<span class="nc" id="L37">    }</span>
 
+    // todo: at the moment, we support only the addition of a PIP monitoring one attribute only.
+    //       Nonetheless, a PIP could monitor multiple attributes.
+    //       To add PIP monitoring multiple attributes, we should change the json schema.
     private static void handleAddPipRequest(JsonIn jsonIn) {
-<span class="nc" id="L34">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+<span class="nc" id="L43">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
 
-<span class="nc" id="L36">        String pipType = messageIn.getPip_type();</span>
-<span class="nc" id="L37">        String attributeId = messageIn.getAttribute_id();</span>
-<span class="nc" id="L38">        String category = messageIn.getCategory();</span>
-<span class="nc" id="L39">        String dataType = messageIn.getData_type();</span>
-<span class="nc" id="L40">        String attributeValue = messageIn.getAttribute_value();</span>
-<span class="nc" id="L41">        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;</span>
-<span class="nc" id="L42">        String fileName = messageIn.getFile_name();</span>
-<span class="nc" id="L43">        long refreshRate = messageIn.getRefresh_rate();</span>
+<span class="nc" id="L45">        String pipType = messageIn.getPip_type();</span>
+
+        Class&lt;?&gt; cls;
+        try {
+<span class="nc" id="L49">            cls = Class.forName(pipType);</span>
+<span class="nc" id="L50">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L51">            JsonOut jsonOut = buildErrorResponseMessage(jsonIn, &quot;PIP class &quot; + pipType + &quot; not recognized&quot;);</span>
+<span class="nc" id="L52">            serializeAndSend(jsonOut);</span>
+<span class="nc" id="L53">            return;</span>
+<span class="nc" id="L54">        }</span>
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (cls == PIPReader.class) {</span>
+<span class="nc" id="L57">            handleAddPipReaderRequest(jsonIn);</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        } else if (cls == PIPTime.class) {</span>
+<span class="nc" id="L59">            handleAddPipTimeRequest(jsonIn);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        } else if (AbstractPIPWebSocket.class.isAssignableFrom(cls)) {</span>
+<span class="nc" id="L61">            handleAddPipWebSocketRequest(jsonIn);</span>
+        } else {
+<span class="nc" id="L63">            JsonOut jsonOut = buildErrorResponseMessage(jsonIn, &quot;PIP class &quot; + pipType + &quot; not recognized&quot;);</span>
+<span class="nc" id="L64">            serializeAndSend(jsonOut);</span>
+        }
+
+<span class="nc" id="L67">    }</span>
+
+
+    private static void handleAddPipWebSocketRequest(JsonIn jsonIn) {
+<span class="nc" id="L71">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L73">        String pipType = messageIn.getPip_type();</span>
+<span class="nc" id="L74">        String attributeId = messageIn.getAttribute_id();</span>
+<span class="nc" id="L75">        String category = messageIn.getCategory();</span>
+<span class="nc" id="L76">        String dataType = messageIn.getData_type();</span>
+<span class="nc" id="L77">        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;</span>
+<span class="nc" id="L78">        long refreshRate = messageIn.getRefresh_rate();</span>
+<span class="nc" id="L79">        Map&lt;String, String&gt; additionalProperties = messageIn.getAdditional_properties();</span>
+
+        // dhtUri, topicName, and topicUuid are stored in the additional_properties field
+<span class="nc" id="L82">        String dhtUri = additionalProperties.get(&quot;dhtUri&quot;);</span>
+<span class="nc" id="L83">        String topicName = additionalProperties.get(&quot;topicName&quot;);</span>
+<span class="nc" id="L84">        String topicUuid = additionalProperties.get(&quot;topicUuid&quot;);</span>
+
+        // create additionalProperties with the required fields only.
+        // this is to ignore other properties possibly specified in the request.
+<span class="nc" id="L88">        Map&lt;String, String&gt; checkedAdditionalProperties = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L89">        checkedAdditionalProperties.put(&quot;dhtUri&quot;, dhtUri);</span>
+<span class="nc" id="L90">        checkedAdditionalProperties.put(&quot;topicName&quot;, topicName);</span>
+<span class="nc" id="L91">        checkedAdditionalProperties.put(&quot;topicUuid&quot;, topicUuid);</span>
 
         JsonOut jsonOut;
 
-<span class="nc" id="L47">        boolean isAdded = ucsClient.addPip(</span>
-                pipType, attributeId, category, dataType, attributePath, fileName, refreshRate);
+<span class="nc" id="L95">        boolean isAdded = ucsClient.addPip(</span>
+                pipType, attributeId, category, dataType, refreshRate, checkedAdditionalProperties);
 
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (!isAdded) {</span>
-<span class="nc" id="L51">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (!isAdded) {</span>
+<span class="nc" id="L99">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
         } else {
-<span class="nc" id="L53">            Utils.createDir(new File(attributePath));</span>
-<span class="nc" id="L54">            setAttributeValue(attributePath + fileName, attributeValue);</span>
-<span class="nc" id="L55">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
+<span class="nc" id="L101">            Utils.createDir(new File(attributePath));</span>
+<span class="nc" id="L102">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
         }
-<span class="nc" id="L57">        serializeAndSend(jsonOut);</span>
+<span class="nc" id="L104">        serializeAndSend(jsonOut);</span>
 
-<span class="nc bnc" id="L59" title="All 2 branches missed.">        if (isAdded) {</span>
-<span class="nc" id="L60">            serializePipToFile(getIdFromJson(jsonIn), attributeId, category,</span>
-                    dataType, fileName, refreshRate, attributeValue);
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (isAdded) {</span>
+<span class="nc" id="L107">            serializePipToFile(pipType, getIdFromJson(jsonIn), attributeId, category,</span>
+                    dataType, refreshRate, checkedAdditionalProperties);
         }
-<span class="nc" id="L63">    }</span>
+
+<span class="nc" id="L111">    }</span>
+
+
+    private static void handleAddPipReaderRequest(JsonIn jsonIn) {
+<span class="nc" id="L115">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L117">        String pipType = messageIn.getPip_type();</span>
+<span class="nc" id="L118">        String attributeId = messageIn.getAttribute_id();</span>
+<span class="nc" id="L119">        String category = messageIn.getCategory();</span>
+<span class="nc" id="L120">        String dataType = messageIn.getData_type();</span>
+<span class="nc" id="L121">        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;</span>
+<span class="nc" id="L122">        long refreshRate = messageIn.getRefresh_rate();</span>
+<span class="nc" id="L123">        Map&lt;String, String&gt; additionalProperties = messageIn.getAdditional_properties();</span>
+
+        // fileName and its value are stored in the additional_properties field
+<span class="nc" id="L126">        String fileName = additionalProperties.get(attributeId);</span>
+<span class="nc" id="L127">        String attributeValue = additionalProperties.get(fileName);</span>
+
+        // prepend the attribute path
+<span class="nc" id="L130">        Map&lt;String, String&gt; absolutePathAdditionalProperties = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L131">        absolutePathAdditionalProperties.put(attributeId, attributePath + fileName);</span>
+<span class="nc" id="L132">        absolutePathAdditionalProperties.put(attributePath + fileName, attributeValue);</span>
+
+        // create additionalProperties with the filename and attribute value only.
+        // this is to ignore other properties possibly specified in the request.
+<span class="nc" id="L136">        Map&lt;String, String&gt; checkedAdditionalProperties = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L137">        checkedAdditionalProperties.put(attributeId, fileName);</span>
+<span class="nc" id="L138">        checkedAdditionalProperties.put(fileName, attributeValue);</span>
+
+        JsonOut jsonOut;
+
+<span class="nc" id="L142">        boolean isAdded = ucsClient.addPip(</span>
+                pipType, attributeId, category, dataType, refreshRate, absolutePathAdditionalProperties);
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (!isAdded) {</span>
+<span class="nc" id="L146">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L148">            Utils.createDir(new File(attributePath));</span>
+<span class="nc" id="L149">            setAttributeValue(attributePath + fileName, attributeValue);</span>
+<span class="nc" id="L150">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L152">        serializeAndSend(jsonOut);</span>
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (isAdded) {</span>
+<span class="nc" id="L155">            serializePipToFile(pipType, getIdFromJson(jsonIn), attributeId, category,</span>
+                    dataType, refreshRate, checkedAdditionalProperties);
+        }
+<span class="nc" id="L158">    }</span>
+
+
+    private static void handleAddPipTimeRequest(JsonIn jsonIn) {
+<span class="nc" id="L162">        AddPipRequest messageIn = (AddPipRequest) getMessageFromJson(jsonIn);</span>
+
+<span class="nc" id="L164">        String pipType = messageIn.getPip_type();</span>
+<span class="nc" id="L165">        String attributeId = messageIn.getAttribute_id();</span>
+<span class="nc" id="L166">        String category = messageIn.getCategory();</span>
+<span class="nc" id="L167">        String dataType = messageIn.getData_type();</span>
+<span class="nc" id="L168">        String attributePath = pipsDir + File.separator + getIdFromJson(jsonIn) + File.separator;</span>
+<span class="nc" id="L169">        long refreshRate = messageIn.getRefresh_rate();</span>
+
+        JsonOut jsonOut;
+
+<span class="nc" id="L173">        boolean isAdded = ucsClient.addPip(</span>
+                pipType, attributeId, category, dataType, refreshRate, new HashMap&lt;&gt;());
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (!isAdded) {</span>
+<span class="nc" id="L177">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;KO&quot;);</span>
+        } else {
+<span class="nc" id="L179">            Utils.createDir(new File(attributePath));</span>
+<span class="nc" id="L180">            jsonOut = buildAddPipResponseMessage(jsonIn, &quot;OK&quot;);</span>
+        }
+<span class="nc" id="L182">        serializeAndSend(jsonOut);</span>
+
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        if (isAdded) {</span>
+<span class="nc" id="L185">            serializePipToFile(pipType, getIdFromJson(jsonIn), attributeId, category,</span>
+                    dataType, refreshRate, new HashMap&lt;&gt;());
+        }
+<span class="nc" id="L188">    }</span>
 
 
     private static JsonOut buildAddPipResponseMessage(JsonIn jsonIn, String code) {
 
-<span class="nc" id="L68">        MessageContent messageOut = new AddPipResponse(getMessageIdFromJson(jsonIn), code);</span>
-<span class="nc" id="L69">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn), &quot;topic-name-pip-is-subscribed-to&quot;, &quot;topic-uuid-pip-is-subscribed-to&quot;, COMMAND_TYPE);</span>
+<span class="nc" id="L193">        MessageContent messageOut = new AddPipResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="nc" id="L194">        return buildOutgoingJsonObject(messageOut, getIdFromJson(jsonIn),</span>
+                &quot;topic-name-pip-is-subscribed-to&quot;, &quot;topic-uuid-pip-is-subscribed-to&quot;, COMMAND_TYPE);
     }
 
     protected static JsonOut buildErrorResponseMessage(JsonIn jsonIn, String description) {
-<span class="nc" id="L73">        MessageContent messageOut =</span>
-<span class="nc" id="L74">                new ErrorResponse(getMessageIdFromJson(jsonIn), description);</span>
-<span class="nc" id="L75">        return buildOutgoingJsonObject(</span>
-<span class="nc" id="L76">                messageOut, getIdFromJson(jsonIn), PIP_SUB_TOPIC_NAME, PIP_SUB_TOPIC_UUID, COMMAND_TYPE);</span>
+<span class="nc" id="L199">        MessageContent messageOut =</span>
+<span class="nc" id="L200">                new ErrorResponse(getMessageIdFromJson(jsonIn), description);</span>
+<span class="nc" id="L201">        return buildOutgoingJsonObject(</span>
+<span class="nc" id="L202">                messageOut, getIdFromJson(jsonIn), PIP_SUB_TOPIC_NAME, PIP_SUB_TOPIC_UUID, COMMAND_TYPE);</span>
     }
 
-    // method specific for PIPReader. Need to make it general if we are going to use different PIP types
-    // note that when serializing, we specify as &quot;FILE_PATH&quot; the file name only. It's up to who loads
-    // the PIP from the json file to prepend the correct path.
-    protected static void serializePipToFile(String id, String attributeId, String category,
-                                             String dataType, String fileName, long refreshRate, String attributeValue) {
-<span class="nc" id="L84">        UCSDhtPipReaderProperties pipReaderProperties = new UCSDhtPipReaderProperties();</span>
 
-<span class="nc" id="L86">        pipReaderProperties.setId(id);</span>
-<span class="nc" id="L87">        pipReaderProperties.addAttribute(attributeId, category, dataType, fileName);</span>
-<span class="nc" id="L88">        pipReaderProperties.setRefreshRate(refreshRate);</span>
-<span class="nc" id="L89">        Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L90">        additionalProperties.put(fileName, attributeValue);</span>
-<span class="nc" id="L91">        pipReaderProperties.setAdditionalProperties(additionalProperties);</span>
+    protected static void serializePipToFile(String name, String id, String attributeId, String category,
+                                             String dataType, long refreshRate, Map&lt;String, String&gt; additionalProperties) {
+<span class="nc" id="L208">        UCSDhtPipProperties pipProperties = new UCSDhtPipProperties();</span>
 
-<span class="nc" id="L93">        JsonUtility.dumpObjectToJsonFile(pipReaderProperties,</span>
+<span class="nc" id="L210">        pipProperties.setName(name);</span>
+<span class="nc" id="L211">        pipProperties.setId(id);</span>
+<span class="nc" id="L212">        pipProperties.addAttribute(attributeId, category, dataType);</span>
+<span class="nc" id="L213">        pipProperties.setRefreshRate(refreshRate);</span>
+<span class="nc" id="L214">        pipProperties.setAdditionalProperties(additionalProperties);</span>
+
+<span class="nc" id="L216">        JsonUtility.dumpObjectToJsonFile(pipProperties,</span>
                 pipsDir + File.separator + id + File.separator + id + &quot;.json&quot;, true);
-<span class="nc" id="L95">    }</span>
+<span class="nc" id="L218">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

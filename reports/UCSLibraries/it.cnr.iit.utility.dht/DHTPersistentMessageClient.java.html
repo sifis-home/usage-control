@@ -25,43 +25,49 @@ public class DHTPersistentMessageClient {
 
     @OnMessage
     public void onMessage(String message, Session session) {
-<span class="nc" id="L28">        System.out.println(&quot;Received response: &quot; + message);</span>
-<span class="nc" id="L29">        response = message;</span>
-<span class="nc" id="L30">        synchronized (lock) {</span>
-<span class="nc" id="L31">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
-<span class="nc" id="L32">        }</span>
-<span class="nc" id="L33">    }</span>
+        String truncatedMessage;
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (message.length() &gt; 50) {</span>
+<span class="nc" id="L30">            truncatedMessage = message.substring(0,49) + &quot;... (remainder omitted for readability)&quot;;</span>
+        } else {
+<span class="nc" id="L32">            truncatedMessage = message;</span>
+        }
+<span class="nc" id="L34">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
+<span class="nc" id="L35">        response = message;</span>
+<span class="nc" id="L36">        synchronized (lock) {</span>
+<span class="nc" id="L37">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
+<span class="nc" id="L38">        }</span>
+<span class="nc" id="L39">    }</span>
 
     @OnClose
     public void onClose(Session session) {
-<span class="nc" id="L37">        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed.&quot;);</span>
-<span class="nc" id="L38">    }</span>
+<span class="nc" id="L43">        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed.&quot;);</span>
+<span class="nc" id="L44">    }</span>
 
     public void closeConnection() {
         try {
-<span class="nc bnc" id="L42" title="All 2 branches missed.">            if (session != null) {</span>
-<span class="nc" id="L43">                session.close();</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (session != null) {</span>
+<span class="nc" id="L49">                session.close();</span>
             }
-<span class="nc" id="L45">        } catch (Exception e) {</span>
-<span class="nc" id="L46">            e.printStackTrace();</span>
-<span class="nc" id="L47">        }</span>
-<span class="nc" id="L48">    }</span>
+<span class="nc" id="L51">        } catch (Exception e) {</span>
+<span class="nc" id="L52">            e.printStackTrace();</span>
+<span class="nc" id="L53">        }</span>
+<span class="nc" id="L54">    }</span>
 
     public String sendRequestAndWaitForResponse(String request) {
 
         try {
-<span class="nc" id="L53">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
-<span class="nc" id="L54">            container.connectToServer(this, new URI(this.uri));</span>
+<span class="nc" id="L59">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
+<span class="nc" id="L60">            container.connectToServer(this, new URI(this.uri));</span>
 
-<span class="nc" id="L56">            synchronized (lock) {</span>
-<span class="nc" id="L57">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
-<span class="nc" id="L58">                lock.wait(); // Wait for the response to be received</span>
-<span class="nc" id="L59">            }</span>
-<span class="nc" id="L60">            return response;</span>
-<span class="nc" id="L61">        } catch (Exception e) {</span>
-<span class="nc" id="L62">            e.printStackTrace();</span>
+<span class="nc" id="L62">            synchronized (lock) {</span>
+<span class="nc" id="L63">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
+<span class="nc" id="L64">                lock.wait(); // Wait for the response to be received</span>
+<span class="nc" id="L65">            }</span>
+<span class="nc" id="L66">            return response;</span>
+<span class="nc" id="L67">        } catch (Exception e) {</span>
+<span class="nc" id="L68">            e.printStackTrace();</span>
         }
-<span class="nc" id="L64">        return null;</span>
+<span class="nc" id="L70">        return null;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

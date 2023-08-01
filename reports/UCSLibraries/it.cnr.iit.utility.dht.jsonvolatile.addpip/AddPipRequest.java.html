@@ -3,31 +3,31 @@
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
+import java.util.Map;
+
 public class AddPipRequest implements MessageContent {
 
-<span class="nc" id="L8">    public final String purpose = PURPOSE.ADD_PIP.name();</span>
+<span class="nc" id="L10">    public final String purpose = PURPOSE.ADD_PIP.name();</span>
     private String message_id;
     private String pip_type;
     private String attribute_id;
     private String category;
     private String data_type;
-    private String attribute_value;
-    private String file_name;
     private long refresh_rate;
+    private Map&lt;String, String&gt; additional_properties;
 
-<span class="nc" id="L18">    public AddPipRequest() {</span>
-<span class="nc" id="L19">    }</span>
+<span class="nc" id="L19">    public AddPipRequest() {</span>
+<span class="nc" id="L20">    }</span>
 
     public AddPipRequest(String message_id, String pip_type, String attribute_id, String category,
-<span class="nc" id="L22">                         String data_type, String attribute_value, String file_name, long refresh_rate) {</span>
-<span class="nc" id="L23">        this.message_id = message_id;</span>
-<span class="nc" id="L24">        this.pip_type = pip_type;</span>
-<span class="nc" id="L25">        this.attribute_id = attribute_id;</span>
-<span class="nc" id="L26">        this.category = category;</span>
-<span class="nc" id="L27">        this.data_type = data_type;</span>
-<span class="nc" id="L28">        this.attribute_value = attribute_value;</span>
-<span class="nc" id="L29">        this.file_name = file_name;</span>
-<span class="nc" id="L30">        this.refresh_rate = refresh_rate;</span>
+<span class="nc" id="L23">                         String data_type, long refresh_rate, Map&lt;String, String&gt; additional_properties) {</span>
+<span class="nc" id="L24">        this.message_id = message_id;</span>
+<span class="nc" id="L25">        this.pip_type = pip_type;</span>
+<span class="nc" id="L26">        this.attribute_id = attribute_id;</span>
+<span class="nc" id="L27">        this.category = category;</span>
+<span class="nc" id="L28">        this.data_type = data_type;</span>
+<span class="nc" id="L29">        this.refresh_rate = refresh_rate;</span>
+<span class="nc" id="L30">        this.additional_properties = additional_properties;</span>
 <span class="nc" id="L31">    }</span>
     @Override
     public String getMessage_id() {
@@ -72,29 +72,21 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L72">        this.data_type = data_type;</span>
 <span class="nc" id="L73">    }</span>
 
-    public String getAttribute_value() {
-<span class="nc" id="L76">        return attribute_value;</span>
+    public Map&lt;String, String&gt; getAdditional_properties() {
+<span class="nc" id="L76">        return additional_properties;</span>
     }
 
-    public void setAttribute_value(String attribute_value) {
-<span class="nc" id="L80">        this.attribute_value = attribute_value;</span>
+    public void setAdditional_properties(Map&lt;String, String&gt; additional_properties) {
+<span class="nc" id="L80">        this.additional_properties = additional_properties;</span>
 <span class="nc" id="L81">    }</span>
 
-    public String getFile_name() {
-<span class="nc" id="L84">        return file_name;</span>
-    }
-
-    public void setFile_name(String file_name) {
-<span class="nc" id="L88">        this.file_name = file_name;</span>
-<span class="nc" id="L89">    }</span>
-
     public long getRefresh_rate() {
-<span class="nc" id="L92">        return refresh_rate;</span>
+<span class="nc" id="L84">        return refresh_rate;</span>
     }
 
     public void setRefresh_rate(long refresh_rate) {
-<span class="nc" id="L96">        this.refresh_rate = refresh_rate;</span>
-<span class="nc" id="L97">    }</span>
+<span class="nc" id="L88">        this.refresh_rate = refresh_rate;</span>
+<span class="nc" id="L89">    }</span>
 }
 
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

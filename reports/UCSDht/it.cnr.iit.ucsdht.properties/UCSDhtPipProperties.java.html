@@ -6,76 +6,108 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 
-<span class="nc" id="L11">public class UCSDhtPipProperties implements PipProperties {</span>
+<span class="nc" id="L12">public class UCSDhtPipProperties implements PipProperties {</span>
 
+	private String id;
+	private String name;
+<span class="nc" id="L16">	private String journalProtocol = &quot;file&quot;;</span>
+<span class="nc" id="L17">	private String journalPath = &quot;/tmp/ucf&quot;;</span>
+<span class="nc" id="L18">	List&lt;Map&lt;String, String&gt;&gt; attributes = new ArrayList&lt;&gt;();</span>
 	private long refreshRate;
 
+<span class="nc" id="L21">	private Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
+
 	@Override
+	public String getId() {
+<span class="nc" id="L25">		return this.id;</span>
+	}
+
+	public void setId(String id) {
+<span class="nc" id="L29">		this.id = id;</span>
+<span class="nc" id="L30">	}</span>
+
 	public String getName() {
-<span class="nc" id="L17">		return &quot;it.cnr.iit.ucs.pipreader.PIPReader&quot;;</span>
+<span class="nc" id="L33">		return this.name;</span>
+	}
+
+	public void setName(String name) {
+<span class="nc" id="L37">		this.name = name;</span>
+<span class="nc" id="L38">	}</span>
+
+	@Override
+	public String getJournalProtocol() {
+<span class="nc" id="L42">		return this.journalProtocol;</span>
+	}
+
+	public void setJournalProtocol(String journalProtocol) {
+<span class="nc" id="L46">		this.journalProtocol = journalProtocol;</span>
+<span class="nc" id="L47">	}</span>
+
+	@Override
+	public String getJournalPath() {
+<span class="nc" id="L51">		return this.journalPath;</span>
+	}
+
+	public void setJournalPath(String journalPath) {
+<span class="nc" id="L55">		this.journalPath = journalPath;</span>
+<span class="nc" id="L56">	}</span>
+
+	@Override
+	public List&lt;Map&lt;String, String&gt;&gt; getAttributes() {
+<span class="nc" id="L60">		return new ArrayList&lt;&gt;(attributes);</span>
+	}
+
+	public void addAttribute(String id, String category, String dataType) {
+<span class="nc" id="L64">		Map&lt;String,String&gt; attributeMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L65">		attributeMap.put(&quot;ATTRIBUTE_ID&quot;, id);</span>
+<span class="nc" id="L66">		attributeMap.put(&quot;CATEGORY&quot;, category);</span>
+<span class="nc" id="L67">		attributeMap.put(&quot;EXPECTED_CATEGORY&quot;, category);</span>
+<span class="nc" id="L68">		attributeMap.put(&quot;DATA_TYPE&quot;, dataType);</span>
+
+<span class="nc" id="L70">		this.attributes.add(attributeMap);</span>
+<span class="nc" id="L71">	}</span>
+
+	public void addAttribute(String id, String category, String dataType, String expectedCategory) {
+<span class="nc" id="L74">		Map&lt;String,String&gt; attributeMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L75">		attributeMap.put(&quot;ATTRIBUTE_ID&quot;, id);</span>
+<span class="nc" id="L76">		attributeMap.put(&quot;CATEGORY&quot;, category);</span>
+<span class="nc" id="L77">		attributeMap.put(&quot;EXPECTED_CATEGORY&quot;, expectedCategory);</span>
+<span class="nc" id="L78">		attributeMap.put(&quot;DATA_TYPE&quot;, dataType);</span>
+
+<span class="nc" id="L80">		this.attributes.add(attributeMap);</span>
+<span class="nc" id="L81">	}</span>
+
+	@Override
+	public long getRefreshRate() {
+<span class="nc" id="L85">		return refreshRate;</span>
+	}
+
+	public void setRefreshRate(long refreshRate) {
+<span class="nc" id="L89">		this.refreshRate = refreshRate;</span>
+<span class="nc" id="L90">	}</span>
+
+	@Override
+	@JsonIgnore
+	public boolean isMultiAttribute() {
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		return this.attributes.size() &gt; 1;</span>
+	}
+
+	@Override
+	@JsonIgnore
+	public Map&lt;String, String&gt; getJournalAdditionalProperties() {
+<span class="nc" id="L101">		return null;</span>
 	}
 
 	@Override
 	public Map&lt;String, String&gt; getAdditionalProperties() {
-//		Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();
-//		additionalProperties.put(&quot;KEY&quot;, &quot;VALUE&quot;);
-//		return additionalProperties;
-<span class="nc" id="L25">		return null;</span>
+<span class="nc" id="L106">		return additionalProperties;</span>
 	}
 
-	@Override
-	public String getId() {
-<span class="nc" id="L30">		return &quot;1&quot;;</span>
-	}
-
-	@Override
-	public String getJournalPath() {
-<span class="nc" id="L35">		return &quot;/tmp/ucf&quot;;</span>
-	}
-
-	@Override
-	public String getJournalProtocol() {
-<span class="nc" id="L40">		return &quot;file&quot;;</span>
-	}
-
-	@Override
-	public Map&lt;String, String&gt; getJournalAdditionalProperties() {
-<span class="nc" id="L45">		return null;</span>
-	}
-
-	@Override
-	public List&lt;Map&lt;String, String&gt;&gt; getAttributes() {
-
-<span class="nc" id="L51">		Map&lt;String,String&gt; attributeMap = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L52">		attributeMap.put(&quot;ATTRIBUTE_ID&quot;,&quot;urn:oasis:names:tc:xacml:3.0:environment:dummy_env_attribute&quot;);</span>
-<span class="nc" id="L53">		attributeMap.put(&quot;CATEGORY&quot;, &quot;urn:oasis:names:tc:xacml:3.0:attribute-category:environment&quot;);</span>
-<span class="nc" id="L54">		attributeMap.put(&quot;DATA_TYPE&quot;,&quot;http://www.w3.org/2001/XMLSchema#string&quot;);</span>
-
-<span class="nc" id="L56">		File file = new File(&quot;src/test/resources/attributes/&quot;);</span>
-<span class="nc" id="L57">		String filePath = file.getAbsolutePath() + &quot;/dummy_env_attribute.txt&quot;;</span>
-
-<span class="nc" id="L59">		attributeMap.put(&quot;FILE_PATH&quot;,filePath);</span>
-
-<span class="nc" id="L61">		List&lt;Map&lt;String, String&gt;&gt; attributes = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L62">		attributes.add(0,attributeMap);</span>
-
-<span class="nc" id="L64">		return attributes;</span>
-	}
-
-	@Override
-	public boolean isMultiAttribute() {
-<span class="nc" id="L69">		return false;</span>
-	}
-
-	@Override
-	public long getRefreshRate() {
-<span class="nc" id="L74">		return refreshRate;</span>
-	}
-
-	public void setRefreshRate(long refreshRate) {
-<span class="nc" id="L78">		this.refreshRate = refreshRate;</span>
-<span class="nc" id="L79">	}</span>
+	public void setAdditionalProperties(Map&lt;String, String&gt; additionalProperties) {
+<span class="nc" id="L110">		this.additionalProperties = additionalProperties;</span>
+<span class="nc" id="L111">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
