@@ -8,15 +8,17 @@
           "message": {
             "purpose": "ADD_PIP",
             "message_id": "c80a7bfc-218f-11ee-9d1d-acde48001122",
-            "pip_type": "PIPReader",
+            "pip_type": "it.cnr.iit.ucs.pipreader.PIPReader",
             "attribute_id": "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed",
             "category": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
             "data_type": "http://www.w3.org/2001/XMLSchema#string",
-            "attribute_value": "true",
-            "file_name": "windows-in-bedroom.txt",
-            "refresh_rate": 1000
+            "refresh_rate": 1000,
+            "additionalProperties": {
+              "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed" : "windows-in-bedroom.txt",
+              "windows-in-bedroom.txt": "true"
+            }
           },
-          "id": "pip-web_socket",
+          "id": "pip-windows-closed",
           "topic_name": "topic-name",
           "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
         }

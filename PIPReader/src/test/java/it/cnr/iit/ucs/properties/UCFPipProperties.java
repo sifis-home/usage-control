@@ -16,6 +16,7 @@ public class UCFPipProperties implements PipProperties {
     private String journalProtocol;
     private List<Map<String, String>> attributes;
     private long refreshRate;
+    private Map<String, String> additionalProperties;
 
     @Override
     public String getName() {
@@ -56,7 +57,7 @@ public class UCFPipProperties implements PipProperties {
 
     @Override
     public Map<String, String> getAdditionalProperties() {
-        return null;
+        return this.additionalProperties;
     }
 
     @Override
