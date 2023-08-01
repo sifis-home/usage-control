@@ -5,16 +5,14 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 import it.cnr.iit.ucs.constants.STATUS;
+import it.cnr.iit.ucs.pipreader.PIPReader;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.ucs.sessionmanager.OnGoingAttribute;
 import it.cnr.iit.ucs.sessionmanager.Session;
 import it.cnr.iit.ucs.sessionmanager.SessionInterface;
 import it.cnr.iit.ucs.sessionmanager.SessionManager;
-import it.cnr.iit.ucsdht.properties.UCSDhtPapProperties;
-import it.cnr.iit.ucsdht.properties.UCSDhtPepProperties;
-import it.cnr.iit.ucsdht.properties.UCSDhtPipReaderProperties;
-import it.cnr.iit.ucsdht.properties.UCSDhtSessionManagerProperties;
+import it.cnr.iit.ucsdht.properties.*;
 import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.DHTPersistentMessageClient;
@@ -281,7 +279,7 @@ public class UCSDht {
         for (String pipString : pipsString) {
             // extract pip id
             PipProperties pipProperties =
-                    PersistUtility.getPipPropertiesFromBase64String(pipString, UCSDhtPipReaderProperties.class);
+                    PersistUtility.getPipPropertiesFromBase64String(pipString, UCSDhtPipProperties.class);
             assert pipProperties != null;
             String pipId = pipProperties.getId();
 
@@ -289,11 +287,13 @@ public class UCSDht {
             Utils.createDir(new File(pipsDir.getAbsolutePath(), pipId));
             PersistUtility.base64StringToFile(pipString, pipsDir + File.separator + pipId + File.separator + pipId + ".json");
 
-            // create the file(s) with the attribute value
-            for (Map<String, String> attribute : pipProperties.getAttributes()) {
-                String attributeFilePath = attribute.get("FILE_PATH");
-                String attributeValue = pipProperties.getAdditionalProperties().get(attributeFilePath);
-                setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId + File.separator + attributeFilePath, attributeValue);
+            // for PIPReader, create the file(s) with the attribute value
+            if (pipProperties.getName().equals(PIPReader.class.getName())) {
+                for (Map<String, String> attribute : pipProperties.getAttributes()) {
+                    String attributeFilePath = pipProperties.getAdditionalProperties().get(attribute.get("ATTRIBUTE_ID"));
+                    String attributeValue = pipProperties.getAdditionalProperties().get(attributeFilePath);
+                    setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId + File.separator + attributeFilePath, attributeValue);
+                }
             }
         }
 
@@ -504,7 +504,8 @@ public class UCSDht {
     private static void initializeUCS() {
 
         // to be correctly initialized, the UCS needs at least one PIP to be present
-        addSamplePip("sample-pip", "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
+        addSamplePip("it.cnr.iit.ucs.pipreader.PIPReader", "sample-pip",
+                "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
                 Category.ENVIRONMENT.toString(), DataType.STRING.toString(), "sample-attribute-1.txt",
                 1000L, "attribute-1-value");
 
@@ -565,14 +566,13 @@ public class UCSDht {
 
 
     /**
-     * Load the PIPs (only PIPReader is supported) from json files. Each PIP
-     * is in a subfolder of the pipsDir folder. The subfolder includes a
-     * json file containing the properties, and a file containing the
-     * attribute value.
-     * |__ pipsDir
-     * |__ pip-id
-     * |__ pip-id.json
-     * |__ attribute-value.txt
+     * Load the PIPs from json files. Each PIP is in a subfolder of the pipsDir
+     * folder. The subfolder includes a json file containing the properties, and,
+     * for PIPs of type PIPReader only, a file containing the attribute value.
+     * |_ pipsDir
+     *     |_ pip-id
+     *         |_ pip-id.json
+     *         |_ attribute-value.txt (only for PIPReader)
      * The json files contain the PipProperties that are added to the list
      * used to initialize the UCS.
      */
@@ -584,16 +584,21 @@ public class UCSDht {
                     File targetFile = new File(subDir, subDir.getName() + ".json");
                     if (targetFile.exists() && targetFile.isFile()) {
                         System.out.print("[PIPs] Loading PIP '" + targetFile.getName() + "' ...");
-                        Optional<UCSDhtPipReaderProperties> properties = Optional.empty();
+                        Optional<UCSDhtPipProperties> properties = Optional.empty();
                         try {
-                            properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPipReaderProperties.class);
+                            properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPipProperties.class);
                         } catch (NoSuchElementException e) {
                             System.err.println(e.getMessage());
                         }
                         if (properties.isPresent()) {
-                            for (Map<String, String> attribute : properties.get().getAttributes()) {
-                                attribute.put("FILE_PATH", pipsDir + File.separator +
-                                        properties.get().getId() + File.separator + attribute.get("FILE_PATH"));
+                            if (properties.get().getName().equals(PIPReader.class.getName())) {
+                                for (Map<String, String> attribute : properties.get().getAttributes()) {
+                                    String attributeId = attribute.get("ATTRIBUTE_ID");
+                                    String fileName = properties.get().getAdditionalProperties().get(attributeId);
+                                    properties.get().getAdditionalProperties().put(attributeId,
+                                            pipsDir + File.separator +
+                                                    properties.get().getId() + File.separator + fileName);
+                                }
                             }
                             pipPropertiesList.add(properties.get());
                         }
@@ -637,15 +642,19 @@ public class UCSDht {
     /**
      * Add a pip programmatically and save its json serialization and attribute file
      */
-    public static void addSamplePip(String pipId, String attributeId, String category, String dataType,
+    public static void addSamplePip(String name, String pipId, String attributeId, String category, String dataType,
                                     String fileName, long refreshRate, String attributeValue) {
 
-        UCSDhtPipReaderProperties pipReader = new UCSDhtPipReaderProperties();
-        pipReader.addAttribute(attributeId, category, dataType,
-                pipsDir + File.separator + pipId + File.separator + fileName);
+        UCSDhtPipProperties pipReader = new UCSDhtPipProperties();
+        pipReader.setName(name);
+        pipReader.addAttribute(attributeId, category, dataType);
         pipReader.setRefreshRate(refreshRate);
         pipReader.setJournalPath("/tmp/ucf");
         pipReader.setJournalProtocol("file");
+        Map<String, String> additionalProperties = new HashMap<>();
+        additionalProperties.put(attributeId, pipsDir + File.separator + pipId + File.separator + fileName);
+        additionalProperties.put(pipsDir + File.separator + pipId + File.separator + fileName, attributeValue);
+        pipReader.setAdditionalProperties(additionalProperties);
         pipPropertiesList.add(pipReader);
 
         Utils.createDir(new File(pipsDir.getAbsolutePath() + File.separator + pipId));
@@ -653,8 +662,13 @@ public class UCSDht {
         setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId
                 + File.separator + fileName, attributeValue);
 
-        PIPMessageManager.serializePipToFile(pipId, attributeId, category,
-                dataType, fileName, refreshRate, attributeValue);
+        // when serializing, we specify only the file name, not the entire path
+        Map<String, String> additionalPropertiesToSerialize = new HashMap<>();
+        additionalPropertiesToSerialize.put(attributeId, fileName);
+        additionalPropertiesToSerialize.put(fileName, attributeValue);
+
+        PIPMessageManager.serializePipToFile(name, pipId, attributeId, category,
+                dataType, refreshRate, additionalPropertiesToSerialize);
     }
 
     /**
