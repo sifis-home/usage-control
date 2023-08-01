@@ -25,6 +25,8 @@
         <module>UCSLibraries</module>
         <module>ObligationManager</module>
         <module>PIPReader</module>
+        <module>PIPTime</module>
+        <module>PIPWebSocket</module>
         <!--<module>PIPJdbc</module>-->
         <!--<module>PIPDsa</module>-->
         <module>PolicyAdministrationPoint</module>

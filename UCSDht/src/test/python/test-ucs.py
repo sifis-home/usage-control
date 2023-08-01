@@ -5,6 +5,7 @@ import base64
 import uuid
 import datetime
 
+websocket_uri = "ws://localhost:3000/ws"
 session_id = "None"
 def on_message(ws, message):
     if "ucs-command" in message:
@@ -29,6 +30,7 @@ def on_close(ws, close_status_code, close_msg):
 
 def on_open(ws):
     print("### Connection established ###")
+    print("[ " + websocket_uri + " ]")
     enter_command()
 
 def enter_command():
@@ -36,9 +38,9 @@ def enter_command():
     print("LIST OF COMMANDS:")
     print("")
     print("  PEP commands:              PAP commands:              PIP commands:")
-    print("    1 : register               5 : add policy             9: add pip")
-    print("    2 : try access             6 : list policies")
-    print("    3 : start access           7 : get policy")
+    print("    1 : register               5 : add policy             9: add pip time")
+    print("    2 : try access             6 : list policies         10: add pip reader")
+    print("    3 : start access           7 : get policy            11: add pip websocket lamps")
     print("    4 : end access             8 : delete policy")
     print("")
 
@@ -64,8 +66,12 @@ def send_command(command):
     elif command == "8":
         delete_policy()
     elif command == "9":
-        add_pip()
+        add_pip_time()
     elif command == "10":
+        add_pip_reader()
+    elif command == "11":
+        add_pip_websocket()
+    elif command == "12":
         unrecognized_command()
     elif command == "q":
         exit("")
@@ -82,25 +88,25 @@ def print_and_send(json_out):
 ## REGISTER
 def register():
     ws_req = {
-     "RequestPubMessage": {
-       "value": {
-         "timestamp": int(datetime.datetime.now().timestamp()*1000),
-         "command": {
-           "command_type": "pep-command",
-           "value": {
-             "message": {
-               "purpose": "REGISTER",
-               "message_id": str(uuid.uuid1()),
-               "sub_topic_name": "topic-name-the-pep-is-subscribed-to",
-               "sub_topic_uuid": "topic-uuid-the-pep-is-subscribed-to"
-             },
-             "id": "pep-websocket_client",
-             "topic_name": "topic-name",
-             "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
-           }
-         }
-       }
-     }
+        "RequestPubMessage": {
+            "value": {
+                "timestamp": int(datetime.datetime.now().timestamp()*1000),
+                "command": {
+                    "command_type": "pep-command",
+                    "value": {
+                        "message": {
+                            "purpose": "REGISTER",
+                            "message_id": str(uuid.uuid1()),
+                            "sub_topic_name": "topic-name-the-pep-is-subscribed-to",
+                            "sub_topic_uuid": "topic-uuid-the-pep-is-subscribed-to"
+                        },
+                        "id": "pep-websocket_client",
+                        "topic_name": "topic-name",
+                        "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+                    }
+                }
+            }
+        }
     }
     print("\n---------- REGISTER ------------\n")
     print_and_send(ws_req)
@@ -313,10 +319,43 @@ def delete_policy():
     print("\n-------- DELETE POLICY ---------\n")
     print_and_send(ws_req)
 
-def add_pip():
-    attribute_id = "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed"
+def add_pip_time():
+    attribute_id = "urn:oasis:names:tc:xacml:1.0:environment:current-time"
     category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
-    data_type = "http://www.w3.org/2001/XMLSchema#string"
+    data_type = "http://www.w3.org/2001/XMLSchema#time"
+    refresh_rate = 10000
+
+    ws_req = {
+        "RequestPubMessage": {
+            "value": {
+                "timestamp": int(datetime.datetime.now().timestamp()*1000),
+                "command": {
+                    "command_type": "pip-command",
+                    "value": {
+                        "message": {
+                            "purpose": "ADD_PIP",
+                            "message_id": str(uuid.uuid1()),
+                            "pip_type": "it.cnr.iit.ucs.piptime.PIPTime",
+                            "attribute_id": attribute_id,
+                            "category": category,
+                            "data_type": data_type,
+                            "refresh_rate": refresh_rate
+                        },
+                        "id": "pip-time",
+                        "topic_name": "topic-name",
+                        "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+                    }
+                }
+            }
+        }
+    }
+    print("\n------- ADD PIP TIME --------\n")
+    print_and_send(ws_req)
+
+def add_pip_reader():
+    attribute_id = "eu:sifis-home:1.0:environment:all-windows-in-bedroom-closed"
+    category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
+    data_type = "http://www.w3.org/2001/XMLSchema#boolean"
     attribute_value = "true"
     file_name = "windows-in-bedroom.txt"
     refresh_rate = 1000
@@ -331,15 +370,17 @@ def add_pip():
                         "message": {
                             "purpose": "ADD_PIP",
                             "message_id": str(uuid.uuid1()),
-                            "pip_type": "PIPReader",
+                            "pip_type": "it.cnr.iit.ucs.pipreader.PIPReader",
                             "attribute_id": attribute_id,
                             "category": category,
                             "data_type": data_type,
-                            "attribute_value": attribute_value,
-                            "file_name": file_name,
-                            "refresh_rate": refresh_rate
+                            "refresh_rate": refresh_rate,
+                            "additional_properties" : {
+                                attribute_id: file_name,
+                                file_name: attribute_value
+                            }
                         },
-                        "id": "pip-web_socket",
+                        "id": "pip-reader-windows",
                         "topic_name": "topic-name",
                         "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
                     }
@@ -347,7 +388,48 @@ def add_pip():
             }
         }
     }
-    print("\n--------- ADD PIP -----------\n")
+    print("\n------ ADD PIP READER -------\n")
+    print_and_send(ws_req)
+
+def add_pip_websocket():
+    attribute_id = "eu:sifis-home:1.0:environment:lamps-status"
+    category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
+    data_type = "http://www.w3.org/2001/XMLSchema#boolean"
+    dhtUri = "ws://sifis-device4.iit.cnr.it:3000/ws"
+    topicName = "domo_light"
+    topicUuid = "bd59a9b8-fb3d-452d-b4ca-f3d13cf2d504"
+    refresh_rate = 10000
+
+    ws_req = {
+        "RequestPubMessage": {
+            "value": {
+                "timestamp": int(datetime.datetime.now().timestamp()*1000),
+                "command": {
+                    "command_type": "pip-command",
+                    "value": {
+                        "message": {
+                            "purpose": "ADD_PIP",
+                            "message_id": str(uuid.uuid1()),
+                            "pip_type": "it.cnr.iit.ucs.pipwebsocket.PIPWebSocketLamps",
+                            "attribute_id": attribute_id,
+                            "category": category,
+                            "data_type": data_type,
+                            "refresh_rate": refresh_rate,
+                            "additional_properties" : {
+                                "dhtUri": dhtUri,
+                                "topicName": topicName,
+                                "topicUuid": topicUuid
+                            }
+                        },
+                        "id": "pip-websocket-lamps",
+                        "topic_name": "topic-name",
+                        "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+                    }
+                }
+            }
+        }
+    }
+    print("\n--- ADD PIP WEBSOCKETLAMPS --\n")
     print_and_send(ws_req)
 
 ## UNRECOGNIZED COMMAND
@@ -400,7 +482,7 @@ def unrecognized_command():
 
 
 if __name__ == "__main__":
-    ws = websocket.WebSocketApp("ws://localhost:3000/ws",
+    ws = websocket.WebSocketApp(websocket_uri,
                                 on_open=on_open,
                                 on_message=on_message,
                                 on_error=on_error,

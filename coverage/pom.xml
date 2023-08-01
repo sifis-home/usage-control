@@ -41,6 +41,18 @@
 
         <dependency>
             <groupId>it.cnr.iit.ucs</groupId>
+            <artifactId>PIPTime</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>it.cnr.iit.ucs</groupId>
+            <artifactId>PIPWebSocket</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>it.cnr.iit.ucs</groupId>
             <artifactId>PolicyAdministrationPoint</artifactId>
             <version>${project.version}</version>
         </dependency>

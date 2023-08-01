@@ -3,6 +3,8 @@ package it.cnr.iit.utility.dht.jsonvolatile.addpip;
 import it.cnr.iit.ucs.constants.PURPOSE;
 import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
+import java.util.Map;
+
 public class AddPipRequest implements MessageContent {
 
     public final String purpose = PURPOSE.ADD_PIP.name();
@@ -11,23 +13,21 @@ public class AddPipRequest implements MessageContent {
     private String attribute_id;
     private String category;
     private String data_type;
-    private String attribute_value;
-    private String file_name;
     private long refresh_rate;
+    private Map<String, String> additional_properties;
 
     public AddPipRequest() {
     }
 
     public AddPipRequest(String message_id, String pip_type, String attribute_id, String category,
-                         String data_type, String attribute_value, String file_name, long refresh_rate) {
+                         String data_type, long refresh_rate, Map<String, String> additional_properties) {
         this.message_id = message_id;
         this.pip_type = pip_type;
         this.attribute_id = attribute_id;
         this.category = category;
         this.data_type = data_type;
-        this.attribute_value = attribute_value;
-        this.file_name = file_name;
         this.refresh_rate = refresh_rate;
+        this.additional_properties = additional_properties;
     }
     @Override
     public String getMessage_id() {
@@ -72,20 +72,12 @@ public class AddPipRequest implements MessageContent {
         this.data_type = data_type;
     }
 
-    public String getAttribute_value() {
-        return attribute_value;
+    public Map<String, String> getAdditional_properties() {
+        return additional_properties;
     }
 
-    public void setAttribute_value(String attribute_value) {
-        this.attribute_value = attribute_value;
-    }
-
-    public String getFile_name() {
-        return file_name;
-    }
-
-    public void setFile_name(String file_name) {
-        this.file_name = file_name;
+    public void setAdditional_properties(Map<String, String> additional_properties) {
+        this.additional_properties = additional_properties;
     }
 
     public long getRefresh_rate() {
