@@ -77,7 +77,7 @@ public class DHTPersistentMessageClient {
         } else {
             truncatedMessage = message;
         }
-        System.out.println("Received response: " + truncatedMessage);
+        System.out.println("Received response: " + message);
         response = message;
         synchronized (lock) {
             lock.notify(); // Notify the waiting thread that the response has been received.
