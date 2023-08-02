@@ -55,7 +55,9 @@ public class StatusWatcher {
                         }
                     }
 
-                    key.reset();
+                    if (!key.reset()) {
+                        System.err.println("The directory is inaccessible.");
+                    }
                 }
             } catch (InterruptedException e) {
                 System.out.println("Folder monitoring thread interrupted.");
