@@ -72,12 +72,12 @@ public class DHTPersistentMessageClient {
         }
 
         String truncatedMessage;
-        if (message.length() > 50) {
-            truncatedMessage = message.substring(0,49) + "... (remainder omitted for readability)";
+        if (message.length() > 100) {
+            truncatedMessage = message.substring(0,99) + "... (remainder omitted for readability)";
         } else {
             truncatedMessage = message;
         }
-        System.out.println("Received response: " + message);
+        System.out.println("Received response: " + truncatedMessage);
         response = message;
         synchronized (lock) {
             lock.notify(); // Notify the waiting thread that the response has been received.
