@@ -72,12 +72,12 @@ public class DHTPersistentMessageClient {
         }
 
         String truncatedMessage;
-<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (message.length() &gt; 50) {</span>
-<span class="nc" id="L76">            truncatedMessage = message.substring(0,49) + &quot;... (remainder omitted for readability)&quot;;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (message.length() &gt; 100) {</span>
+<span class="nc" id="L76">            truncatedMessage = message.substring(0,99) + &quot;... (remainder omitted for readability)&quot;;</span>
         } else {
 <span class="nc" id="L78">            truncatedMessage = message;</span>
         }
-<span class="nc" id="L80">        System.out.println(&quot;Received response: &quot; + message);</span>
+<span class="nc" id="L80">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
 <span class="nc" id="L81">        response = message;</span>
 <span class="nc" id="L82">        synchronized (lock) {</span>
 <span class="nc" id="L83">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
