@@ -67,11 +67,12 @@ public class UCSDht {
 
     static String PERSISTENT_TOPIC_NAME_UCS = "SIFIS:UCS";
     static String PERSISTENT_TOPIC_UUID_UCS_STATUS = "status";
-    static DHTPersistentMessageClient client =
-            new DHTPersistentMessageClient(dhtUri, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
+    static DHTPersistentMessageClient client;
 
 
     public static void main(String[] args) {
+
+        System.out.println("Time: " + System.currentTimeMillis());
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -105,6 +106,9 @@ public class UCSDht {
                     System.exit(1);
             }
         }
+
+        client = new DHTPersistentMessageClient(
+                dhtUri, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
 
         if (hardReset) {
             performHardReset();
