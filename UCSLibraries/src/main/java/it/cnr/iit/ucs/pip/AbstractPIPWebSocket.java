@@ -1,6 +1,7 @@
 package it.cnr.iit.ucs.pip;
 
 import com.google.gson.GsonBuilder;
+import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.dht.DHTPersistentMessageClient;
 import it.cnr.iit.utility.dht.jsonpersistent.JsonOutRequestGetTopicUuid;
@@ -35,7 +36,7 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
             topicUuid = properties.getAdditionalProperties().get("topicUuid");
             Reject.ifNull(topicUuid, "Topic UUID not specified");
 
-            client = new DHTPersistentMessageClient(dhtUri);
+            client = new DHTPersistentMessageClient(dhtUri, topicName, topicUuid);
 
             for (Map<String, String> attributeMap : properties.getAttributes()) {
 
@@ -56,10 +57,10 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
     }
 
 
-    public String performRequestGetTopicUuid() {
+    public String performRequestGetTopicUuid() throws PIPException {
         // get the status from the dht
         String response = null;
-        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
+        if (isDhtReachable(dhtUri, 2000, 1)) {
             RequestGetTopicUuid requestGetTopicUuid =
                     new RequestGetTopicUuid(topicName, topicUuid);
 
@@ -71,9 +72,25 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
                     .toJson(jsonOut);
 
             response = client.sendRequestAndWaitForResponse(request);
+
+            if (response.equals("{\"Response\":{\"value\":{}}}")) {
+                int attempts = 5;
+                for (int i = 1; i <= attempts; i++) {
+                    response = client.sendRequestAndWaitForResponse(request);
+                    if (!response.equals("{\"Response\":{\"value\":{}}}")) {
+                        break;
+                    }
+                    if (i == attempts) {
+                        throw new PIPException("Attribute Manager error: " +
+                                "DHT returned an empty response");
+                    }
+                }
+            }
+
             client.closeConnection();
         } else {
-            System.err.println("Unable to connect to the DHT");
+            throw new PIPException("Attribute Manager error: " +
+                    "Unable to connect to the DHT");
         }
         return response;
     }

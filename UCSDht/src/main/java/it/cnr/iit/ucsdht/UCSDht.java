@@ -65,7 +65,11 @@ public class UCSDht {
     static boolean softReset = false;
     static boolean hardReset = false;
 
-    static DHTPersistentMessageClient client = new DHTPersistentMessageClient(dhtUri);
+    static String PERSISTENT_TOPIC_NAME_UCS = "SIFIS:UCS";
+    static String PERSISTENT_TOPIC_UUID_UCS_STATUS = "status";
+    static DHTPersistentMessageClient client =
+            new DHTPersistentMessageClient(dhtUri, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
+
 
     public static void main(String[] args) {
 
@@ -265,6 +269,7 @@ public class UCSDht {
         sessionManager.stop();
         System.out.println("[DATABASE] Sessions with status START and REVOKED gathered. "
                 + sessionsWithStatusStartOrRevoke.size() + " sessions found.");
+        System.out.println();
     }
 
 
@@ -286,6 +291,7 @@ public class UCSDht {
             // create pip properties json file
             Utils.createDir(new File(pipsDir.getAbsolutePath(), pipId));
             PersistUtility.base64StringToFile(pipString, pipsDir + File.separator + pipId + File.separator + pipId + ".json");
+            System.out.println("[PIPs] PIP '" + pipId + "' correctly retrieved from the DHT and saved to file");
 
             // for PIPReader, create the file(s) with the attribute value
             if (pipProperties.getName().equals(PIPReader.class.getName())) {
@@ -293,9 +299,12 @@ public class UCSDht {
                     String attributeFilePath = pipProperties.getAdditionalProperties().get(attribute.get("ATTRIBUTE_ID"));
                     String attributeValue = pipProperties.getAdditionalProperties().get(attributeFilePath);
                     setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId + File.separator + attributeFilePath, attributeValue);
+                    System.out.println("        - Attribute value for '" + attribute.get("ATTRIBUTE_ID")
+                            + "' correctly saved to file '" + attributeFilePath + "'");
                 }
             }
         }
+        System.out.println();
 
         // load the pips' properties in memory from the json files
         loadPips();
@@ -318,7 +327,9 @@ public class UCSDht {
 
             // create pep properties json file
             PersistUtility.base64StringToFile(pepString, pepsDir + File.separator + pepId + ".json");
+            System.out.println("[PEPs] PEP '" + pepId + "' correctly retrieved from the DHT and saved to file");
         }
+        System.out.println();
 
         // load the peps' properties in memory from the json files
         loadPeps();
@@ -338,7 +349,9 @@ public class UCSDht {
 
             // create policy file
             PersistUtility.base64StringToFile(policyString, policiesDir + File.separator + policyId + ".xml");
+            System.out.println("[Policies] Policy '" + policyId + "' correctly retrieved from the DHT and saved to file");
         }
+        System.out.println();
     }
 
 
@@ -437,7 +450,7 @@ public class UCSDht {
         String response = null;
         if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
             RequestGetTopicUuid requestGetTopicUuid =
-                    new RequestGetTopicUuid("SIFIS:UCS", "status");
+                    new RequestGetTopicUuid(PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
 
             JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);
             String request = new GsonBuilder()
@@ -447,6 +460,22 @@ public class UCSDht {
                     .toJson(jsonOut);
 
             response = client.sendRequestAndWaitForResponse(request);
+
+            // If we get an empty response, perform the request
+            // again to be sure that the empty response is actually
+            // the response to our request.
+            // If a response different from the empty response is
+            // retrieved, exit the loop.
+            if (response.equals("{\"Response\":{\"value\":{}}}")) {
+                int attempts = 5;
+                for (int i = 1; i <= attempts; i++) {
+                        response = client.sendRequestAndWaitForResponse(request);
+                    if (!response.equals("{\"Response\":{\"value\":{}}}")) {
+                        break;
+                    }
+                }
+            }
+
             client.closeConnection();
         } else {
             System.exit(1);
@@ -469,7 +498,7 @@ public class UCSDht {
                 savePepsToString(),
                 savePoliciesToString());
         RequestPostTopicUuid requestPostTopicUuid =
-                new RequestPostTopicUuid(value, "SIFIS:UCS", "status");
+                new RequestPostTopicUuid(value, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
         JsonOutRequestPostTopicUuid jsonOut = new JsonOutRequestPostTopicUuid(requestPostTopicUuid);
         String request = new GsonBuilder()
                 .disableHtmlEscaping()
@@ -583,7 +612,7 @@ public class UCSDht {
                 for (File subDir : subDirs) {
                     File targetFile = new File(subDir, subDir.getName() + ".json");
                     if (targetFile.exists() && targetFile.isFile()) {
-                        System.out.print("[PIPs] Loading PIP '" + targetFile.getName() + "' ...");
+                        System.out.print("[PIPs] Loading PIP '" + targetFile.getName() + "' in memory ...");
                         Optional<UCSDhtPipProperties> properties = Optional.empty();
                         try {
                             properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPipProperties.class);
@@ -611,6 +640,7 @@ public class UCSDht {
         } else {
             System.out.println("PIPs folder not found or is not a directory.");
         }
+        System.out.println();
     }
 
     /**
@@ -623,7 +653,7 @@ public class UCSDht {
             File[] files = pepsDir.listFiles(File::isFile);
             if (files != null) {
                 for (File targetFile : files) {
-                    System.out.print("[PEPs] Loading PEP '" + targetFile.getName() + "' ...");
+                    System.out.print("[PEPs] Loading PEP '" + targetFile.getName() + "' in memory ...");
                     Optional<UCSDhtPepProperties> properties = Optional.empty();
                     try {
                         properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPepProperties.class);
@@ -637,6 +667,7 @@ public class UCSDht {
         } else {
             System.out.println("PEPs folder not found or is not a directory.");
         }
+        System.out.println();
     }
 
     /**

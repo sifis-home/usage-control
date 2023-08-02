@@ -276,8 +276,9 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
             try {
                 value = retrieve(attribute);
             } catch (PIPException e) {
-                getLogger().log(Level.WARNING, "Error reading attribute " + attribute.getAttributeId());
-                return;
+                getLogger().log(Level.WARNING, "Error reading attribute "
+                        + attribute.getAttributeId() + e.getMessage());
+                continue;
             }
 
             if (!oldValue.equals(value)) { // if the attribute has changed

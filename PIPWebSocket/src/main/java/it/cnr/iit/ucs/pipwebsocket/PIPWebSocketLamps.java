@@ -23,10 +23,10 @@ public class PIPWebSocketLamps extends AbstractPIPWebSocket {
     }
 
     @Override
-    public String retrieve(Attribute attribute) {
+    public String retrieve(Attribute attribute) throws PIPException {
         String response = performRequestGetTopicUuid();
         // fixme: parse the response and return the attribute value
-        System.out.println(response);
+        //System.out.println(response);
         String value;
         if (response.contains("\"status\":false")) {
             value = "false";
