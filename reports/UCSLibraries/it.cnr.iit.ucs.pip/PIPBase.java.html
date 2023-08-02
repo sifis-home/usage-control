@@ -276,21 +276,22 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
             try {
 <span class="fc" id="L277">                value = retrieve(attribute);</span>
 <span class="nc" id="L278">            } catch (PIPException e) {</span>
-<span class="nc" id="L279">                getLogger().log(Level.WARNING, &quot;Error reading attribute &quot; + attribute.getAttributeId());</span>
-<span class="nc" id="L280">                return;</span>
-<span class="fc" id="L281">            }</span>
+<span class="nc" id="L279">                getLogger().log(Level.WARNING, &quot;Error reading attribute &quot;</span>
+<span class="nc" id="L280">                        + attribute.getAttributeId() + e.getMessage());</span>
+<span class="nc" id="L281">                continue;</span>
+<span class="fc" id="L282">            }</span>
 
-<span class="fc bfc" id="L283" title="All 2 branches covered.">            if (!oldValue.equals(value)) { // if the attribute has changed</span>
-<span class="fc" id="L284">                getLogger().log(Level.INFO,</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">            if (!oldValue.equals(value)) { // if the attribute has changed</span>
+<span class="fc" id="L285">                getLogger().log(Level.INFO,</span>
                         &quot;Attribute {0}={1}:{2} changed at {3}&quot;,
-<span class="fc" id="L286">                        new Object[]{attribute.getAttributeId(), value,</span>
-<span class="fc" id="L287">                                attribute.getAdditionalInformation(),</span>
-<span class="fc" id="L288">                                System.currentTimeMillis()});</span>
-<span class="fc" id="L289">                attribute.setValue(attribute.getDataType(), value);</span>
-<span class="fc" id="L290">                notifyRequestManager(attribute);</span>
+<span class="fc" id="L287">                        new Object[]{attribute.getAttributeId(), value,</span>
+<span class="fc" id="L288">                                attribute.getAdditionalInformation(),</span>
+<span class="fc" id="L289">                                System.currentTimeMillis()});</span>
+<span class="fc" id="L290">                attribute.setValue(attribute.getDataType(), value);</span>
+<span class="fc" id="L291">                notifyRequestManager(attribute);</span>
             }
-<span class="fc" id="L292">        }</span>
-<span class="fc" id="L293">    }</span>
+<span class="fc" id="L293">        }</span>
+<span class="fc" id="L294">    }</span>
 
 
     /**
@@ -299,10 +300,10 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      * @param subscribedAttribute the attribute to remove from the list
      */
     private boolean removeAttribute(Attribute subscribedAttribute) {
-<span class="pc bpc" id="L302" title="1 of 2 branches missed.">        if (!subscriptions.remove(subscribedAttribute)) {</span>
-<span class="nc" id="L303">            throw new IllegalStateException(&quot;Unable to remove attribute from list&quot;);</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if (!subscriptions.remove(subscribedAttribute)) {</span>
+<span class="nc" id="L304">            throw new IllegalStateException(&quot;Unable to remove attribute from list&quot;);</span>
         }
-<span class="fc" id="L305">        return true;</span>
+<span class="fc" id="L306">        return true;</span>
     }
 
 
@@ -314,7 +315,7 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      * false otherwise
      */
     public boolean isEnvironmentCategory(Attribute attribute) {
-<span class="fc bfc" id="L317" title="All 2 branches covered.">        return attribute.getCategory() == Category.ENVIRONMENT;</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        return attribute.getCategory() == Category.ENVIRONMENT;</span>
     }
 
 
@@ -328,45 +329,45 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      * @param attribute the attribute to which the additionalInformation has to be set
      */
     private void addAdditionalInformation(RequestType request, Attribute attribute) {
-<span class="fc" id="L331">        String filter = request.getAttributeValue(expectedCategoryMap.get(attribute.getAttributeId()));</span>
-<span class="fc" id="L332">        attribute.setAdditionalInformation(filter);</span>
-<span class="fc" id="L333">    }</span>
+<span class="fc" id="L332">        String filter = request.getAttributeValue(expectedCategoryMap.get(attribute.getAttributeId()));</span>
+<span class="fc" id="L333">        attribute.setAdditionalInformation(filter);</span>
+<span class="fc" id="L334">    }</span>
 
 
     @Override
     public final ArrayList&lt;String&gt; getAttributeIds() {
-<span class="nc" id="L338">        return new ArrayList&lt;&gt;(attributesMap.keySet());</span>
+<span class="nc" id="L339">        return new ArrayList&lt;&gt;(attributesMap.keySet());</span>
     }
 
     @Override
     public final ArrayList&lt;Attribute&gt; getAttributes() {
-<span class="fc" id="L343">        return new ArrayList&lt;&gt;(attributesMap.values());</span>
+<span class="fc" id="L344">        return new ArrayList&lt;&gt;(attributesMap.values());</span>
     }
 
     @Override
     public final HashMap&lt;String, Attribute&gt; getAttributesCharacteristics() {
-<span class="nc" id="L348">        return attributesMap;</span>
+<span class="nc" id="L349">        return attributesMap;</span>
     }
 
     @Override
     public RequestManagerInterface getRequestManager() {
-<span class="fc" id="L353">        Reject.ifNull(requestManager, &quot;request manager is null&quot;);</span>
-<span class="fc" id="L354">        return requestManager;</span>
+<span class="fc" id="L354">        Reject.ifNull(requestManager, &quot;request manager is null&quot;);</span>
+<span class="fc" id="L355">        return requestManager;</span>
     }
 
     @Override
     public void setRequestManager(RequestManagerInterface requestManager) {
-<span class="fc" id="L359">        Reject.ifNull(requestManager);</span>
-<span class="fc" id="L360">        this.requestManager = requestManager;</span>
-<span class="fc" id="L361">    }</span>
+<span class="fc" id="L360">        Reject.ifNull(requestManager);</span>
+<span class="fc" id="L361">        this.requestManager = requestManager;</span>
+<span class="fc" id="L362">    }</span>
 
     protected final boolean addAttribute(Attribute attribute) {
-<span class="fc" id="L364">        Reject.ifNull(attribute);</span>
-<span class="pc bpc" id="L365" title="1 of 2 branches missed.">        if (attributesMap.containsKey(attribute.getAttributeId())) {</span>
-<span class="nc" id="L366">            return false;</span>
+<span class="fc" id="L365">        Reject.ifNull(attribute);</span>
+<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if (attributesMap.containsKey(attribute.getAttributeId())) {</span>
+<span class="nc" id="L367">            return false;</span>
         }
-<span class="fc" id="L368">        attributesMap.put(attribute.getAttributeId(), attribute);</span>
-<span class="fc" id="L369">        return true;</span>
+<span class="fc" id="L369">        attributesMap.put(attribute.getAttributeId(), attribute);</span>
+<span class="fc" id="L370">        return true;</span>
     }
 
 
@@ -377,11 +378,11 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      * @param attribute the attribute whose value changed
      */
     public void notifyRequestManager(Attribute attribute) {
-<span class="fc" id="L380">        AttributeChangeMessage attrChangeMessage = new AttributeChangeMessage(ENTITIES.PIP.toString(), ENTITIES.CH.toString());</span>
-<span class="fc" id="L381">        ArrayList&lt;Attribute&gt; attrList = new ArrayList&lt;&gt;(Arrays.asList(attribute));</span>
-<span class="fc" id="L382">        attrChangeMessage.setAttributes(attrList);</span>
-<span class="fc" id="L383">        getRequestManager().sendMessage(attrChangeMessage);</span>
-<span class="fc" id="L384">    }</span>
+<span class="fc" id="L381">        AttributeChangeMessage attrChangeMessage = new AttributeChangeMessage(ENTITIES.PIP.toString(), ENTITIES.CH.toString());</span>
+<span class="fc" id="L382">        ArrayList&lt;Attribute&gt; attrList = new ArrayList&lt;&gt;(Arrays.asList(attribute));</span>
+<span class="fc" id="L383">        attrChangeMessage.setAttributes(attrList);</span>
+<span class="fc" id="L384">        getRequestManager().sendMessage(attrChangeMessage);</span>
+<span class="fc" id="L385">    }</span>
 
     /**
      * Get the queue containing the subscriptions
@@ -389,7 +390,7 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      * @return the queue containing the subscriptions
      */
     public BlockingQueue&lt;Attribute&gt; getSubscriptions() {
-<span class="nc" id="L392">        return subscriptions;</span>
+<span class="nc" id="L393">        return subscriptions;</span>
     }
 
     protected abstract Logger getLogger();

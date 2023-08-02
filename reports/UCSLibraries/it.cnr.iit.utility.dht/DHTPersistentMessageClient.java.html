@@ -12,62 +12,125 @@ public class DHTPersistentMessageClient {
     private String response;
     private Session session;
     private final String uri;
+    private String topicName;
+    private String topicUuid;
 
-<span class="nc" id="L16">    public DHTPersistentMessageClient(String uri) {</span>
-<span class="nc" id="L17">        this.uri = uri;</span>
-<span class="nc" id="L18">    }</span>
+<span class="nc" id="L18">    public DHTPersistentMessageClient(String uri) {</span>
+<span class="nc" id="L19">        this.uri = uri;</span>
+<span class="nc" id="L20">    }</span>
+
+<span class="nc" id="L22">    public DHTPersistentMessageClient(String uri, String topicName, String topicUuid) {</span>
+<span class="nc" id="L23">        this.uri = uri;</span>
+<span class="nc" id="L24">        this.topicName = topicName;</span>
+<span class="nc" id="L25">        this.topicUuid = topicUuid;</span>
+<span class="nc" id="L26">    }</span>
 
     @OnOpen
     public void onOpen(Session session) {
-<span class="nc" id="L22">        this.session = session; // Store the session for later use</span>
-<span class="nc" id="L23">        System.out.println(&quot;WebSocket connected&quot;);</span>
-<span class="nc" id="L24">    }</span>
+<span class="nc" id="L30">        this.session = session; // Store the session for later use</span>
+//        System.out.println(&quot;WebSocket connected&quot;);
+<span class="nc" id="L32">    }</span>
+
+
+    private boolean areTopicNameAndTopicUuidInitialized() {
+<span class="nc bnc" id="L36" title="All 4 branches missed.">        return topicName != null &amp;&amp; topicUuid != null;</span>
+    }
+
+    // This is not the ultimate check. We should parse the response as a json
+    private boolean messageContainsRightTopicNameAndTopicUuid(String message) {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        return (message.contains(&quot;\&quot;topic_name\&quot;:\&quot;&quot; + topicName + &quot;\&quot;&quot;)</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">                &amp;&amp; message.contains(&quot;\&quot;topic_uuid\&quot;:\&quot;&quot; + topicUuid + &quot;\&quot;&quot;));</span>
+    }
+
+
+    // This is an empty message, and it could be the right answer
+    // to our request. This happens when no messages for the topic
+    // name and topic uuid are found in the DHT.
+    // However, we cannot know with certainty that this is the answer
+    // to our request.
+    // Therefore, to minimize false positives, we return this string
+    // to the caller, which should make another request equal to the
+    // previous one. If, for a number of attempts, the caller receives
+    // the empty response string, it should assume that the DHT
+    // contains no records for the given topic name and uuid.
+    private boolean isEmptyResponse(String message) {
+<span class="nc" id="L57">        return message.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;);</span>
+    }
 
     @OnMessage
     public void onMessage(String message, Session session) {
-        String truncatedMessage;
-<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (message.length() &gt; 50) {</span>
-<span class="nc" id="L30">            truncatedMessage = message.substring(0,49) + &quot;... (remainder omitted for readability)&quot;;</span>
-        } else {
-<span class="nc" id="L32">            truncatedMessage = message;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (areTopicNameAndTopicUuidInitialized()) {</span>
+<span class="nc bnc" id="L63" title="All 4 branches missed.">            if (!messageContainsRightTopicNameAndTopicUuid(message) &amp;&amp; !isEmptyResponse(message)) {</span>
+                // discard message
+<span class="nc" id="L65">                System.out.println(&quot;DHTPersistentMessageClient: message discarded: &quot; + message);</span>
+<span class="nc" id="L66">                return;</span>
+            }
+            else {
+<span class="nc" id="L69">                System.out.println(&quot;DHTPersistentMessageClient: &quot; +</span>
+                        &quot;Received response for &quot; + topicName + &quot;, &quot; + topicUuid);
+            }
         }
-<span class="nc" id="L34">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
-<span class="nc" id="L35">        response = message;</span>
-<span class="nc" id="L36">        synchronized (lock) {</span>
-<span class="nc" id="L37">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
-<span class="nc" id="L38">        }</span>
-<span class="nc" id="L39">    }</span>
+
+        String truncatedMessage;
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if (message.length() &gt; 50) {</span>
+<span class="nc" id="L76">            truncatedMessage = message.substring(0,49) + &quot;... (remainder omitted for readability)&quot;;</span>
+        } else {
+<span class="nc" id="L78">            truncatedMessage = message;</span>
+        }
+<span class="nc" id="L80">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
+<span class="nc" id="L81">        response = message;</span>
+<span class="nc" id="L82">        synchronized (lock) {</span>
+<span class="nc" id="L83">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
+<span class="nc" id="L84">        }</span>
+<span class="nc" id="L85">    }</span>
 
     @OnClose
     public void onClose(Session session) {
-<span class="nc" id="L43">        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed.&quot;);</span>
-<span class="nc" id="L44">    }</span>
+//        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed.&quot;);
+<span class="nc" id="L90">    }</span>
 
     public void closeConnection() {
         try {
-<span class="nc bnc" id="L48" title="All 2 branches missed.">            if (session != null) {</span>
-<span class="nc" id="L49">                session.close();</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            if (session != null) {</span>
+<span class="nc" id="L95">                session.close();</span>
             }
-<span class="nc" id="L51">        } catch (Exception e) {</span>
-<span class="nc" id="L52">            e.printStackTrace();</span>
-<span class="nc" id="L53">        }</span>
-<span class="nc" id="L54">    }</span>
+<span class="nc" id="L97">        } catch (Exception e) {</span>
+<span class="nc" id="L98">            e.printStackTrace();</span>
+<span class="nc" id="L99">        }</span>
+<span class="nc" id="L100">    }</span>
 
     public String sendRequestAndWaitForResponse(String request) {
 
         try {
-<span class="nc" id="L59">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
-<span class="nc" id="L60">            container.connectToServer(this, new URI(this.uri));</span>
+<span class="nc" id="L105">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
+<span class="nc" id="L106">            container.connectToServer(this, new URI(this.uri));</span>
 
-<span class="nc" id="L62">            synchronized (lock) {</span>
-<span class="nc" id="L63">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
-<span class="nc" id="L64">                lock.wait(); // Wait for the response to be received</span>
-<span class="nc" id="L65">            }</span>
-<span class="nc" id="L66">            return response;</span>
-<span class="nc" id="L67">        } catch (Exception e) {</span>
-<span class="nc" id="L68">            e.printStackTrace();</span>
+<span class="nc" id="L108">            synchronized (lock) {</span>
+<span class="nc" id="L109">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
+<span class="nc" id="L110">                lock.wait(); // Wait for the response to be received</span>
+<span class="nc" id="L111">            }</span>
+<span class="nc" id="L112">            return response;</span>
+<span class="nc" id="L113">        } catch (Exception e) {</span>
+<span class="nc" id="L114">            e.printStackTrace();</span>
         }
-<span class="nc" id="L70">        return null;</span>
+<span class="nc" id="L116">        return null;</span>
     }
+
+    public String getTopicName() {
+<span class="nc" id="L120">        return topicName;</span>
+    }
+
+    public void setTopicName(String topicName) {
+<span class="nc" id="L124">        this.topicName = topicName;</span>
+<span class="nc" id="L125">    }</span>
+
+    public String getTopicUuid() {
+<span class="nc" id="L128">        return topicUuid;</span>
+    }
+
+    public void setTopicUuid(String topicUuid) {
+<span class="nc" id="L132">        this.topicUuid = topicUuid;</span>
+<span class="nc" id="L133">    }</span>
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

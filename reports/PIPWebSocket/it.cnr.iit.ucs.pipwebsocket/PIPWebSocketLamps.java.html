@@ -23,10 +23,10 @@ public class PIPWebSocketLamps extends AbstractPIPWebSocket {
 <span class="nc" id="L23">    }</span>
 
     @Override
-    public String retrieve(Attribute attribute) {
+    public String retrieve(Attribute attribute) throws PIPException {
 <span class="nc" id="L27">        String response = performRequestGetTopicUuid();</span>
         // fixme: parse the response and return the attribute value
-<span class="nc" id="L29">        System.out.println(response);</span>
+        //System.out.println(response);
         String value;
 <span class="nc bnc" id="L31" title="All 2 branches missed.">        if (response.contains(&quot;\&quot;status\&quot;:false&quot;)) {</span>
 <span class="nc" id="L32">            value = &quot;false&quot;;</span>

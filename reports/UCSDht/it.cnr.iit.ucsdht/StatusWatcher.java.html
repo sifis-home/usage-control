@@ -55,25 +55,27 @@ public class StatusWatcher {
                         }
 <span class="nc" id="L56">                    }</span>
 
-<span class="nc" id="L58">                    key.reset();</span>
-<span class="nc" id="L59">                }</span>
-<span class="nc" id="L60">            } catch (InterruptedException e) {</span>
-<span class="nc" id="L61">                System.out.println(&quot;Folder monitoring thread interrupted.&quot;);</span>
-<span class="nc" id="L62">            }</span>
-<span class="nc" id="L63">        });</span>
-<span class="nc" id="L64">    }</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                    if (!key.reset()) {</span>
+<span class="nc" id="L59">                        System.err.println(&quot;The directory is inaccessible.&quot;);</span>
+                    }
+<span class="nc" id="L61">                }</span>
+<span class="nc" id="L62">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L63">                System.out.println(&quot;Folder monitoring thread interrupted.&quot;);</span>
+<span class="nc" id="L64">            }</span>
+<span class="nc" id="L65">        });</span>
+<span class="nc" id="L66">    }</span>
 
     public void stopMonitoring() {
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if (executorService != null) {</span>
-<span class="nc" id="L68">            executorService.shutdownNow();</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (executorService != null) {</span>
+<span class="nc" id="L70">            executorService.shutdownNow();</span>
         }
-<span class="nc bnc" id="L70" title="All 2 branches missed.">        if (watchService != null) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        if (watchService != null) {</span>
             try {
-<span class="nc" id="L72">                watchService.close();</span>
-<span class="nc" id="L73">            } catch (IOException e) {</span>
-<span class="nc" id="L74">                e.printStackTrace();</span>
-<span class="nc" id="L75">            }</span>
+<span class="nc" id="L74">                watchService.close();</span>
+<span class="nc" id="L75">            } catch (IOException e) {</span>
+<span class="nc" id="L76">                e.printStackTrace();</span>
+<span class="nc" id="L77">            }</span>
         }
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L79">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
