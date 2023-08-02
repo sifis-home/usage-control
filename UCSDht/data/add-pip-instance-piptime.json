@@ -1,0 +1,24 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1689261194667,
+      "command": {
+        "command_type": "pip-command",
+        "value": {
+          "message": {
+            "purpose": "ADD_PIP",
+            "message_id": "81b1cb38-3c50-448f-941b-85cb0aa3aa8b",
+            "pip_type": "it.cnr.iit.ucs.piptime.PIPTime",
+            "attribute_id": "urn:oasis:names:tc:xacml:1.0:environment:current-time",
+            "category": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+            "data_type": "http://www.w3.org/2001/XMLSchema#time",
+            "refresh_rate": 10000
+          },
+          "id": "pip-time",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}

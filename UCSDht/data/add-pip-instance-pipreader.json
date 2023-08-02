@@ -13,7 +13,7 @@
             "category": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
             "data_type": "http://www.w3.org/2001/XMLSchema#string",
             "refresh_rate": 1000,
-            "additionalProperties": {
+            "additional_properties": {
               "eu.sifis-home:1.0:environment:all-windows-in-bedroom-closed" : "windows-in-bedroom.txt",
               "windows-in-bedroom.txt": "true"
             }

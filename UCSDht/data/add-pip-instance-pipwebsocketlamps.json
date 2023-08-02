@@ -1,0 +1,29 @@
+{
+  "RequestPubMessage": {
+    "value": {
+      "timestamp": 1689261770870,
+      "command": {
+        "command_type": "pip-command",
+        "value": {
+          "message": {
+            "purpose": "ADD_PIP",
+            "message_id": "342dbe10-3082-11ee-ba00-acde48001122",
+            "pip_type": "it.cnr.iit.ucs.pipwebsocket.PIPWebSocketLamps",
+            "attribute_id": "eu:sifis-home:1.0:environment:lamps-status",
+            "category": "urn:oasis:names:tc:xacml:3.0:attribute-category:environment",
+            "data_type": "http://www.w3.org/2001/XMLSchema#boolean",
+            "refresh_rate": 1000,
+            "additional_properties" : {
+              "dhtUri": "ws://localhost:3000/ws",
+              "topicName": "domo_light",
+              "topicUuid": "bd59a9b8-fb3d-452d-b4ca-f3d13cf2d504"
+            }
+          },
+          "id": "pip-websocket-lamp-status",
+          "topic_name": "topic-name",
+          "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+        }
+      }
+    }
+  }
+}
