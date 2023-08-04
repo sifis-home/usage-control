@@ -1,14 +1,15 @@
-package it.cnr.iit.utility.dht.jsonpersistent;
+package it.cnr.iit.ucsdht.json;
 
 import java.util.List;
 
-public class Value {
+public class Status {
+
     private String database;
     private List<String> pips;
     private List<String> peps;
     private List<String> policies;
 
-    public Value(String database, List<String> pips, List<String> peps, List<String> policies) {
+    public Status(String database, List<String> pips, List<String> peps, List<String> policies) {
         this.database = database;
         this.pips = pips;
         this.peps = peps;
@@ -46,4 +47,5 @@ public class Value {
     public void setPolicies(List<String> policies) {
         this.policies = policies;
     }
+
 }

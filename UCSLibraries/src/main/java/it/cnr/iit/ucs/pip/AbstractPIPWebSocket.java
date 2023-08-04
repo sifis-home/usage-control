@@ -1,11 +1,11 @@
 package it.cnr.iit.ucs.pip;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.dht.DHTPersistentMessageClient;
-import it.cnr.iit.utility.dht.jsonpersistent.JsonOutRequestGetTopicUuid;
-import it.cnr.iit.utility.dht.jsonpersistent.RequestGetTopicUuid;
+import it.cnr.iit.utility.dht.jsonpersistent.*;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 
@@ -20,6 +20,10 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
     public String topicName;
     public String topicUuid;
     public DHTPersistentMessageClient client;
+    private RuntimeTypeAdapterFactory<RequestPostTopicUuid> typeFactory;
+    private RuntimeTypeAdapterFactory<Persistent> persistentTypeFactory;
+    private Class<? extends RequestPostTopicUuid> typeFactoryClazz;
+    private Class<? extends Persistent> persistentTypeFactoryClazz;
 
 
     public AbstractPIPWebSocket(PipProperties properties) {
@@ -36,7 +40,25 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
             topicUuid = properties.getAdditionalProperties().get("topicUuid");
             Reject.ifNull(topicUuid, "Topic UUID not specified");
 
-            client = new DHTPersistentMessageClient(dhtUri, topicName, topicUuid);
+            Reject.ifNull(this.typeFactoryClazz, "Class for TypeFactory not set. " +
+                    "Call setClassForTypeFactory() method before init()");
+            this.typeFactory = RuntimeTypeAdapterFactory
+                    .of(RequestPostTopicUuid.class, "topic_name")
+                    .registerSubtype(this.typeFactoryClazz, this.topicName);
+
+            // if the PIP is not intended to upload data to the DHT, persistent
+            // messages will not be obtained. Therefore, the PIP is allowed not
+            // to use this adapter.
+            if (persistentTypeFactoryClazz != null) {
+                this.persistentTypeFactory = RuntimeTypeAdapterFactory
+                        .of(Persistent.class, "topic_name")
+                        .registerSubtype(this.persistentTypeFactoryClazz, this.topicName);
+            } else {
+                persistentTypeFactory = null;
+            }
+
+            client = new DHTPersistentMessageClient(
+                    dhtUri, topicName, topicUuid, typeFactory, persistentTypeFactory);
 
             for (Map<String, String> attributeMap : properties.getAttributes()) {
 
@@ -71,23 +93,7 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
                     .create()
                     .toJson(jsonOut);
 
-            response = client.sendRequestAndWaitForResponse(request);
-
-            if (response.equals("{\"Response\":{\"value\":{}}}")) {
-                int attempts = 5;
-                for (int i = 1; i <= attempts; i++) {
-                    response = client.sendRequestAndWaitForResponse(request);
-                    if (!response.equals("{\"Response\":{\"value\":{}}}")) {
-                        break;
-                    }
-                    if (i == attempts) {
-                        throw new PIPException("Attribute Manager error: " +
-                                "DHT returned an empty response");
-                    }
-                }
-            }
-
-            client.closeConnection();
+            response = getResponse(request);
         } else {
             throw new PIPException("Attribute Manager error: " +
                     "Unable to connect to the DHT");
@@ -95,4 +101,41 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
         return response;
     }
 
+
+    private String getResponse(String request) throws PIPException {
+        String response = client.sendRequestAndWaitForResponse(request);
+        client.closeConnection();
+
+        if (response.equals("{\"Response\":{\"value\":{}}}")) {
+            int attempts = 5;
+            for (int i = 1; i <= attempts; i++) {
+                response = client.sendRequestAndWaitForResponse(request);
+                client.closeConnection();
+                if (!response.equals("{\"Response\":{\"value\":{}}}")) {
+                    break;
+                }
+                if (i == attempts) {
+                    throw new PIPException("Attribute Manager error: " +
+                            "DHT returned an empty response");
+                }
+            }
+        }
+        return response;
+    }
+
+    public void setClassForTypeFactory(Class<? extends RequestPostTopicUuid> clazz) {
+        this.typeFactoryClazz = clazz;
+    }
+
+    public void setClassForPersistentTypeFactory(Class<? extends Persistent> clazz) {
+        this.persistentTypeFactoryClazz = clazz;
+    }
+
+    public RuntimeTypeAdapterFactory<RequestPostTopicUuid> getTypeFactory() {
+        return typeFactory;
+    }
+
+    public RuntimeTypeAdapterFactory<Persistent> getPersistentTypeFactory() {
+        return persistentTypeFactory;
+    }
 }

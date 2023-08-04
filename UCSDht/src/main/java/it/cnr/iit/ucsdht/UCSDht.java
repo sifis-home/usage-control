@@ -1,6 +1,7 @@
 package it.cnr.iit.ucsdht;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
@@ -12,6 +13,9 @@ import it.cnr.iit.ucs.sessionmanager.OnGoingAttribute;
 import it.cnr.iit.ucs.sessionmanager.Session;
 import it.cnr.iit.ucs.sessionmanager.SessionInterface;
 import it.cnr.iit.ucs.sessionmanager.SessionManager;
+import it.cnr.iit.ucsdht.json.Status;
+import it.cnr.iit.ucsdht.json.StatusPersistent;
+import it.cnr.iit.ucsdht.json.StatusRequestPostTopicUuid;
 import it.cnr.iit.ucsdht.properties.*;
 import it.cnr.iit.utility.JsonUtility;
 import it.cnr.iit.utility.dht.DHTClient;
@@ -69,6 +73,13 @@ public class UCSDht {
     static String PERSISTENT_TOPIC_UUID_UCS_STATUS = "status";
     static DHTPersistentMessageClient client;
 
+    private static final RuntimeTypeAdapterFactory<RequestPostTopicUuid> typeFactory = RuntimeTypeAdapterFactory
+            .of(RequestPostTopicUuid.class, "topic_name")
+            .registerSubtype(StatusRequestPostTopicUuid.class, PERSISTENT_TOPIC_NAME_UCS);
+
+    private static final RuntimeTypeAdapterFactory<Persistent> persistentTypeFactory = RuntimeTypeAdapterFactory
+            .of(Persistent.class, "topic_name")
+            .registerSubtype(StatusPersistent.class, PERSISTENT_TOPIC_NAME_UCS);
 
     public static void main(String[] args) {
 
@@ -107,8 +118,8 @@ public class UCSDht {
             }
         }
 
-        client = new DHTPersistentMessageClient(
-                dhtUri, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
+        client = new DHTPersistentMessageClient(dhtUri, PERSISTENT_TOPIC_NAME_UCS,
+                PERSISTENT_TOPIC_UUID_UCS_STATUS, typeFactory, persistentTypeFactory);
 
         if (hardReset) {
             performHardReset();
@@ -194,6 +205,7 @@ public class UCSDht {
         Utils.createDir(pipsDir);
         Utils.createDir(pepsDir);
         Utils.createDir(policiesDir);
+        System.out.println("... hard reset performed");
 
         // save the new state to the dht
         uploadStatus();
@@ -202,8 +214,9 @@ public class UCSDht {
     public static void performSoftReset() {
         System.out.println("Performing soft reset...");
         // get the state from the dht
-        Value status = downloadStatus();
+        Status status = downloadStatus();
         if (status == null) {
+            System.out.print("No status found: ");
             // if there is no state
             //   perform hard reset
             performHardReset();
@@ -212,6 +225,7 @@ public class UCSDht {
             restorePips(status.getPips());
             restorePeps(status.getPeps());
             restorePolicies(status.getPolicies());
+            System.out.println("... soft reset performed");
 
             // save the new state to the dht
             uploadStatus();
@@ -221,8 +235,9 @@ public class UCSDht {
     public static void reloadState() {
         System.out.println("Reloading state...");
         // get the state from the dht
-        Value status = downloadStatus();
+        Status status = downloadStatus();
         if (status == null) {
+            System.out.print("No status found: ");
             // if there is no state
             //   perform hard reset
             performHardReset();
@@ -231,6 +246,7 @@ public class UCSDht {
             restorePips(status.getPips());
             restorePeps(status.getPeps());
             restorePolicies(status.getPolicies());
+            System.out.println("... status reloaded");
 
             // do not save the new state to the dht since nothing changed
         }
@@ -449,7 +465,8 @@ public class UCSDht {
      * @return the inner value field of the received response containing the base64 string
      * representations of the database, pips, peps, and policies
      */
-    public static Value downloadStatus() {
+    public static Status downloadStatus() {
+        System.out.println("Downloading status ...");
         // get the status from the dht
         String response = null;
         if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
@@ -464,6 +481,7 @@ public class UCSDht {
                     .toJson(jsonOut);
 
             response = client.sendRequestAndWaitForResponse(request);
+            client.closeConnection();
 
             // If we get an empty response, perform the request
             // again to be sure that the empty response is actually
@@ -473,21 +491,25 @@ public class UCSDht {
             if (response.equals("{\"Response\":{\"value\":{}}}")) {
                 int attempts = 5;
                 for (int i = 1; i <= attempts; i++) {
-                        response = client.sendRequestAndWaitForResponse(request);
+                    response = client.sendRequestAndWaitForResponse(request);
+                    client.closeConnection();
                     if (!response.equals("{\"Response\":{\"value\":{}}}")) {
                         break;
                     }
                 }
             }
-
-            client.closeConnection();
         } else {
             System.exit(1);
         }
 
-        JsonInResponse jsonInResponse = new GsonBuilder().create().fromJson(response, JsonInResponse.class);
+        JsonInResponse jsonInResponse = new GsonBuilder()
+                .registerTypeAdapterFactory(typeFactory)
+                .create().fromJson(response, JsonInResponse.class);
 
-        return jsonInResponse.getResponse().getValue().getValue();
+        StatusRequestPostTopicUuid statusRequestPostTopicUuid =
+                (StatusRequestPostTopicUuid) jsonInResponse.getResponse().getValue();
+        return statusRequestPostTopicUuid.getValue();
+        //return jsonInResponse.getResponse().getValue().getValue();
     }
 
 
@@ -495,14 +517,14 @@ public class UCSDht {
      * Save the UCS status to the dht
      */
     public static void uploadStatus() {
-
-        Value value = new Value(
+    System.out.println("Uploading status ...");
+        Status value = new Status(
                 saveDbToString(),
                 savePipsToString(),
                 savePepsToString(),
                 savePoliciesToString());
-        RequestPostTopicUuid requestPostTopicUuid =
-                new RequestPostTopicUuid(value, PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
+        StatusRequestPostTopicUuid requestPostTopicUuid =
+                new StatusRequestPostTopicUuid(value, PERSISTENT_TOPIC_UUID_UCS_STATUS);
         JsonOutRequestPostTopicUuid jsonOut = new JsonOutRequestPostTopicUuid(requestPostTopicUuid);
         String request = new GsonBuilder()
                 .disableHtmlEscaping()
@@ -518,15 +540,20 @@ public class UCSDht {
             System.exit(1);
         }
 
-        JsonInPersistent jsonInPersistent = new GsonBuilder().create().fromJson(response, JsonInPersistent.class);
-
-        // fixme: sort of check to assess if the received response is invalid. Does it make sense?
-        if (jsonInPersistent.getPersistent().isDeleted()) {
-            System.err.println("The received response is marked as deleted");
-            System.exit(1);
-        } else {
-            System.out.println("Current state correctly stored on the dht");
+        try {
+            JsonInPersistent jsonInPersistent = new GsonBuilder()
+                    .registerTypeAdapterFactory(persistentTypeFactory)
+                    .create().fromJson(response, JsonInPersistent.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to parse received Persistent message");
         }
+//        // fixme: sort of check to assess if the received response is invalid. Does it make sense?
+//        if (jsonInPersistent.getPersistent().isDeleted()) {
+//            System.err.println("The received response is marked as deleted");
+//            System.exit(1);
+//        } else {
+            System.out.println("... status uploaded");
+//        }
     }
 
 
@@ -574,7 +601,7 @@ public class UCSDht {
                 throw new RuntimeException(e);
             }
         }
-        System.out.println("PIPs' subscriptions restored.");
+        System.out.println("[PIPs] PIPs' subscriptions restored");
     }
 
     /**
