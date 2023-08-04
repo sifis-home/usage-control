@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>DomoLightRequestPostTopicUuid.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PIPWebSocket</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pipwebsocket.json</a> &gt; <span class="el_source">DomoLightRequestPostTopicUuid.java</span></div><h1>DomoLightRequestPostTopicUuid.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.pipwebsocket.json;
+
+import it.cnr.iit.utility.dht.jsonpersistent.RequestPostTopicUuid;
+
+public class DomoLightRequestPostTopicUuid implements RequestPostTopicUuid {
+<span class="nc" id="L6">    public final String topic_name = &quot;domo_light&quot;;</span>
+    private String topic_uuid;
+    private DomoLight value;
+
+
+<span class="nc" id="L11">    public DomoLightRequestPostTopicUuid(DomoLight value, String topic_uuid) {</span>
+<span class="nc" id="L12">        this.value = value;</span>
+<span class="nc" id="L13">        this.topic_uuid = topic_uuid;</span>
+<span class="nc" id="L14">    }</span>
+
+    public DomoLight getValue() {
+<span class="nc" id="L17">        return value;</span>
+    }
+
+    public void setValue(DomoLight value) {
+<span class="nc" id="L21">        this.value = value;</span>
+<span class="nc" id="L22">    }</span>
+
+    @Override
+    public String getTopic_name() {
+<span class="nc" id="L26">        return topic_name;</span>
+    }
+
+    @Override
+    public String getTopic_uuid() {
+<span class="nc" id="L31">        return topic_uuid;</span>
+    }
+
+    @Override
+    public void setTopic_uuid(String topic_uuid) {
+<span class="nc" id="L36">        this.topic_uuid = topic_uuid;</span>
+<span class="nc" id="L37">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

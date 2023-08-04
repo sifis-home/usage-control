@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>DomoLight.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PIPWebSocket</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pipwebsocket.json</a> &gt; <span class="el_source">DomoLight.java</span></div><h1>DomoLight.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.pipwebsocket.json;
+
+
+// This class represents the domo_light json schema at
+// https://github.com/sifis-home/json-schemas/blob/master/domo_light.jsonschema
+
+// When we query the DHT with RequestGetTopicName or RequestGetTopicUUID, the DHT will
+// include one or more of these objects as part of the response.
+<span class="nc" id="L9">public class DomoLight {</span>
+        private String area_name;
+        private double energy;
+        private String name;
+        private double power;
+        private boolean status;
+        private String[] updated_properties;
+
+    public String getArea_name() {
+<span class="nc" id="L18">        return area_name;</span>
+    }
+
+    public void setArea_name(String area_name) {
+<span class="nc" id="L22">        this.area_name = area_name;</span>
+<span class="nc" id="L23">    }</span>
+
+    public double getEnergy() {
+<span class="nc" id="L26">        return energy;</span>
+    }
+
+    public void setEnergy(double energy) {
+<span class="nc" id="L30">        this.energy = energy;</span>
+<span class="nc" id="L31">    }</span>
+
+    public String getName() {
+<span class="nc" id="L34">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="nc" id="L38">        this.name = name;</span>
+<span class="nc" id="L39">    }</span>
+
+    public double getPower() {
+<span class="nc" id="L42">        return power;</span>
+    }
+
+    public void setPower(double power) {
+<span class="nc" id="L46">        this.power = power;</span>
+<span class="nc" id="L47">    }</span>
+
+    public boolean isStatus() {
+<span class="nc" id="L50">        return status;</span>
+    }
+
+    public void setStatus(boolean status) {
+<span class="nc" id="L54">        this.status = status;</span>
+<span class="nc" id="L55">    }</span>
+
+    public String[] getUpdated_properties() {
+<span class="nc" id="L58">        return updated_properties;</span>
+    }
+
+    public void setUpdated_properties(String[] updated_properties) {
+<span class="nc" id="L62">        this.updated_properties = updated_properties;</span>
+<span class="nc" id="L63">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

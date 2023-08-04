@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>AbstractPIPWebSocket.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">UCSLibraries</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pip</a> &gt; <span class="el_source">AbstractPIPWebSocket.java</span></div><h1>AbstractPIPWebSocket.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.pip;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.properties.components.PipProperties;
 import it.cnr.iit.utility.dht.DHTPersistentMessageClient;
-import it.cnr.iit.utility.dht.jsonpersistent.JsonOutRequestGetTopicUuid;
-import it.cnr.iit.utility.dht.jsonpersistent.RequestGetTopicUuid;
+import it.cnr.iit.utility.dht.jsonpersistent.*;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 
@@ -20,80 +20,123 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
     public String topicName;
     public String topicUuid;
     public DHTPersistentMessageClient client;
+    private RuntimeTypeAdapterFactory&lt;RequestPostTopicUuid&gt; typeFactory;
+    private RuntimeTypeAdapterFactory&lt;Persistent&gt; persistentTypeFactory;
+    private Class&lt;? extends RequestPostTopicUuid&gt; typeFactoryClazz;
+    private Class&lt;? extends Persistent&gt; persistentTypeFactoryClazz;
 
 
     public AbstractPIPWebSocket(PipProperties properties) {
-<span class="nc" id="L26">        super(properties);</span>
-<span class="nc" id="L27">    }</span>
+<span class="nc" id="L30">        super(properties);</span>
+<span class="nc" id="L31">    }</span>
 
     @Override
     public boolean init(PipProperties properties) {
         try {
-<span class="nc" id="L32">            dhtUri = properties.getAdditionalProperties().get(&quot;dhtUri&quot;);</span>
-<span class="nc" id="L33">            Reject.ifNull(dhtUri, &quot;DHT URI not specified&quot;);</span>
-<span class="nc" id="L34">            topicName = properties.getAdditionalProperties().get(&quot;topicName&quot;);</span>
-<span class="nc" id="L35">            Reject.ifNull(topicName, &quot;Topic name not specified&quot;);</span>
-<span class="nc" id="L36">            topicUuid = properties.getAdditionalProperties().get(&quot;topicUuid&quot;);</span>
-<span class="nc" id="L37">            Reject.ifNull(topicUuid, &quot;Topic UUID not specified&quot;);</span>
+<span class="nc" id="L36">            dhtUri = properties.getAdditionalProperties().get(&quot;dhtUri&quot;);</span>
+<span class="nc" id="L37">            Reject.ifNull(dhtUri, &quot;DHT URI not specified&quot;);</span>
+<span class="nc" id="L38">            topicName = properties.getAdditionalProperties().get(&quot;topicName&quot;);</span>
+<span class="nc" id="L39">            Reject.ifNull(topicName, &quot;Topic name not specified&quot;);</span>
+<span class="nc" id="L40">            topicUuid = properties.getAdditionalProperties().get(&quot;topicUuid&quot;);</span>
+<span class="nc" id="L41">            Reject.ifNull(topicUuid, &quot;Topic UUID not specified&quot;);</span>
 
-<span class="nc" id="L39">            client = new DHTPersistentMessageClient(dhtUri, topicName, topicUuid);</span>
+<span class="nc" id="L43">            Reject.ifNull(this.typeFactoryClazz, &quot;Class for TypeFactory not set. &quot; +</span>
+                    &quot;Call setClassForTypeFactory() method before init()&quot;);
+<span class="nc" id="L45">            this.typeFactory = RuntimeTypeAdapterFactory</span>
+<span class="nc" id="L46">                    .of(RequestPostTopicUuid.class, &quot;topic_name&quot;)</span>
+<span class="nc" id="L47">                    .registerSubtype(this.typeFactoryClazz, this.topicName);</span>
 
-<span class="nc bnc" id="L41" title="All 2 branches missed.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
+            // if the PIP is not intended to upload data to the DHT, persistent
+            // messages will not be obtained. Therefore, the PIP is allowed not
+            // to use this adapter.
+<span class="nc bnc" id="L52" title="All 2 branches missed.">            if (persistentTypeFactoryClazz != null) {</span>
+<span class="nc" id="L53">                this.persistentTypeFactory = RuntimeTypeAdapterFactory</span>
+<span class="nc" id="L54">                        .of(Persistent.class, &quot;topic_name&quot;)</span>
+<span class="nc" id="L55">                        .registerSubtype(this.persistentTypeFactoryClazz, this.topicName);</span>
+            } else {
+<span class="nc" id="L57">                persistentTypeFactory = null;</span>
+            }
 
-<span class="nc" id="L43">                Attribute attribute = new Attribute();</span>
-<span class="nc" id="L44">                buildAttribute(attribute, attributeMap);</span>
+<span class="nc" id="L60">            client = new DHTPersistentMessageClient(</span>
+                    dhtUri, topicName, topicUuid, typeFactory, persistentTypeFactory);
 
-<span class="nc" id="L46">                addAttribute(attribute);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
+
+<span class="nc" id="L65">                Attribute attribute = new Attribute();</span>
+<span class="nc" id="L66">                buildAttribute(attribute, attributeMap);</span>
+
+<span class="nc" id="L68">                addAttribute(attribute);</span>
 
                 // timer for polling the value of the attribute
-<span class="nc" id="L49">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
-<span class="nc" id="L50">                subscriberTimer.setRate(properties.getRefreshRate());</span>
-<span class="nc" id="L51">                subscriberTimer.start();</span>
-<span class="nc" id="L52">            }</span>
-<span class="nc" id="L53">            return true;</span>
-<span class="nc" id="L54">        } catch (Exception e) {</span>
-<span class="nc" id="L55">            return false;</span>
+<span class="nc" id="L71">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
+<span class="nc" id="L72">                subscriberTimer.setRate(properties.getRefreshRate());</span>
+<span class="nc" id="L73">                subscriberTimer.start();</span>
+<span class="nc" id="L74">            }</span>
+<span class="nc" id="L75">            return true;</span>
+<span class="nc" id="L76">        } catch (Exception e) {</span>
+<span class="nc" id="L77">            return false;</span>
         }
     }
 
 
     public String performRequestGetTopicUuid() throws PIPException {
         // get the status from the dht
-<span class="nc" id="L62">        String response = null;</span>
-<span class="nc bnc" id="L63" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, 1)) {</span>
-<span class="nc" id="L64">            RequestGetTopicUuid requestGetTopicUuid =</span>
+<span class="nc" id="L84">        String response = null;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, 1)) {</span>
+<span class="nc" id="L86">            RequestGetTopicUuid requestGetTopicUuid =</span>
                     new RequestGetTopicUuid(topicName, topicUuid);
 
-<span class="nc" id="L67">            JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);</span>
-<span class="nc" id="L68">            String request = new GsonBuilder()</span>
-<span class="nc" id="L69">                    .disableHtmlEscaping()</span>
-<span class="nc" id="L70">                    .serializeNulls()</span>
-<span class="nc" id="L71">                    .create()</span>
-<span class="nc" id="L72">                    .toJson(jsonOut);</span>
+<span class="nc" id="L89">            JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);</span>
+<span class="nc" id="L90">            String request = new GsonBuilder()</span>
+<span class="nc" id="L91">                    .disableHtmlEscaping()</span>
+<span class="nc" id="L92">                    .serializeNulls()</span>
+<span class="nc" id="L93">                    .create()</span>
+<span class="nc" id="L94">                    .toJson(jsonOut);</span>
 
-<span class="nc" id="L74">            response = client.sendRequestAndWaitForResponse(request);</span>
-
-<span class="nc bnc" id="L76" title="All 2 branches missed.">            if (response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
-<span class="nc" id="L77">                int attempts = 5;</span>
-<span class="nc bnc" id="L78" title="All 2 branches missed.">                for (int i = 1; i &lt;= attempts; i++) {</span>
-<span class="nc" id="L79">                    response = client.sendRequestAndWaitForResponse(request);</span>
-<span class="nc bnc" id="L80" title="All 2 branches missed.">                    if (!response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
-<span class="nc" id="L81">                        break;</span>
-                    }
-<span class="nc bnc" id="L83" title="All 2 branches missed.">                    if (i == attempts) {</span>
-<span class="nc" id="L84">                        throw new PIPException(&quot;Attribute Manager error: &quot; +</span>
-                                &quot;DHT returned an empty response&quot;);
-                    }
-                }
-            }
-
-<span class="nc" id="L90">            client.closeConnection();</span>
-<span class="nc" id="L91">        } else {</span>
-<span class="nc" id="L92">            throw new PIPException(&quot;Attribute Manager error: &quot; +</span>
+<span class="nc" id="L96">            response = getResponse(request);</span>
+<span class="nc" id="L97">        } else {</span>
+<span class="nc" id="L98">            throw new PIPException(&quot;Attribute Manager error: &quot; +</span>
                     &quot;Unable to connect to the DHT&quot;);
         }
-<span class="nc" id="L95">        return response;</span>
+<span class="nc" id="L101">        return response;</span>
     }
 
+
+    private String getResponse(String request) throws PIPException {
+<span class="nc" id="L106">        String response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="nc" id="L107">        client.closeConnection();</span>
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if (response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
+<span class="nc" id="L110">            int attempts = 5;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            for (int i = 1; i &lt;= attempts; i++) {</span>
+<span class="nc" id="L112">                response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="nc" id="L113">                client.closeConnection();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">                if (!response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
+<span class="nc" id="L115">                    break;</span>
+                }
+<span class="nc bnc" id="L117" title="All 2 branches missed.">                if (i == attempts) {</span>
+<span class="nc" id="L118">                    throw new PIPException(&quot;Attribute Manager error: &quot; +</span>
+                            &quot;DHT returned an empty response&quot;);
+                }
+            }
+        }
+<span class="nc" id="L123">        return response;</span>
+    }
+
+    public void setClassForTypeFactory(Class&lt;? extends RequestPostTopicUuid&gt; clazz) {
+<span class="nc" id="L127">        this.typeFactoryClazz = clazz;</span>
+<span class="nc" id="L128">    }</span>
+
+    public void setClassForPersistentTypeFactory(Class&lt;? extends Persistent&gt; clazz) {
+<span class="nc" id="L131">        this.persistentTypeFactoryClazz = clazz;</span>
+<span class="nc" id="L132">    }</span>
+
+    public RuntimeTypeAdapterFactory&lt;RequestPostTopicUuid&gt; getTypeFactory() {
+<span class="nc" id="L135">        return typeFactory;</span>
+    }
+
+    public RuntimeTypeAdapterFactory&lt;Persistent&gt; getPersistentTypeFactory() {
+<span class="nc" id="L139">        return persistentTypeFactory;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
