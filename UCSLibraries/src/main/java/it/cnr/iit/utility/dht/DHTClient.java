@@ -5,8 +5,13 @@ import jakarta.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
 
 @ClientEndpoint
 public class DHTClient {
@@ -19,6 +24,8 @@ public class DHTClient {
     private WebSocketContainer container;
 
     private URI wsURI;
+
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
     {
         try {
@@ -42,7 +49,9 @@ public class DHTClient {
             container = ContainerProvider.getWebSocketContainer();
             session = container.connectToServer(this, endpointURI);
         } catch (Exception e) {
-            throw new RuntimeException("Unable to connect to " + wsURI.toString() + ". " + e.getMessage());
+            //throw new RuntimeException("Unable to connect to " + wsURI.toString() + ". " + e.getMessage());
+            System.err.println("Unable to connect to " + endpointURI.toString());
+            scheduleReconnect();
         }
         isLoggingEnabled = true;
     }
@@ -70,6 +79,20 @@ public class DHTClient {
         //System.out.println("Received message in client: " + message);
     }
 
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        System.out.println("WebSocket connection closed: " + closeReason.getReasonPhrase());
+        scheduleReconnect();
+    }
+
+    private void scheduleReconnect() {
+        executor.schedule(() -> {
+            if (!session.isOpen()) {
+                System.out.println("WebSocket reconnecting...");
+                connect(wsURI);
+            }
+        }, 5, TimeUnit.SECONDS);
+    }
 
     /**
      * Sends a logging message to the DHT
