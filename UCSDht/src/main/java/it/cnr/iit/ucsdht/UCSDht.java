@@ -505,6 +505,10 @@ public class UCSDht {
             System.exit(1);
         }
 
+        if (!isStatusExistent) {
+            return null;
+        }
+
         JsonInResponse jsonInResponse = new GsonBuilder()
                 .registerTypeAdapterFactory(typeFactory)
                 .create().fromJson(response, JsonInResponse.class);
