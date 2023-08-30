@@ -466,49 +466,56 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      * representations of the database, pips, peps, and policies
      */
     public static Status downloadStatus() {
-<span class="nc" id="L469">        System.out.println(&quot;Downloading status ...&quot;);</span>
+<span class="nc" id="L469">        boolean isStatusExistent = true;</span>
+
+<span class="nc" id="L471">        System.out.println(&quot;Downloading status ...&quot;);</span>
         // get the status from the dht
-<span class="nc" id="L471">        String response = null;</span>
-<span class="nc bnc" id="L472" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
-<span class="nc" id="L473">            RequestGetTopicUuid requestGetTopicUuid =</span>
+<span class="nc" id="L473">        String response = null;</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
+<span class="nc" id="L475">            RequestGetTopicUuid requestGetTopicUuid =</span>
                     new RequestGetTopicUuid(PERSISTENT_TOPIC_NAME_UCS, PERSISTENT_TOPIC_UUID_UCS_STATUS);
 
-<span class="nc" id="L476">            JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);</span>
-<span class="nc" id="L477">            String request = new GsonBuilder()</span>
-<span class="nc" id="L478">                    .disableHtmlEscaping()</span>
-<span class="nc" id="L479">                    .serializeNulls()</span>
-<span class="nc" id="L480">                    .create()</span>
-<span class="nc" id="L481">                    .toJson(jsonOut);</span>
+<span class="nc" id="L478">            JsonOutRequestGetTopicUuid jsonOut = new JsonOutRequestGetTopicUuid(requestGetTopicUuid);</span>
+<span class="nc" id="L479">            String request = new GsonBuilder()</span>
+<span class="nc" id="L480">                    .disableHtmlEscaping()</span>
+<span class="nc" id="L481">                    .serializeNulls()</span>
+<span class="nc" id="L482">                    .create()</span>
+<span class="nc" id="L483">                    .toJson(jsonOut);</span>
 
-<span class="nc" id="L483">            response = client.sendRequestAndWaitForResponse(request);</span>
-<span class="nc" id="L484">            client.closeConnection();</span>
+<span class="nc" id="L485">            response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="nc" id="L486">            client.closeConnection();</span>
 
             // If we get an empty response, perform the request
             // again to be sure that the empty response is actually
             // the response to our request.
             // If a response different from the empty response is
             // retrieved, exit the loop.
-<span class="nc bnc" id="L491" title="All 2 branches missed.">            if (response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
-<span class="nc" id="L492">                int attempts = 5;</span>
-<span class="nc bnc" id="L493" title="All 2 branches missed.">                for (int i = 1; i &lt;= attempts; i++) {</span>
-<span class="nc" id="L494">                    response = client.sendRequestAndWaitForResponse(request);</span>
-<span class="nc" id="L495">                    client.closeConnection();</span>
-<span class="nc bnc" id="L496" title="All 2 branches missed.">                    if (!response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
-<span class="nc" id="L497">                        break;</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            if (response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
+<span class="nc" id="L494">                int attempts = 5;</span>
+<span class="nc bnc" id="L495" title="All 2 branches missed.">                for (int i = 1; i &lt;= attempts; i++) {</span>
+<span class="nc" id="L496">                    response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="nc" id="L497">                    client.closeConnection();</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">                    if (!response.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;)) {</span>
+<span class="nc" id="L499">                        break;</span>
                     }
                 }
+<span class="nc" id="L502">                isStatusExistent = false;</span>
             }
-<span class="nc" id="L501">        } else {</span>
-<span class="nc" id="L502">            System.exit(1);</span>
+<span class="nc" id="L504">        } else {</span>
+<span class="nc" id="L505">            System.exit(1);</span>
         }
 
-<span class="nc" id="L505">        JsonInResponse jsonInResponse = new GsonBuilder()</span>
-<span class="nc" id="L506">                .registerTypeAdapterFactory(typeFactory)</span>
-<span class="nc" id="L507">                .create().fromJson(response, JsonInResponse.class);</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">        if (!isStatusExistent) {</span>
+<span class="nc" id="L509">            return null;</span>
+        }
 
-<span class="nc" id="L509">        StatusRequestPostTopicUuid statusRequestPostTopicUuid =</span>
-<span class="nc" id="L510">                (StatusRequestPostTopicUuid) jsonInResponse.getResponse().getValue();</span>
-<span class="nc" id="L511">        return statusRequestPostTopicUuid.getValue();</span>
+<span class="nc" id="L512">        JsonInResponse jsonInResponse = new GsonBuilder()</span>
+<span class="nc" id="L513">                .registerTypeAdapterFactory(typeFactory)</span>
+<span class="nc" id="L514">                .create().fromJson(response, JsonInResponse.class);</span>
+
+<span class="nc" id="L516">        StatusRequestPostTopicUuid statusRequestPostTopicUuid =</span>
+<span class="nc" id="L517">                (StatusRequestPostTopicUuid) jsonInResponse.getResponse().getValue();</span>
+<span class="nc" id="L518">        return statusRequestPostTopicUuid.getValue();</span>
         //return jsonInResponse.getResponse().getValue().getValue();
     }
 
@@ -517,44 +524,44 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      * Save the UCS status to the dht
      */
     public static void uploadStatus() {
-<span class="nc" id="L520">    System.out.println(&quot;Uploading status ...&quot;);</span>
-<span class="nc" id="L521">        Status value = new Status(</span>
-<span class="nc" id="L522">                saveDbToString(),</span>
-<span class="nc" id="L523">                savePipsToString(),</span>
-<span class="nc" id="L524">                savePepsToString(),</span>
-<span class="nc" id="L525">                savePoliciesToString());</span>
-<span class="nc" id="L526">        StatusRequestPostTopicUuid requestPostTopicUuid =</span>
+<span class="nc" id="L527">    System.out.println(&quot;Uploading status ...&quot;);</span>
+<span class="nc" id="L528">        Status value = new Status(</span>
+<span class="nc" id="L529">                saveDbToString(),</span>
+<span class="nc" id="L530">                savePipsToString(),</span>
+<span class="nc" id="L531">                savePepsToString(),</span>
+<span class="nc" id="L532">                savePoliciesToString());</span>
+<span class="nc" id="L533">        StatusRequestPostTopicUuid requestPostTopicUuid =</span>
                 new StatusRequestPostTopicUuid(value, PERSISTENT_TOPIC_UUID_UCS_STATUS);
-<span class="nc" id="L528">        JsonOutRequestPostTopicUuid jsonOut = new JsonOutRequestPostTopicUuid(requestPostTopicUuid);</span>
-<span class="nc" id="L529">        String request = new GsonBuilder()</span>
-<span class="nc" id="L530">                .disableHtmlEscaping()</span>
-<span class="nc" id="L531">                .serializeNulls()</span>
-<span class="nc" id="L532">                .create()</span>
-<span class="nc" id="L533">                .toJson(jsonOut);</span>
+<span class="nc" id="L535">        JsonOutRequestPostTopicUuid jsonOut = new JsonOutRequestPostTopicUuid(requestPostTopicUuid);</span>
+<span class="nc" id="L536">        String request = new GsonBuilder()</span>
+<span class="nc" id="L537">                .disableHtmlEscaping()</span>
+<span class="nc" id="L538">                .serializeNulls()</span>
+<span class="nc" id="L539">                .create()</span>
+<span class="nc" id="L540">                .toJson(jsonOut);</span>
 
-<span class="nc" id="L535">        String response = null;</span>
-<span class="nc bnc" id="L536" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
-<span class="nc" id="L537">            response = client.sendRequestAndWaitForResponse(request);</span>
-<span class="nc" id="L538">            client.closeConnection();</span>
+<span class="nc" id="L542">        String response = null;</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {</span>
+<span class="nc" id="L544">            response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="nc" id="L545">            client.closeConnection();</span>
         } else {
-<span class="nc" id="L540">            System.exit(1);</span>
+<span class="nc" id="L547">            System.exit(1);</span>
         }
 
         try {
-<span class="nc" id="L544">            JsonInPersistent jsonInPersistent = new GsonBuilder()</span>
-<span class="nc" id="L545">                    .registerTypeAdapterFactory(persistentTypeFactory)</span>
-<span class="nc" id="L546">                    .create().fromJson(response, JsonInPersistent.class);</span>
-<span class="nc" id="L547">        } catch (Exception e) {</span>
-<span class="nc" id="L548">            throw new RuntimeException(&quot;Unable to parse received Persistent message&quot;);</span>
-<span class="nc" id="L549">        }</span>
+<span class="nc" id="L551">            JsonInPersistent jsonInPersistent = new GsonBuilder()</span>
+<span class="nc" id="L552">                    .registerTypeAdapterFactory(persistentTypeFactory)</span>
+<span class="nc" id="L553">                    .create().fromJson(response, JsonInPersistent.class);</span>
+<span class="nc" id="L554">        } catch (Exception e) {</span>
+<span class="nc" id="L555">            throw new RuntimeException(&quot;Unable to parse received Persistent message&quot;);</span>
+<span class="nc" id="L556">        }</span>
 //        // fixme: sort of check to assess if the received response is invalid. Does it make sense?
 //        if (jsonInPersistent.getPersistent().isDeleted()) {
 //            System.err.println(&quot;The received response is marked as deleted&quot;);
 //            System.exit(1);
 //        } else {
-<span class="nc" id="L555">            System.out.println(&quot;... status uploaded&quot;);</span>
+<span class="nc" id="L562">            System.out.println(&quot;... status uploaded&quot;);</span>
 //        }
-<span class="nc" id="L557">    }</span>
+<span class="nc" id="L564">    }</span>
 
 
     /**
@@ -564,22 +571,22 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
     private static void initializeUCS() {
 
         // to be correctly initialized, the UCS needs at least one PIP to be present
-<span class="nc" id="L567">        addSamplePip(&quot;it.cnr.iit.ucs.pipreader.PIPReader&quot;, &quot;sample-pip&quot;,</span>
+<span class="nc" id="L574">        addSamplePip(&quot;it.cnr.iit.ucs.pipreader.PIPReader&quot;, &quot;sample-pip&quot;,</span>
                 &quot;urn:oasis:names:tc:xacml:3.0:environment:attribute-1&quot;,
-<span class="nc" id="L569">                Category.ENVIRONMENT.toString(), DataType.STRING.toString(), &quot;sample-attribute-1.txt&quot;,</span>
+<span class="nc" id="L576">                Category.ENVIRONMENT.toString(), DataType.STRING.toString(), &quot;sample-attribute-1.txt&quot;,</span>
                 1000L, &quot;attribute-1-value&quot;);
 
-<span class="nc" id="L572">        sessionManagerProperties.setDbUri(dbUri);</span>
+<span class="nc" id="L579">        sessionManagerProperties.setDbUri(dbUri);</span>
 
         // start the UCS
-<span class="nc" id="L575">        ucsClient = new UCSClient(pipPropertiesList, papProperties, sessionManagerProperties, pepPropertiesList);</span>
+<span class="nc" id="L582">        ucsClient = new UCSClient(pipPropertiesList, papProperties, sessionManagerProperties, pepPropertiesList);</span>
 
         // add sample policy
-<span class="nc" id="L578">        String examplePolicy = Utils.readContent(Utils.accessFile(UCSDht.class, &quot;example-policy.xml&quot;));</span>
-<span class="nc bnc" id="L579" title="All 2 branches missed.">        if (!ucsClient.addPolicy(examplePolicy)) {</span>
-<span class="nc" id="L580">            System.err.println(&quot;Failed to add policy&quot;);</span>
+<span class="nc" id="L585">        String examplePolicy = Utils.readContent(Utils.accessFile(UCSDht.class, &quot;example-policy.xml&quot;));</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">        if (!ucsClient.addPolicy(examplePolicy)) {</span>
+<span class="nc" id="L587">            System.err.println(&quot;Failed to add policy&quot;);</span>
         }
-<span class="nc" id="L582">    }</span>
+<span class="nc" id="L589">    }</span>
 
     /**
      * Take the sessions with status START and REVOKE, and for each of them
@@ -590,19 +597,19 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      */
     public static void restorePIPsSubscriptions() {
         // restore PIPs' subscriptions
-<span class="nc bnc" id="L593" title="All 2 branches missed.">        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {</span>
+<span class="nc bnc" id="L600" title="All 2 branches missed.">        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {</span>
             try {
-<span class="nc" id="L595">                PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());</span>
-<span class="nc" id="L596">                List&lt;Attribute&gt; attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
-<span class="nc" id="L597">                RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), ucsClient.getPipRegistry());</span>
-<span class="nc" id="L598">                ucsClient.getPipRegistry().subscribe(request.getRequestType(), attributes);</span>
-<span class="nc" id="L599">            } catch (Exception e) {</span>
-<span class="nc" id="L600">                System.err.println(&quot;Error restoring PIPs' subscriptions&quot;);</span>
-<span class="nc" id="L601">                throw new RuntimeException(e);</span>
-<span class="nc" id="L602">            }</span>
-<span class="nc" id="L603">        }</span>
-<span class="nc" id="L604">        System.out.println(&quot;[PIPs] PIPs' subscriptions restored&quot;);</span>
-<span class="nc" id="L605">    }</span>
+<span class="nc" id="L602">                PolicyWrapper policy = PolicyWrapper.build(session.getPolicySet());</span>
+<span class="nc" id="L603">                List&lt;Attribute&gt; attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
+<span class="nc" id="L604">                RequestWrapper request = RequestWrapper.build(session.getOriginalRequest(), ucsClient.getPipRegistry());</span>
+<span class="nc" id="L605">                ucsClient.getPipRegistry().subscribe(request.getRequestType(), attributes);</span>
+<span class="nc" id="L606">            } catch (Exception e) {</span>
+<span class="nc" id="L607">                System.err.println(&quot;Error restoring PIPs' subscriptions&quot;);</span>
+<span class="nc" id="L608">                throw new RuntimeException(e);</span>
+<span class="nc" id="L609">            }</span>
+<span class="nc" id="L610">        }</span>
+<span class="nc" id="L611">        System.out.println(&quot;[PIPs] PIPs' subscriptions restored&quot;);</span>
+<span class="nc" id="L612">    }</span>
 
     /**
      * Reevaluate the sessions with status START and REVOKE. This has to be
@@ -614,15 +621,15 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      * this happens, a REEVALUATION message is sent to the interested pep.
      */
     public static void reevaluateSessions() {
-<span class="nc bnc" id="L617" title="All 2 branches missed.">        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">        for (SessionInterface session : sessionsWithStatusStartOrRevoke) {</span>
             try {
-<span class="nc" id="L619">                ucsClient.getContextHandler().reevaluate(session);</span>
-<span class="nc" id="L620">            } catch (Exception e) {</span>
-<span class="nc" id="L621">                System.err.println(&quot;Error reevaluating sessions&quot;);</span>
-<span class="nc" id="L622">                throw new RuntimeException(e);</span>
-<span class="nc" id="L623">            }</span>
-<span class="nc" id="L624">        }</span>
-<span class="nc" id="L625">    }</span>
+<span class="nc" id="L626">                ucsClient.getContextHandler().reevaluate(session);</span>
+<span class="nc" id="L627">            } catch (Exception e) {</span>
+<span class="nc" id="L628">                System.err.println(&quot;Error reevaluating sessions&quot;);</span>
+<span class="nc" id="L629">                throw new RuntimeException(e);</span>
+<span class="nc" id="L630">            }</span>
+<span class="nc" id="L631">        }</span>
+<span class="nc" id="L632">    }</span>
 
 
     /**
@@ -637,42 +644,42 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      * used to initialize the UCS.
      */
     public static void loadPips() {
-<span class="nc bnc" id="L640" title="All 4 branches missed.">        if (pipsDir.exists() &amp;&amp; pipsDir.isDirectory()) {</span>
-<span class="nc" id="L641">            File[] subDirs = pipsDir.listFiles(File::isDirectory);</span>
-<span class="nc bnc" id="L642" title="All 2 branches missed.">            if (subDirs != null) {</span>
-<span class="nc bnc" id="L643" title="All 2 branches missed.">                for (File subDir : subDirs) {</span>
-<span class="nc" id="L644">                    File targetFile = new File(subDir, subDir.getName() + &quot;.json&quot;);</span>
-<span class="nc bnc" id="L645" title="All 4 branches missed.">                    if (targetFile.exists() &amp;&amp; targetFile.isFile()) {</span>
-<span class="nc" id="L646">                        System.out.print(&quot;[PIPs] Loading PIP '&quot; + targetFile.getName() + &quot;' in memory ...&quot;);</span>
-<span class="nc" id="L647">                        Optional&lt;UCSDhtPipProperties&gt; properties = Optional.empty();</span>
+<span class="nc bnc" id="L647" title="All 4 branches missed.">        if (pipsDir.exists() &amp;&amp; pipsDir.isDirectory()) {</span>
+<span class="nc" id="L648">            File[] subDirs = pipsDir.listFiles(File::isDirectory);</span>
+<span class="nc bnc" id="L649" title="All 2 branches missed.">            if (subDirs != null) {</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">                for (File subDir : subDirs) {</span>
+<span class="nc" id="L651">                    File targetFile = new File(subDir, subDir.getName() + &quot;.json&quot;);</span>
+<span class="nc bnc" id="L652" title="All 4 branches missed.">                    if (targetFile.exists() &amp;&amp; targetFile.isFile()) {</span>
+<span class="nc" id="L653">                        System.out.print(&quot;[PIPs] Loading PIP '&quot; + targetFile.getName() + &quot;' in memory ...&quot;);</span>
+<span class="nc" id="L654">                        Optional&lt;UCSDhtPipProperties&gt; properties = Optional.empty();</span>
                         try {
-<span class="nc" id="L649">                            properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPipProperties.class);</span>
-<span class="nc" id="L650">                        } catch (NoSuchElementException e) {</span>
-<span class="nc" id="L651">                            System.err.println(e.getMessage());</span>
-<span class="nc" id="L652">                        }</span>
-<span class="nc bnc" id="L653" title="All 2 branches missed.">                        if (properties.isPresent()) {</span>
-<span class="nc bnc" id="L654" title="All 2 branches missed.">                            if (properties.get().getName().equals(PIPReader.class.getName())) {</span>
-<span class="nc bnc" id="L655" title="All 2 branches missed.">                                for (Map&lt;String, String&gt; attribute : properties.get().getAttributes()) {</span>
-<span class="nc" id="L656">                                    String attributeId = attribute.get(&quot;ATTRIBUTE_ID&quot;);</span>
-<span class="nc" id="L657">                                    String fileName = properties.get().getAdditionalProperties().get(attributeId);</span>
-<span class="nc" id="L658">                                    properties.get().getAdditionalProperties().put(attributeId,</span>
+<span class="nc" id="L656">                            properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPipProperties.class);</span>
+<span class="nc" id="L657">                        } catch (NoSuchElementException e) {</span>
+<span class="nc" id="L658">                            System.err.println(e.getMessage());</span>
+<span class="nc" id="L659">                        }</span>
+<span class="nc bnc" id="L660" title="All 2 branches missed.">                        if (properties.isPresent()) {</span>
+<span class="nc bnc" id="L661" title="All 2 branches missed.">                            if (properties.get().getName().equals(PIPReader.class.getName())) {</span>
+<span class="nc bnc" id="L662" title="All 2 branches missed.">                                for (Map&lt;String, String&gt; attribute : properties.get().getAttributes()) {</span>
+<span class="nc" id="L663">                                    String attributeId = attribute.get(&quot;ATTRIBUTE_ID&quot;);</span>
+<span class="nc" id="L664">                                    String fileName = properties.get().getAdditionalProperties().get(attributeId);</span>
+<span class="nc" id="L665">                                    properties.get().getAdditionalProperties().put(attributeId,</span>
                                             pipsDir + File.separator +
-<span class="nc" id="L660">                                                    properties.get().getId() + File.separator + fileName);</span>
-<span class="nc" id="L661">                                }</span>
+<span class="nc" id="L667">                                                    properties.get().getId() + File.separator + fileName);</span>
+<span class="nc" id="L668">                                }</span>
                             }
-<span class="nc" id="L663">                            pipPropertiesList.add(properties.get());</span>
+<span class="nc" id="L670">                            pipPropertiesList.add(properties.get());</span>
                         }
-<span class="nc" id="L665">                        System.out.println(&quot; [LOADED]&quot;);</span>
-<span class="nc" id="L666">                    } else {</span>
-<span class="nc" id="L667">                        System.out.println(&quot;Target file not found in subfolder: &quot; + subDir.getAbsolutePath());</span>
+<span class="nc" id="L672">                        System.out.println(&quot; [LOADED]&quot;);</span>
+<span class="nc" id="L673">                    } else {</span>
+<span class="nc" id="L674">                        System.out.println(&quot;Target file not found in subfolder: &quot; + subDir.getAbsolutePath());</span>
                     }
                 }
             }
-<span class="nc" id="L671">        } else {</span>
-<span class="nc" id="L672">            System.out.println(&quot;PIPs folder not found or is not a directory.&quot;);</span>
+<span class="nc" id="L678">        } else {</span>
+<span class="nc" id="L679">            System.out.println(&quot;PIPs folder not found or is not a directory.&quot;);</span>
         }
-<span class="nc" id="L674">        System.out.println();</span>
-<span class="nc" id="L675">    }</span>
+<span class="nc" id="L681">        System.out.println();</span>
+<span class="nc" id="L682">    }</span>
 
     /**
      * Load the PEPs from json files within the pepsDir folder.
@@ -680,26 +687,26 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      * used to initialize the UCS.
      */
     public static void loadPeps() {
-<span class="nc bnc" id="L683" title="All 4 branches missed.">        if (pepsDir.exists() &amp;&amp; pepsDir.isDirectory()) {</span>
-<span class="nc" id="L684">            File[] files = pepsDir.listFiles(File::isFile);</span>
-<span class="nc bnc" id="L685" title="All 2 branches missed.">            if (files != null) {</span>
-<span class="nc bnc" id="L686" title="All 2 branches missed.">                for (File targetFile : files) {</span>
-<span class="nc" id="L687">                    System.out.print(&quot;[PEPs] Loading PEP '&quot; + targetFile.getName() + &quot;' in memory ...&quot;);</span>
-<span class="nc" id="L688">                    Optional&lt;UCSDhtPepProperties&gt; properties = Optional.empty();</span>
+<span class="nc bnc" id="L690" title="All 4 branches missed.">        if (pepsDir.exists() &amp;&amp; pepsDir.isDirectory()) {</span>
+<span class="nc" id="L691">            File[] files = pepsDir.listFiles(File::isFile);</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">            if (files != null) {</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">                for (File targetFile : files) {</span>
+<span class="nc" id="L694">                    System.out.print(&quot;[PEPs] Loading PEP '&quot; + targetFile.getName() + &quot;' in memory ...&quot;);</span>
+<span class="nc" id="L695">                    Optional&lt;UCSDhtPepProperties&gt; properties = Optional.empty();</span>
                     try {
-<span class="nc" id="L690">                        properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPepProperties.class);</span>
-<span class="nc" id="L691">                    } catch (NoSuchElementException e) {</span>
-<span class="nc" id="L692">                        System.err.println(e.getMessage());</span>
-<span class="nc" id="L693">                    }</span>
-<span class="nc" id="L694">                    properties.ifPresent(pepPropertiesList::add);</span>
-<span class="nc" id="L695">                    System.out.println(&quot; [LOADED]&quot;);</span>
+<span class="nc" id="L697">                        properties = JsonUtility.loadObjectFromJsonFile(targetFile, UCSDhtPepProperties.class);</span>
+<span class="nc" id="L698">                    } catch (NoSuchElementException e) {</span>
+<span class="nc" id="L699">                        System.err.println(e.getMessage());</span>
+<span class="nc" id="L700">                    }</span>
+<span class="nc" id="L701">                    properties.ifPresent(pepPropertiesList::add);</span>
+<span class="nc" id="L702">                    System.out.println(&quot; [LOADED]&quot;);</span>
                 }
             }
-<span class="nc" id="L698">        } else {</span>
-<span class="nc" id="L699">            System.out.println(&quot;PEPs folder not found or is not a directory.&quot;);</span>
+<span class="nc" id="L705">        } else {</span>
+<span class="nc" id="L706">            System.out.println(&quot;PEPs folder not found or is not a directory.&quot;);</span>
         }
-<span class="nc" id="L701">        System.out.println();</span>
-<span class="nc" id="L702">    }</span>
+<span class="nc" id="L708">        System.out.println();</span>
+<span class="nc" id="L709">    }</span>
 
     /**
      * Add a pip programmatically and save its json serialization and attribute file
@@ -707,31 +714,31 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
     public static void addSamplePip(String name, String pipId, String attributeId, String category, String dataType,
                                     String fileName, long refreshRate, String attributeValue) {
 
-<span class="nc" id="L710">        UCSDhtPipProperties pipReader = new UCSDhtPipProperties();</span>
-<span class="nc" id="L711">        pipReader.setName(name);</span>
-<span class="nc" id="L712">        pipReader.addAttribute(attributeId, category, dataType);</span>
-<span class="nc" id="L713">        pipReader.setRefreshRate(refreshRate);</span>
-<span class="nc" id="L714">        pipReader.setJournalPath(&quot;/tmp/ucf&quot;);</span>
-<span class="nc" id="L715">        pipReader.setJournalProtocol(&quot;file&quot;);</span>
-<span class="nc" id="L716">        Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L717">        additionalProperties.put(attributeId, pipsDir + File.separator + pipId + File.separator + fileName);</span>
-<span class="nc" id="L718">        additionalProperties.put(pipsDir + File.separator + pipId + File.separator + fileName, attributeValue);</span>
-<span class="nc" id="L719">        pipReader.setAdditionalProperties(additionalProperties);</span>
-<span class="nc" id="L720">        pipPropertiesList.add(pipReader);</span>
+<span class="nc" id="L717">        UCSDhtPipProperties pipReader = new UCSDhtPipProperties();</span>
+<span class="nc" id="L718">        pipReader.setName(name);</span>
+<span class="nc" id="L719">        pipReader.addAttribute(attributeId, category, dataType);</span>
+<span class="nc" id="L720">        pipReader.setRefreshRate(refreshRate);</span>
+<span class="nc" id="L721">        pipReader.setJournalPath(&quot;/tmp/ucf&quot;);</span>
+<span class="nc" id="L722">        pipReader.setJournalProtocol(&quot;file&quot;);</span>
+<span class="nc" id="L723">        Map&lt;String, String&gt; additionalProperties = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L724">        additionalProperties.put(attributeId, pipsDir + File.separator + pipId + File.separator + fileName);</span>
+<span class="nc" id="L725">        additionalProperties.put(pipsDir + File.separator + pipId + File.separator + fileName, attributeValue);</span>
+<span class="nc" id="L726">        pipReader.setAdditionalProperties(additionalProperties);</span>
+<span class="nc" id="L727">        pipPropertiesList.add(pipReader);</span>
 
-<span class="nc" id="L722">        Utils.createDir(new File(pipsDir.getAbsolutePath() + File.separator + pipId));</span>
+<span class="nc" id="L729">        Utils.createDir(new File(pipsDir.getAbsolutePath() + File.separator + pipId));</span>
 
-<span class="nc" id="L724">        setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId</span>
+<span class="nc" id="L731">        setAttributeValue(pipsDir.getAbsolutePath() + File.separator + pipId</span>
                 + File.separator + fileName, attributeValue);
 
         // when serializing, we specify only the file name, not the entire path
-<span class="nc" id="L728">        Map&lt;String, String&gt; additionalPropertiesToSerialize = new HashMap&lt;&gt;();</span>
-<span class="nc" id="L729">        additionalPropertiesToSerialize.put(attributeId, fileName);</span>
-<span class="nc" id="L730">        additionalPropertiesToSerialize.put(fileName, attributeValue);</span>
+<span class="nc" id="L735">        Map&lt;String, String&gt; additionalPropertiesToSerialize = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L736">        additionalPropertiesToSerialize.put(attributeId, fileName);</span>
+<span class="nc" id="L737">        additionalPropertiesToSerialize.put(fileName, attributeValue);</span>
 
-<span class="nc" id="L732">        PIPMessageManager.serializePipToFile(name, pipId, attributeId, category,</span>
+<span class="nc" id="L739">        PIPMessageManager.serializePipToFile(name, pipId, attributeId, category,</span>
                 dataType, refreshRate, additionalPropertiesToSerialize);
-<span class="nc" id="L734">    }</span>
+<span class="nc" id="L741">    }</span>
 
     /**
      * Write a value in a file
@@ -741,15 +748,15 @@ import static it.cnr.iit.utility.dht.DHTUtils.isDhtReachable;
      */
     public static void setAttributeValue(String fileName, String value) {
 
-<span class="nc" id="L744">        File file = new File(fileName);</span>
-<span class="nc" id="L745">        FileWriter fw = null;</span>
+<span class="nc" id="L751">        File file = new File(fileName);</span>
+<span class="nc" id="L752">        FileWriter fw = null;</span>
         try {
-<span class="nc" id="L747">            fw = new FileWriter(file);</span>
-<span class="nc" id="L748">            fw.write(value);</span>
-<span class="nc" id="L749">            fw.close();</span>
-<span class="nc" id="L750">        } catch (IOException e) {</span>
-<span class="nc" id="L751">            e.printStackTrace();</span>
-<span class="nc" id="L752">        }</span>
-<span class="nc" id="L753">    }</span>
+<span class="nc" id="L754">            fw = new FileWriter(file);</span>
+<span class="nc" id="L755">            fw.write(value);</span>
+<span class="nc" id="L756">            fw.close();</span>
+<span class="nc" id="L757">        } catch (IOException e) {</span>
+<span class="nc" id="L758">            e.printStackTrace();</span>
+<span class="nc" id="L759">        }</span>
+<span class="nc" id="L760">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
