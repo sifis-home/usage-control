@@ -4,20 +4,20 @@ services:
   # USAGE CONTROL ENGINE
   usage-control-engine:
     image: ghcr.io/sifis-home/usage-control-engine:latest
-    entrypoint: ["java", "-jar", "UCSDht/UCSDht.jar", "-d", "ws://domo-dht-manager:3000/ws"]
+    entrypoint: ["java", "-jar", "UCSDht/UCSDht.jar", "--dht", "ws://domo-dht-manager:3000/ws"]
     depends_on:
       domo-dht-manager:
         condition: service_healthy
 
   # POLICY ENFORCEMENT POINT
-  pep-java:
-    image: ghcr.io/sifis-home/pep-java:latest
-    entrypoint: ["java", "-jar", "PEPDht/PEPDht.jar", "-d", "ws://domo-dht-manager:3000/ws"]
-    depends_on:
-      usage-control-engine:
-        condition: service_started
-      domo-dht-manager:
-        condition: service_healthy
+#  pep-java:
+#    image: ghcr.io/sifis-home/pep-java:latest
+#    entrypoint: ["java", "-jar", "PEPDht/PEPDht.jar", "-d", "ws://domo-dht-manager:3000/ws"]
+#    depends_on:
+#      usage-control-engine:
+#        condition: service_started
+#      domo-dht-manager:
+#        condition: service_healthy
 
   # The DHT. The AS uses it for logging. The clients use it to receive commands and relay back responses from the server(s).
   domo-dht-manager:
