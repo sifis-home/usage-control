@@ -466,6 +466,8 @@ public class UCSDht {
      * representations of the database, pips, peps, and policies
      */
     public static Status downloadStatus() {
+        boolean isStatusExistent = true;
+
         System.out.println("Downloading status ...");
         // get the status from the dht
         String response = null;
@@ -497,6 +499,7 @@ public class UCSDht {
                         break;
                     }
                 }
+                isStatusExistent = false;
             }
         } else {
             System.exit(1);
