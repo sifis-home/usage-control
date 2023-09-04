@@ -512,9 +512,9 @@ public class UCSDht {
             return null;
         }
 
-        JsonInResponse jsonInResponse = new GsonBuilder()
+        JsonInResponse2RequestGetTopicUuid jsonInResponse = new GsonBuilder()
                 .registerTypeAdapterFactory(typeFactory)
-                .create().fromJson(response, JsonInResponse.class);
+                .create().fromJson(response, JsonInResponse2RequestGetTopicUuid.class);
 
         StatusRequestPostTopicUuid statusRequestPostTopicUuid =
                 (StatusRequestPostTopicUuid) jsonInResponse.getResponse().getValue();

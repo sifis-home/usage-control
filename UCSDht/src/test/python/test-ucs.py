@@ -6,6 +6,9 @@ import uuid
 import datetime
 
 websocket_uri = "ws://localhost:3000/ws"
+#websocket_uri = "ws://sifis-device4.iit.cnr.it:3000/ws"
+#websocket_uri = "ws://146.48.89.28:3000/ws"
+
 session_id = "None"
 def on_message(ws, message):
     if "ucs-command" in message:
@@ -40,8 +43,8 @@ def enter_command():
     print("  PEP commands:              PAP commands:              PIP commands:")
     print("    1 : register               5 : add policy             9: add pip time")
     print("    2 : try access             6 : list policies         10: add pip reader")
-    print("    3 : start access           7 : get policy            11: add pip websocket lamps")
-    print("    4 : end access             8 : delete policy")
+    print("    3 : start access           7 : get policy            11: add pip websocket lamp status")
+    print("    4 : end access             8 : delete policy         12: add pip websocket lamps status")
     print("")
 
     command = input("Enter command number> ")
@@ -70,8 +73,10 @@ def send_command(command):
     elif command == "10":
         add_pip_reader()
     elif command == "11":
-        add_pip_websocket()
+        add_pip_websocket_lamp_status()
     elif command == "12":
+        add_pip_websocket_lamps_status()
+    elif command == "13":
         unrecognized_command()
     elif command == "q":
         exit("")
@@ -391,13 +396,53 @@ def add_pip_reader():
     print("\n------ ADD PIP READER -------\n")
     print_and_send(ws_req)
 
-def add_pip_websocket():
-    attribute_id = "eu:sifis-home:1.0:environment:lamps-status"
+def add_pip_websocket_lamp_status():
+    attribute_id = "eu:sifis-home:1.0:environment:lamp-status"
     category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
     data_type = "http://www.w3.org/2001/XMLSchema#boolean"
     dhtUri = "ws://sifis-device4.iit.cnr.it:3000/ws"
     topicName = "domo_light"
     topicUuid = "bd59a9b8-fb3d-452d-b4ca-f3d13cf2d504"
+    refresh_rate = 10000
+
+    ws_req = {
+        "RequestPubMessage": {
+            "value": {
+                "timestamp": int(datetime.datetime.now().timestamp()*1000),
+                "command": {
+                    "command_type": "pip-command",
+                    "value": {
+                        "message": {
+                            "purpose": "ADD_PIP",
+                            "message_id": str(uuid.uuid1()),
+                            "pip_type": "it.cnr.iit.ucs.pipwebsocket.PIPWebSocketLampStatus",
+                            "attribute_id": attribute_id,
+                            "category": category,
+                            "data_type": data_type,
+                            "refresh_rate": refresh_rate,
+                            "additional_properties" : {
+                                "dhtUri": dhtUri,
+                                "topicName": topicName,
+                                "topicUuid": topicUuid
+                            }
+                        },
+                        "id": "pip-websocket-lamp-status",
+                        "topic_name": "topic-name",
+                        "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
+                    }
+                }
+            }
+        }
+    }
+    print("\n-- ADD PIP WEBSOCKET LAMP STATUS --\n")
+    print_and_send(ws_req)
+
+def add_pip_websocket_lamps_status():
+    attribute_id = "eu:sifis-home:1.0:environment:all-lamps-are-on"
+    category = "urn:oasis:names:tc:xacml:3.0:attribute-category:environment"
+    data_type = "http://www.w3.org/2001/XMLSchema#boolean"
+    dhtUri = "ws://sifis-device4.iit.cnr.it:3000/ws"
+    topicName = "domo_light"
     refresh_rate = 10000
 
     ws_req = {
@@ -418,10 +463,9 @@ def add_pip_websocket():
                             "additional_properties" : {
                                 "dhtUri": dhtUri,
                                 "topicName": topicName,
-                                "topicUuid": topicUuid
                             }
                         },
-                        "id": "pip-websocket-lamps",
+                        "id": "pip-websocket-all-lamps-are-on",
                         "topic_name": "topic-name",
                         "topic_uuid": "topic-uuid-the-ucs-is-subscribed-to"
                     }
@@ -429,7 +473,7 @@ def add_pip_websocket():
             }
         }
     }
-    print("\n--- ADD PIP WEBSOCKETLAMPS --\n")
+    print("\n-- ADD PIP WEBSOCKET LAMPS STATUS --\n")
     print_and_send(ws_req)
 
 ## UNRECOGNIZED COMMAND

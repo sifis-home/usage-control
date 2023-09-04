@@ -1,6 +1,6 @@
 package it.cnr.iit.utility.dht.jsonpersistent;
 
-public class Response {
+public class Response2RequestGetTopicUuid {
     private RequestPostTopicUuid value;
 
     public RequestPostTopicUuid getValue() {

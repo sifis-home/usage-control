@@ -1,6 +1,5 @@
 package it.cnr.iit.utility.dht;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.typeadapters.RuntimeTypeAdapterFactory;
 import it.cnr.iit.utility.dht.jsonpersistent.*;
@@ -40,6 +39,9 @@ public class DHTPersistentMessageClient {
     public DHTPersistentMessageClient(String uri, String topicName, String topicUuid,
                                       RuntimeTypeAdapterFactory<RequestPostTopicUuid> typeFactory,
                                       RuntimeTypeAdapterFactory<Persistent> persistentTypeFactory) {
+        if (topicName == null || uri == null) {
+            throw new RuntimeException("Topic name and URI cannot be null");
+        }
         this.uri = uri;
         this.topicName = topicName;
         this.topicUuid = topicUuid;
@@ -54,47 +56,78 @@ public class DHTPersistentMessageClient {
     }
 
 
-    private boolean areTopicNameAndTopicUuidInitialized() {
-        return topicName != null && topicUuid != null;
-    }
-
-
     /**
-     * Try to deserialize the message as a jsonInResponse. If this fails, try to
-     * deserialize it as a jsonInPersistent message. If both the attempt fail
-     * we cannot deserialize the json and return false.
-     * If one attempt is successful, extract the topicName and topicUuid. If they
-     * both match, return true
+     * Try to deserialize the message as a JsonInResponse2RequestGetTopicUuid. If this
+     * fails, return false.
+     * Otherwise, extract the topicName and topicUuid. If they both match, return true.
      * @param message the json string
-     * @return true if, after deserialization, topicName and topicUuid match.
-     * False otherwise.
+     * @return true if, after deserialization, topicName and topicUuid match the local
+     * topicName and topicUuid fields. False otherwise.
      */
-    private boolean messageContainsRightTopicNameAndTopicUuid(String message) {
+    private boolean isExpectedResponse2RequestGetTopicUuid(String message) {
+        if (this.topicUuid == null) {
+            return false;
+        }
         try {
-            JsonInResponse jsonInResponse = new GsonBuilder()
+            JsonInResponse2RequestGetTopicUuid jsonInResponse = new GsonBuilder()
                     .registerTypeAdapterFactory(typeFactory)
                     .create()
-                    .fromJson(message, JsonInResponse.class);
+                    .fromJson(message, JsonInResponse2RequestGetTopicUuid.class);
 
             String topicName = jsonInResponse.getResponse().getValue().getTopic_name();
             String topicUuid = jsonInResponse.getResponse().getValue().getTopic_uuid();
             return this.topicName.equals(topicName) && this.topicUuid.equals(topicUuid);
         } catch (Exception e) {
-            try {
-                JsonInPersistent jsonInPersistent = new GsonBuilder()
-                        .registerTypeAdapterFactory(persistentTypeFactory)
-                        .create()
-                        .fromJson(message, JsonInPersistent.class);
-
-                String topicName = jsonInPersistent.getPersistent().getTopic_name();
-                String topicUuid = jsonInPersistent.getPersistent().getTopic_uuid();
-                return this.topicName.equals(topicName) && this.topicUuid.equals(topicUuid);
-            } catch (Exception e2) {
-                return false;
-            }
+            return false;
         }
     }
 
+    /**
+     * Try to deserialize the message as a JsonInResponse2RequestGetTopicName. If this
+     * fails, return false.
+     * Otherwise, extract the topicName. If topicName matches, return true.
+     * @param message the json string
+     * @return true if, after deserialization, topicName matches the local topicName.
+     * False otherwise.
+     */
+    private boolean isExpectedResponse2RequestGetTopicName(String message) {
+        try {
+            JsonInResponse2RequestGetTopicName jsonInResponse = new GsonBuilder()
+                    .registerTypeAdapterFactory(typeFactory)
+                    .create()
+                    .fromJson(message, JsonInResponse2RequestGetTopicName.class);
+
+            String topicName = jsonInResponse.getResponse().getValue().get(0).getTopic_name();
+            return this.topicName.equals(topicName);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Try to deserialize the message as a jsonInPersistent. If this fails, return false.
+     * Otherwise, extract the topicName and topicUuid. If they both match, return true.
+     * @param message the json string
+     * @return true if, after deserialization, topicName and topicUuid match the local
+     * topicName and topicUuid fields. False otherwise.
+     */
+    private boolean isExpectedPersistent(String message) {
+        if (this.topicUuid == null) {
+            return false;
+        }
+        try {
+            JsonInPersistent jsonInPersistent = new GsonBuilder()
+                    .registerTypeAdapterFactory(persistentTypeFactory)
+                    .create()
+                    .fromJson(message, JsonInPersistent.class);
+
+            String topicName = jsonInPersistent.getPersistent().getTopic_name();
+            String topicUuid = jsonInPersistent.getPersistent().getTopic_uuid();
+            return this.topicName.equals(topicName) && this.topicUuid.equals(topicUuid);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      *      This is an empty message, and it could be the right answer
@@ -111,9 +144,7 @@ public class DHTPersistentMessageClient {
      * @return true if the input matches the empty response, false otherwise.
      */
     private boolean isEmptyResponse(String message) {
-        // todo: OR it with the empty response for the RequestGetTopicName,
-        //       which returns an empty array
-        return message.equals("{\"Response\":{\"value\":{}}}");
+        return message.equals("{\"Response\":{\"value\":{}}}") || message.equals("{\"Response\":{\"value\":[]}}");
     }
 
     // todo (?): implement a mechanism that calls the lock.notify() after
@@ -127,18 +158,23 @@ public class DHTPersistentMessageClient {
             truncatedMessage = message;
         }
 
-        if (areTopicNameAndTopicUuidInitialized()) {
-            if (!messageContainsRightTopicNameAndTopicUuid(message) && !isEmptyResponse(message)) {
-                // discard message
+        if (!(isExpectedResponse2RequestGetTopicUuid(message)
+                || isExpectedResponse2RequestGetTopicName(message)
+                || isExpectedPersistent(message))
+                && !isEmptyResponse(message)) {
+            // discard message
 //                System.out.println("DHTPersistentMessageClient: message discarded: " + truncatedMessage);
-                return;
-            }
-            else {
-                System.out.println("DHTPersistentMessageClient: " +
-                        "Received response for " + topicName + ", " + topicUuid);
+            return;
+        }
+        else {
+            System.out.print("DHTPersistentMessageClient: " +
+                    "Received response for topicName: " + topicName);
+            if (topicUuid != null) {
+                System.out.println(", topicUuid: " + topicUuid);
+            } else {
+                System.out.println();
             }
         }
-
 
         System.out.println("Received response: " + truncatedMessage);
         response = message;

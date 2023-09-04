@@ -35,10 +35,13 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
         try {
             dhtUri = properties.getAdditionalProperties().get("dhtUri");
             Reject.ifNull(dhtUri, "DHT URI not specified");
+
             topicName = properties.getAdditionalProperties().get("topicName");
             Reject.ifNull(topicName, "Topic name not specified");
+
+            // topicUuid can be null since the PIP might perform only
+            // requests of type RequestGetTopicName
             topicUuid = properties.getAdditionalProperties().get("topicUuid");
-            Reject.ifNull(topicUuid, "Topic UUID not specified");
 
             Reject.ifNull(this.typeFactoryClazz, "Class for TypeFactory not set. " +
                     "Call setClassForTypeFactory() method before init()");
@@ -80,6 +83,10 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
 
 
     public String performRequestGetTopicUuid() throws PIPException {
+        if (topicUuid == null) {
+            throw new PIPException("Topic UUID is not set");
+        }
+
         // get the status from the dht
         String response = null;
         if (isDhtReachable(dhtUri, 2000, 1)) {
@@ -101,17 +108,38 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
         return response;
     }
 
+    public String performRequestGetTopicName() throws PIPException {
+        // get the status from the dht
+        String response = null;
+        if (isDhtReachable(dhtUri, 2000, 1)) {
+            RequestGetTopicName requestGetTopicName =
+                    new RequestGetTopicName(topicName);
+
+            JsonOutRequestGetTopicName jsonOut = new JsonOutRequestGetTopicName(requestGetTopicName);
+            String request = new GsonBuilder()
+                    .disableHtmlEscaping()
+                    .serializeNulls()
+                    .create()
+                    .toJson(jsonOut);
+
+            response = getResponse(request);
+        } else {
+            throw new PIPException("Attribute Manager error: " +
+                    "Unable to connect to the DHT");
+        }
+        return response;
+    }
 
     private String getResponse(String request) throws PIPException {
         String response = client.sendRequestAndWaitForResponse(request);
         client.closeConnection();
 
-        if (response.equals("{\"Response\":{\"value\":{}}}")) {
+        if (isEmptyResponse(response)) {
             int attempts = 5;
             for (int i = 1; i <= attempts; i++) {
                 response = client.sendRequestAndWaitForResponse(request);
                 client.closeConnection();
-                if (!response.equals("{\"Response\":{\"value\":{}}}")) {
+                if (!(isEmptyResponse(response))) {
                     break;
                 }
                 if (i == attempts) {
@@ -121,6 +149,10 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
             }
         }
         return response;
+    }
+
+    private boolean isEmptyResponse(String message) {
+        return message.equals("{\"Response\":{\"value\":{}}}") || message.equals("{\"Response\":{\"value\":[]}}");
     }
 
     public void setClassForTypeFactory(Class<? extends RequestPostTopicUuid> clazz) {
