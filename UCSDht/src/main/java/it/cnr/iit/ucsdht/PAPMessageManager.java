@@ -24,21 +24,21 @@ public class PAPMessageManager {
     protected static void processMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
         if (message instanceof AddPolicyRequest) {
-            System.out.println("handle add policy request");
+            System.out.println("Handling add policy request...");
             handleAddPolicyRequest(jsonIn);
         } else if (message instanceof DeletePolicyRequest) {
-            System.out.println("handle delete policy request");
+            System.out.println("Handling delete policy request...");
             handleDeletePolicyRequest(jsonIn);
         } else if (message instanceof ListPoliciesRequest) {
-            System.out.println("handle list policies request");
+            System.out.println("Handling list policies request...");
             handleListPoliciesRequest(jsonIn);
         } else if (message instanceof GetPolicyRequest) {
-            System.out.println("handle get policy request");
+            System.out.println("Handling get policy request...");
             handleGetPolicyRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-            System.err.println("class not recognized. It might be a ResponseMessage");
+            System.err.println("Class not recognized. It might be a ResponseMessage");
         }
     }
 
