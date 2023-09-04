@@ -24,21 +24,21 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
     protected static void processMessage(JsonIn jsonIn) {
 <span class="nc" id="L25">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
 <span class="nc bnc" id="L26" title="All 2 branches missed.">        if (message instanceof AddPolicyRequest) {</span>
-<span class="nc" id="L27">            System.out.println(&quot;handle add policy request&quot;);</span>
+<span class="nc" id="L27">            System.out.println(&quot;Handling add policy request...&quot;);</span>
 <span class="nc" id="L28">            handleAddPolicyRequest(jsonIn);</span>
 <span class="nc bnc" id="L29" title="All 2 branches missed.">        } else if (message instanceof DeletePolicyRequest) {</span>
-<span class="nc" id="L30">            System.out.println(&quot;handle delete policy request&quot;);</span>
+<span class="nc" id="L30">            System.out.println(&quot;Handling delete policy request...&quot;);</span>
 <span class="nc" id="L31">            handleDeletePolicyRequest(jsonIn);</span>
 <span class="nc bnc" id="L32" title="All 2 branches missed.">        } else if (message instanceof ListPoliciesRequest) {</span>
-<span class="nc" id="L33">            System.out.println(&quot;handle list policies request&quot;);</span>
+<span class="nc" id="L33">            System.out.println(&quot;Handling list policies request...&quot;);</span>
 <span class="nc" id="L34">            handleListPoliciesRequest(jsonIn);</span>
 <span class="nc bnc" id="L35" title="All 2 branches missed.">        } else if (message instanceof GetPolicyRequest) {</span>
-<span class="nc" id="L36">            System.out.println(&quot;handle get policy request&quot;);</span>
+<span class="nc" id="L36">            System.out.println(&quot;Handling get policy request...&quot;);</span>
 <span class="nc" id="L37">            handleGetPolicyRequest(jsonIn);</span>
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-<span class="nc" id="L41">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+<span class="nc" id="L41">            System.err.println(&quot;Class not recognized. It might be a ResponseMessage&quot;);</span>
         }
 <span class="nc" id="L43">    }</span>
 

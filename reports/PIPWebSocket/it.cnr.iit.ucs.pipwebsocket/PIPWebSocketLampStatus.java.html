@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../jacoco-resources/report.gif" type="image/gif"/><title>PIPWebSocketLampStatus.java</title><link rel="stylesheet" href="../../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../../index.html" class="el_report">coverage</a> &gt; <a href="../index.html" class="el_bundle">PIPWebSocket</a> &gt; <a href="index.source.html" class="el_package">it.cnr.iit.ucs.pipwebsocket</a> &gt; <span class="el_source">PIPWebSocketLampStatus.java</span></div><h1>PIPWebSocketLampStatus.java</h1><pre class="source lang-java linenums">package it.cnr.iit.ucs.pipwebsocket;
+
+import com.google.gson.GsonBuilder;
+import it.cnr.iit.ucs.exceptions.PIPException;
+import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
+import it.cnr.iit.ucs.pip.AbstractPIPWebSocket;
+import it.cnr.iit.ucs.pipwebsocket.json.DomoLight;
+import it.cnr.iit.ucs.pipwebsocket.json.DomoLightRequestPostTopicUuid;
+import it.cnr.iit.ucs.properties.components.PipProperties;
+import it.cnr.iit.utility.dht.jsonpersistent.JsonInResponse2RequestGetTopicUuid;
+import it.cnr.iit.utility.errorhandling.Reject;
+import it.cnr.iit.xacml.Attribute;
+import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
+
+import java.util.List;
+import java.util.logging.Logger;
+
+public class PIPWebSocketLampStatus extends AbstractPIPWebSocket {
+
+<span class="nc" id="L20">    private static final Logger log = Logger.getLogger(PIPWebSocketLamps.class.getName());</span>
+
+    public PIPWebSocketLampStatus(PipProperties properties) {
+<span class="nc" id="L23">        super(properties);</span>
+<span class="nc" id="L24">        setClassForTypeFactory(DomoLightRequestPostTopicUuid.class);</span>
+<span class="nc" id="L25">        Reject.ifFalse(init(properties), &quot;Error initialising pip : &quot; + properties.getId());</span>
+<span class="nc" id="L26">    }</span>
+
+    @Override
+    public String retrieve(Attribute attribute) throws PIPException {
+<span class="nc" id="L30">        String response = performRequestGetTopicUuid();</span>
+
+<span class="nc" id="L32">        JsonInResponse2RequestGetTopicUuid jsonInResponse = new GsonBuilder()</span>
+<span class="nc" id="L33">                .registerTypeAdapterFactory(getTypeFactory())</span>
+<span class="nc" id="L34">                .create()</span>
+<span class="nc" id="L35">                .fromJson(response, JsonInResponse2RequestGetTopicUuid.class);</span>
+
+<span class="nc" id="L37">        DomoLight domoLight =</span>
+<span class="nc" id="L38">                ((DomoLightRequestPostTopicUuid) jsonInResponse.getResponse().getValue()).getValue();</span>
+
+        String value;
+<span class="nc bnc" id="L41" title="All 2 branches missed.">        if (domoLight.isStatus()) {</span>
+<span class="nc" id="L42">            value = &quot;true&quot;;</span>
+        } else {
+<span class="nc" id="L44">            value = &quot;false&quot;;</span>
+        }
+
+        // attribute value must always be set after it has been retrieved
+<span class="nc" id="L48">        attribute.setValue(attribute.getDataType(), value);</span>
+<span class="nc" id="L49">        return value;</span>
+    }
+
+    @Override
+    protected Logger getLogger() {
+<span class="nc" id="L54">        return log;</span>
+    }
+
+
+    @Override
+    public void retrieve(RequestType request, List&lt;Attribute&gt; attributeRetrievals) {
+
+<span class="nc" id="L61">    }</span>
+
+    @Override
+    public void subscribe(RequestType request, List&lt;Attribute&gt; attributeRetrieval) {
+
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void update(String json) throws PIPException {
+
+<span class="nc" id="L71">    }</span>
+
+    @Override
+    public void performObligation(ObligationInterface obligation) {
+
+<span class="nc" id="L76">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

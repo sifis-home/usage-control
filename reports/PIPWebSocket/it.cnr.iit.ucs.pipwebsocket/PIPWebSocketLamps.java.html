@@ -4,10 +4,10 @@ import com.google.gson.GsonBuilder;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.AbstractPIPWebSocket;
-import it.cnr.iit.ucs.pipwebsocket.json.DomoLight;
 import it.cnr.iit.ucs.pipwebsocket.json.DomoLightRequestPostTopicUuid;
 import it.cnr.iit.ucs.properties.components.PipProperties;
-import it.cnr.iit.utility.dht.jsonpersistent.JsonInResponse;
+import it.cnr.iit.utility.dht.jsonpersistent.JsonInResponse2RequestGetTopicName;
+import it.cnr.iit.utility.dht.jsonpersistent.RequestPostTopicUuid;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
@@ -27,51 +27,53 @@ public class PIPWebSocketLamps extends AbstractPIPWebSocket {
 
     @Override
     public String retrieve(Attribute attribute) throws PIPException {
-<span class="nc" id="L30">        String response = performRequestGetTopicUuid();</span>
+        // example in which the attribute value represents all-lamps-are-on
+<span class="nc" id="L31">        String response = performRequestGetTopicName();</span>
 
-<span class="nc" id="L32">        JsonInResponse jsonInResponse = new GsonBuilder()</span>
-<span class="nc" id="L33">                .registerTypeAdapterFactory(getTypeFactory())</span>
-<span class="nc" id="L34">                .create().fromJson(response, JsonInResponse.class);</span>
+<span class="nc" id="L33">        JsonInResponse2RequestGetTopicName jsonInResponse = new GsonBuilder()</span>
+<span class="nc" id="L34">                .registerTypeAdapterFactory(getTypeFactory())</span>
+<span class="nc" id="L35">                .create()</span>
+<span class="nc" id="L36">                .fromJson(response, JsonInResponse2RequestGetTopicName.class);</span>
 
-<span class="nc" id="L36">        DomoLight domoLight =</span>
-<span class="nc" id="L37">                ((DomoLightRequestPostTopicUuid) jsonInResponse.getResponse().getValue()).getValue();</span>
-
-        String value;
-<span class="nc bnc" id="L40" title="All 2 branches missed.">        if (domoLight.isStatus()) {</span>
-<span class="nc" id="L41">            value = &quot;true&quot;;</span>
-        } else {
-<span class="nc" id="L43">            value = &quot;false&quot;;</span>
-        }
+<span class="nc" id="L38">        String value = &quot;true&quot;;</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        for (RequestPostTopicUuid requestPostTopicUuid : jsonInResponse.getResponse().getValue()) {</span>
+<span class="nc" id="L40">            DomoLightRequestPostTopicUuid domoLightRequestPostTopicUuid = (DomoLightRequestPostTopicUuid) requestPostTopicUuid;</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">            if (!domoLightRequestPostTopicUuid.getValue().isStatus()) {</span>
+                // if at least one light is off, value takes false, meaning not all lights are on.
+<span class="nc" id="L43">                value = &quot;false&quot;;</span>
+<span class="nc" id="L44">                break;</span>
+            }
+<span class="nc" id="L46">        }</span>
 
         // attribute value must always be set after it has been retrieved
-<span class="nc" id="L47">        attribute.setValue(attribute.getDataType(), value);</span>
-<span class="nc" id="L48">        return value;</span>
+<span class="nc" id="L49">        attribute.setValue(attribute.getDataType(), value);</span>
+<span class="nc" id="L50">        return value;</span>
     }
 
     @Override
     protected Logger getLogger() {
-<span class="nc" id="L53">        return log;</span>
+<span class="nc" id="L55">        return log;</span>
     }
 
 
     @Override
     public void retrieve(RequestType request, List&lt;Attribute&gt; attributeRetrievals) {
 
-<span class="nc" id="L60">    }</span>
+<span class="nc" id="L62">    }</span>
 
     @Override
     public void subscribe(RequestType request, List&lt;Attribute&gt; attributeRetrieval) {
 
-<span class="nc" id="L65">    }</span>
+<span class="nc" id="L67">    }</span>
 
     @Override
     public void update(String json) throws PIPException {
 
-<span class="nc" id="L70">    }</span>
+<span class="nc" id="L72">    }</span>
 
     @Override
     public void performObligation(ObligationInterface obligation) {
 
-<span class="nc" id="L75">    }</span>
+<span class="nc" id="L77">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

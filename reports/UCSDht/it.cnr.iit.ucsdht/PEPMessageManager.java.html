@@ -32,24 +32,24 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
 <span class="nc" id="L32">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
 <span class="nc bnc" id="L33" title="All 2 branches missed.">        if (message instanceof RegisterRequest) {</span>
             // handle register request
-<span class="nc" id="L35">            System.out.println(&quot;handle register request&quot;);</span>
+<span class="nc" id="L35">            System.out.println(&quot;Handling register request...&quot;);</span>
 <span class="nc" id="L36">            handleRegisterRequest(jsonIn);</span>
 <span class="nc bnc" id="L37" title="All 2 branches missed.">        } else if (message instanceof TryAccessRequest) {</span>
             // handle try access request
-<span class="nc" id="L39">            System.out.println(&quot;handle try access request&quot;);</span>
+<span class="nc" id="L39">            System.out.println(&quot;Handling try access request...&quot;);</span>
 <span class="nc" id="L40">            handleTryAccessRequest(jsonIn);</span>
 <span class="nc bnc" id="L41" title="All 2 branches missed.">        } else if (message instanceof StartAccessRequest) {</span>
             // handle start access request
-<span class="nc" id="L43">            System.out.println(&quot;handle start access request&quot;);</span>
+<span class="nc" id="L43">            System.out.println(&quot;Handling start access request...&quot;);</span>
 <span class="nc" id="L44">            handleStartAccessRequest(jsonIn);</span>
 <span class="nc bnc" id="L45" title="All 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
             // handle end access request
-<span class="nc" id="L47">            System.out.println(&quot;handle end access request&quot;);</span>
+<span class="nc" id="L47">            System.out.println(&quot;Handling end access request...&quot;);</span>
 <span class="nc" id="L48">            handleEndAccessRequest(jsonIn);</span>
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-<span class="nc" id="L52">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+<span class="nc" id="L52">            System.err.println(&quot;Class not recognized. It might be a ResponseMessage&quot;);</span>
         }
 <span class="nc" id="L54">    }</span>
 

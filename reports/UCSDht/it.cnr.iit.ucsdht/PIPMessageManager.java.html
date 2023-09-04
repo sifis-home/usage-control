@@ -27,12 +27,12 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
     protected static void processMessage(JsonIn jsonIn) {
 <span class="nc" id="L28">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
 <span class="nc bnc" id="L29" title="All 2 branches missed.">        if (message instanceof AddPipRequest) {</span>
-<span class="nc" id="L30">            System.out.println(&quot;handle add Pip request&quot;);</span>
+<span class="nc" id="L30">            System.out.println(&quot;Handling add Pip request...&quot;);</span>
 <span class="nc" id="L31">            handleAddPipRequest(jsonIn);</span>
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-<span class="nc" id="L35">            System.err.println(&quot;class not recognized. It might be a ResponseMessage&quot;);</span>
+<span class="nc" id="L35">            System.err.println(&quot;Class not recognized. It might be a ResponseMessage&quot;);</span>
         }
 <span class="nc" id="L37">    }</span>
 
