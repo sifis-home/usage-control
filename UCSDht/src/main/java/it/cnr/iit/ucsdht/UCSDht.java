@@ -83,7 +83,7 @@ public class UCSDht {
 
     public static void main(String[] args) {
 
-        System.out.println("Time: " + System.currentTimeMillis());
+        System.out.println(java.time.LocalDateTime.now() + " Start usage control engine...");
 
         for (int i = 0; i < args.length; i++) {
             switch (args[i]) {
@@ -171,7 +171,8 @@ public class UCSDht {
             System.exit(1);
         }
 
-        System.out.println("Waiting for commands...");
+        System.out.println();
+        System.out.println(java.time.LocalDateTime.now() + " Waiting for commands...");
         System.out.println();
     }
 
@@ -199,20 +200,20 @@ public class UCSDht {
     }
 
     public static void performHardReset() {
-        System.out.println("Performing hard reset...");
+        System.out.println(java.time.LocalDateTime.now() + " Performing hard reset ...");
         // reset everything
         initializeDb();
         Utils.createDir(pipsDir);
         Utils.createDir(pepsDir);
         Utils.createDir(policiesDir);
-        System.out.println("... hard reset performed");
+        System.out.println(java.time.LocalDateTime.now() + " ... hard reset performed");
 
         // save the new state to the dht
         uploadStatus();
     }
 
     public static void performSoftReset() {
-        System.out.println("Performing soft reset...");
+        System.out.println(java.time.LocalDateTime.now() + " Performing soft reset ...");
         // get the state from the dht
         Status status = downloadStatus();
         if (status == null) {
@@ -221,11 +222,12 @@ public class UCSDht {
             //   perform hard reset
             performHardReset();
         } else {
+            System.out.println(java.time.LocalDateTime.now() + " ... status downloaded");
             initializeDb();
             restorePips(status.getPips());
             restorePeps(status.getPeps());
             restorePolicies(status.getPolicies());
-            System.out.println("... soft reset performed");
+            System.out.println(java.time.LocalDateTime.now() + " ... soft reset performed");
 
             // save the new state to the dht
             uploadStatus();
@@ -233,7 +235,7 @@ public class UCSDht {
     }
 
     public static void reloadState() {
-        System.out.println("Reloading state...");
+        System.out.println(java.time.LocalDateTime.now() + " Reloading state ...");
         // get the state from the dht
         Status status = downloadStatus();
         if (status == null) {
@@ -242,11 +244,12 @@ public class UCSDht {
             //   perform hard reset
             performHardReset();
         } else {
+            System.out.println(java.time.LocalDateTime.now() + " ... status downloaded");
             restoreDb(status.getDatabase());
             restorePips(status.getPips());
             restorePeps(status.getPeps());
             restorePolicies(status.getPolicies());
-            System.out.println("... status reloaded");
+            System.out.println(java.time.LocalDateTime.now() + " ... status reloaded");
 
             // do not save the new state to the dht since nothing changed
         }
@@ -468,7 +471,7 @@ public class UCSDht {
     public static Status downloadStatus() {
         boolean isStatusExistent = true;
 
-        System.out.println("Downloading status ...");
+        System.out.println(java.time.LocalDateTime.now() + " Downloading status ...");
         // get the status from the dht
         String response = null;
         if (isDhtReachable(dhtUri, 2000, Integer.MAX_VALUE)) {
@@ -524,7 +527,7 @@ public class UCSDht {
      * Save the UCS status to the dht
      */
     public static void uploadStatus() {
-    System.out.println("Uploading status ...");
+    System.out.println(java.time.LocalDateTime.now() + " Uploading status ...");
         Status value = new Status(
                 saveDbToString(),
                 savePipsToString(),
@@ -554,13 +557,7 @@ public class UCSDht {
         } catch (Exception e) {
             throw new RuntimeException("Unable to parse received Persistent message");
         }
-//        // fixme: sort of check to assess if the received response is invalid. Does it make sense?
-//        if (jsonInPersistent.getPersistent().isDeleted()) {
-//            System.err.println("The received response is marked as deleted");
-//            System.exit(1);
-//        } else {
-            System.out.println("... status uploaded");
-//        }
+            System.out.println(java.time.LocalDateTime.now() + " ... status uploaded");
     }
 
 

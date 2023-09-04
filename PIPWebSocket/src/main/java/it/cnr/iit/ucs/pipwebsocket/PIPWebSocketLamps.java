@@ -4,10 +4,10 @@ import com.google.gson.GsonBuilder;
 import it.cnr.iit.ucs.exceptions.PIPException;
 import it.cnr.iit.ucs.obligationmanager.ObligationInterface;
 import it.cnr.iit.ucs.pip.AbstractPIPWebSocket;
-import it.cnr.iit.ucs.pipwebsocket.json.DomoLight;
 import it.cnr.iit.ucs.pipwebsocket.json.DomoLightRequestPostTopicUuid;
 import it.cnr.iit.ucs.properties.components.PipProperties;
-import it.cnr.iit.utility.dht.jsonpersistent.JsonInResponse;
+import it.cnr.iit.utility.dht.jsonpersistent.JsonInResponse2RequestGetTopicName;
+import it.cnr.iit.utility.dht.jsonpersistent.RequestPostTopicUuid;
 import it.cnr.iit.utility.errorhandling.Reject;
 import it.cnr.iit.xacml.Attribute;
 import oasis.names.tc.xacml.core.schema.wd_17.RequestType;
@@ -27,20 +27,22 @@ public class PIPWebSocketLamps extends AbstractPIPWebSocket {
 
     @Override
     public String retrieve(Attribute attribute) throws PIPException {
-        String response = performRequestGetTopicUuid();
+        // example in which the attribute value represents all-lamps-are-on
+        String response = performRequestGetTopicName();
 
-        JsonInResponse jsonInResponse = new GsonBuilder()
+        JsonInResponse2RequestGetTopicName jsonInResponse = new GsonBuilder()
                 .registerTypeAdapterFactory(getTypeFactory())
-                .create().fromJson(response, JsonInResponse.class);
+                .create()
+                .fromJson(response, JsonInResponse2RequestGetTopicName.class);
 
-        DomoLight domoLight =
-                ((DomoLightRequestPostTopicUuid) jsonInResponse.getResponse().getValue()).getValue();
-
-        String value;
-        if (domoLight.isStatus()) {
-            value = "true";
-        } else {
-            value = "false";
+        String value = "true";
+        for (RequestPostTopicUuid requestPostTopicUuid : jsonInResponse.getResponse().getValue()) {
+            DomoLightRequestPostTopicUuid domoLightRequestPostTopicUuid = (DomoLightRequestPostTopicUuid) requestPostTopicUuid;
+            if (!domoLightRequestPostTopicUuid.getValue().isStatus()) {
+                // if at least one light is off, value takes false, meaning not all lights are on.
+                value = "false";
+                break;
+            }
         }
 
         // attribute value must always be set after it has been retrieved

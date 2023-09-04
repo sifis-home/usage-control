@@ -27,12 +27,12 @@ public class PIPMessageManager {
     protected static void processMessage(JsonIn jsonIn) {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
         if (message instanceof AddPipRequest) {
-            System.out.println("handle add Pip request");
+            System.out.println("Handling add Pip request...");
             handleAddPipRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-            System.err.println("class not recognized. It might be a ResponseMessage");
+            System.err.println("Class not recognized. It might be a ResponseMessage");
         }
     }
 

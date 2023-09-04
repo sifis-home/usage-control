@@ -1,5 +1,6 @@
 package it.cnr.iit.ucsdht;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import it.cnr.iit.utility.dht.DHTClient;
 import it.cnr.iit.utility.dht.jsonvolatile.JsonIn;
@@ -32,7 +33,15 @@ public class DhtMessageHandler implements DHTClient.MessageHandler {
             if (!isTopicOfInterest(jsonIn, UCS_SUB_TOPIC_UUID)) {
                 return;
             }
-            System.out.println("Topic matches. Message type: " + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName());
+            System.out.println("\n" + java.time.LocalDateTime.now() + " Received new command of type "
+                    + jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getClass().getSimpleName()
+                    + ": ");
+            System.out.println(new GsonBuilder()
+                    .disableHtmlEscaping()
+                    .serializeNulls()
+                    .setPrettyPrinting()
+                    .create()
+                    .toJson(jsonIn));
         } catch (JsonSyntaxException e) {
             //System.err.println("Error deserializing Json. Message discarded.");
             return;
@@ -75,6 +84,7 @@ public class DhtMessageHandler implements DHTClient.MessageHandler {
             default:
                 System.err.println("Wrong command type. Request discarded.");
         }
+        System.out.println("\n" + java.time.LocalDateTime.now() + " Command handled\n");
     }
 
     @Override

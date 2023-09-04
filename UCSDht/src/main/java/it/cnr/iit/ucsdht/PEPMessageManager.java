@@ -32,24 +32,24 @@ public class PEPMessageManager {
         MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();
         if (message instanceof RegisterRequest) {
             // handle register request
-            System.out.println("handle register request");
+            System.out.println("Handling register request...");
             handleRegisterRequest(jsonIn);
         } else if (message instanceof TryAccessRequest) {
             // handle try access request
-            System.out.println("handle try access request");
+            System.out.println("Handling try access request...");
             handleTryAccessRequest(jsonIn);
         } else if (message instanceof StartAccessRequest) {
             // handle start access request
-            System.out.println("handle start access request");
+            System.out.println("Handling start access request...");
             handleStartAccessRequest(jsonIn);
         } else if (message instanceof EndAccessRequest) {
             // handle end access request
-            System.out.println("handle end access request");
+            System.out.println("Handling end access request...");
             handleEndAccessRequest(jsonIn);
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
-            System.err.println("class not recognized. It might be a ResponseMessage");
+            System.err.println("Class not recognized. It might be a ResponseMessage");
         }
     }
 
