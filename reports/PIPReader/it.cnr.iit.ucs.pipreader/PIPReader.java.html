@@ -162,10 +162,10 @@ public class PIPReader extends PIPBase {
 
     private void setFilePath(String attributeId, String filePath) {
 <span class="fc" id="L164">        String absFilePath = FileUtility.findFileAbsPathUsingClassLoader(filePath);</span>
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (absFilePath != null) {</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if (absFilePath != null) {</span>
 <span class="fc" id="L166">            this.filePathMap.put(attributeId, absFilePath);</span>
         } else {
-<span class="nc" id="L168">            this.filePathMap.put(attributeId, filePath);</span>
+<span class="fc" id="L168">            this.filePathMap.put(attributeId, filePath);</span>
         }
 <span class="fc" id="L170">        Reject.ifNull(this.filePathMap.get(attributeId));</span>
 <span class="fc" id="L171">    }</span>
@@ -206,10 +206,10 @@ public class PIPReader extends PIPBase {
 
     @Override
     public void performObligation(ObligationInterface obligation) {
-<span class="nc bnc" id="L209" title="All 2 branches missed.">        if (obligation != null) {</span>
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if (obligation != null) {</span>
 <span class="nc" id="L210">            log.severe(&quot;Perform obligation is unimplemented&quot;);</span>
         }
-<span class="nc" id="L212">    }</span>
+<span class="fc" id="L212">    }</span>
 
 
     @Override

@@ -82,9 +82,9 @@ public final class ContextHandler extends AbstractContextHandler {
 //		log.log(Level.INFO, &quot;tryAccess: fattening ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
 
 <span class="fc" id="L84">        log.info(&quot;TryAccess fattened request contents : \n&quot; + request.getRequest());</span>
-<span class="pc bpc" id="L85" title="3 of 4 branches missed.">        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null</span>
-<span class="pc" id="L86">                ? PolicyWrapper.build(getPap(), message)</span>
-<span class="pc" id="L87">                : getPdp().findPolicy(request);</span>
+<span class="pc bpc" id="L85" title="1 of 4 branches missed.">        PolicyWrapper policy = message.getPolicy() != null || message.getPolicyId() != null</span>
+<span class="fc" id="L86">                ? PolicyWrapper.build(getPap(), message)</span>
+<span class="fc" id="L87">                : getPdp().findPolicy(request);</span>
 //		log.info(policy == null || policy.getPolicy() == null ? &quot;No policy found.&quot;
 //				: &quot;Policy found: \n&quot; + policy.getPolicy());
 <span class="pc bpc" id="L90" title="2 of 4 branches missed.">        if (policy == null || policy.getPolicy() == null) {</span>
@@ -132,11 +132,11 @@ public final class ContextHandler extends AbstractContextHandler {
 <span class="fc" id="L132">        String sessionId = generateSessionId();</span>
 <span class="fc" id="L133">        getObligationManager().translateObligations(evaluation, sessionId, STATUS.TRY);</span>
 
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
             // If access decision is PERMIT create entry in SessionManager
-<span class="nc" id="L137">            RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());</span>
+<span class="fc" id="L137">            RequestWrapper origRequest = RequestWrapper.build(message.getRequest(), getPipRegistry());</span>
 //			log.log(Level.INFO, &quot;TryAccess: create session start: {0}&quot;, new Object[] { System.currentTimeMillis() });
-<span class="nc" id="L139">            createSession(message, origRequest, policy, sessionId);</span>
+<span class="fc" id="L139">            createSession(message, origRequest, policy, sessionId);</span>
 //			log.log(Level.INFO, &quot;TryAccess: create session ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
         }
 
@@ -173,34 +173,34 @@ public final class ContextHandler extends AbstractContextHandler {
      */
     private void createSession(TryAccessMessage message, RequestWrapper request, PolicyWrapper policy,
                                String sessionId) {
-<span class="nc" id="L176">        log.setLevel(Level.OFF);</span>
+<span class="fc" id="L176">        log.setLevel(Level.OFF);</span>
 //		log.setLevel(Level.INFO);
-<span class="nc bnc" id="L178" title="All 2 branches missed.">        policy = policy == null ? getPdp().findPolicy(request) : policy;</span>
-<span class="nc" id="L179">        log.log(Level.INFO, &quot;Creating a new session : {0} &quot;, sessionId);</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        policy = policy == null ? getPdp().findPolicy(request) : policy;</span>
+<span class="fc" id="L179">        log.log(Level.INFO, &quot;Creating a new session : {0} &quot;, sessionId);</span>
 
-<span class="nc" id="L181">        String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();</span>
+<span class="fc" id="L181">        String pepUri = uri.getHost() + PEP_ID_SEPARATOR + message.getSource();</span>
 
         // retrieve the id of ongoing attributes
-<span class="nc" id="L184">        List&lt;Attribute&gt; onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
-<span class="nc" id="L185">        SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();</span>
-<span class="nc" id="L186">        sessionAttributeBuilder</span>
-<span class="nc" id="L187">                .setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))</span>
-<span class="nc" id="L188">                .setOnGoingAttributesForAction(getAttributeIdsForCategory(onGoingAttributes, Category.ACTION))</span>
-<span class="nc" id="L189">                .setOnGoingAttributesForResource(getAttributeIdsForCategory(onGoingAttributes, Category.RESOURCE))</span>
-<span class="nc" id="L190">                .setOnGoingAttributesForEnvironment(</span>
-<span class="nc" id="L191">                        getAttributeIdsForCategory(onGoingAttributes, Category.ENVIRONMENT));</span>
-<span class="nc" id="L192">        sessionAttributeBuilder.setSubjectName(request.getRequestType().getAttributeValue(Category.SUBJECT))</span>
-<span class="nc" id="L193">                .setResourceName(request.getRequestType().getAttributeValue(Category.RESOURCE))</span>
-<span class="nc" id="L194">                .setActionName(request.getRequestType().getAttributeValue(Category.ACTION));</span>
-<span class="nc" id="L195">        sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())</span>
-<span class="nc" id="L196">                .setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)</span>
-<span class="nc" id="L197">                .setMyIP(uri.getHost());</span>
+<span class="fc" id="L184">        List&lt;Attribute&gt; onGoingAttributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
+<span class="fc" id="L185">        SessionAttributesBuilder sessionAttributeBuilder = new SessionAttributesBuilder();</span>
+<span class="fc" id="L186">        sessionAttributeBuilder</span>
+<span class="fc" id="L187">                .setOnGoingAttributesForSubject(getAttributeIdsForCategory(onGoingAttributes, Category.SUBJECT))</span>
+<span class="fc" id="L188">                .setOnGoingAttributesForAction(getAttributeIdsForCategory(onGoingAttributes, Category.ACTION))</span>
+<span class="fc" id="L189">                .setOnGoingAttributesForResource(getAttributeIdsForCategory(onGoingAttributes, Category.RESOURCE))</span>
+<span class="fc" id="L190">                .setOnGoingAttributesForEnvironment(</span>
+<span class="fc" id="L191">                        getAttributeIdsForCategory(onGoingAttributes, Category.ENVIRONMENT));</span>
+<span class="fc" id="L192">        sessionAttributeBuilder.setSubjectName(request.getRequestType().getAttributeValue(Category.SUBJECT))</span>
+<span class="fc" id="L193">                .setResourceName(request.getRequestType().getAttributeValue(Category.RESOURCE))</span>
+<span class="fc" id="L194">                .setActionName(request.getRequestType().getAttributeValue(Category.ACTION));</span>
+<span class="fc" id="L195">        sessionAttributeBuilder.setSessionId(sessionId).setPolicySet(policy.getPolicy())</span>
+<span class="fc" id="L196">                .setOriginalRequest(request.getRequest()).setStatus(STATUS.TRY.name()).setPepURI(pepUri)</span>
+<span class="fc" id="L197">                .setMyIP(uri.getHost());</span>
 
         // insert all the values inside the session manager
-<span class="nc bnc" id="L200" title="All 2 branches missed.">        if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if (!getSessionManager().createEntry(sessionAttributeBuilder.build())) {</span>
 <span class="nc" id="L201">            log.log(Level.SEVERE, &quot;Session \&quot;{0}\&quot; has not been stored correctly&quot;, sessionId);</span>
         }
-<span class="nc" id="L203">    }</span>
+<span class="fc" id="L203">    }</span>
 
     /**
      * Retrieves the AttributeIDs of the attributes used for the ongoing evaluation
@@ -210,13 +210,13 @@ public final class ContextHandler extends AbstractContextHandler {
      * @return the list of the string representing the IDs of the attributes
      */
     private List&lt;String&gt; getAttributeIdsForCategory(List&lt;Attribute&gt; onGoingAttributes, Category category) {
-<span class="nc" id="L213">        ArrayList&lt;String&gt; attributeIds = new ArrayList&lt;&gt;();</span>
-<span class="nc bnc" id="L214" title="All 2 branches missed.">        for (Attribute attribute : onGoingAttributes) {</span>
-<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (attribute.getCategory() == category) {</span>
-<span class="nc" id="L216">                attributeIds.add(attribute.getAttributeId());</span>
+<span class="fc" id="L213">        ArrayList&lt;String&gt; attributeIds = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        for (Attribute attribute : onGoingAttributes) {</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            if (attribute.getCategory() == category) {</span>
+<span class="fc" id="L216">                attributeIds.add(attribute.getAttributeId());</span>
             }
-<span class="nc" id="L218">        }</span>
-<span class="nc" id="L219">        return attributeIds;</span>
+<span class="fc" id="L218">        }</span>
+<span class="fc" id="L219">        return attributeIds;</span>
     }
 
     /**
@@ -259,15 +259,15 @@ public final class ContextHandler extends AbstractContextHandler {
 <span class="fc" id="L259">        getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.TRY);</span>
 
 //		log.log(Level.INFO, &quot;startAccess: update entry start: {0}&quot;, new Object[] { System.currentTimeMillis() });
-<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
-<span class="nc bnc" id="L263" title="All 2 branches missed.">            if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">        if (evaluation.isDecision(DecisionType.PERMIT)) {</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">            if (!getSessionManager().updateEntry(message.getSessionId(), STATUS.START.name())) {</span>
 <span class="nc" id="L264">                log.log(Level.SEVERE, &quot;StartAccess error, sessionId {0} status update failed&quot;, message.getSessionId());</span>
             }
 //			log.log(Level.INFO, &quot;startAccess: update entry ended: {0}&quot;, new Object[] { System.currentTimeMillis() });
-<span class="nc" id="L267">            List&lt;Attribute&gt; attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
-<span class="nc" id="L268">            RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
-<span class="nc" id="L269">            getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);</span>
-<span class="nc" id="L270">        } else {</span>
+<span class="fc" id="L267">            List&lt;Attribute&gt; attributes = policy.getAttributesForCondition(PolicyTags.getCondition(STATUS.START));</span>
+<span class="fc" id="L268">            RequestWrapper originalRequest = RequestWrapper.build(session.getOriginalRequest(), getPipRegistry());</span>
+<span class="fc" id="L269">            getPipRegistry().subscribe(originalRequest.getRequestType(), attributes);</span>
+<span class="fc" id="L270">        } else {</span>
 <span class="pc bpc" id="L271" title="3 of 4 branches missed.">            if (revoke(session, new ArrayList&lt;&gt;()) &amp;&amp; !getSessionManager().deleteEntry(message.getSessionId())) {</span>
 <span class="nc" id="L272">                log.log(Level.SEVERE, &quot;StartAccess error, sessionId {0} deletion failed&quot;, message.getSessionId());</span>
             }
@@ -293,17 +293,17 @@ public final class ContextHandler extends AbstractContextHandler {
 <span class="fc" id="L293">        log.log(Level.INFO, &quot;Revoke begins at {0}&quot;, System.currentTimeMillis());</span>
 
 <span class="fc" id="L295">        boolean otherSessions = attributesToUnsubscribe(session.getId(), (ArrayList&lt;Attribute&gt;) attributes);</span>
-<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (!otherSessions) {</span>
-<span class="nc" id="L297">            getPipRegistry().unsubscribeAll(attributes);</span>
+<span class="fc bfc" id="L296" title="All 2 branches covered.">        if (!otherSessions) {</span>
+<span class="fc" id="L297">            getPipRegistry().unsubscribeAll(attributes);</span>
         }
 
-<span class="pc bpc" id="L300" title="1 of 2 branches missed.">        if (!getSessionManager().deleteEntry(session.getId())) {</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">        if (!getSessionManager().deleteEntry(session.getId())) {</span>
 <span class="fc" id="L301">            log.log(Level.SEVERE, &quot;EndAccess: errors during entry deletion for sessionId {0}&quot;, session.getId());</span>
 <span class="fc" id="L302">            return false;</span>
         }
 
-<span class="nc" id="L305">        log.log(Level.INFO, &quot;Revoke ends at {0}&quot;, System.currentTimeMillis());</span>
-<span class="nc" id="L306">        return true;</span>
+<span class="fc" id="L305">        log.log(Level.INFO, &quot;Revoke ends at {0}&quot;, System.currentTimeMillis());</span>
+<span class="fc" id="L306">        return true;</span>
     }
 
     /**
@@ -327,34 +327,34 @@ public final class ContextHandler extends AbstractContextHandler {
 <span class="fc" id="L327">        List&lt;OnGoingAttributesInterface&gt; environmentOnGoingAttributesList = new LinkedList&lt;&gt;();</span>
 
         // build attribute lists for subject, resource, action and environment
-<span class="pc bpc" id="L330" title="2 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
+<span class="pc bpc" id="L330" title="1 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
             // fill the correspondent list of ongoingAttributes
-<span class="nc bnc" id="L332" title="All 2 branches missed.">            for (OnGoingAttributesInterface attribute : onGoingAttributes) {</span>
-<span class="nc bnc" id="L333" title="All 4 branches missed.">                if (attribute.getSubjectName() != null &amp;&amp; !attribute.getSubjectName().equals(&quot;null&quot;)) {</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            for (OnGoingAttributesInterface attribute : onGoingAttributes) {</span>
+<span class="pc bpc" id="L333" title="3 of 4 branches missed.">                if (attribute.getSubjectName() != null &amp;&amp; !attribute.getSubjectName().equals(&quot;null&quot;)) {</span>
 <span class="nc" id="L334">                    subjectOnGoingAttributesList.add(attribute);</span>
 <span class="nc" id="L335">                    subjectName = attribute.getSubjectName();</span>
-<span class="nc bnc" id="L336" title="All 4 branches missed.">                } else if (attribute.getResourceName() != null &amp;&amp; !attribute.getResourceName().equals(&quot;null&quot;)) {</span>
+<span class="pc bpc" id="L336" title="3 of 4 branches missed.">                } else if (attribute.getResourceName() != null &amp;&amp; !attribute.getResourceName().equals(&quot;null&quot;)) {</span>
 <span class="nc" id="L337">                    resourceOnGoingAttributesList.add(attribute);</span>
 <span class="nc" id="L338">                    resourceName = attribute.getResourceName();</span>
-<span class="nc bnc" id="L339" title="All 4 branches missed.">                } else if (attribute.getActionName() != null &amp;&amp; !attribute.getActionName().equals(&quot;null&quot;)) {</span>
+<span class="pc bpc" id="L339" title="3 of 4 branches missed.">                } else if (attribute.getActionName() != null &amp;&amp; !attribute.getActionName().equals(&quot;null&quot;)) {</span>
 <span class="nc" id="L340">                    actionOnGoingAttributesList.add(attribute);</span>
 <span class="nc" id="L341">                    actionName = attribute.getActionName();</span>
                 } else {
-<span class="nc" id="L343">                    environmentOnGoingAttributesList.add(attribute);</span>
+<span class="fc" id="L343">                    environmentOnGoingAttributesList.add(attribute);</span>
                 }
-<span class="nc" id="L345">            }</span>
+<span class="fc" id="L345">            }</span>
         }
 
         // builds up the JSON object that is needed to perform unsubscribe
 <span class="fc" id="L349">        boolean otherSessions = true;</span>
-<span class="pc bpc" id="L350" title="2 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
-<span class="nc" id="L351">            otherSessions = buildOnGoingAttributes(Category.RESOURCE, attributes, resourceName, otherSessions,</span>
+<span class="pc bpc" id="L350" title="1 of 4 branches missed.">        if (onGoingAttributes != null &amp;&amp; !onGoingAttributes.isEmpty()) {</span>
+<span class="fc" id="L351">            otherSessions = buildOnGoingAttributes(Category.RESOURCE, attributes, resourceName, otherSessions,</span>
                     resourceOnGoingAttributesList);
-<span class="nc" id="L353">            otherSessions = buildOnGoingAttributes(Category.SUBJECT, attributes, subjectName, otherSessions,</span>
+<span class="fc" id="L353">            otherSessions = buildOnGoingAttributes(Category.SUBJECT, attributes, subjectName, otherSessions,</span>
                     subjectOnGoingAttributesList);
-<span class="nc" id="L355">            otherSessions = buildOnGoingAttributes(Category.ACTION, attributes, actionName, otherSessions,</span>
+<span class="fc" id="L355">            otherSessions = buildOnGoingAttributes(Category.ACTION, attributes, actionName, otherSessions,</span>
                     actionOnGoingAttributesList);
-<span class="nc" id="L357">            otherSessions = buildOnGoingAttributes(Category.ENVIRONMENT, attributes, &quot;&quot;, otherSessions,</span>
+<span class="fc" id="L357">            otherSessions = buildOnGoingAttributes(Category.ENVIRONMENT, attributes, &quot;&quot;, otherSessions,</span>
                     environmentOnGoingAttributesList);
         }
 <span class="fc" id="L360">        return otherSessions;</span>
@@ -362,14 +362,14 @@ public final class ContextHandler extends AbstractContextHandler {
 
     private boolean buildOnGoingAttributes(Category category, ArrayList&lt;Attribute&gt; attributes, String name,
                                            boolean otherSessions, List&lt;OnGoingAttributesInterface&gt; listOngoingAttributes) {
-<span class="nc bnc" id="L365" title="All 2 branches missed.">        for (OnGoingAttributesInterface attribute : listOngoingAttributes) {</span>
-<span class="nc" id="L366">            List&lt;SessionInterface&gt; sessionList = getSessionListForCategory(category, attribute.getAttributeId(), name);</span>
-<span class="nc bnc" id="L367" title="All 6 branches missed.">            if (sessionList == null || sessionList.isEmpty() || sessionList.size() == 1) {</span>
-<span class="nc" id="L368">                otherSessions = false;</span>
-<span class="nc" id="L369">                attributes.add(buildAttribute(attribute, name));</span>
+<span class="fc bfc" id="L365" title="All 2 branches covered.">        for (OnGoingAttributesInterface attribute : listOngoingAttributes) {</span>
+<span class="fc" id="L366">            List&lt;SessionInterface&gt; sessionList = getSessionListForCategory(category, attribute.getAttributeId(), name);</span>
+<span class="pc bpc" id="L367" title="3 of 6 branches missed.">            if (sessionList == null || sessionList.isEmpty() || sessionList.size() == 1) {</span>
+<span class="fc" id="L368">                otherSessions = false;</span>
+<span class="fc" id="L369">                attributes.add(buildAttribute(attribute, name));</span>
             }
-<span class="nc" id="L371">        }</span>
-<span class="nc" id="L372">        return otherSessions;</span>
+<span class="fc" id="L371">        }</span>
+<span class="fc" id="L372">        return otherSessions;</span>
     }
 
     private List&lt;SessionInterface&gt; getSessionListForCategory(Category category, String id, String name) {
@@ -389,12 +389,12 @@ public final class ContextHandler extends AbstractContextHandler {
     }
 
     private Attribute buildAttribute(OnGoingAttributesInterface ongoingAttribute, String name) {
-<span class="nc" id="L392">        Attribute attribute = new Attribute();</span>
-<span class="nc" id="L393">        attribute.setAttributeId(ongoingAttribute.getAttributeId());</span>
-<span class="nc bnc" id="L394" title="All 2 branches missed.">        if (!name.isEmpty()) {</span>
+<span class="fc" id="L392">        Attribute attribute = new Attribute();</span>
+<span class="fc" id="L393">        attribute.setAttributeId(ongoingAttribute.getAttributeId());</span>
+<span class="pc bpc" id="L394" title="1 of 2 branches missed.">        if (!name.isEmpty()) {</span>
 <span class="nc" id="L395">            attribute.setAdditionalInformation(name);</span>
         }
-<span class="nc" id="L397">        return attribute;</span>
+<span class="fc" id="L397">        return attribute;</span>
     }
 
     /**
@@ -433,8 +433,8 @@ public final class ContextHandler extends AbstractContextHandler {
 <span class="fc" id="L433">        getObligationManager().translateObligations(evaluation, message.getSessionId(), STATUS.END);</span>
 
         // access must be revoked
-<span class="pc bpc" id="L436" title="1 of 2 branches missed.">        if (revoke(session, new ArrayList&lt;&gt;())) {</span>
-<span class="nc" id="L437">            log.log(Level.INFO, &quot;EndAccess evaluation with revoke ends at {0}&quot;, System.currentTimeMillis());</span>
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        if (revoke(session, new ArrayList&lt;&gt;())) {</span>
+<span class="fc" id="L437">            log.log(Level.INFO, &quot;EndAccess evaluation with revoke ends at {0}&quot;, System.currentTimeMillis());</span>
         }
 
 <span class="fc" id="L440">        return buildEndAccessResponse(message, evaluation);</span>

@@ -16,24 +16,24 @@ import static it.cnr.iit.utility.dht.DHTUtils.serializeOutgoingJson;
      */
     protected static void serializeAndSend(JsonOut jsonOut) {
         // serialize the object to a json string
-<span class="nc" id="L19">        String msg = serializeOutgoingJson(jsonOut);</span>
+<span class="fc" id="L19">        String msg = serializeOutgoingJson(jsonOut);</span>
 
         // send the request
-<span class="nc bnc" id="L22" title="All 2 branches missed.">        if (!dhtClientEndPoint.sendMessage(msg)) {</span>
+<span class="pc bpc" id="L22" title="1 of 2 branches missed.">        if (!dhtClientEndPoint.sendMessage(msg)) {</span>
 <span class="nc" id="L23">            System.err.println(&quot;Error sending the message to the DHT&quot;);</span>
         }
-<span class="nc" id="L25">    }</span>
+<span class="fc" id="L25">    }</span>
 
     static MessageContent getMessageFromJson(JsonIn jsonIn) {
-<span class="nc" id="L28">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="fc" id="L28">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
     }
 
     static String getIdFromJson(JsonIn jsonIn) {
-<span class="nc" id="L32">        return jsonIn.getVolatile().getValue().getCommand().getValue().getId();</span>
+<span class="fc" id="L32">        return jsonIn.getVolatile().getValue().getCommand().getValue().getId();</span>
     }
 
     static String getMessageIdFromJson(JsonIn jsonIn) {
-<span class="nc" id="L36">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getMessage_id();</span>
+<span class="fc" id="L36">        return jsonIn.getVolatile().getValue().getCommand().getValue().getMessage().getMessage_id();</span>
     }
 
 

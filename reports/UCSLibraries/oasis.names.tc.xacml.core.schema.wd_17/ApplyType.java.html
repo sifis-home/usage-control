@@ -53,10 +53,10 @@ import javax.xml.bind.annotation.XmlType;
 <span class="nc" id="L53">    }</span>
 
     public List&lt;JAXBElement&lt;?&gt;&gt; getExpression() { // NOSONAR
-<span class="nc bnc" id="L56" title="All 2 branches missed.">        if( expression == null ) {</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        if( expression == null ) {</span>
 <span class="nc" id="L57">            expression = new ArrayList&lt;&gt;();</span>
         }
-<span class="nc" id="L59">        return this.expression;</span>
+<span class="fc" id="L59">        return this.expression;</span>
     }
 
     String getFunctionId() {

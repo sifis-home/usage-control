@@ -5,13 +5,13 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class AddPolicyRequest implements MessageContent {
 
-<span class="nc" id="L8">    public final String purpose = PURPOSE.ADD_POLICY.name();</span>
+<span class="pc" id="L8">    public final String purpose = PURPOSE.ADD_POLICY.name();</span>
     private String message_id;
     private String policy;
     private String policy_id;
 
-<span class="nc" id="L13">    public AddPolicyRequest() {</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L13">    public AddPolicyRequest() {</span>
+<span class="fc" id="L14">    }</span>
 
 <span class="nc" id="L16">    public AddPolicyRequest(String message_id, String policy, String policy_id) {</span>
 <span class="nc" id="L17">        this.message_id = message_id;</span>
@@ -20,7 +20,7 @@ public class AddPolicyRequest implements MessageContent {
 <span class="nc" id="L20">    }</span>
     @Override
     public String getMessage_id() {
-<span class="nc" id="L23">        return message_id;</span>
+<span class="fc" id="L23">        return message_id;</span>
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AddPolicyRequest implements MessageContent {
 <span class="nc" id="L29">    }</span>
 
     public String getPolicy() {
-<span class="nc" id="L32">        return policy;</span>
+<span class="fc" id="L32">        return policy;</span>
     }
 
     public void setPolicy(String policy) {

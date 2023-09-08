@@ -19,7 +19,7 @@ import it.cnr.iit.utility.errorhandling.Reject;
 
 public class ReflectionsUtility {
 
-<span class="nc" id="L22">    private static final Logger log = Logger.getLogger( ReflectionsUtility.class.getName() );</span>
+<span class="fc" id="L22">    private static final Logger log = Logger.getLogger( ReflectionsUtility.class.getName() );</span>
 
     private ReflectionsUtility() {}
 
@@ -36,7 +36,7 @@ public class ReflectionsUtility {
 
     public static &lt;T&gt; Optional&lt;Class&lt;T&gt;&gt; getClassFromPackageName( String name ) {
         try {
-<span class="nc" id="L39">            return Optional.of( (Class&lt;T&gt;) Class.forName( name ) );</span>
+<span class="fc" id="L39">            return Optional.of( (Class&lt;T&gt;) Class.forName( name ) );</span>
 <span class="nc" id="L40">        } catch( ClassNotFoundException e ) {</span>
 <span class="nc" id="L41">            log.warning( e.getMessage() );</span>
         }
@@ -55,21 +55,21 @@ public class ReflectionsUtility {
     }
 
     public static &lt;T&gt; Optional&lt;Class&lt;T&gt;&gt; getClass( String name, Class&lt;T&gt; clazz ) {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if( name.contains( &quot;.&quot; ) ) {</span>
-<span class="nc" id="L59">            return getClassFromPackageName( name );</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if( name.contains( &quot;.&quot; ) ) {</span>
+<span class="fc" id="L59">            return getClassFromPackageName( name );</span>
         }
 <span class="nc" id="L61">        return getClassFromSimpleName( name, clazz );</span>
     }
 
     public static &lt;T&gt; Optional&lt;T&gt; buildComponent( CommonProperties properties, Class&lt;T&gt; clazz ) {
-<span class="nc" id="L65">        Reject.ifBlank( properties.getName() );</span>
+<span class="fc" id="L65">        Reject.ifBlank( properties.getName() );</span>
         try {
-<span class="nc" id="L67">            Class&lt;?&gt; propClazz = properties.getClass().getInterfaces()[0]; // TODO UCS-32 NOSONAR</span>
-<span class="nc" id="L68">            Optional&lt;Class&lt;T&gt;&gt; actualClass = getClass( properties.getName(), clazz );</span>
-<span class="nc bnc" id="L69" title="All 2 branches missed.">            if( actualClass.isPresent() ) {</span>
-<span class="nc" id="L70">                Constructor&lt;?&gt; constructor = actualClass.get().getConstructor( propClazz );</span>
-<span class="nc" id="L71">                T obj = (T) constructor.newInstance( properties );</span>
-<span class="nc" id="L72">                return Optional.of( obj );</span>
+<span class="fc" id="L67">            Class&lt;?&gt; propClazz = properties.getClass().getInterfaces()[0]; // TODO UCS-32 NOSONAR</span>
+<span class="fc" id="L68">            Optional&lt;Class&lt;T&gt;&gt; actualClass = getClass( properties.getName(), clazz );</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">            if( actualClass.isPresent() ) {</span>
+<span class="fc" id="L70">                Constructor&lt;?&gt; constructor = actualClass.get().getConstructor( propClazz );</span>
+<span class="fc" id="L71">                T obj = (T) constructor.newInstance( properties );</span>
+<span class="fc" id="L72">                return Optional.of( obj );</span>
             }
 <span class="nc" id="L74">        } catch( Exception e ) {</span>
 <span class="nc" id="L75">            log.severe( () -&gt; &quot;Failed building &quot; + properties.getName() + &quot; : &quot; + e.getMessage() );</span>

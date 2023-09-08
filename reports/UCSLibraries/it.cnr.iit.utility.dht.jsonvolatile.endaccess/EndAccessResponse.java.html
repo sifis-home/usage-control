@@ -6,7 +6,7 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class EndAccessResponse implements MessageContent, EvaluatedMessageContent {
 
-<span class="nc" id="L9">    public String purpose = PURPOSE.END_RESPONSE.name();</span>
+<span class="pc" id="L9">    public String purpose = PURPOSE.END_RESPONSE.name();</span>
     private String message_id;
     private String evaluation;
 
@@ -14,10 +14,10 @@ public class EndAccessResponse implements MessageContent, EvaluatedMessageConten
 
 <span class="nc" id="L15">    }</span>
 
-<span class="nc" id="L17">    public EndAccessResponse(String message_id, String evaluation) {</span>
-<span class="nc" id="L18">        this.message_id = message_id;</span>
-<span class="nc" id="L19">        this.evaluation = evaluation;</span>
-<span class="nc" id="L20">    }</span>
+<span class="fc" id="L17">    public EndAccessResponse(String message_id, String evaluation) {</span>
+<span class="fc" id="L18">        this.message_id = message_id;</span>
+<span class="fc" id="L19">        this.evaluation = evaluation;</span>
+<span class="fc" id="L20">    }</span>
 
     public String getMessage_id() {
 <span class="nc" id="L23">        return message_id;</span>

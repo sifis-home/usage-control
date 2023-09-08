@@ -5,17 +5,17 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class GetPolicyResponse implements MessageContent {
 
-<span class="nc" id="L8">    public String purpose = PURPOSE.GET_POLICY_RESPONSE.name();</span>
+<span class="pc" id="L8">    public String purpose = PURPOSE.GET_POLICY_RESPONSE.name();</span>
     private String message_id;
     private String policy;
 
 <span class="nc" id="L12">    public GetPolicyResponse() {</span>
 <span class="nc" id="L13">    }</span>
 
-<span class="nc" id="L15">    public GetPolicyResponse(String message_id, String policy) {</span>
-<span class="nc" id="L16">        this.message_id = message_id;</span>
-<span class="nc" id="L17">        this.policy = policy;</span>
-<span class="nc" id="L18">    }</span>
+<span class="fc" id="L15">    public GetPolicyResponse(String message_id, String policy) {</span>
+<span class="fc" id="L16">        this.message_id = message_id;</span>
+<span class="fc" id="L17">        this.policy = policy;</span>
+<span class="fc" id="L18">    }</span>
 
     public String getMessage_id() {
 <span class="nc" id="L21">        return message_id;</span>

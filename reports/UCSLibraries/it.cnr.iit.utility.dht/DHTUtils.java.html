@@ -33,28 +33,28 @@ import java.net.URI;
 
 <span class="nc" id="L34">public class DHTUtils {</span>
 
-<span class="nc" id="L36">    private static final RuntimeTypeAdapterFactory&lt;MessageContent&gt; typeFactory = RuntimeTypeAdapterFactory</span>
-<span class="nc" id="L37">            .of(MessageContent.class, &quot;purpose&quot;)</span>
-<span class="nc" id="L38">            .registerSubtype(RegisterRequest.class, PURPOSE.REGISTER.name())</span>
-<span class="nc" id="L39">            .registerSubtype(RegisterResponse.class, PURPOSE.REGISTER_RESPONSE.name())</span>
-<span class="nc" id="L40">            .registerSubtype(TryAccessRequest.class, PURPOSE.TRY.name())</span>
-<span class="nc" id="L41">            .registerSubtype(TryAccessResponse.class, PURPOSE.TRY_RESPONSE.name())</span>
-<span class="nc" id="L42">            .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())</span>
-<span class="nc" id="L43">            .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())</span>
-<span class="nc" id="L44">            .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())</span>
-<span class="nc" id="L45">            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())</span>
-<span class="nc" id="L46">            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name())</span>
-<span class="nc" id="L47">            .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())</span>
-<span class="nc" id="L48">            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name())</span>
-<span class="nc" id="L49">            .registerSubtype(DeletePolicyRequest.class, PURPOSE.DELETE_POLICY.name())</span>
-<span class="nc" id="L50">            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name())</span>
-<span class="nc" id="L51">            .registerSubtype(ListPoliciesRequest.class, PURPOSE.LIST_POLICIES.name())</span>
-<span class="nc" id="L52">            .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name())</span>
-<span class="nc" id="L53">            .registerSubtype(GetPolicyRequest.class, PURPOSE.GET_POLICY.name())</span>
-<span class="nc" id="L54">            .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name())</span>
-<span class="nc" id="L55">            .registerSubtype(AddPipRequest.class, PURPOSE.ADD_PIP.name())</span>
-<span class="nc" id="L56">            .registerSubtype(AddPipResponse.class, PURPOSE.ADD_PIP_RESPONSE.name())</span>
-<span class="nc" id="L57">            .registerSubtype(ErrorResponse.class, PURPOSE.ERROR_RESPONSE.name());</span>
+<span class="fc" id="L36">    private static final RuntimeTypeAdapterFactory&lt;MessageContent&gt; typeFactory = RuntimeTypeAdapterFactory</span>
+<span class="fc" id="L37">            .of(MessageContent.class, &quot;purpose&quot;)</span>
+<span class="fc" id="L38">            .registerSubtype(RegisterRequest.class, PURPOSE.REGISTER.name())</span>
+<span class="fc" id="L39">            .registerSubtype(RegisterResponse.class, PURPOSE.REGISTER_RESPONSE.name())</span>
+<span class="fc" id="L40">            .registerSubtype(TryAccessRequest.class, PURPOSE.TRY.name())</span>
+<span class="fc" id="L41">            .registerSubtype(TryAccessResponse.class, PURPOSE.TRY_RESPONSE.name())</span>
+<span class="fc" id="L42">            .registerSubtype(StartAccessRequest.class, PURPOSE.START.name())</span>
+<span class="fc" id="L43">            .registerSubtype(StartAccessResponse.class, PURPOSE.START_RESPONSE.name())</span>
+<span class="fc" id="L44">            .registerSubtype(EndAccessRequest.class, PURPOSE.END.name())</span>
+<span class="fc" id="L45">            .registerSubtype(EndAccessResponse.class, PURPOSE.END_RESPONSE.name())</span>
+<span class="fc" id="L46">            .registerSubtype(ReevaluationResponse.class, PURPOSE.REEVALUATION_RESPONSE.name())</span>
+<span class="fc" id="L47">            .registerSubtype(AddPolicyRequest.class, PURPOSE.ADD_POLICY.name())</span>
+<span class="fc" id="L48">            .registerSubtype(AddPolicyResponse.class, PURPOSE.ADD_POLICY_RESPONSE.name())</span>
+<span class="fc" id="L49">            .registerSubtype(DeletePolicyRequest.class, PURPOSE.DELETE_POLICY.name())</span>
+<span class="fc" id="L50">            .registerSubtype(DeletePolicyResponse.class, PURPOSE.DELETE_POLICY_RESPONSE.name())</span>
+<span class="fc" id="L51">            .registerSubtype(ListPoliciesRequest.class, PURPOSE.LIST_POLICIES.name())</span>
+<span class="fc" id="L52">            .registerSubtype(ListPoliciesResponse.class, PURPOSE.LIST_POLICIES_RESPONSE.name())</span>
+<span class="fc" id="L53">            .registerSubtype(GetPolicyRequest.class, PURPOSE.GET_POLICY.name())</span>
+<span class="fc" id="L54">            .registerSubtype(GetPolicyResponse.class, PURPOSE.GET_POLICY_RESPONSE.name())</span>
+<span class="fc" id="L55">            .registerSubtype(AddPipRequest.class, PURPOSE.ADD_PIP.name())</span>
+<span class="fc" id="L56">            .registerSubtype(AddPipResponse.class, PURPOSE.ADD_PIP_RESPONSE.name())</span>
+<span class="fc" id="L57">            .registerSubtype(ErrorResponse.class, PURPOSE.ERROR_RESPONSE.name());</span>
 
 
     /**
@@ -70,21 +70,21 @@ import java.net.URI;
     public static JsonOut buildOutgoingJsonObject(MessageContent message, String id,
                                                   String topic_name, String topic_uuid,
                                                   String commandType) {
-<span class="nc" id="L73">        InnerValue innerValue =</span>
+<span class="fc" id="L73">        InnerValue innerValue =</span>
                 new InnerValue(
                         message,
                         id,
                         topic_name,
                         topic_uuid);
 
-<span class="nc" id="L80">        Command command = new Command(commandType, innerValue);</span>
+<span class="fc" id="L80">        Command command = new Command(commandType, innerValue);</span>
 
         // set timestamp
-<span class="nc" id="L83">        OuterValue outerValue = new OuterValue(System.currentTimeMillis(), command);</span>
+<span class="fc" id="L83">        OuterValue outerValue = new OuterValue(System.currentTimeMillis(), command);</span>
 
-<span class="nc" id="L85">        RequestPubMessage pubMsg = new RequestPubMessage(outerValue);</span>
+<span class="fc" id="L85">        RequestPubMessage pubMsg = new RequestPubMessage(outerValue);</span>
 
-<span class="nc" id="L87">        return new JsonOut(pubMsg);</span>
+<span class="fc" id="L87">        return new JsonOut(pubMsg);</span>
     }
 
     /**
@@ -96,29 +96,29 @@ import java.net.URI;
      */
     public static String serializeOutgoingJson(JsonOut jsonOut) {
 
-<span class="nc" id="L99">        String outgoing = new GsonBuilder()</span>
-<span class="nc" id="L100">                .disableHtmlEscaping()</span>
-<span class="nc" id="L101">                .serializeNulls()</span>
-<span class="nc" id="L102">                .create()</span>
-<span class="nc" id="L103">                .toJson(jsonOut);</span>
+<span class="fc" id="L99">        String outgoing = new GsonBuilder()</span>
+<span class="fc" id="L100">                .disableHtmlEscaping()</span>
+<span class="fc" id="L101">                .serializeNulls()</span>
+<span class="fc" id="L102">                .create()</span>
+<span class="fc" id="L103">                .toJson(jsonOut);</span>
 
-<span class="nc" id="L105">        String messageClass = jsonOut</span>
-<span class="nc" id="L106">                .getRequestPubMessage()</span>
-<span class="nc" id="L107">                .getValue()</span>
-<span class="nc" id="L108">                .getCommand()</span>
-<span class="nc" id="L109">                .getValue()</span>
-<span class="nc" id="L110">                .getMessage()</span>
-<span class="nc" id="L111">                .getClass()</span>
-<span class="nc" id="L112">                .getSimpleName();</span>
+<span class="fc" id="L105">        String messageClass = jsonOut</span>
+<span class="fc" id="L106">                .getRequestPubMessage()</span>
+<span class="fc" id="L107">                .getValue()</span>
+<span class="fc" id="L108">                .getCommand()</span>
+<span class="fc" id="L109">                .getValue()</span>
+<span class="fc" id="L110">                .getMessage()</span>
+<span class="fc" id="L111">                .getClass()</span>
+<span class="fc" id="L112">                .getSimpleName();</span>
 
-<span class="nc" id="L114">        System.out.println(&quot;Sending &quot; + messageClass + &quot; message:&quot;);</span>
-<span class="nc" id="L115">        System.out.println(new GsonBuilder()</span>
-<span class="nc" id="L116">                .disableHtmlEscaping()</span>
-<span class="nc" id="L117">                .serializeNulls()</span>
-<span class="nc" id="L118">                .setPrettyPrinting()</span>
-<span class="nc" id="L119">                .create()</span>
-<span class="nc" id="L120">                .toJson(jsonOut));</span>
-<span class="nc" id="L121">        return outgoing;</span>
+<span class="fc" id="L114">        System.out.println(&quot;Sending &quot; + messageClass + &quot; message:&quot;);</span>
+<span class="fc" id="L115">        System.out.println(new GsonBuilder()</span>
+<span class="fc" id="L116">                .disableHtmlEscaping()</span>
+<span class="fc" id="L117">                .serializeNulls()</span>
+<span class="fc" id="L118">                .setPrettyPrinting()</span>
+<span class="fc" id="L119">                .create()</span>
+<span class="fc" id="L120">                .toJson(jsonOut));</span>
+<span class="fc" id="L121">        return outgoing;</span>
     }
 
 
@@ -129,9 +129,9 @@ import java.net.URI;
      * @return the object deserialized from the Json string
      */
     public static JsonIn deserializeIncomingJson(String message) {
-<span class="nc" id="L132">        return new GsonBuilder()</span>
-<span class="nc" id="L133">                .registerTypeAdapterFactory(typeFactory)</span>
-<span class="nc" id="L134">                .create().fromJson(message, JsonIn.class);</span>
+<span class="fc" id="L132">        return new GsonBuilder()</span>
+<span class="fc" id="L133">                .registerTypeAdapterFactory(typeFactory)</span>
+<span class="fc" id="L134">                .create().fromJson(message, JsonIn.class);</span>
     }
 
     /**
@@ -170,24 +170,24 @@ import java.net.URI;
      */
     public static boolean isDhtReachable(String dhtWebsocketUri, int timeout, int attempts) {
 
-<span class="nc" id="L173">        Socket socket = null;</span>
-<span class="nc" id="L174">        URI dhtUri = URI.create(dhtWebsocketUri);</span>
+<span class="fc" id="L173">        Socket socket = null;</span>
+<span class="fc" id="L174">        URI dhtUri = URI.create(dhtWebsocketUri);</span>
 
-<span class="nc" id="L176">        long connectionTime = System.currentTimeMillis();</span>
-<span class="nc bnc" id="L177" title="All 2 branches missed.">        for (int i = 0; i &lt; attempts; i++) {</span>
+<span class="fc" id="L176">        long connectionTime = System.currentTimeMillis();</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        for (int i = 0; i &lt; attempts; i++) {</span>
             try {
-<span class="nc" id="L179">                connectionTime = System.currentTimeMillis();</span>
-<span class="nc" id="L180">                socket = new Socket();</span>
-<span class="nc" id="L181">                socket.connect(new InetSocketAddress(dhtUri.getHost(), dhtUri.getPort()), timeout);</span>
-<span class="nc" id="L182">                break;</span>
-<span class="nc" id="L183">            } catch (Exception e) {</span>
-<span class="nc" id="L184">                System.err.println(&quot;Failed: Attempt &quot; + (i + 1) + &quot; of &quot; + attempts + &quot; to reach DHT at: &quot; + dhtWebsocketUri);</span>
-<span class="nc bnc" id="L185" title="All 2 branches missed.">                if (i == attempts - 1) {</span>
+<span class="fc" id="L179">                connectionTime = System.currentTimeMillis();</span>
+<span class="fc" id="L180">                socket = new Socket();</span>
+<span class="fc" id="L181">                socket.connect(new InetSocketAddress(dhtUri.getHost(), dhtUri.getPort()), timeout);</span>
+<span class="fc" id="L182">                break;</span>
+<span class="fc" id="L183">            } catch (Exception e) {</span>
+<span class="fc" id="L184">                System.err.println(&quot;Failed: Attempt &quot; + (i + 1) + &quot; of &quot; + attempts + &quot; to reach DHT at: &quot; + dhtWebsocketUri);</span>
+<span class="pc bpc" id="L185" title="1 of 2 branches missed.">                if (i == attempts - 1) {</span>
 <span class="nc" id="L186">                    return false;</span>
                 }
                 try {
-<span class="nc" id="L189">                    long currentTime = System.currentTimeMillis();</span>
-<span class="nc bnc" id="L190" title="All 2 branches missed.">                    long timeLeftToSleep = connectionTime + timeout - currentTime &gt; 0 ?</span>
+<span class="fc" id="L189">                    long currentTime = System.currentTimeMillis();</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">                    long timeLeftToSleep = connectionTime + timeout - currentTime &gt; 0 ?</span>
                             connectionTime + timeout - currentTime : 0L;
 
 <span class="nc" id="L193">                    Thread.sleep(timeLeftToSleep);</span>
@@ -197,12 +197,12 @@ import java.net.URI;
             }
         }
         try {
-<span class="nc bnc" id="L200" title="All 2 branches missed.">            assert socket != null;</span>
-<span class="nc" id="L201">            socket.close();</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">            assert socket != null;</span>
+<span class="fc" id="L201">            socket.close();</span>
 <span class="nc" id="L202">        } catch (IOException e) {</span>
 <span class="nc" id="L203">            e.printStackTrace();</span>
-<span class="nc" id="L204">        }</span>
-<span class="nc" id="L205">        return true;</span>
+<span class="fc" id="L204">        }</span>
+<span class="fc" id="L205">        return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

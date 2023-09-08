@@ -40,14 +40,14 @@ public class PIPRegistry implements PIPRegistryInterface {
 
 	@Override
 	public void unsubscribeAll(List&lt;Attribute&gt; attributes) {
-<span class="nc bnc" id="L43" title="All 2 branches missed.">		for (PIPCHInterface pip : pipList) {</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">		for (PIPCHInterface pip : pipList) {</span>
 			try {
-<span class="nc" id="L45">				pip.unsubscribe(attributes);</span>
+<span class="fc" id="L45">				pip.unsubscribe(attributes);</span>
 <span class="nc" id="L46">			} catch (Exception e) {</span>
 <span class="nc" id="L47">				log.severe(&quot;Error unsubscribe : &quot; + e.getMessage());</span>
-<span class="nc" id="L48">			}</span>
-<span class="nc" id="L49">		}</span>
-<span class="nc" id="L50">	}</span>
+<span class="fc" id="L48">			}</span>
+<span class="fc" id="L49">		}</span>
+<span class="fc" id="L50">	}</span>
 
 	@Override
 	public void subscribeAll(RequestType requestType) {
@@ -75,16 +75,16 @@ public class PIPRegistry implements PIPRegistryInterface {
 
 	@Override
 	public Optional&lt;PIPCHInterface&gt; getByAttributeId(String attributeId) {
-<span class="nc" id="L78">		Attribute attribute = new Attribute();</span>
-<span class="nc" id="L79">		attribute.setAttributeId(attributeId);</span>
-<span class="nc" id="L80">		return getByAttribute(attribute);</span>
+<span class="fc" id="L78">		Attribute attribute = new Attribute();</span>
+<span class="fc" id="L79">		attribute.setAttributeId(attributeId);</span>
+<span class="fc" id="L80">		return getByAttribute(attribute);</span>
 	}
 
 	@Override
 	public Optional&lt;PIPCHInterface&gt; getByAttribute(Attribute attribute) {
-<span class="nc bnc" id="L85" title="All 2 branches missed.">		for (PIPCHInterface pip : pipList) {</span>
-<span class="nc bnc" id="L86" title="All 2 branches missed.">			if (pip.getAttributeIds().contains(attribute.getAttributeId())) {</span>
-<span class="nc" id="L87">				return Optional.of(pip);</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">		for (PIPCHInterface pip : pipList) {</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">			if (pip.getAttributeIds().contains(attribute.getAttributeId())) {</span>
+<span class="fc" id="L87">				return Optional.of(pip);</span>
 			}
 <span class="nc" id="L89">		}</span>
 <span class="nc" id="L90">		return Optional.empty();</span>
@@ -116,23 +116,23 @@ public class PIPRegistry implements PIPRegistryInterface {
 	public void subscribe(RequestType request, List&lt;Attribute&gt; attributes) {
 
 		// loop on all the PIPs
-<span class="nc bnc" id="L119" title="All 2 branches missed.">		for (PIPCHInterface pip : pipList) {</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">		for (PIPCHInterface pip : pipList) {</span>
 
 			//loop on the ongoing attributes
-<span class="nc bnc" id="L122" title="All 2 branches missed.">			for (Attribute attr : attributes) {</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">			for (Attribute attr : attributes) {</span>
 
 				// if among the attributeIds handled by the PIP there is
 				// the attributeId of the attribute we are considering,
-<span class="nc bnc" id="L126" title="All 2 branches missed.">				if (pip.getAttributeIds().contains(attr.getAttributeId())) {</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">				if (pip.getAttributeIds().contains(attr.getAttributeId())) {</span>
 					try {
-<span class="nc" id="L128">						pip.subscribe(request, attr.getAttributeId());</span>
+<span class="fc" id="L128">						pip.subscribe(request, attr.getAttributeId());</span>
 <span class="nc" id="L129">					} catch (Exception e) {</span>
 <span class="nc" id="L130">						log.severe(&quot;Error subscribe : &quot; + e.getMessage());</span>
 <span class="nc" id="L131">						Throwables.throwIfUnchecked(new RuntimeException(&quot;Error subscribe : &quot; + e.getMessage()));</span>
-<span class="nc" id="L132">					}</span>
+<span class="fc" id="L132">					}</span>
 				}
-<span class="nc" id="L134">			}</span>
-<span class="nc" id="L135">		}</span>
-<span class="nc" id="L136">	}</span>
+<span class="fc" id="L134">			}</span>
+<span class="fc" id="L135">		}</span>
+<span class="fc" id="L136">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class AddPipRequest implements MessageContent {
 
-<span class="nc" id="L10">    public final String purpose = PURPOSE.ADD_PIP.name();</span>
+<span class="pc" id="L10">    public final String purpose = PURPOSE.ADD_PIP.name();</span>
     private String message_id;
     private String pip_type;
     private String attribute_id;
@@ -16,8 +16,8 @@ public class AddPipRequest implements MessageContent {
     private long refresh_rate;
     private Map&lt;String, String&gt; additional_properties;
 
-<span class="nc" id="L19">    public AddPipRequest() {</span>
-<span class="nc" id="L20">    }</span>
+<span class="fc" id="L19">    public AddPipRequest() {</span>
+<span class="fc" id="L20">    }</span>
 
     public AddPipRequest(String message_id, String pip_type, String attribute_id, String category,
 <span class="nc" id="L23">                         String data_type, long refresh_rate, Map&lt;String, String&gt; additional_properties) {</span>
@@ -31,7 +31,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L31">    }</span>
     @Override
     public String getMessage_id() {
-<span class="nc" id="L34">        return message_id;</span>
+<span class="fc" id="L34">        return message_id;</span>
     }
 
     @Override
@@ -41,7 +41,7 @@ public class AddPipRequest implements MessageContent {
 
 
     public String getPip_type() {
-<span class="nc" id="L44">        return pip_type;</span>
+<span class="fc" id="L44">        return pip_type;</span>
     }
 
     public void setPip_type(String pip_type) {
@@ -49,7 +49,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L49">    }</span>
 
     public String getAttribute_id() {
-<span class="nc" id="L52">        return attribute_id;</span>
+<span class="fc" id="L52">        return attribute_id;</span>
     }
 
     public void setAttribute_id(String attribute_id) {
@@ -57,7 +57,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L57">    }</span>
 
     public String getCategory() {
-<span class="nc" id="L60">        return category;</span>
+<span class="fc" id="L60">        return category;</span>
     }
 
     public void setCategory(String category) {
@@ -65,7 +65,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L65">    }</span>
 
     public String getData_type() {
-<span class="nc" id="L68">        return data_type;</span>
+<span class="fc" id="L68">        return data_type;</span>
     }
 
     public void setData_type(String data_type) {
@@ -73,7 +73,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L73">    }</span>
 
     public Map&lt;String, String&gt; getAdditional_properties() {
-<span class="nc" id="L76">        return additional_properties;</span>
+<span class="fc" id="L76">        return additional_properties;</span>
     }
 
     public void setAdditional_properties(Map&lt;String, String&gt; additional_properties) {
@@ -81,7 +81,7 @@ public class AddPipRequest implements MessageContent {
 <span class="nc" id="L81">    }</span>
 
     public long getRefresh_rate() {
-<span class="nc" id="L84">        return refresh_rate;</span>
+<span class="fc" id="L84">        return refresh_rate;</span>
     }
 
     public void setRefresh_rate(long refresh_rate) {

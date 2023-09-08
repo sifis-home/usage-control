@@ -43,21 +43,21 @@ import it.cnr.iit.utility.errorhandling.Reject;
  */
 public final class ObligationManager implements ObligationManagerInterface {
 
-<span class="nc" id="L46">    private final Logger log = Logger.getLogger( ObligationManager.class.getName() );</span>
+<span class="fc" id="L46">    private final Logger log = Logger.getLogger( ObligationManager.class.getName() );</span>
 
     private List&lt;PIPOMInterface&gt; pipList;
     private ObligationManagerProperties properties; // NOSONAR
 
-<span class="nc" id="L51">    public ObligationManager( ObligationManagerProperties properties ) {</span>
-<span class="nc" id="L52">        Reject.ifNull( properties );</span>
-<span class="nc" id="L53">        this.properties = properties;</span>
-<span class="nc" id="L54">    }</span>
+<span class="fc" id="L51">    public ObligationManager( ObligationManagerProperties properties ) {</span>
+<span class="fc" id="L52">        Reject.ifNull( properties );</span>
+<span class="fc" id="L53">        this.properties = properties;</span>
+<span class="fc" id="L54">    }</span>
 
     @Override
     public void setPIPs( List&lt;PIPOMInterface&gt; pips ) {
-<span class="nc" id="L58">        Reject.ifEmpty( pips );</span>
-<span class="nc" id="L59">        pipList = pips;</span>
-<span class="nc" id="L60">    }</span>
+<span class="fc" id="L58">        Reject.ifEmpty( pips );</span>
+<span class="fc" id="L59">        pipList = pips;</span>
+<span class="fc" id="L60">    }</span>
 
     /**
      * Translates the obligation from String to an Object that can be passed to a
@@ -71,18 +71,18 @@ public final class ObligationManager implements ObligationManagerInterface {
      */
     @Override
     public void translateObligations( PDPEvaluation evaluation, String sessionId, STATUS status ) {
-<span class="nc" id="L74">        Reject.ifNull( evaluation );</span>
-<span class="nc" id="L75">        Reject.ifNull( sessionId );</span>
-<span class="nc" id="L76">        Reject.ifNull( status );</span>
+<span class="fc" id="L74">        Reject.ifNull( evaluation );</span>
+<span class="fc" id="L75">        Reject.ifNull( sessionId );</span>
+<span class="fc" id="L76">        Reject.ifNull( status );</span>
 
-<span class="nc" id="L78">        List&lt;String&gt; obligationsList = evaluation.getObligations();</span>
-<span class="nc bnc" id="L79" title="All 2 branches missed.">        if( obligationsList == null ) {</span>
+<span class="fc" id="L78">        List&lt;String&gt; obligationsList = evaluation.getObligations();</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if( obligationsList == null ) {</span>
 <span class="nc" id="L80">            return;</span>
         }
 
-<span class="nc" id="L83">        StringBuilder pipName = new StringBuilder();</span>
-<span class="nc" id="L84">        HashMap&lt;String, ObligationInterface&gt; obligationMap = new HashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L85" title="All 2 branches missed.">        for( String obligationString : obligationsList ) {</span>
+<span class="fc" id="L83">        StringBuilder pipName = new StringBuilder();</span>
+<span class="fc" id="L84">        HashMap&lt;String, ObligationInterface&gt; obligationMap = new HashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        for( String obligationString : obligationsList ) {</span>
 <span class="nc" id="L86">            ObligationInterface obligation = (ObligationInterface) createObjectFromString( obligationString, pipName );</span>
 <span class="nc bnc" id="L87" title="All 2 branches missed.">            if( obligation != null ) {</span>
 <span class="nc" id="L88">                obligation.setSessionId( sessionId );</span>
@@ -95,10 +95,10 @@ public final class ObligationManager implements ObligationManagerInterface {
             }
 <span class="nc" id="L96">        }</span>
 
-<span class="nc bnc" id="L98" title="All 2 branches missed.">        for( PIPOMInterface pip : pipList ) {</span>
-<span class="nc" id="L99">            pip.performObligation( obligationMap.get( pipName.toString() ) );</span>
-<span class="nc" id="L100">        }</span>
-<span class="nc" id="L101">    }</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        for( PIPOMInterface pip : pipList ) {</span>
+<span class="fc" id="L99">            pip.performObligation( obligationMap.get( pipName.toString() ) );</span>
+<span class="fc" id="L100">        }</span>
+<span class="fc" id="L101">    }</span>
 
     /**
      * Given the string representing the whole obligation, this function extracts

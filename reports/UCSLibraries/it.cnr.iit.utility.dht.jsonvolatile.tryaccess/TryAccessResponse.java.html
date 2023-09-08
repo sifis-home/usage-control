@@ -6,7 +6,7 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class TryAccessResponse implements MessageContent, EvaluatedMessageContent {
 
-<span class="nc" id="L9">    public String purpose = PURPOSE.TRY_RESPONSE.name();</span>
+<span class="pc" id="L9">    public String purpose = PURPOSE.TRY_RESPONSE.name();</span>
     private String message_id;
     private String evaluation;
     private String session_id;
@@ -14,11 +14,11 @@ public class TryAccessResponse implements MessageContent, EvaluatedMessageConten
 <span class="nc" id="L14">    public TryAccessResponse() {</span>
 <span class="nc" id="L15">    }</span>
 
-<span class="nc" id="L17">    public TryAccessResponse(String message_id, String evaluation, String session_id) {</span>
-<span class="nc" id="L18">        this.message_id = message_id;</span>
-<span class="nc" id="L19">        this.evaluation = evaluation;</span>
-<span class="nc" id="L20">        this.session_id = session_id;</span>
-<span class="nc" id="L21">    }</span>
+<span class="fc" id="L17">    public TryAccessResponse(String message_id, String evaluation, String session_id) {</span>
+<span class="fc" id="L18">        this.message_id = message_id;</span>
+<span class="fc" id="L19">        this.evaluation = evaluation;</span>
+<span class="fc" id="L20">        this.session_id = session_id;</span>
+<span class="fc" id="L21">    }</span>
 
     public String getMessage_id() {
 <span class="nc" id="L24">        return message_id;</span>

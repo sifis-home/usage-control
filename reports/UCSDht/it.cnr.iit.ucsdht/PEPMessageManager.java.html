@@ -29,103 +29,103 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
 <span class="nc" id="L29">public class PEPMessageManager {</span>
 
     protected static void processMessage(JsonIn jsonIn) {
-<span class="nc" id="L32">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
-<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (message instanceof RegisterRequest) {</span>
+<span class="fc" id="L32">        MessageContent message = jsonIn.getVolatile().getValue().getCommand().getValue().getMessage();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if (message instanceof RegisterRequest) {</span>
             // handle register request
-<span class="nc" id="L35">            System.out.println(&quot;Handling register request...&quot;);</span>
-<span class="nc" id="L36">            handleRegisterRequest(jsonIn);</span>
-<span class="nc bnc" id="L37" title="All 2 branches missed.">        } else if (message instanceof TryAccessRequest) {</span>
+<span class="fc" id="L35">            System.out.println(&quot;Handling register request...&quot;);</span>
+<span class="fc" id="L36">            handleRegisterRequest(jsonIn);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        } else if (message instanceof TryAccessRequest) {</span>
             // handle try access request
-<span class="nc" id="L39">            System.out.println(&quot;Handling try access request...&quot;);</span>
-<span class="nc" id="L40">            handleTryAccessRequest(jsonIn);</span>
-<span class="nc bnc" id="L41" title="All 2 branches missed.">        } else if (message instanceof StartAccessRequest) {</span>
+<span class="fc" id="L39">            System.out.println(&quot;Handling try access request...&quot;);</span>
+<span class="fc" id="L40">            handleTryAccessRequest(jsonIn);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        } else if (message instanceof StartAccessRequest) {</span>
             // handle start access request
-<span class="nc" id="L43">            System.out.println(&quot;Handling start access request...&quot;);</span>
-<span class="nc" id="L44">            handleStartAccessRequest(jsonIn);</span>
-<span class="nc bnc" id="L45" title="All 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
+<span class="fc" id="L43">            System.out.println(&quot;Handling start access request...&quot;);</span>
+<span class="fc" id="L44">            handleStartAccessRequest(jsonIn);</span>
+<span class="pc bpc" id="L45" title="1 of 2 branches missed.">        } else if (message instanceof EndAccessRequest) {</span>
             // handle end access request
-<span class="nc" id="L47">            System.out.println(&quot;Handling end access request...&quot;);</span>
-<span class="nc" id="L48">            handleEndAccessRequest(jsonIn);</span>
+<span class="fc" id="L47">            System.out.println(&quot;Handling end access request...&quot;);</span>
+<span class="fc" id="L48">            handleEndAccessRequest(jsonIn);</span>
         } else {
             // class not recognized. Handle case
             // this should not happen since the deserialization would already have thrown an exception
 <span class="nc" id="L52">            System.err.println(&quot;Class not recognized. It might be a ResponseMessage&quot;);</span>
         }
-<span class="nc" id="L54">    }</span>
+<span class="fc" id="L54">    }</span>
 
 
     private static void handleTryAccessRequest(JsonIn jsonIn) {
         // construct a TryAccess message compliant with what the UCS accepts
-<span class="nc" id="L59">        TryAccessRequest messageIn = (TryAccessRequest) getMessageFromJson(jsonIn);</span>
+<span class="fc" id="L59">        TryAccessRequest messageIn = (TryAccessRequest) getMessageFromJson(jsonIn);</span>
 
         // make the actual try access request to the UCS
-<span class="nc" id="L62">        String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));</span>
-<span class="nc" id="L63">        TryAccessResponseMessage response =</span>
-<span class="nc" id="L64">                ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+<span class="fc" id="L62">        String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));</span>
+<span class="fc" id="L63">        TryAccessResponseMessage response =</span>
+<span class="fc" id="L64">                ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
 
         // build the json object
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
-<span class="nc" id="L68">                buildErrorResponseMessage(jsonIn, &quot;Error during try access&quot;) :</span>
-<span class="nc" id="L69">                buildTryAccessResponseMessage(jsonIn, response);</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="pc" id="L68">                buildErrorResponseMessage(jsonIn, &quot;Error during try access&quot;) :</span>
+<span class="fc" id="L69">                buildTryAccessResponseMessage(jsonIn, response);</span>
 
-<span class="nc" id="L71">        serializeAndSend(jsonOut);</span>
-<span class="nc" id="L72">    }</span>
+<span class="fc" id="L71">        serializeAndSend(jsonOut);</span>
+<span class="fc" id="L72">    }</span>
 
 
     private static JsonOut buildTryAccessResponseMessage(JsonIn jsonIn, TryAccessResponseMessage response) {
-<span class="nc" id="L76">        MessageContent messageOut = new TryAccessResponse(</span>
-<span class="nc" id="L77">                response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());</span>
-<span class="nc" id="L78">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+<span class="fc" id="L76">        MessageContent messageOut = new TryAccessResponse(</span>
+<span class="fc" id="L77">                response.getMessageId(), response.getEvaluation().getResult(), response.getSessionId());</span>
+<span class="fc" id="L78">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
     }
 
 
     private static void handleStartAccessRequest(JsonIn jsonIn) {
         // construct a StartAccess message compliant with what the UCS accepts
-<span class="nc" id="L84">        StartAccessRequest messageIn = (StartAccessRequest) getMessageFromJson(jsonIn);</span>
+<span class="fc" id="L84">        StartAccessRequest messageIn = (StartAccessRequest) getMessageFromJson(jsonIn);</span>
 
         // make the actual start access request to the UCS
-<span class="nc" id="L87">        StartAccessResponseMessage response =</span>
-<span class="nc" id="L88">                ucsClient.startAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+<span class="fc" id="L87">        StartAccessResponseMessage response =</span>
+<span class="fc" id="L88">                ucsClient.startAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
 
         // build the json object
-<span class="nc bnc" id="L91" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
-<span class="nc" id="L92">                buildErrorResponseMessage(jsonIn, &quot;Error during start access&quot;) :</span>
-<span class="nc" id="L93">                buildStartAccessResponseMessage(jsonIn, response);</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="pc" id="L92">                buildErrorResponseMessage(jsonIn, &quot;Error during start access&quot;) :</span>
+<span class="fc" id="L93">                buildStartAccessResponseMessage(jsonIn, response);</span>
 
-<span class="nc" id="L95">        serializeAndSend(jsonOut);</span>
-<span class="nc" id="L96">    }</span>
+<span class="fc" id="L95">        serializeAndSend(jsonOut);</span>
+<span class="fc" id="L96">    }</span>
 
 
     private static JsonOut buildStartAccessResponseMessage(JsonIn jsonIn, StartAccessResponseMessage response) {
-<span class="nc" id="L100">        MessageContent messageOut =</span>
+<span class="fc" id="L100">        MessageContent messageOut =</span>
                 new StartAccessResponse(
-<span class="nc" id="L102">                        response.getMessageId(), response.getEvaluation().getResult());</span>
-<span class="nc" id="L103">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+<span class="fc" id="L102">                        response.getMessageId(), response.getEvaluation().getResult());</span>
+<span class="fc" id="L103">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
     }
 
 
     private static void handleEndAccessRequest(JsonIn jsonIn) {
         // construct an EndAccess message compliant with what the UCS accepts
-<span class="nc" id="L109">        EndAccessRequest messageIn = (EndAccessRequest) getMessageFromJson(jsonIn);</span>
+<span class="fc" id="L109">        EndAccessRequest messageIn = (EndAccessRequest) getMessageFromJson(jsonIn);</span>
 
         // make the actual end access request to the UCS
-<span class="nc" id="L112">        EndAccessResponseMessage response =</span>
-<span class="nc" id="L113">                ucsClient.endAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
+<span class="fc" id="L112">        EndAccessResponseMessage response =</span>
+<span class="fc" id="L113">                ucsClient.endAccess(messageIn.getSession_id(), getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));</span>
 
         // build the json object
-<span class="nc bnc" id="L116" title="All 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
-<span class="nc" id="L117">                buildErrorResponseMessage(jsonIn, &quot;Error during end access&quot;) :</span>
-<span class="nc" id="L118">                buildEndAccessResponseMessage(jsonIn, response);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        JsonOut jsonOut = response == null ?</span>
+<span class="pc" id="L117">                buildErrorResponseMessage(jsonIn, &quot;Error during end access&quot;) :</span>
+<span class="fc" id="L118">                buildEndAccessResponseMessage(jsonIn, response);</span>
 
-<span class="nc" id="L120">        serializeAndSend(jsonOut);</span>
-<span class="nc" id="L121">    }</span>
+<span class="fc" id="L120">        serializeAndSend(jsonOut);</span>
+<span class="fc" id="L121">    }</span>
 
 
     private static JsonOut buildEndAccessResponseMessage(JsonIn jsonIn, EndAccessResponseMessage response) {
-<span class="nc" id="L125">        MessageContent messageOut =</span>
+<span class="fc" id="L125">        MessageContent messageOut =</span>
                 new EndAccessResponse(
-<span class="nc" id="L127">                        response.getMessageId(), response.getEvaluation().getResult());</span>
-<span class="nc" id="L128">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+<span class="fc" id="L127">                        response.getMessageId(), response.getEvaluation().getResult());</span>
+<span class="fc" id="L128">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
     }
 
 
@@ -139,24 +139,24 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
     // it returns KO if the pep cannot be registered
     private static void handleRegisterRequest(JsonIn jsonIn) {
         JsonOut jsonOut;
-<span class="nc" id="L142">        boolean isAdded = false;</span>
+<span class="fc" id="L142">        boolean isAdded = false;</span>
 
-<span class="nc bnc" id="L144" title="All 2 branches missed.">        if (!isPepRegistered(jsonIn)) {</span>
-<span class="nc" id="L145">            RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);</span>
-<span class="nc" id="L146">            String pepId = getIdFromJson(jsonIn);</span>
-<span class="nc" id="L147">            String subTopicName = messageIn.getSub_topic_name();</span>
-<span class="nc" id="L148">            String subTopicUuid = messageIn.getSub_topic_uuid();</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if (!isPepRegistered(jsonIn)) {</span>
+<span class="fc" id="L145">            RegisterRequest messageIn = (RegisterRequest) getMessageFromJson(jsonIn);</span>
+<span class="fc" id="L146">            String pepId = getIdFromJson(jsonIn);</span>
+<span class="fc" id="L147">            String subTopicName = messageIn.getSub_topic_name();</span>
+<span class="fc" id="L148">            String subTopicUuid = messageIn.getSub_topic_uuid();</span>
 
-<span class="nc" id="L150">            isAdded = ucsClient.addPep(pepId, subTopicName, subTopicUuid);</span>
-<span class="nc bnc" id="L151" title="All 2 branches missed.">            if (!isAdded) {</span>
+<span class="fc" id="L150">            isAdded = ucsClient.addPep(pepId, subTopicName, subTopicUuid);</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">            if (!isAdded) {</span>
 <span class="nc" id="L152">                jsonOut = buildRegisterResponseMessage(jsonIn, &quot;KO&quot;);</span>
 <span class="nc" id="L153">                serializeAndSend(jsonOut);</span>
 <span class="nc" id="L154">                return;</span>
             } else {
-<span class="nc" id="L156">                jsonOut = buildRegisterResponseMessage(jsonIn, &quot;OK&quot;);</span>
-<span class="nc" id="L157">                serializeAndSend(jsonOut);</span>
-<span class="nc" id="L158">                serializePepToFile(pepId, subTopicName, subTopicUuid);</span>
-<span class="nc" id="L159">                return;</span>
+<span class="fc" id="L156">                jsonOut = buildRegisterResponseMessage(jsonIn, &quot;OK&quot;);</span>
+<span class="fc" id="L157">                serializeAndSend(jsonOut);</span>
+<span class="fc" id="L158">                serializePepToFile(pepId, subTopicName, subTopicUuid);</span>
+<span class="fc" id="L159">                return;</span>
             }
         }
 <span class="nc" id="L162">        jsonOut = buildRegisterResponseMessage(jsonIn, &quot;OK&quot;);</span>
@@ -164,25 +164,25 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
 <span class="nc" id="L164">    }</span>
 
     private static void serializePepToFile(String id, String subTopicName, String subTopicUuid) {
-<span class="nc" id="L167">        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();</span>
-<span class="nc" id="L168">        pepProperties.setId(id);</span>
-<span class="nc" id="L169">        pepProperties.setSubTopicName(subTopicName);</span>
-<span class="nc" id="L170">        pepProperties.setSubTopicUuid(subTopicUuid);</span>
+<span class="fc" id="L167">        UCSDhtPepProperties pepProperties = new UCSDhtPepProperties();</span>
+<span class="fc" id="L168">        pepProperties.setId(id);</span>
+<span class="fc" id="L169">        pepProperties.setSubTopicName(subTopicName);</span>
+<span class="fc" id="L170">        pepProperties.setSubTopicUuid(subTopicUuid);</span>
 
-<span class="nc" id="L172">        JsonUtility.dumpObjectToJsonFile(pepProperties,</span>
+<span class="fc" id="L172">        JsonUtility.dumpObjectToJsonFile(pepProperties,</span>
                 pepsDir + File.separator + id + &quot;.json&quot;, true);
-<span class="nc" id="L174">    }</span>
+<span class="fc" id="L174">    }</span>
 
     private static JsonOut buildRegisterResponseMessage(JsonIn jsonIn, String code) {
-<span class="nc" id="L177">        MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);</span>
-<span class="nc" id="L178">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
+<span class="fc" id="L177">        MessageContent messageOut = new RegisterResponse(getMessageIdFromJson(jsonIn), code);</span>
+<span class="fc" id="L178">        return buildJsonOutForPep(messageOut, getIdFromJson(jsonIn));</span>
     }
 
 
     private static JsonOut buildJsonOutForPep(MessageContent messageOut, String pepId) {
-<span class="nc" id="L183">        PepProperties pepProperties = ucsClient.getPepProperties(pepId);</span>
-<span class="nc" id="L184">        return buildOutgoingJsonObject(messageOut, pepId,</span>
-<span class="nc" id="L185">                pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);</span>
+<span class="fc" id="L183">        PepProperties pepProperties = ucsClient.getPepProperties(pepId);</span>
+<span class="fc" id="L184">        return buildOutgoingJsonObject(messageOut, pepId,</span>
+<span class="fc" id="L185">                pepProperties.getSubTopicName(), pepProperties.getSubTopicUuid(), COMMAND_TYPE);</span>
     }
 
 
@@ -199,7 +199,7 @@ import static it.cnr.iit.utility.dht.DHTUtils.buildOutgoingJsonObject;
     }
 
     protected static boolean isPepRegistered(JsonIn jsonIn) {
-<span class="nc" id="L202">        return (ucsClient.pepMapHas(getIdFromJson(jsonIn)));</span>
+<span class="fc" id="L202">        return (ucsClient.pepMapHas(getIdFromJson(jsonIn)));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

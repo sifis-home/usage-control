@@ -24,11 +24,11 @@ import java.util.Optional;
         // Read the content of the source file
         byte[] bytes;
         try {
-<span class="nc" id="L27">            bytes = Files.readAllBytes(Paths.get(sourceFilePath));</span>
+<span class="fc" id="L27">            bytes = Files.readAllBytes(Paths.get(sourceFilePath));</span>
 <span class="nc" id="L28">        } catch (IOException e) {</span>
 <span class="nc" id="L29">            throw new RuntimeException(e);</span>
-<span class="nc" id="L30">        }</span>
-<span class="nc" id="L31">        return new String(Base64.getEncoder().encode(bytes));</span>
+<span class="fc" id="L30">        }</span>
+<span class="fc" id="L31">        return new String(Base64.getEncoder().encode(bytes));</span>
     }
 
     /**
@@ -40,12 +40,12 @@ import java.util.Optional;
     public static void base64StringToFile(String base64String, String destinationFilePath) {
         byte[] bytes;
         try {
-<span class="nc" id="L43">            bytes = Base64.getDecoder().decode(base64String);</span>
-<span class="nc" id="L44">            Files.write(Paths.get(destinationFilePath), bytes);</span>
+<span class="fc" id="L43">            bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="fc" id="L44">            Files.write(Paths.get(destinationFilePath), bytes);</span>
 <span class="nc" id="L45">        } catch (IOException e) {</span>
 <span class="nc" id="L46">            throw new RuntimeException(e);</span>
-<span class="nc" id="L47">        }</span>
-<span class="nc" id="L48">    }</span>
+<span class="fc" id="L47">        }</span>
+<span class="fc" id="L48">    }</span>
 
     /**
      * Extract the pip properties from a base64 string. The decoded base64 string must
@@ -55,10 +55,10 @@ import java.util.Optional;
      * @return the PipProperties object
      */
     public static PipProperties getPipPropertiesFromBase64String(String base64String, Class&lt;? extends PipProperties&gt; clazz) {
-<span class="nc" id="L58">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
-<span class="nc" id="L59">        String jsonString = new String(bytes);</span>
-<span class="nc" id="L60">        Optional&lt;? extends PipProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
-<span class="nc" id="L61">        return object.orElse(null);</span>
+<span class="fc" id="L58">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="fc" id="L59">        String jsonString = new String(bytes);</span>
+<span class="fc" id="L60">        Optional&lt;? extends PipProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
+<span class="fc" id="L61">        return object.orElse(null);</span>
     }
 
     /**
@@ -69,10 +69,10 @@ import java.util.Optional;
      * @return the PepProperties object
      */
     public static PepProperties getPepPropertiesFromBase64String(String base64String, Class&lt;? extends PepProperties&gt; clazz) {
-<span class="nc" id="L72">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
-<span class="nc" id="L73">        String jsonString = new String(bytes);</span>
-<span class="nc" id="L74">        Optional&lt;? extends PepProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
-<span class="nc" id="L75">        return object.orElse(null);</span>
+<span class="fc" id="L72">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="fc" id="L73">        String jsonString = new String(bytes);</span>
+<span class="fc" id="L74">        Optional&lt;? extends PepProperties&gt; object = JsonUtility.loadObjectFromJsonString(jsonString, clazz);</span>
+<span class="fc" id="L75">        return object.orElse(null);</span>
     }
 
     /**
@@ -83,15 +83,15 @@ import java.util.Optional;
      * @return the string containing the policyId
      */
     public static String getPolicyIdFromBase64String(String base64String) {
-<span class="nc" id="L86">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
-<span class="nc" id="L87">        String xmlString = new String(bytes);</span>
+<span class="fc" id="L86">        byte[] bytes = Base64.getDecoder().decode(base64String);</span>
+<span class="fc" id="L87">        String xmlString = new String(bytes);</span>
         PolicyType policy;
         try {
-<span class="nc" id="L90">            policy = JAXBUtility.unmarshalToObject(PolicyType.class, xmlString);</span>
+<span class="fc" id="L90">            policy = JAXBUtility.unmarshalToObject(PolicyType.class, xmlString);</span>
 <span class="nc" id="L91">        } catch (JAXBException e) {</span>
 <span class="nc" id="L92">            throw new RuntimeException(e);</span>
-<span class="nc" id="L93">        }</span>
-<span class="nc" id="L94">        return policy.getPolicyId();</span>
+<span class="fc" id="L93">        }</span>
+<span class="fc" id="L94">        return policy.getPolicyId();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

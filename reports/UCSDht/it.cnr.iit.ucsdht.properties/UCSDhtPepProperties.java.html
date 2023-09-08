@@ -5,45 +5,45 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import it.cnr.iit.ucs.properties.components.PepProperties;
 
-<span class="nc" id="L8">public class UCSDhtPepProperties implements PepProperties {</span>
+<span class="fc" id="L8">public class UCSDhtPepProperties implements PepProperties {</span>
 
-<span class="nc" id="L10">	private String name = &quot;it.cnr.iit.ucsdht.PEPDhtUCSSide&quot;;</span>
+<span class="fc" id="L10">	private String name = &quot;it.cnr.iit.ucsdht.PEPDhtUCSSide&quot;;</span>
 
 	// the identifier of the pep
-<span class="nc" id="L13">	private String pepId = &quot;pep-default&quot;;</span>
+<span class="fc" id="L13">	private String pepId = &quot;pep-default&quot;;</span>
 
 	// the topic name this pep is subscribed to
-<span class="nc" id="L16">	private String subTopicName = &quot;topic-name-the-pep-is-subscribed-to&quot;;</span>
+<span class="fc" id="L16">	private String subTopicName = &quot;topic-name-the-pep-is-subscribed-to&quot;;</span>
 
 	// the topic uuid this pep is subscribed to
-<span class="nc" id="L19">	private String subTopicUuid = &quot;topic-uuid-the-pep-is-subscribed-to&quot;;</span>
+<span class="fc" id="L19">	private String subTopicUuid = &quot;topic-uuid-the-pep-is-subscribed-to&quot;;</span>
 
-<span class="nc" id="L21">	private String commandType = &quot;ucs-command&quot;;</span>
+<span class="fc" id="L21">	private String commandType = &quot;ucs-command&quot;;</span>
 
 
 	@Override
 	public String getName() {
-<span class="nc" id="L26">		return this.name;</span>
+<span class="fc" id="L26">		return this.name;</span>
 	}
 
 	@Override
 	public Map&lt;String, String&gt; getAdditionalProperties() {
-<span class="nc" id="L31">		return null;</span>
+<span class="fc" id="L31">		return null;</span>
 	}
 
 	@Override
 	public String getId() {
-<span class="nc" id="L36">		return this.pepId;</span>
+<span class="fc" id="L36">		return this.pepId;</span>
 	}
 
 	public void setId(String pepId) {
-<span class="nc" id="L40">		this.pepId = pepId;</span>
-<span class="nc" id="L41">	}</span>
+<span class="fc" id="L40">		this.pepId = pepId;</span>
+<span class="fc" id="L41">	}</span>
 
 	@JsonIgnore
 	@Override
 	public String getUri() {
-<span class="nc" id="L46">		return &quot;http://localhost:9400&quot;;</span>
+<span class="fc" id="L46">		return &quot;http://localhost:9400&quot;;</span>
 	}
 
 	@JsonIgnore
@@ -78,25 +78,25 @@ import it.cnr.iit.ucs.properties.components.PepProperties;
 
 	@Override
 	public String getSubTopicName() {
-<span class="nc" id="L81">		return this.subTopicName;</span>
+<span class="fc" id="L81">		return this.subTopicName;</span>
 	}
 
 	@Override
 	public String getSubTopicUuid() {
-<span class="nc" id="L86">		return this.subTopicUuid;</span>
+<span class="fc" id="L86">		return this.subTopicUuid;</span>
 	}
 
 	public void setSubTopicName(String subTopicName) {
-<span class="nc" id="L90">		this.subTopicName = subTopicName;</span>
-<span class="nc" id="L91">	}</span>
+<span class="fc" id="L90">		this.subTopicName = subTopicName;</span>
+<span class="fc" id="L91">	}</span>
 
 	public void setSubTopicUuid(String subTopicUuid) {
-<span class="nc" id="L94">		this.subTopicUuid = subTopicUuid;</span>
-<span class="nc" id="L95">	}</span>
+<span class="fc" id="L94">		this.subTopicUuid = subTopicUuid;</span>
+<span class="fc" id="L95">	}</span>
 
 	@Override
 	public String getCommandType() {
-<span class="nc" id="L99">		return this.commandType;</span>
+<span class="fc" id="L99">		return this.commandType;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

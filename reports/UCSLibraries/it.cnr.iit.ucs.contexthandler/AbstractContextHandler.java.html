@@ -100,11 +100,11 @@ public abstract class AbstractContextHandler implements ContextHandlerInterface 
 <span class="fc" id="L100">    }</span>
 
     public void setPIPs( List&lt;PIPCHInterface&gt; pipList ) {
-<span class="nc" id="L103">        Reject.ifNull( pipList, PIPCHInterface.class.getName() + &quot; list&quot; );</span>
-<span class="nc bnc" id="L104" title="All 2 branches missed.">        for( PIPCHInterface pip : pipList ) {</span>
-<span class="nc" id="L105">            pipRegistry.add( pip );</span>
-<span class="nc" id="L106">        }</span>
-<span class="nc" id="L107">    }</span>
+<span class="fc" id="L103">        Reject.ifNull( pipList, PIPCHInterface.class.getName() + &quot; list&quot; );</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        for( PIPCHInterface pip : pipList ) {</span>
+<span class="fc" id="L105">            pipRegistry.add( pip );</span>
+<span class="fc" id="L106">        }</span>
+<span class="fc" id="L107">    }</span>
 
     protected void setPipRegistry( PIPRegistryInterface pipRegistry ) {
 <span class="nc" id="L110">        Reject.ifNull( pipRegistry, PIPRegistryInterface.class.getName() );</span>

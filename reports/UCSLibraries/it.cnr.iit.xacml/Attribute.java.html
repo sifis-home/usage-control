@@ -132,28 +132,28 @@ public final class Attribute implements Cloneable {
 	 * @param value value to set
 	 */
 	public void setAttributeValues(String type, String value) {
-<span class="nc" id="L135">		checkValidDataType(type);</span>
-<span class="nc" id="L136">		Reject.ifBlank(value);</span>
-<span class="nc" id="L137">		List&lt;String&gt; valueList = attributeValueMap.get(type);</span>
-<span class="nc bnc" id="L138" title="All 2 branches missed.">		if (valueList == null) {</span>
-<span class="nc" id="L139">			valueList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L135">		checkValidDataType(type);</span>
+<span class="fc" id="L136">		Reject.ifBlank(value);</span>
+<span class="fc" id="L137">		List&lt;String&gt; valueList = attributeValueMap.get(type);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">		if (valueList == null) {</span>
+<span class="fc" id="L139">			valueList = new LinkedList&lt;&gt;();</span>
 		}
-<span class="nc bnc" id="L141" title="All 2 branches missed.">		for (int i = 0; i &lt; valueList.size(); i++) {</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">		for (int i = 0; i &lt; valueList.size(); i++) {</span>
 <span class="nc bnc" id="L142" title="All 2 branches missed.">			if (valueList.get(i).isEmpty()) {</span>
 <span class="nc" id="L143">				valueList.set(i, value);</span>
 <span class="nc" id="L144">				attributeValueMap.put(type, valueList);</span>
 <span class="nc" id="L145">				return;</span>
 			}
 		}
-<span class="nc" id="L148">		valueList.add(value);</span>
-<span class="nc" id="L149">		attributeValueMap.put(type, valueList);</span>
-<span class="nc" id="L150">	}</span>
+<span class="fc" id="L148">		valueList.add(value);</span>
+<span class="fc" id="L149">		attributeValueMap.put(type, valueList);</span>
+<span class="fc" id="L150">	}</span>
 
 	private void checkValidDataType(String type) {
-<span class="nc" id="L153">		Reject.ifBlank(type);</span>
-<span class="nc" id="L154">		DataType tmpDataType = DataType.toDATATYPE(type);</span>
-<span class="nc" id="L155">		Reject.ifNull(tmpDataType);</span>
-<span class="nc" id="L156">	}</span>
+<span class="fc" id="L153">		Reject.ifBlank(type);</span>
+<span class="fc" id="L154">		DataType tmpDataType = DataType.toDATATYPE(type);</span>
+<span class="fc" id="L155">		Reject.ifNull(tmpDataType);</span>
+<span class="fc" id="L156">	}</span>
 
 	/**
 	 * Creates the values of an attribute given its type

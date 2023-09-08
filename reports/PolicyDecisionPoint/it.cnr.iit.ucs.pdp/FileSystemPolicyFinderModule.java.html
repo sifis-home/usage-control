@@ -66,11 +66,11 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
 <span class="fc" id="L67">	private static final Logger log = Logger.getLogger(FileSystemPolicyFinderModule.class.getName());</span>
 
-<span class="nc" id="L69">	private PolicyFinder finder = null;</span>
+<span class="fc" id="L69">	private PolicyFinder finder = null;</span>
 
 	private static final String POLICY_FILE_EXTENSION = &quot;.xml&quot;;
 
-<span class="nc" id="L73">	private String POLICY_FILE_FOLDER = null;</span>
+<span class="fc" id="L73">	private String POLICY_FILE_FOLDER = null;</span>
 
 	private Map&lt;URI, AbstractPolicy&gt; policies;
 
@@ -80,21 +80,21 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
 	private String policyCondition;
 
-<span class="nc" id="L83">	public FileSystemPolicyFinderModule(String policyFolderPath) {</span>
-<span class="nc" id="L84">		policies = new HashMap&lt;URI, AbstractPolicy&gt;();</span>
-<span class="nc" id="L85">		POLICY_FILE_FOLDER = policyFolderPath;</span>
+<span class="fc" id="L83">	public FileSystemPolicyFinderModule(String policyFolderPath) {</span>
+<span class="fc" id="L84">		policies = new HashMap&lt;URI, AbstractPolicy&gt;();</span>
+<span class="fc" id="L85">		POLICY_FILE_FOLDER = policyFolderPath;</span>
 		try {
-<span class="nc" id="L87">			documentBuilderFactory = DocumentBuilderFactory.newInstance();</span>
-<span class="nc" id="L88">			documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</span>
-<span class="nc" id="L89">			documentBuilderFactory.setIgnoringComments(true);</span>
-<span class="nc" id="L90">			documentBuilderFactory.setNamespaceAware(true);</span>
-<span class="nc" id="L91">			documentBuilderFactory.setValidating(false);</span>
+<span class="fc" id="L87">			documentBuilderFactory = DocumentBuilderFactory.newInstance();</span>
+<span class="fc" id="L88">			documentBuilderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);</span>
+<span class="fc" id="L89">			documentBuilderFactory.setIgnoringComments(true);</span>
+<span class="fc" id="L90">			documentBuilderFactory.setNamespaceAware(true);</span>
+<span class="fc" id="L91">			documentBuilderFactory.setValidating(false);</span>
 <span class="nc" id="L92">		} catch (Exception e) {</span>
 <span class="nc" id="L93">			log.severe(e.getMessage());</span>
 <span class="nc" id="L94">			throw new IllegalStateException(&quot;Unable to protect against XXE&quot;);</span>
-<span class="nc" id="L95">		}</span>
-<span class="nc" id="L96">		loadPolicies();</span>
-<span class="nc" id="L97">	}</span>
+<span class="fc" id="L95">		}</span>
+<span class="fc" id="L96">		loadPolicies();</span>
+<span class="fc" id="L97">	}</span>
 
 	public FileSystemPolicyFinderModule(String policyFolderPath, STATUS status) {
 <span class="nc" id="L100">		this(policyFolderPath);</span>
@@ -103,32 +103,32 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
 	@Override
 	public void init(PolicyFinder finder) {
-<span class="nc" id="L106">		this.finder = finder;</span>
-<span class="nc" id="L107">		combiningAlg = new DenyOverridesPolicyAlg();</span>
-<span class="nc" id="L108">	}</span>
+<span class="fc" id="L106">		this.finder = finder;</span>
+<span class="fc" id="L107">		combiningAlg = new DenyOverridesPolicyAlg();</span>
+<span class="fc" id="L108">	}</span>
 
 	@Override
 	public PolicyFinderResult findPolicy(EvaluationCtx context) {
 
-<span class="nc" id="L113">		ArrayList&lt;AbstractPolicy&gt; selectedPolicies = new ArrayList&lt;AbstractPolicy&gt;();</span>
-<span class="nc" id="L114">		Set&lt;Map.Entry&lt;URI, AbstractPolicy&gt;&gt; entrySet = policies.entrySet();</span>
+<span class="fc" id="L113">		ArrayList&lt;AbstractPolicy&gt; selectedPolicies = new ArrayList&lt;AbstractPolicy&gt;();</span>
+<span class="fc" id="L114">		Set&lt;Map.Entry&lt;URI, AbstractPolicy&gt;&gt; entrySet = policies.entrySet();</span>
 
 		// iterate through all the policies we currently have loaded
-<span class="nc bnc" id="L117" title="All 2 branches missed.">		for (Map.Entry&lt;URI, AbstractPolicy&gt; entry : entrySet) {</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">		for (Map.Entry&lt;URI, AbstractPolicy&gt; entry : entrySet) {</span>
 
-<span class="nc" id="L119">			AbstractPolicy policy = entry.getValue();</span>
-<span class="nc" id="L120">			MatchResult match = policy.match(context);</span>
-<span class="nc" id="L121">			int result = match.getResult();</span>
+<span class="fc" id="L119">			AbstractPolicy policy = entry.getValue();</span>
+<span class="fc" id="L120">			MatchResult match = policy.match(context);</span>
+<span class="fc" id="L121">			int result = match.getResult();</span>
 
 			// if target matching was indeterminate, then return the error
-<span class="nc bnc" id="L124" title="All 2 branches missed.">			if (result == MatchResult.INDETERMINATE) {</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">			if (result == MatchResult.INDETERMINATE) {</span>
 <span class="nc" id="L125">				return new PolicyFinderResult(match.getStatus());</span>
 			}
 
 			// see if the target matched
-<span class="nc bnc" id="L129" title="All 2 branches missed.">			if (result == MatchResult.MATCH) {</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">			if (result == MatchResult.MATCH) {</span>
 
-<span class="nc bnc" id="L131" title="All 4 branches missed.">				if ((combiningAlg == null) &amp;&amp; (selectedPolicies.size() &gt; 0)) {</span>
+<span class="pc bpc" id="L131" title="3 of 4 branches missed.">				if ((combiningAlg == null) &amp;&amp; (selectedPolicies.size() &gt; 0)) {</span>
 					// we found a match before, so this is an error
 <span class="nc" id="L133">					ArrayList&lt;String&gt; code = new ArrayList&lt;String&gt;();</span>
 <span class="nc" id="L134">					code.add(Status.STATUS_PROCESSING_ERROR);</span>
@@ -137,21 +137,21 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 				}
 
 				// this is the first match we've found, so remember it
-<span class="nc bnc" id="L140" title="All 2 branches missed.">				if (selectedPolicies.size() == 0) {</span>
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">				if (selectedPolicies.size() == 0) {</span>
 					// sort of hack to prevent policyset
-<span class="nc" id="L142">					selectedPolicies.add(policy);</span>
+<span class="fc" id="L142">					selectedPolicies.add(policy);</span>
 				}
 			}
-<span class="nc" id="L145">		}</span>
+<span class="fc" id="L145">		}</span>
 
 		// no errors happened during the search, so now take the right
 		// action based on how many policies we found
-<span class="nc bnc" id="L149" title="All 3 branches missed.">		switch (selectedPolicies.size()) {</span>
+<span class="pc bpc" id="L149" title="2 of 3 branches missed.">		switch (selectedPolicies.size()) {</span>
 		case 0:
 <span class="nc" id="L151">			log.info(&quot;No matching XACML policy found&quot;);</span>
 <span class="nc" id="L152">			return new PolicyFinderResult();</span>
 		case 1:
-<span class="nc" id="L154">			return new PolicyFinderResult((selectedPolicies.get(0)));</span>
+<span class="fc" id="L154">			return new PolicyFinderResult((selectedPolicies.get(0)));</span>
 		default:
 <span class="nc" id="L156">			return new PolicyFinderResult(new PolicySet(null, combiningAlg, null, selectedPolicies));</span>
 		}
@@ -183,12 +183,12 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 
 	@Override
 	public boolean isIdReferenceSupported() {
-<span class="nc" id="L186">		return true;</span>
+<span class="fc" id="L186">		return true;</span>
 	}
 
 	@Override
 	public boolean isRequestSupported() {
-<span class="nc" id="L191">		return true;</span>
+<span class="fc" id="L191">		return true;</span>
 	}
 
 	/**
@@ -199,11 +199,11 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 	 */
 	public Integer loadPolicies() {
 		// Load all policy from fs folder
-<span class="nc" id="L202">		policies.clear();</span>
-<span class="nc bnc" id="L203" title="All 2 branches missed.">		if (POLICY_FILE_FOLDER == null) {</span>
+<span class="fc" id="L202">		policies.clear();</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">		if (POLICY_FILE_FOLDER == null) {</span>
 <span class="nc" id="L204">			throw new IllegalStateException(&quot;Policy folder path not set.&quot;);</span>
 		}
-<span class="nc" id="L206">		log.severe(&quot;POLICY_FILE_FOLDER = &quot; + POLICY_FILE_FOLDER);</span>
+<span class="fc" id="L206">		log.severe(&quot;POLICY_FILE_FOLDER = &quot; + POLICY_FILE_FOLDER);</span>
 
 		// TODO: still &quot;premature end of file&quot;, maybe problem is when the file is saved?
 
@@ -215,12 +215,12 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 //			throw new IllegalStateException(&quot;Unable to read policies from filesystem&quot;);
 //		}
 
-<span class="nc" id="L218">		File dir = new File(POLICY_FILE_FOLDER);</span>
-<span class="nc" id="L219">		File[] directoryListing = dir.listFiles();</span>
-<span class="nc bnc" id="L220" title="All 2 branches missed.">		if (directoryListing != null) {</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">			for (File policy : directoryListing) {</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {</span>
-<span class="nc" id="L223">					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);</span>
+<span class="fc" id="L218">		File dir = new File(POLICY_FILE_FOLDER);</span>
+<span class="fc" id="L219">		File[] directoryListing = dir.listFiles();</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">		if (directoryListing != null) {</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">			for (File policy : directoryListing) {</span>
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">				if (policy.getName().endsWith(POLICY_FILE_EXTENSION)) {</span>
+<span class="fc" id="L223">					loadPolicy(FileUtility.readFileAsString(policy.getPath()), finder);</span>
 
 				}
 			}
@@ -228,7 +228,7 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 <span class="nc" id="L228">			log.severe(&quot;directoryListing is null&quot;);</span>
 		}
 
-<span class="nc" id="L231">		return policies.size();</span>
+<span class="fc" id="L231">		return policies.size();</span>
 	}
 
 	/**
@@ -240,37 +240,37 @@ public class FileSystemPolicyFinderModule extends PolicyFinderModule {
 	 * @return org.w3c.dom.Element
 	 */
 	protected AbstractPolicy loadPolicy(String policy, PolicyFinder finder) {
-<span class="nc" id="L243">		AbstractPolicy abstractPolicy = null;</span>
+<span class="fc" id="L243">		AbstractPolicy abstractPolicy = null;</span>
 
 		try {
-<span class="nc bnc" id="L246" title="All 2 branches missed.">			policy = policyCondition == null ? policy</span>
-<span class="nc" id="L247">					: PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">			policy = policyCondition == null ? policy</span>
+<span class="pc" id="L247">					: PolicyWrapper.build(policy).getPolicyForCondition(policyCondition).getPolicy();</span>
 <span class="nc" id="L248">		} catch (PolicyException e) {</span>
 <span class="nc" id="L249">			return abstractPolicy;</span>
-<span class="nc" id="L250">		}</span>
+<span class="fc" id="L250">		}</span>
 
-<span class="nc" id="L252">		try (InputStream stream = new ByteArrayInputStream(policy.getBytes())) {</span>
+<span class="fc" id="L252">		try (InputStream stream = new ByteArrayInputStream(policy.getBytes())) {</span>
 
-<span class="nc" id="L254">			DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();</span>
-<span class="nc" id="L255">			Document doc = db.parse(stream);</span>
-<span class="nc" id="L256">			Element root = doc.getDocumentElement();</span>
-<span class="nc" id="L257">			String name = root.getLocalName();</span>
+<span class="fc" id="L254">			DocumentBuilder db = documentBuilderFactory.newDocumentBuilder();</span>
+<span class="fc" id="L255">			Document doc = db.parse(stream);</span>
+<span class="fc" id="L256">			Element root = doc.getDocumentElement();</span>
+<span class="fc" id="L257">			String name = root.getLocalName();</span>
 
-<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (name.equals(&quot;Policy&quot;)) {</span>
-<span class="nc" id="L260">				abstractPolicy = Policy.getInstance(root);</span>
+<span class="pc bpc" id="L259" title="1 of 2 branches missed.">			if (name.equals(&quot;Policy&quot;)) {</span>
+<span class="fc" id="L260">				abstractPolicy = Policy.getInstance(root);</span>
 <span class="nc bnc" id="L261" title="All 2 branches missed.">			} else if (name.equals(&quot;PolicySet&quot;)) {</span>
 <span class="nc" id="L262">				abstractPolicy = PolicySet.getInstance(root, finder);</span>
 			}
 <span class="nc" id="L264">		} catch (Exception e) {</span>
 <span class="nc" id="L265">			log.severe(&quot;fail to load UXACML policy : &quot; + e.getLocalizedMessage());</span>
 <span class="nc" id="L266">			e.printStackTrace();</span>
-<span class="nc" id="L267">		}</span>
+<span class="fc" id="L267">		}</span>
 
-<span class="nc bnc" id="L269" title="All 2 branches missed.">		if (abstractPolicy != null) {</span>
-<span class="nc" id="L270">			policies.put(abstractPolicy.getId(), abstractPolicy);</span>
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">		if (abstractPolicy != null) {</span>
+<span class="fc" id="L270">			policies.put(abstractPolicy.getId(), abstractPolicy);</span>
 		}
 
-<span class="nc" id="L273">		return abstractPolicy;</span>
+<span class="fc" id="L273">		return abstractPolicy;</span>
 
 	}
 

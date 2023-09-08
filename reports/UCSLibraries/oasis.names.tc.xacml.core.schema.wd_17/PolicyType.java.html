@@ -160,7 +160,7 @@ import javax.xml.bind.annotation.XmlType;
 <span class="fc" id="L160">    }</span>
 
     public List&lt;RuleType&gt; getRuleTypeList() {
-<span class="nc" id="L163">        return getObjectsOfTypeToList( RuleType.class );</span>
+<span class="fc" id="L163">        return getObjectsOfTypeToList( RuleType.class );</span>
     }
 
     public List&lt;ObligationsType&gt; getObligationsTypeList() {
@@ -168,10 +168,10 @@ import javax.xml.bind.annotation.XmlType;
     }
 
     private &lt;T&gt; List&lt;T&gt; getObjectsOfTypeToList( Class&lt;T&gt; clazz ) {
-<span class="nc" id="L171">        List&lt;Object&gt; list = this.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition();</span>
-<span class="nc" id="L172">        return (List&lt;T&gt;) list.stream()</span>
-<span class="nc" id="L173">            .filter( o -&gt; clazz.isInstance( o ) )</span>
-<span class="nc" id="L174">            .collect( Collectors.toList() );</span>
+<span class="fc" id="L171">        List&lt;Object&gt; list = this.getCombinerParametersOrRuleCombinerParametersOrVariableDefinition();</span>
+<span class="fc" id="L172">        return (List&lt;T&gt;) list.stream()</span>
+<span class="fc" id="L173">            .filter( o -&gt; clazz.isInstance( o ) )</span>
+<span class="fc" id="L174">            .collect( Collectors.toList() );</span>
     }
 
 }

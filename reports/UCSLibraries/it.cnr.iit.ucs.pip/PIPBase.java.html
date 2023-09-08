@@ -63,19 +63,19 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
 
     public boolean init(PipProperties properties) {
         try {
-<span class="nc bnc" id="L66" title="All 2 branches missed.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
 
-<span class="nc" id="L68">                Attribute attribute = new Attribute();</span>
-<span class="nc" id="L69">                buildAttribute(attribute, attributeMap);</span>
+<span class="fc" id="L68">                Attribute attribute = new Attribute();</span>
+<span class="fc" id="L69">                buildAttribute(attribute, attributeMap);</span>
 
-<span class="nc" id="L71">                addAttribute(attribute);</span>
+<span class="fc" id="L71">                addAttribute(attribute);</span>
 
                 // timer for polling the value of the attribute
-<span class="nc" id="L74">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
-<span class="nc" id="L75">                subscriberTimer.setRate(properties.getRefreshRate());</span>
-<span class="nc" id="L76">                subscriberTimer.start();</span>
-<span class="nc" id="L77">            }</span>
-<span class="nc" id="L78">            return true;</span>
+<span class="fc" id="L74">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
+<span class="fc" id="L75">                subscriberTimer.setRate(properties.getRefreshRate());</span>
+<span class="fc" id="L76">                subscriberTimer.start();</span>
+<span class="fc" id="L77">            }</span>
+<span class="fc" id="L78">            return true;</span>
 <span class="nc" id="L79">        } catch (Exception e) {</span>
 <span class="nc" id="L80">            return false;</span>
         }
@@ -144,22 +144,22 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
      */
     @Override
     public void subscribe(RequestType request, String attributeId) {
-<span class="nc" id="L147">        Reject.ifNull(request);</span>
+<span class="fc" id="L147">        Reject.ifNull(request);</span>
 
-<span class="nc" id="L149">        Attribute attribute = getAttributes().stream()</span>
-<span class="nc" id="L150">                .filter(attr -&gt; attr.getAttributeId().equals(attributeId)).findAny().orElse(null);</span>
-<span class="nc" id="L151">        Reject.ifNull(attribute);</span>
-<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (!isEnvironmentCategory(attribute)) {</span>
+<span class="fc" id="L149">        Attribute attribute = getAttributes().stream()</span>
+<span class="fc" id="L150">                .filter(attr -&gt; attr.getAttributeId().equals(attributeId)).findAny().orElse(null);</span>
+<span class="fc" id="L151">        Reject.ifNull(attribute);</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if (!isEnvironmentCategory(attribute)) {</span>
 <span class="nc" id="L153">            addAdditionalInformation(request, attribute);</span>
         }
         try {
-<span class="nc" id="L156">            String value = subscribe(attribute);</span>
-<span class="nc" id="L157">            request.addAttribute(attribute, value);</span>
+<span class="fc" id="L156">            String value = subscribe(attribute);</span>
+<span class="fc" id="L157">            request.addAttribute(attribute, value);</span>
 <span class="nc" id="L158">        } catch (Exception e) {</span>
             //TODO: handle exception
 <span class="nc" id="L160">            System.err.println(e.getMessage());</span>
-<span class="nc" id="L161">        }</span>
-<span class="nc" id="L162">    }</span>
+<span class="fc" id="L161">        }</span>
+<span class="fc" id="L162">    }</span>
 
 
     /**
@@ -336,7 +336,7 @@ public abstract class PIPBase implements PIPCHInterface, PIPOMInterface {
 
     @Override
     public final ArrayList&lt;String&gt; getAttributeIds() {
-<span class="nc" id="L339">        return new ArrayList&lt;&gt;(attributesMap.keySet());</span>
+<span class="fc" id="L339">        return new ArrayList&lt;&gt;(attributesMap.keySet());</span>
     }
 
     @Override

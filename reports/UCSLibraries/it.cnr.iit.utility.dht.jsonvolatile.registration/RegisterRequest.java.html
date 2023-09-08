@@ -5,13 +5,13 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class RegisterRequest implements MessageContent {
 
-<span class="nc" id="L8">    public String purpose = PURPOSE.REGISTER.name();</span>
+<span class="pc" id="L8">    public String purpose = PURPOSE.REGISTER.name();</span>
     private String message_id;
     private String sub_topic_name;
     private String sub_topic_uuid;
 
-<span class="nc" id="L13">    public RegisterRequest() {</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L13">    public RegisterRequest() {</span>
+<span class="fc" id="L14">    }</span>
 
 <span class="nc" id="L16">    public RegisterRequest(String message_id, String sub_topic_name, String sub_topic_uuid) {</span>
 <span class="nc" id="L17">        this.message_id = message_id;</span>
@@ -21,7 +21,7 @@ public class RegisterRequest implements MessageContent {
 
     @Override
     public String getMessage_id() {
-<span class="nc" id="L24">        return this.message_id;</span>
+<span class="fc" id="L24">        return this.message_id;</span>
     }
 
     @Override
@@ -30,7 +30,7 @@ public class RegisterRequest implements MessageContent {
 <span class="nc" id="L30">    }</span>
 
     public String getSub_topic_name() {
-<span class="nc" id="L33">        return sub_topic_name;</span>
+<span class="fc" id="L33">        return sub_topic_name;</span>
     }
 
     public void setSub_topic_name(String sub_topic_name) {
@@ -38,7 +38,7 @@ public class RegisterRequest implements MessageContent {
 <span class="nc" id="L38">    }</span>
 
     public String getSub_topic_uuid() {
-<span class="nc" id="L41">        return sub_topic_uuid;</span>
+<span class="fc" id="L41">        return sub_topic_uuid;</span>
     }
 
     public void setSub_topic_uuid(String sub_topic_uuid) {

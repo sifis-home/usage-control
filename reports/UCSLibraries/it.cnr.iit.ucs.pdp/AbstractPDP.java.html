@@ -53,23 +53,23 @@ public abstract class AbstractPDP implements PDPInterface {
 
     @Override
     public final void setObligationManager( ObligationManagerInterface obligationManager ) {
-<span class="nc" id="L56">        Reject.ifNull( obligationManager );</span>
-<span class="nc" id="L57">        this.obligationManager = obligationManager;</span>
-<span class="nc" id="L58">    }</span>
+<span class="fc" id="L56">        Reject.ifNull( obligationManager );</span>
+<span class="fc" id="L57">        this.obligationManager = obligationManager;</span>
+<span class="fc" id="L58">    }</span>
 
     protected final PAPInterface getPAP() {
-<span class="nc" id="L61">        return pap;</span>
+<span class="fc" id="L61">        return pap;</span>
     }
 
     protected final String getPolicyFolder() {
-<span class="nc" id="L65">        return pap.getPath();</span>
+<span class="fc" id="L65">        return pap.getPath();</span>
     }
 
     @Override
     public final void setPap( PAPInterface pap ) {
-<span class="nc" id="L70">        Reject.ifNull( pap );</span>
-<span class="nc" id="L71">        this.pap = pap;</span>
-<span class="nc" id="L72">    }</span>
+<span class="fc" id="L70">        Reject.ifNull( pap );</span>
+<span class="fc" id="L71">        this.pap = pap;</span>
+<span class="fc" id="L72">    }</span>
 
     public final boolean isInitialized() {
 <span class="nc" id="L75">        return initialized;</span>

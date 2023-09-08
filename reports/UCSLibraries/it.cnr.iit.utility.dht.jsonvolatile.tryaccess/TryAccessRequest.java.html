@@ -5,13 +5,13 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class TryAccessRequest implements MessageContent {
 
-<span class="nc" id="L8">    public final String purpose = PURPOSE.TRY.name();</span>
+<span class="pc" id="L8">    public final String purpose = PURPOSE.TRY.name();</span>
     private String message_id;
     private String request;
     private String policy;
 
-<span class="nc" id="L13">    public TryAccessRequest() {</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L13">    public TryAccessRequest() {</span>
+<span class="fc" id="L14">    }</span>
 
 <span class="nc" id="L16">    public TryAccessRequest(String message_id, String request, String policy) {</span>
 <span class="nc" id="L17">        this.message_id = message_id;</span>
@@ -20,14 +20,14 @@ public class TryAccessRequest implements MessageContent {
 <span class="nc" id="L20">    }</span>
 
     public String getMessage_id() {
-<span class="nc" id="L23">        return message_id;</span>
+<span class="fc" id="L23">        return message_id;</span>
     }
 
     public void setMessage_id(String message_id) {
 <span class="nc" id="L27">        this.message_id = message_id;</span>
 <span class="nc" id="L28">    }</span>
     public String getRequest() {
-<span class="nc" id="L30">        return request;</span>
+<span class="fc" id="L30">        return request;</span>
     }
 
     public void setRequest(String request) {

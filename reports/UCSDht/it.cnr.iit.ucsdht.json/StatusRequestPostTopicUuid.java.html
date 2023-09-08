@@ -3,18 +3,18 @@
 import it.cnr.iit.utility.dht.jsonpersistent.RequestPostTopicUuid;
 
 public class StatusRequestPostTopicUuid implements RequestPostTopicUuid {
-<span class="nc" id="L6">    public final String topic_name = &quot;SIFIS:UCS&quot;;</span>
-<span class="nc" id="L7">    private String topic_uuid = &quot;status&quot;;</span>
+<span class="fc" id="L6">    public final String topic_name = &quot;SIFIS:UCS&quot;;</span>
+<span class="fc" id="L7">    private String topic_uuid = &quot;status&quot;;</span>
     private Status value;
 
 
-<span class="nc" id="L11">    public StatusRequestPostTopicUuid(Status value, String topic_uuid) {</span>
-<span class="nc" id="L12">        this.value = value;</span>
-<span class="nc" id="L13">        this.topic_uuid = topic_uuid;</span>
-<span class="nc" id="L14">    }</span>
+<span class="fc" id="L11">    public StatusRequestPostTopicUuid(Status value, String topic_uuid) {</span>
+<span class="fc" id="L12">        this.value = value;</span>
+<span class="fc" id="L13">        this.topic_uuid = topic_uuid;</span>
+<span class="fc" id="L14">    }</span>
 
     public Status getValue() {
-<span class="nc" id="L17">        return value;</span>
+<span class="fc" id="L17">        return value;</span>
     }
 
     public void setValue(Status value) {
@@ -23,12 +23,12 @@ public class StatusRequestPostTopicUuid implements RequestPostTopicUuid {
 
     @Override
     public String getTopic_name() {
-<span class="nc" id="L26">        return topic_name;</span>
+<span class="fc" id="L26">        return topic_name;</span>
     }
 
     @Override
     public String getTopic_uuid() {
-<span class="nc" id="L31">        return topic_uuid;</span>
+<span class="fc" id="L31">        return topic_uuid;</span>
     }
 
     @Override

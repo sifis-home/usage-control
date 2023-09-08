@@ -102,16 +102,16 @@ public final class PolicyDecisionPoint extends AbstractPDP {
 	@Override
 	public PolicyWrapper findPolicy(RequestWrapper request) {
 		try {
-<span class="nc" id="L105">			PolicyFinder policyFinder = getPolicyFinder();</span>
-<span class="nc" id="L106">			AbstractRequestCtx requestCtx = RequestCtxFactory.getFactory()</span>
-<span class="nc" id="L107">					.getRequestCtx(request.getRequest().replaceAll(&quot;&gt;\\s+&lt;&quot;, &quot;&gt;&lt;&quot;));</span>
-<span class="nc bnc" id="L108" title="All 2 branches missed.">			pdpConfig = pdpConfig == null ? Balana.getInstance().getPdpConfig() : pdpConfig;</span>
-<span class="nc" id="L109">			EvaluationCtx evalContext = EvaluationCtxFactory.getFactory().getEvaluationCtx(requestCtx, pdpConfig);</span>
-<span class="nc" id="L110">			PolicyFinderResult policyFinderResult = policyFinder.findPolicy(evalContext);</span>
-<span class="nc bnc" id="L111" title="All 4 branches missed.">			if (policyFinderResult.getPolicy() == null || policyFinderResult.getPolicy().getId() == null) {</span>
+<span class="fc" id="L105">			PolicyFinder policyFinder = getPolicyFinder();</span>
+<span class="fc" id="L106">			AbstractRequestCtx requestCtx = RequestCtxFactory.getFactory()</span>
+<span class="fc" id="L107">					.getRequestCtx(request.getRequest().replaceAll(&quot;&gt;\\s+&lt;&quot;, &quot;&gt;&lt;&quot;));</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">			pdpConfig = pdpConfig == null ? Balana.getInstance().getPdpConfig() : pdpConfig;</span>
+<span class="fc" id="L109">			EvaluationCtx evalContext = EvaluationCtxFactory.getFactory().getEvaluationCtx(requestCtx, pdpConfig);</span>
+<span class="fc" id="L110">			PolicyFinderResult policyFinderResult = policyFinder.findPolicy(evalContext);</span>
+<span class="pc bpc" id="L111" title="2 of 4 branches missed.">			if (policyFinderResult.getPolicy() == null || policyFinderResult.getPolicy().getId() == null) {</span>
 <span class="nc" id="L112">				return null;</span>
 			}
-<span class="nc" id="L114">			return PolicyWrapper.build(getPAP().retrievePolicy(policyFinderResult.getPolicy().getId().toString()));</span>
+<span class="fc" id="L114">			return PolicyWrapper.build(getPAP().retrievePolicy(policyFinderResult.getPolicy().getId().toString()));</span>
 <span class="nc" id="L115">		} catch (PolicyException | ParsingException e) {</span>
 <span class="nc" id="L116">			return null;</span>
 		}
@@ -177,13 +177,13 @@ public final class PolicyDecisionPoint extends AbstractPDP {
 	}
 
 	private PolicyFinder getPolicyFinder() {
-<span class="nc" id="L180">		PolicyFinder policyFinder = new PolicyFinder();</span>
-<span class="nc" id="L181">		Set&lt;PolicyFinderModule&gt; policyFinderModulesSet = new HashSet&lt;&gt;();</span>
-<span class="nc" id="L182">		FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule(getPolicyFolder());</span>
-<span class="nc" id="L183">		policyFinderModulesSet.add(finderModule);</span>
-<span class="nc" id="L184">		policyFinder.setModules(policyFinderModulesSet);</span>
-<span class="nc" id="L185">		policyFinder.init();</span>
-<span class="nc" id="L186">		return policyFinder;</span>
+<span class="fc" id="L180">		PolicyFinder policyFinder = new PolicyFinder();</span>
+<span class="fc" id="L181">		Set&lt;PolicyFinderModule&gt; policyFinderModulesSet = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L182">		FileSystemPolicyFinderModule finderModule = new FileSystemPolicyFinderModule(getPolicyFolder());</span>
+<span class="fc" id="L183">		policyFinderModulesSet.add(finderModule);</span>
+<span class="fc" id="L184">		policyFinder.setModules(policyFinderModulesSet);</span>
+<span class="fc" id="L185">		policyFinder.init();</span>
+<span class="fc" id="L186">		return policyFinder;</span>
 	}
 
 	/**

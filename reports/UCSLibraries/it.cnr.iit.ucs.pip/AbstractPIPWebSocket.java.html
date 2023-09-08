@@ -27,55 +27,55 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
 
 
     public AbstractPIPWebSocket(PipProperties properties) {
-<span class="nc" id="L30">        super(properties);</span>
-<span class="nc" id="L31">    }</span>
+<span class="fc" id="L30">        super(properties);</span>
+<span class="fc" id="L31">    }</span>
 
     @Override
     public boolean init(PipProperties properties) {
         try {
-<span class="nc" id="L36">            dhtUri = properties.getAdditionalProperties().get(&quot;dhtUri&quot;);</span>
-<span class="nc" id="L37">            Reject.ifNull(dhtUri, &quot;DHT URI not specified&quot;);</span>
+<span class="fc" id="L36">            dhtUri = properties.getAdditionalProperties().get(&quot;dhtUri&quot;);</span>
+<span class="fc" id="L37">            Reject.ifNull(dhtUri, &quot;DHT URI not specified&quot;);</span>
 
-<span class="nc" id="L39">            topicName = properties.getAdditionalProperties().get(&quot;topicName&quot;);</span>
-<span class="nc" id="L40">            Reject.ifNull(topicName, &quot;Topic name not specified&quot;);</span>
+<span class="fc" id="L39">            topicName = properties.getAdditionalProperties().get(&quot;topicName&quot;);</span>
+<span class="fc" id="L40">            Reject.ifNull(topicName, &quot;Topic name not specified&quot;);</span>
 
             // topicUuid can be null since the PIP might perform only
             // requests of type RequestGetTopicName
-<span class="nc" id="L44">            topicUuid = properties.getAdditionalProperties().get(&quot;topicUuid&quot;);</span>
+<span class="fc" id="L44">            topicUuid = properties.getAdditionalProperties().get(&quot;topicUuid&quot;);</span>
 
-<span class="nc" id="L46">            Reject.ifNull(this.typeFactoryClazz, &quot;Class for TypeFactory not set. &quot; +</span>
+<span class="fc" id="L46">            Reject.ifNull(this.typeFactoryClazz, &quot;Class for TypeFactory not set. &quot; +</span>
                     &quot;Call setClassForTypeFactory() method before init()&quot;);
-<span class="nc" id="L48">            this.typeFactory = RuntimeTypeAdapterFactory</span>
-<span class="nc" id="L49">                    .of(RequestPostTopicUuid.class, &quot;topic_name&quot;)</span>
-<span class="nc" id="L50">                    .registerSubtype(this.typeFactoryClazz, this.topicName);</span>
+<span class="fc" id="L48">            this.typeFactory = RuntimeTypeAdapterFactory</span>
+<span class="fc" id="L49">                    .of(RequestPostTopicUuid.class, &quot;topic_name&quot;)</span>
+<span class="fc" id="L50">                    .registerSubtype(this.typeFactoryClazz, this.topicName);</span>
 
             // if the PIP is not intended to upload data to the DHT, persistent
             // messages will not be obtained. Therefore, the PIP is allowed not
             // to use this adapter.
-<span class="nc bnc" id="L55" title="All 2 branches missed.">            if (persistentTypeFactoryClazz != null) {</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if (persistentTypeFactoryClazz != null) {</span>
 <span class="nc" id="L56">                this.persistentTypeFactory = RuntimeTypeAdapterFactory</span>
 <span class="nc" id="L57">                        .of(Persistent.class, &quot;topic_name&quot;)</span>
 <span class="nc" id="L58">                        .registerSubtype(this.persistentTypeFactoryClazz, this.topicName);</span>
             } else {
-<span class="nc" id="L60">                persistentTypeFactory = null;</span>
+<span class="fc" id="L60">                persistentTypeFactory = null;</span>
             }
 
-<span class="nc" id="L63">            client = new DHTPersistentMessageClient(</span>
+<span class="fc" id="L63">            client = new DHTPersistentMessageClient(</span>
                     dhtUri, topicName, topicUuid, typeFactory, persistentTypeFactory);
 
-<span class="nc bnc" id="L66" title="All 2 branches missed.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (Map&lt;String, String&gt; attributeMap : properties.getAttributes()) {</span>
 
-<span class="nc" id="L68">                Attribute attribute = new Attribute();</span>
-<span class="nc" id="L69">                buildAttribute(attribute, attributeMap);</span>
+<span class="fc" id="L68">                Attribute attribute = new Attribute();</span>
+<span class="fc" id="L69">                buildAttribute(attribute, attributeMap);</span>
 
-<span class="nc" id="L71">                addAttribute(attribute);</span>
+<span class="fc" id="L71">                addAttribute(attribute);</span>
 
                 // timer for polling the value of the attribute
-<span class="nc" id="L74">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
-<span class="nc" id="L75">                subscriberTimer.setRate(properties.getRefreshRate());</span>
-<span class="nc" id="L76">                subscriberTimer.start();</span>
-<span class="nc" id="L77">            }</span>
-<span class="nc" id="L78">            return true;</span>
+<span class="fc" id="L74">                PIPSubscriberTimer subscriberTimer = new PIPSubscriberTimer(this);</span>
+<span class="fc" id="L75">                subscriberTimer.setRate(properties.getRefreshRate());</span>
+<span class="fc" id="L76">                subscriberTimer.start();</span>
+<span class="fc" id="L77">            }</span>
+<span class="fc" id="L78">            return true;</span>
 <span class="nc" id="L79">        } catch (Exception e) {</span>
 <span class="nc" id="L80">            return false;</span>
         }
@@ -110,31 +110,31 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
 
     public String performRequestGetTopicName() throws PIPException {
         // get the status from the dht
-<span class="nc" id="L113">        String response = null;</span>
-<span class="nc bnc" id="L114" title="All 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, 1)) {</span>
-<span class="nc" id="L115">            RequestGetTopicName requestGetTopicName =</span>
+<span class="fc" id="L113">        String response = null;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (isDhtReachable(dhtUri, 2000, 1)) {</span>
+<span class="fc" id="L115">            RequestGetTopicName requestGetTopicName =</span>
                     new RequestGetTopicName(topicName);
 
-<span class="nc" id="L118">            JsonOutRequestGetTopicName jsonOut = new JsonOutRequestGetTopicName(requestGetTopicName);</span>
-<span class="nc" id="L119">            String request = new GsonBuilder()</span>
-<span class="nc" id="L120">                    .disableHtmlEscaping()</span>
-<span class="nc" id="L121">                    .serializeNulls()</span>
-<span class="nc" id="L122">                    .create()</span>
-<span class="nc" id="L123">                    .toJson(jsonOut);</span>
+<span class="fc" id="L118">            JsonOutRequestGetTopicName jsonOut = new JsonOutRequestGetTopicName(requestGetTopicName);</span>
+<span class="fc" id="L119">            String request = new GsonBuilder()</span>
+<span class="fc" id="L120">                    .disableHtmlEscaping()</span>
+<span class="fc" id="L121">                    .serializeNulls()</span>
+<span class="fc" id="L122">                    .create()</span>
+<span class="fc" id="L123">                    .toJson(jsonOut);</span>
 
-<span class="nc" id="L125">            response = getResponse(request);</span>
-<span class="nc" id="L126">        } else {</span>
+<span class="fc" id="L125">            response = getResponse(request);</span>
+<span class="fc" id="L126">        } else {</span>
 <span class="nc" id="L127">            throw new PIPException(&quot;Attribute Manager error: &quot; +</span>
                     &quot;Unable to connect to the DHT&quot;);
         }
-<span class="nc" id="L130">        return response;</span>
+<span class="fc" id="L130">        return response;</span>
     }
 
     private String getResponse(String request) throws PIPException {
-<span class="nc" id="L134">        String response = client.sendRequestAndWaitForResponse(request);</span>
-<span class="nc" id="L135">        client.closeConnection();</span>
+<span class="fc" id="L134">        String response = client.sendRequestAndWaitForResponse(request);</span>
+<span class="fc" id="L135">        client.closeConnection();</span>
 
-<span class="nc bnc" id="L137" title="All 2 branches missed.">        if (isEmptyResponse(response)) {</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">        if (isEmptyResponse(response)) {</span>
 <span class="nc" id="L138">            int attempts = 5;</span>
 <span class="nc bnc" id="L139" title="All 2 branches missed.">            for (int i = 1; i &lt;= attempts; i++) {</span>
 <span class="nc" id="L140">                response = client.sendRequestAndWaitForResponse(request);</span>
@@ -148,23 +148,23 @@ public abstract class AbstractPIPWebSocket extends PIPBase {
                 }
             }
         }
-<span class="nc" id="L151">        return response;</span>
+<span class="fc" id="L151">        return response;</span>
     }
 
     private boolean isEmptyResponse(String message) {
-<span class="nc bnc" id="L155" title="All 4 branches missed.">        return message.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;) || message.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:[]}}&quot;);</span>
+<span class="pc bpc" id="L155" title="2 of 4 branches missed.">        return message.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:{}}}&quot;) || message.equals(&quot;{\&quot;Response\&quot;:{\&quot;value\&quot;:[]}}&quot;);</span>
     }
 
     public void setClassForTypeFactory(Class&lt;? extends RequestPostTopicUuid&gt; clazz) {
-<span class="nc" id="L159">        this.typeFactoryClazz = clazz;</span>
-<span class="nc" id="L160">    }</span>
+<span class="fc" id="L159">        this.typeFactoryClazz = clazz;</span>
+<span class="fc" id="L160">    }</span>
 
     public void setClassForPersistentTypeFactory(Class&lt;? extends Persistent&gt; clazz) {
 <span class="nc" id="L163">        this.persistentTypeFactoryClazz = clazz;</span>
 <span class="nc" id="L164">    }</span>
 
     public RuntimeTypeAdapterFactory&lt;RequestPostTopicUuid&gt; getTypeFactory() {
-<span class="nc" id="L167">        return typeFactory;</span>
+<span class="fc" id="L167">        return typeFactory;</span>
     }
 
     public RuntimeTypeAdapterFactory&lt;Persistent&gt; getPersistentTypeFactory() {

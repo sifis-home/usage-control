@@ -93,17 +93,17 @@ public class PolicyWrapper implements PolicyWrapperInterface {
 
     @Override
     public List&lt;Attribute&gt; getAttributesForCondition( String conditionName ) {
-<span class="nc" id="L96">        Reject.ifBlank( conditionName );</span>
-<span class="nc bnc" id="L97" title="All 2 branches missed.">        Reject.ifTrue( conditionName.length() &gt; MAX_CONDITION_LENGTH );</span>
-<span class="nc bnc" id="L98" title="All 2 branches missed.">        for( RuleType ruleType : policyType.getRuleTypeList() ) {</span>
-<span class="nc" id="L99">            List&lt;ConditionType&gt; conditionTypeList = ruleType.getCondition();</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">            if( conditionTypeList != null ) {</span>
-<span class="nc bnc" id="L101" title="All 2 branches missed.">                for( ConditionType conditionType : conditionTypeList ) {</span>
-<span class="nc" id="L102">                    List&lt;Attribute&gt; attributeList = getAttributesFromCondition( conditionType, conditionName );</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">                    if( !attributeList.isEmpty() ) {</span>
-<span class="nc" id="L104">                        return attributeList;</span>
+<span class="fc" id="L96">        Reject.ifBlank( conditionName );</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        Reject.ifTrue( conditionName.length() &gt; MAX_CONDITION_LENGTH );</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">        for( RuleType ruleType : policyType.getRuleTypeList() ) {</span>
+<span class="fc" id="L99">            List&lt;ConditionType&gt; conditionTypeList = ruleType.getCondition();</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">            if( conditionTypeList != null ) {</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">                for( ConditionType conditionType : conditionTypeList ) {</span>
+<span class="fc" id="L102">                    List&lt;Attribute&gt; attributeList = getAttributesFromCondition( conditionType, conditionName );</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">                    if( !attributeList.isEmpty() ) {</span>
+<span class="fc" id="L104">                        return attributeList;</span>
                     }
-<span class="nc" id="L106">                }</span>
+<span class="fc" id="L106">                }</span>
             }
 <span class="nc" id="L108">        }</span>
 <span class="nc" id="L109">        log.log( Level.WARNING, &quot;Condition not found : {0}&quot;, conditionName );</span>
@@ -111,14 +111,14 @@ public class PolicyWrapper implements PolicyWrapperInterface {
     }
 
     private List&lt;Attribute&gt; getAttributesFromCondition( ConditionType conditionType, String conditionName ) {
-<span class="nc bnc" id="L114" title="All 2 branches missed.">        if( conditionType.getDecisionTime() == null ) {</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if( conditionType.getDecisionTime() == null ) {</span>
 <span class="nc bnc" id="L115" title="All 2 branches missed.">            if( conditionName.equals( PolicyTags.CONDITION_PRE ) ) {</span>
 <span class="nc" id="L116">                return getAttributesFromCondition( conditionType );</span>
             }
-<span class="nc bnc" id="L118" title="All 2 branches missed.">        } else if( conditionType.getDecisionTime().equals( conditionName ) ) {</span>
-<span class="nc" id="L119">            return getAttributesFromCondition( conditionType );</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        } else if( conditionType.getDecisionTime().equals( conditionName ) ) {</span>
+<span class="fc" id="L119">            return getAttributesFromCondition( conditionType );</span>
         }
-<span class="nc" id="L121">        return new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L121">        return new ArrayList&lt;&gt;();</span>
     }
 
 
@@ -138,35 +138,35 @@ public class PolicyWrapper implements PolicyWrapperInterface {
      *                in the next recursive iterations.
      */
     private void recursiveGetChildren(JAXBElement&lt;?&gt; node, List&lt;ArrayList&lt;JAXBElement&lt;?&gt;&gt;&gt; elementList, ArrayList&lt;JAXBElement&lt;?&gt;&gt; auxList) {
-<span class="nc" id="L141">        Object objValue = node.getValue();</span>
-<span class="nc bnc" id="L142" title="All 2 branches missed.">        if( objValue instanceof ApplyType ) {</span>
-<span class="nc" id="L143">            ApplyType applyType = (ApplyType) objValue;</span>
-<span class="nc" id="L144">            ArrayList&lt;JAXBElement&lt;?&gt;&gt; children = (ArrayList&lt;JAXBElement&lt;?&gt;&gt;) applyType.getExpression();</span>
-<span class="nc" id="L145">            boolean hasAnAttributeValueTypeChild = false;</span>
-<span class="nc bnc" id="L146" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
-<span class="nc" id="L147">                Object child = jaxbElement.getValue();</span>
-<span class="nc bnc" id="L148" title="All 2 branches missed.">                if (child instanceof AttributeValueType) {</span>
+<span class="fc" id="L141">        Object objValue = node.getValue();</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        if( objValue instanceof ApplyType ) {</span>
+<span class="fc" id="L143">            ApplyType applyType = (ApplyType) objValue;</span>
+<span class="fc" id="L144">            ArrayList&lt;JAXBElement&lt;?&gt;&gt; children = (ArrayList&lt;JAXBElement&lt;?&gt;&gt;) applyType.getExpression();</span>
+<span class="fc" id="L145">            boolean hasAnAttributeValueTypeChild = false;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
+<span class="fc" id="L147">                Object child = jaxbElement.getValue();</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                if (child instanceof AttributeValueType) {</span>
                     // At least one direct child of this node is of type AttributeValueType
-<span class="nc" id="L150">                    hasAnAttributeValueTypeChild = true;</span>
+<span class="fc" id="L150">                    hasAnAttributeValueTypeChild = true;</span>
                 }
-<span class="nc" id="L152">            }</span>
-<span class="nc bnc" id="L153" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
-<span class="nc" id="L154">                recursiveGetChildren(jaxbElement, elementList, auxList);</span>
-<span class="nc" id="L155">            }</span>
-<span class="nc bnc" id="L156" title="All 2 branches missed.">            if (hasAnAttributeValueTypeChild) {</span>
+<span class="fc" id="L152">            }</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">            for (JAXBElement&lt;?&gt; jaxbElement : children) {</span>
+<span class="fc" id="L154">                recursiveGetChildren(jaxbElement, elementList, auxList);</span>
+<span class="fc" id="L155">            }</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">            if (hasAnAttributeValueTypeChild) {</span>
                 // if we get here it means that the node is of type ApplyType, it has at least
                 // one child of type AttributeValueType, and the recursion of this node is terminated,
                 // i.e., all its child nodes have been visited and the attributeList has been fully
                 // populated.
-<span class="nc" id="L161">                elementList.add((ArrayList&lt;JAXBElement&lt;?&gt;&gt;) auxList.clone());</span>
-<span class="nc" id="L162">                auxList.clear();</span>
+<span class="fc" id="L161">                elementList.add((ArrayList&lt;JAXBElement&lt;?&gt;&gt;) auxList.clone());</span>
+<span class="fc" id="L162">                auxList.clear();</span>
             }
-<span class="nc bnc" id="L164" title="All 2 branches missed.">        } else if (objValue instanceof AttributeValueType) {</span>
-<span class="nc" id="L165">            auxList.add(node);</span>
-<span class="nc bnc" id="L166" title="All 2 branches missed.">        } else if (objValue instanceof AttributeDesignatorType) {</span>
-<span class="nc" id="L167">            auxList.add(node);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        } else if (objValue instanceof AttributeValueType) {</span>
+<span class="fc" id="L165">            auxList.add(node);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">        } else if (objValue instanceof AttributeDesignatorType) {</span>
+<span class="fc" id="L167">            auxList.add(node);</span>
         }
-<span class="nc" id="L169">    }</span>
+<span class="fc" id="L169">    }</span>
 
 
     /**
@@ -179,50 +179,50 @@ public class PolicyWrapper implements PolicyWrapperInterface {
      * @return the list of attributes contained in this condition.
      */
     private List&lt;Attribute&gt; getAttributesFromCondition( ConditionType conditionType ) {
-<span class="nc" id="L182">        List&lt;ArrayList&lt;JAXBElement&lt;?&gt;&gt;&gt; elementList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L182">        List&lt;ArrayList&lt;JAXBElement&lt;?&gt;&gt;&gt; elementList = new ArrayList&lt;&gt;();</span>
 
         // populate the elementList as a list of lists. Each list contains
         // one or more elements whose value is of type AttributeValueType
         // and only one element whose value is of type AttributeDesignatorType
-<span class="nc" id="L187">        recursiveGetChildren(conditionType.getExpression(), elementList, new ArrayList&lt;&gt;());</span>
+<span class="fc" id="L187">        recursiveGetChildren(conditionType.getExpression(), elementList, new ArrayList&lt;&gt;());</span>
 
-<span class="nc" id="L189">        ArrayList&lt;Attribute&gt; attributesList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L189">        ArrayList&lt;Attribute&gt; attributesList = new ArrayList&lt;&gt;();</span>
 
-<span class="nc bnc" id="L191" title="All 2 branches missed.">        for (ArrayList&lt;JAXBElement&lt;?&gt;&gt; attributeValuesAndDesignatorList : elementList) {</span>
-<span class="nc" id="L192">            List&lt;List&lt;Object&gt;&gt; dataTypeAndValuesList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        for (ArrayList&lt;JAXBElement&lt;?&gt;&gt; attributeValuesAndDesignatorList : elementList) {</span>
+<span class="fc" id="L192">            List&lt;List&lt;Object&gt;&gt; dataTypeAndValuesList = new ArrayList&lt;&gt;();</span>
 
-<span class="nc" id="L194">            Attribute attribute = new Attribute();</span>
+<span class="fc" id="L194">            Attribute attribute = new Attribute();</span>
 
             // get the attribute values from the elements whose value is of type AttributeValueType
             // and store them in the dataTypeAndValuesList
-<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
-<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (jaxbElement.getValue() instanceof AttributeValueType) {</span>
-<span class="nc" id="L200">                    AttributeValueType attributeValueType = (AttributeValueType) jaxbElement.getValue();</span>
-<span class="nc bnc" id="L201" title="All 2 branches missed.">                    for (Object obj : attributeValueType.getContent()) {</span>
-<span class="nc" id="L202">                        dataTypeAndValuesList.add(Arrays.asList(attributeValueType.getDataType(), obj));</span>
-<span class="nc" id="L203">                    }</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">                if (jaxbElement.getValue() instanceof AttributeValueType) {</span>
+<span class="fc" id="L200">                    AttributeValueType attributeValueType = (AttributeValueType) jaxbElement.getValue();</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">                    for (Object obj : attributeValueType.getContent()) {</span>
+<span class="fc" id="L202">                        dataTypeAndValuesList.add(Arrays.asList(attributeValueType.getDataType(), obj));</span>
+<span class="fc" id="L203">                    }</span>
                 }
-<span class="nc" id="L205">            }</span>
+<span class="fc" id="L205">            }</span>
 
             // get the other info from the element whose value is of type AttributeDesignatorType,
             // build the attribute of type Attribute, and add it to the list that will be returned
-<span class="nc bnc" id="L209" title="All 2 branches missed.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
-<span class="nc bnc" id="L210" title="All 2 branches missed.">                if (jaxbElement.getValue() instanceof AttributeDesignatorType) {</span>
-<span class="nc" id="L211">                    AttributeDesignatorType attrDesignatorType = (AttributeDesignatorType) jaxbElement.getValue();</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            for (JAXBElement&lt;?&gt; jaxbElement : attributeValuesAndDesignatorList) {</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                if (jaxbElement.getValue() instanceof AttributeDesignatorType) {</span>
+<span class="fc" id="L211">                    AttributeDesignatorType attrDesignatorType = (AttributeDesignatorType) jaxbElement.getValue();</span>
 
-<span class="nc" id="L213">                    attribute.setAttributeId(attrDesignatorType.getAttributeId());</span>
-<span class="nc" id="L214">                    attribute.setCategory(Category.toCATEGORY(attrDesignatorType.getCategory()));</span>
-<span class="nc" id="L215">                    attribute.setDataType(DataType.toDATATYPE(attrDesignatorType.getDataType()));</span>
+<span class="fc" id="L213">                    attribute.setAttributeId(attrDesignatorType.getAttributeId());</span>
+<span class="fc" id="L214">                    attribute.setCategory(Category.toCATEGORY(attrDesignatorType.getCategory()));</span>
+<span class="fc" id="L215">                    attribute.setDataType(DataType.toDATATYPE(attrDesignatorType.getDataType()));</span>
 
-<span class="nc bnc" id="L217" title="All 2 branches missed.">                    for (List&lt;Object&gt; o : dataTypeAndValuesList) {</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                    for (List&lt;Object&gt; o : dataTypeAndValuesList) {</span>
                         // the first element of the list is the datatype, while the second is the attribute value
-<span class="nc" id="L219">                        attribute.setAttributeValues(o.get(0).toString(), o.get(1).toString());</span>
-<span class="nc" id="L220">                    }</span>
-<span class="nc" id="L221">                    attributesList.add(attribute);</span>
+<span class="fc" id="L219">                        attribute.setAttributeValues(o.get(0).toString(), o.get(1).toString());</span>
+<span class="fc" id="L220">                    }</span>
+<span class="fc" id="L221">                    attributesList.add(attribute);</span>
                 }
-<span class="nc" id="L223">            }</span>
-<span class="nc" id="L224">        }</span>
-<span class="nc" id="L225">        return attributesList;</span>
+<span class="fc" id="L223">            }</span>
+<span class="fc" id="L224">        }</span>
+<span class="fc" id="L225">        return attributesList;</span>
     }
 
 

@@ -43,31 +43,31 @@ public class JsonUtility {
     }
 
     public static &lt;T&gt; Optional&lt;T&gt; loadObjectFromJsonFile( File file, Class&lt;T&gt; clazz ) {
-<span class="nc" id="L46">        String data = null;</span>
+<span class="fc" id="L46">        String data = null;</span>
         try {
             // TODO UCS-33 NOSONAR
-<span class="nc" id="L49">            Path path = Paths.get( file.getAbsolutePath() );</span>
-<span class="nc" id="L50">            byte[] bytes = Files.readAllBytes( path );</span>
-<span class="nc" id="L51">            data = new String( bytes, StandardCharsets.UTF_8 );</span>
+<span class="fc" id="L49">            Path path = Paths.get( file.getAbsolutePath() );</span>
+<span class="fc" id="L50">            byte[] bytes = Files.readAllBytes( path );</span>
+<span class="fc" id="L51">            data = new String( bytes, StandardCharsets.UTF_8 );</span>
 <span class="nc" id="L52">        } catch( IOException e ) {</span>
 <span class="nc" id="L53">            log.severe( &quot;Error reading file : &quot; + file.getAbsolutePath() + &quot;, &quot; + e.getMessage() );</span>
 <span class="nc" id="L54">            return Optional.empty();</span>
-<span class="nc" id="L55">        }</span>
+<span class="fc" id="L55">        }</span>
 
-<span class="nc" id="L57">        return loadObjectFromJsonString( data, clazz );</span>
+<span class="fc" id="L57">        return loadObjectFromJsonString( data, clazz );</span>
     }
 
     public static void dumpObjectToJsonFile( Object obj, String path, boolean pretty ) {
         // TODO UCS-33 NOSONAR
-<span class="nc" id="L62">        try (FileOutputStream stream = new FileOutputStream( path )) {</span>
-<span class="nc" id="L63">            Optional&lt;String&gt; data = getJsonStringFromObject( obj, pretty );</span>
-<span class="nc bnc" id="L64" title="All 2 branches missed.">            if( data.isPresent() ) {</span>
-<span class="nc" id="L65">                stream.write( data.get().getBytes() );</span>
+<span class="fc" id="L62">        try (FileOutputStream stream = new FileOutputStream( path )) {</span>
+<span class="fc" id="L63">            Optional&lt;String&gt; data = getJsonStringFromObject( obj, pretty );</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">            if( data.isPresent() ) {</span>
+<span class="fc" id="L65">                stream.write( data.get().getBytes() );</span>
             }
 <span class="nc" id="L67">        } catch( IOException e ) {</span>
 <span class="nc" id="L68">            log.severe( &quot;Error writing file : &quot; + path + &quot;, &quot; + e.getMessage() );</span>
-<span class="nc" id="L69">        }</span>
-<span class="nc" id="L70">    }</span>
+<span class="fc" id="L69">        }</span>
+<span class="fc" id="L70">    }</span>
 
     private static ObjectMapper getObjectMapper() {
 <span class="fc" id="L73">        ObjectMapper mapper = new ObjectMapper();</span>

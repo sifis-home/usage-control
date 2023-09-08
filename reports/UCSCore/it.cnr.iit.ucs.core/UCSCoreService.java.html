@@ -41,7 +41,7 @@ import java.util.Map;
  *
  * @author Antonio La Marra, Alessandro Rosetti
  */
-<span class="nc" id="L44">public class UCSCoreService implements UCSInterface {</span>
+<span class="fc" id="L44">public class UCSCoreService implements UCSInterface {</span>
 
     AbstractContextHandler contextHandler;
     AbstractRequestManager requestManager;
@@ -54,29 +54,29 @@ import java.util.Map;
 
     @Override
     public TryAccessResponseMessage tryAccess(TryAccessMessage tryAccessMessage) {
-<span class="nc" id="L57">        Reject.ifNull(tryAccessMessage);</span>
-<span class="nc" id="L58">        TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);</span>
+<span class="fc" id="L57">        Reject.ifNull(tryAccessMessage);</span>
+<span class="fc" id="L58">        TryAccessResponseMessage response = (TryAccessResponseMessage) requestManager.sendMessage(tryAccessMessage);</span>
         // this is null
 //		Reject.ifNull(response);
-<span class="nc" id="L61">        return response;</span>
+<span class="fc" id="L61">        return response;</span>
     }
 
     @Override
     public StartAccessResponseMessage startAccess(StartAccessMessage startAccessMessage) {
-<span class="nc" id="L66">        return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);</span>
+<span class="fc" id="L66">        return (StartAccessResponseMessage) requestManager.sendMessage(startAccessMessage);</span>
     }
 
     @Override
     public EndAccessResponseMessage endAccess(EndAccessMessage endAccessMessage) {
-<span class="nc" id="L71">        return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);</span>
+<span class="fc" id="L71">        return (EndAccessResponseMessage) requestManager.sendMessage(endAccessMessage);</span>
     }
 
     public AbstractContextHandler getContextHandler() {
-<span class="nc" id="L75">        return contextHandler;</span>
+<span class="fc" id="L75">        return contextHandler;</span>
     }
 
     public AbstractRequestManager getRequestManager() {
-<span class="nc" id="L79">        return requestManager;</span>
+<span class="fc" id="L79">        return requestManager;</span>
     }
 
     public ObligationManagerInterface getObligationManager() {
@@ -92,15 +92,15 @@ import java.util.Map;
     }
 
     public PAPInterface getPap() {
-<span class="nc" id="L95">        return pap;</span>
+<span class="fc" id="L95">        return pap;</span>
     }
 
     public List&lt;PIPBase&gt; getPipList() {
-<span class="nc" id="L99">        return pipList;</span>
+<span class="fc" id="L99">        return pipList;</span>
     }
 
     public Map&lt;String, PEPInterface&gt; getPEPMap() {
-<span class="nc" id="L103">        return this.pepMap;</span>
+<span class="fc" id="L103">        return this.pepMap;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

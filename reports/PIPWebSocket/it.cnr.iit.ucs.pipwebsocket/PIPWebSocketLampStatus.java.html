@@ -17,13 +17,13 @@ import java.util.logging.Logger;
 
 public class PIPWebSocketLampStatus extends AbstractPIPWebSocket {
 
-<span class="nc" id="L20">    private static final Logger log = Logger.getLogger(PIPWebSocketLamps.class.getName());</span>
+<span class="fc" id="L20">    private static final Logger log = Logger.getLogger(PIPWebSocketLamps.class.getName());</span>
 
     public PIPWebSocketLampStatus(PipProperties properties) {
-<span class="nc" id="L23">        super(properties);</span>
-<span class="nc" id="L24">        setClassForTypeFactory(DomoLightRequestPostTopicUuid.class);</span>
-<span class="nc" id="L25">        Reject.ifFalse(init(properties), &quot;Error initialising pip : &quot; + properties.getId());</span>
-<span class="nc" id="L26">    }</span>
+<span class="fc" id="L23">        super(properties);</span>
+<span class="fc" id="L24">        setClassForTypeFactory(DomoLightRequestPostTopicUuid.class);</span>
+<span class="fc" id="L25">        Reject.ifFalse(init(properties), &quot;Error initialising pip : &quot; + properties.getId());</span>
+<span class="fc" id="L26">    }</span>
 
     @Override
     public String retrieve(Attribute attribute) throws PIPException {

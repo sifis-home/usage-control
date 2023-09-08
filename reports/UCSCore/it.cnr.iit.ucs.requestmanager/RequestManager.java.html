@@ -97,7 +97,7 @@ public class RequestManager extends AbstractRequestManager {
 	 * the messages coming to the request manager and sends them to the context
 	 * handler.
 	 */
-<span class="nc" id="L100">	private class ContextHandlerInquirer implements Callable&lt;Message&gt; {</span>
+<span class="fc" id="L100">	private class ContextHandlerInquirer implements Callable&lt;Message&gt; {</span>
 
 		@Override
 		public Message call() {
@@ -121,7 +121,7 @@ public class RequestManager extends AbstractRequestManager {
 <span class="fc" id="L121">			return null;</span>
 <span class="fc bfc" id="L122" title="All 2 branches covered.">		} else if (message.getPurpose() == PURPOSE.TRY) {</span>
 <span class="fc" id="L123">			responseMessage = getContextHandler().tryAccess((TryAccessMessage) message);</span>
-<span class="pc bpc" id="L124" title="1 of 2 branches missed.">			if (responseMessage == null) {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">			if (responseMessage == null) {</span>
 <span class="fc" id="L125">				log.severe(&quot;responseMessage is null&quot;);</span>
 			}
 <span class="fc bfc" id="L127" title="All 2 branches covered.">		} else if (message.getPurpose() == PURPOSE.START) {</span>
@@ -135,14 +135,14 @@ public class RequestManager extends AbstractRequestManager {
 <span class="nc" id="L135">			getPEPMap().get(responseMessage.getDestination()).receiveResponse(responseMessage);</span>
 		}
 
-<span class="nc" id="L138">		System.out.println(&quot;responseMessage.toString()=&quot; + responseMessage.toString());</span>
-<span class="nc" id="L139">		return responseMessage;</span>
+<span class="fc" id="L138">		System.out.println(&quot;responseMessage.toString()=&quot; + responseMessage.toString());</span>
+<span class="fc" id="L139">		return responseMessage;</span>
 	}
 
 	@Override
 	public void startMonitoring() {
-<span class="nc" id="L144">		inquirers.submit(new ContextHandlerInquirer());</span>
-<span class="nc" id="L145">	}</span>
+<span class="fc" id="L144">		inquirers.submit(new ContextHandlerInquirer());</span>
+<span class="fc" id="L145">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

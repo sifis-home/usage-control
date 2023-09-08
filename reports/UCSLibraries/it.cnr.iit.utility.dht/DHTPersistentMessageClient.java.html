@@ -11,7 +11,7 @@ import java.net.URI;
 public class DHTPersistentMessageClient {
 
 
-<span class="nc" id="L14">    private final Object lock = new Object();</span>
+<span class="pc" id="L14">    private final Object lock = new Object();</span>
     private String response;
     private Session session;
     private final String uri;
@@ -38,22 +38,22 @@ public class DHTPersistentMessageClient {
 
     public DHTPersistentMessageClient(String uri, String topicName, String topicUuid,
                                       RuntimeTypeAdapterFactory&lt;RequestPostTopicUuid&gt; typeFactory,
-<span class="nc" id="L41">                                      RuntimeTypeAdapterFactory&lt;Persistent&gt; persistentTypeFactory) {</span>
-<span class="nc bnc" id="L42" title="All 4 branches missed.">        if (topicName == null || uri == null) {</span>
+<span class="fc" id="L41">                                      RuntimeTypeAdapterFactory&lt;Persistent&gt; persistentTypeFactory) {</span>
+<span class="pc bpc" id="L42" title="2 of 4 branches missed.">        if (topicName == null || uri == null) {</span>
 <span class="nc" id="L43">            throw new RuntimeException(&quot;Topic name and URI cannot be null&quot;);</span>
         }
-<span class="nc" id="L45">        this.uri = uri;</span>
-<span class="nc" id="L46">        this.topicName = topicName;</span>
-<span class="nc" id="L47">        this.topicUuid = topicUuid;</span>
-<span class="nc" id="L48">        this.typeFactory = typeFactory;</span>
-<span class="nc" id="L49">        this.persistentTypeFactory = persistentTypeFactory;</span>
-<span class="nc" id="L50">    }</span>
+<span class="fc" id="L45">        this.uri = uri;</span>
+<span class="fc" id="L46">        this.topicName = topicName;</span>
+<span class="fc" id="L47">        this.topicUuid = topicUuid;</span>
+<span class="fc" id="L48">        this.typeFactory = typeFactory;</span>
+<span class="fc" id="L49">        this.persistentTypeFactory = persistentTypeFactory;</span>
+<span class="fc" id="L50">    }</span>
 
     @OnOpen
     public void onOpen(Session session) {
-<span class="nc" id="L54">        this.session = session; // Store the session for later use</span>
+<span class="fc" id="L54">        this.session = session; // Store the session for later use</span>
 //        System.out.println(&quot;WebSocket connected&quot;);
-<span class="nc" id="L56">    }</span>
+<span class="fc" id="L56">    }</span>
 
 
     /**
@@ -65,20 +65,20 @@ public class DHTPersistentMessageClient {
      * topicName and topicUuid fields. False otherwise.
      */
     private boolean isExpectedResponse2RequestGetTopicUuid(String message) {
-<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (this.topicUuid == null) {</span>
-<span class="nc" id="L69">            return false;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (this.topicUuid == null) {</span>
+<span class="fc" id="L69">            return false;</span>
         }
         try {
-<span class="nc" id="L72">            JsonInResponse2RequestGetTopicUuid jsonInResponse = new GsonBuilder()</span>
-<span class="nc" id="L73">                    .registerTypeAdapterFactory(typeFactory)</span>
-<span class="nc" id="L74">                    .create()</span>
-<span class="nc" id="L75">                    .fromJson(message, JsonInResponse2RequestGetTopicUuid.class);</span>
+<span class="fc" id="L72">            JsonInResponse2RequestGetTopicUuid jsonInResponse = new GsonBuilder()</span>
+<span class="fc" id="L73">                    .registerTypeAdapterFactory(typeFactory)</span>
+<span class="fc" id="L74">                    .create()</span>
+<span class="fc" id="L75">                    .fromJson(message, JsonInResponse2RequestGetTopicUuid.class);</span>
 
-<span class="nc" id="L77">            String topicName = jsonInResponse.getResponse().getValue().getTopic_name();</span>
-<span class="nc" id="L78">            String topicUuid = jsonInResponse.getResponse().getValue().getTopic_uuid();</span>
-<span class="nc bnc" id="L79" title="All 4 branches missed.">            return this.topicName.equals(topicName) &amp;&amp; this.topicUuid.equals(topicUuid);</span>
-<span class="nc" id="L80">        } catch (Exception e) {</span>
-<span class="nc" id="L81">            return false;</span>
+<span class="fc" id="L77">            String topicName = jsonInResponse.getResponse().getValue().getTopic_name();</span>
+<span class="fc" id="L78">            String topicUuid = jsonInResponse.getResponse().getValue().getTopic_uuid();</span>
+<span class="pc bpc" id="L79" title="2 of 4 branches missed.">            return this.topicName.equals(topicName) &amp;&amp; this.topicUuid.equals(topicUuid);</span>
+<span class="fc" id="L80">        } catch (Exception e) {</span>
+<span class="fc" id="L81">            return false;</span>
         }
     }
 
@@ -92,15 +92,15 @@ public class DHTPersistentMessageClient {
      */
     private boolean isExpectedResponse2RequestGetTopicName(String message) {
         try {
-<span class="nc" id="L95">            JsonInResponse2RequestGetTopicName jsonInResponse = new GsonBuilder()</span>
-<span class="nc" id="L96">                    .registerTypeAdapterFactory(typeFactory)</span>
-<span class="nc" id="L97">                    .create()</span>
-<span class="nc" id="L98">                    .fromJson(message, JsonInResponse2RequestGetTopicName.class);</span>
+<span class="fc" id="L95">            JsonInResponse2RequestGetTopicName jsonInResponse = new GsonBuilder()</span>
+<span class="fc" id="L96">                    .registerTypeAdapterFactory(typeFactory)</span>
+<span class="fc" id="L97">                    .create()</span>
+<span class="fc" id="L98">                    .fromJson(message, JsonInResponse2RequestGetTopicName.class);</span>
 
-<span class="nc" id="L100">            String topicName = jsonInResponse.getResponse().getValue().get(0).getTopic_name();</span>
-<span class="nc" id="L101">            return this.topicName.equals(topicName);</span>
-<span class="nc" id="L102">        } catch (Exception e) {</span>
-<span class="nc" id="L103">            return false;</span>
+<span class="fc" id="L100">            String topicName = jsonInResponse.getResponse().getValue().get(0).getTopic_name();</span>
+<span class="fc" id="L101">            return this.topicName.equals(topicName);</span>
+<span class="fc" id="L102">        } catch (Exception e) {</span>
+<span class="fc" id="L103">            return false;</span>
         }
     }
 
@@ -112,18 +112,18 @@ public class DHTPersistentMessageClient {
      * topicName and topicUuid fields. False otherwise.
      */
     private boolean isExpectedPersistent(String message) {
-<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (this.topicUuid == null) {</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (this.topicUuid == null) {</span>
 <span class="nc" id="L116">            return false;</span>
         }
         try {
-<span class="nc" id="L119">            JsonInPersistent jsonInPersistent = new GsonBuilder()</span>
-<span class="nc" id="L120">                    .registerTypeAdapterFactory(persistentTypeFactory)</span>
-<span class="nc" id="L121">                    .create()</span>
-<span class="nc" id="L122">                    .fromJson(message, JsonInPersistent.class);</span>
+<span class="fc" id="L119">            JsonInPersistent jsonInPersistent = new GsonBuilder()</span>
+<span class="fc" id="L120">                    .registerTypeAdapterFactory(persistentTypeFactory)</span>
+<span class="fc" id="L121">                    .create()</span>
+<span class="fc" id="L122">                    .fromJson(message, JsonInPersistent.class);</span>
 
-<span class="nc" id="L124">            String topicName = jsonInPersistent.getPersistent().getTopic_name();</span>
-<span class="nc" id="L125">            String topicUuid = jsonInPersistent.getPersistent().getTopic_uuid();</span>
-<span class="nc bnc" id="L126" title="All 4 branches missed.">            return this.topicName.equals(topicName) &amp;&amp; this.topicUuid.equals(topicUuid);</span>
+<span class="fc" id="L124">            String topicName = jsonInPersistent.getPersistent().getTopic_name();</span>
+<span class="fc" id="L125">            String topicUuid = jsonInPersistent.getPersistent().getTopic_uuid();</span>
+<span class="pc bpc" id="L126" title="2 of 4 branches missed.">            return this.topicName.equals(topicName) &amp;&amp; this.topicUuid.equals(topicUuid);</span>
 <span class="nc" id="L127">        } catch (Exception e) {</span>
 <span class="nc" id="L128">            return false;</span>
         }
@@ -152,67 +152,67 @@ public class DHTPersistentMessageClient {
     @OnMessage
     public void onMessage(String message, Session session) {
         String truncatedMessage;
-<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (message.length() &gt; 100) {</span>
-<span class="nc" id="L156">            truncatedMessage = message.substring(0,99) + &quot;... (remainder omitted for readability)&quot;;</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if (message.length() &gt; 100) {</span>
+<span class="fc" id="L156">            truncatedMessage = message.substring(0,99) + &quot;... (remainder omitted for readability)&quot;;</span>
         } else {
 <span class="nc" id="L158">            truncatedMessage = message;</span>
         }
 
-<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (!(isExpectedResponse2RequestGetTopicUuid(message)</span>
-<span class="nc bnc" id="L162" title="All 2 branches missed.">                || isExpectedResponse2RequestGetTopicName(message)</span>
-<span class="nc bnc" id="L163" title="All 2 branches missed.">                || isExpectedPersistent(message))</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (!(isExpectedResponse2RequestGetTopicUuid(message)</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">                || isExpectedResponse2RequestGetTopicName(message)</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">                || isExpectedPersistent(message))</span>
 <span class="nc bnc" id="L164" title="All 2 branches missed.">                &amp;&amp; !isEmptyResponse(message)) {</span>
             // discard message
 //                System.out.println(&quot;DHTPersistentMessageClient: message discarded: &quot; + truncatedMessage);
 <span class="nc" id="L167">            return;</span>
         }
         else {
-<span class="nc" id="L170">            System.out.print(&quot;DHTPersistentMessageClient: &quot; +</span>
+<span class="fc" id="L170">            System.out.print(&quot;DHTPersistentMessageClient: &quot; +</span>
                     &quot;Received response for topicName: &quot; + topicName);
-<span class="nc bnc" id="L172" title="All 2 branches missed.">            if (topicUuid != null) {</span>
-<span class="nc" id="L173">                System.out.println(&quot;, topicUuid: &quot; + topicUuid);</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            if (topicUuid != null) {</span>
+<span class="fc" id="L173">                System.out.println(&quot;, topicUuid: &quot; + topicUuid);</span>
             } else {
-<span class="nc" id="L175">                System.out.println();</span>
+<span class="fc" id="L175">                System.out.println();</span>
             }
         }
 
-<span class="nc" id="L179">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
-<span class="nc" id="L180">        response = message;</span>
-<span class="nc" id="L181">        synchronized (lock) {</span>
-<span class="nc" id="L182">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
-<span class="nc" id="L183">        }</span>
-<span class="nc" id="L184">    }</span>
+<span class="fc" id="L179">        System.out.println(&quot;Received response: &quot; + truncatedMessage);</span>
+<span class="fc" id="L180">        response = message;</span>
+<span class="fc" id="L181">        synchronized (lock) {</span>
+<span class="fc" id="L182">            lock.notify(); // Notify the waiting thread that the response has been received.</span>
+<span class="fc" id="L183">        }</span>
+<span class="fc" id="L184">    }</span>
 
     @OnClose
     public void onClose(Session session) {
 //        System.out.println(&quot;Session &quot; + session.getId() + &quot; closed.&quot;);
-<span class="nc" id="L189">    }</span>
+<span class="fc" id="L189">    }</span>
 
     public void closeConnection() {
         try {
-<span class="nc bnc" id="L193" title="All 2 branches missed.">            if (session != null) {</span>
-<span class="nc" id="L194">                session.close();</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">            if (session != null) {</span>
+<span class="fc" id="L194">                session.close();</span>
             }
 <span class="nc" id="L196">        } catch (Exception e) {</span>
 <span class="nc" id="L197">            e.printStackTrace();</span>
-<span class="nc" id="L198">        }</span>
-<span class="nc" id="L199">    }</span>
+<span class="fc" id="L198">        }</span>
+<span class="fc" id="L199">    }</span>
 
     public String sendRequestAndWaitForResponse(String request) {
 
         try {
-<span class="nc" id="L204">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
-<span class="nc" id="L205">            container.connectToServer(this, new URI(this.uri));</span>
+<span class="fc" id="L204">            WebSocketContainer container = ContainerProvider.getWebSocketContainer();</span>
+<span class="fc" id="L205">            container.connectToServer(this, new URI(this.uri));</span>
 
-<span class="nc" id="L207">            synchronized (lock) {</span>
-<span class="nc" id="L208">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
-<span class="nc" id="L209">                lock.wait(); // Wait for the response to be received</span>
-<span class="nc" id="L210">            }</span>
-<span class="nc" id="L211">            return response;</span>
-<span class="nc" id="L212">        } catch (Exception e) {</span>
-<span class="nc" id="L213">            e.printStackTrace();</span>
+<span class="fc" id="L207">            synchronized (lock) {</span>
+<span class="fc" id="L208">                this.session.getBasicRemote().sendText(request); // Send the request using the stored session</span>
+<span class="fc" id="L209">                lock.wait(); // Wait for the response to be received</span>
+<span class="fc" id="L210">            }</span>
+<span class="fc" id="L211">            return response;</span>
+<span class="fc" id="L212">        } catch (Exception e) {</span>
+<span class="fc" id="L213">            e.printStackTrace();</span>
         }
-<span class="nc" id="L215">        return null;</span>
+<span class="fc" id="L215">        return null;</span>
     }
 
     public String getTopicName() {

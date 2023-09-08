@@ -5,12 +5,12 @@ import it.cnr.iit.utility.dht.jsonvolatile.MessageContent;
 
 public class EndAccessRequest implements MessageContent {
 
-<span class="nc" id="L8">    public String purpose = PURPOSE.END.name();</span>
+<span class="pc" id="L8">    public String purpose = PURPOSE.END.name();</span>
     private String message_id;
     private String session_id;
 
-<span class="nc" id="L12">    public EndAccessRequest() {</span>
-<span class="nc" id="L13">    }</span>
+<span class="fc" id="L12">    public EndAccessRequest() {</span>
+<span class="fc" id="L13">    }</span>
 
 <span class="nc" id="L15">    public EndAccessRequest(String message_id, String session_id) {</span>
 <span class="nc" id="L16">        this.message_id = message_id;</span>
@@ -18,7 +18,7 @@ public class EndAccessRequest implements MessageContent {
 <span class="nc" id="L18">    }</span>
 
     public String getMessage_id() {
-<span class="nc" id="L21">        return message_id;</span>
+<span class="fc" id="L21">        return message_id;</span>
     }
 
     public void setMessage_id(String message_id) {
@@ -26,7 +26,7 @@ public class EndAccessRequest implements MessageContent {
 <span class="nc" id="L26">    }</span>
 
     public String getSession_id() {
-<span class="nc" id="L29">        return session_id;</span>
+<span class="fc" id="L29">        return session_id;</span>
     }
 
     public void setSession_id(String session_id) {

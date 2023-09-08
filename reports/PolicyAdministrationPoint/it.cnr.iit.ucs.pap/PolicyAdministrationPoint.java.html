@@ -111,8 +111,8 @@ public class PolicyAdministrationPoint implements PAPInterface {
         }
 
 <span class="fc" id="L113">        Path policyPath = getPolicyPath( id );</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if( policyPath.toFile().exists() ) {</span>
-<span class="nc" id="L115">            log.log( Level.INFO, &quot;Updating policy {0}&quot;, id );</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        if( policyPath.toFile().exists() ) {</span>
+<span class="fc" id="L115">            log.log( Level.INFO, &quot;Updating policy {0}&quot;, id );</span>
         }
 <span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if( writePolicy( policyPath, policy ) ) {</span>
 <span class="fc" id="L118">            return id;</span>

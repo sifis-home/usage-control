@@ -95,14 +95,14 @@ public final class FileUtility {
 <span class="nc" id="L95">			return null;</span>
 		}
 <span class="fc" id="L97">		File file = new File(relPath);</span>
-<span class="pc bpc" id="L98" title="1 of 2 branches missed.">		if (file.exists()) {</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">		if (file.exists()) {</span>
 <span class="fc" id="L99">			return relPath;</span>
 		}
 		try {
-<span class="nc" id="L102">			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span>
+<span class="fc" id="L102">			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();</span>
 <span class="nc" id="L103">			return Paths.get(classLoader.getResource(relPath).toURI()).toString();</span>
-<span class="nc" id="L104">		} catch (NullPointerException e) {</span>
-<span class="nc" id="L105">			return null;</span>
+<span class="fc" id="L104">		} catch (NullPointerException e) {</span>
+<span class="fc" id="L105">			return null;</span>
 <span class="nc" id="L106">		} catch (Exception e) {</span>
 <span class="nc" id="L107">			log.severe(&quot;Unable to find absolute path due to error: &quot; + e.getMessage());</span>
 <span class="nc" id="L108">			return null;</span>
