@@ -568,10 +568,12 @@ public class UCSDht {
     private static void initializeUCS() {
 
         // to be correctly initialized, the UCS needs at least one PIP to be present
-        addSamplePip("it.cnr.iit.ucs.pipreader.PIPReader", "sample-pip",
-                "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
-                Category.ENVIRONMENT.toString(), DataType.STRING.toString(), "sample-attribute-1.txt",
-                1000L, "attribute-1-value");
+        if (pipPropertiesList.stream().noneMatch(id -> id.getId().equals("sample-pip"))) {
+            addSamplePip("it.cnr.iit.ucs.pipreader.PIPReader", "sample-pip",
+                    "urn:oasis:names:tc:xacml:3.0:environment:attribute-1",
+                    Category.ENVIRONMENT.toString(), DataType.STRING.toString(), "sample-attribute-1.txt",
+                    1000L, "attribute-1-value");
+        }
 
         sessionManagerProperties.setDbUri(dbUri);
 
