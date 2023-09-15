@@ -8,8 +8,8 @@ coverage/PEPDht,it.cnr.iit.pepdht,PEPDht.NewThread,10,0,0,0,5,0,2,0,2,0
 coverage/PEPDht,it.cnr.iit.pepdht,PEPDht,361,0,30,0,110,0,34,0,19,0
 coverage/PIPReader,it.cnr.iit.ucs.pipreader,PIPReader,43,273,1,13,11,55,4,16,3,10
 coverage/PIPTime,it.cnr.iit.ucs.piptime,PIPTime,57,22,2,0,17,4,7,2,6,2
-coverage/PIPWebSocket,it.cnr.iit.ucs.pipwebsocket.json,DomoLight,39,6,0,0,17,2,11,2,11,2
 coverage/PIPWebSocket,it.cnr.iit.ucs.pipwebsocket.json,DomoLightRequestPostTopicUuid,23,5,0,0,10,2,4,2,4,2
+coverage/PIPWebSocket,it.cnr.iit.ucs.pipwebsocket.json,DomoLight,39,6,0,0,17,2,11,2,11,2
 coverage/PIPWebSocket,it.cnr.iit.ucs.pipwebsocket,PIPWebSocketLampStatus,47,25,2,0,17,5,7,2,6,2
 coverage/PIPWebSocket,it.cnr.iit.ucs.pipwebsocket,PIPWebSocketLamps,8,75,1,3,6,18,5,5,4,4
 coverage/PolicyAdministrationPoint,it.cnr.iit.ucs.pap,PolicyAdministrationPoint,23,187,4,10,5,40,4,12,0,9
@@ -41,11 +41,11 @@ coverage/UCSDht,it.cnr.iit.ucsdht,PIPMessageManager,36,446,8,12,7,97,9,10,1,8
 coverage/UCSDht,it.cnr.iit.ucsdht,ManagerUtils,6,30,1,1,2,6,2,4,1,4
 coverage/UCSDht,it.cnr.iit.ucsdht,DhtMessageHandler,156,3,10,0,47,1,8,1,2,1
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPepProperties,10,49,0,0,5,19,5,11,5,11
-coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtObligationManagerProperties,4,5,0,0,2,2,2,2,2,2
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPipProperties,41,97,2,0,9,31,4,15,3,15
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtRequestManagerProperties,6,7,0,0,3,3,3,3,3,3
-coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtProperties,4,43,0,0,1,14,1,9,1,9
+coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtObligationManagerProperties,4,5,0,0,2,2,2,2,2,2
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPdpProperties,6,9,0,0,3,4,3,4,3,4
+coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtProperties,4,43,0,0,1,14,1,9,1,9
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtContextHandlerProperties,4,7,0,0,2,3,2,3,2,3
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtCoreProperties,13,0,0,0,5,0,5,0,5,0
 coverage/UCSDht,it.cnr.iit.ucsdht.properties,UCSDhtPapProperties,8,11,0,0,4,5,3,3,3,3
@@ -128,8 +128,8 @@ coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,EffectType,31,34,4,
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributeValueType,0,29,0,2,0,9,0,6,0,5
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,MultiRequestsType,0,14,1,1,0,4,1,2,0,2
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,MissingAttributeDetailType,16,26,1,1,8,8,5,6,4,6
-coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,PolicyType,4,104,0,2,1,39,1,26,1,25
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,DefaultsType,4,6,0,0,2,2,1,2,1,2
+coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,PolicyType,4,104,0,2,1,39,1,26,1,25
 coverage/UCSLibraries,oasis.names.tc.xacml.core.schema.wd_17,AttributeType,0,35,0,2,0,13,0,9,0,8
 coverage/UCSLibraries,it.cnr.iit.utility.dht.jsonvolatile.reevaluation,ReevaluationResponse,44,0,0,0,17,0,8,0,8,0
 coverage/UCSLibraries,it.cnr.iit.ucs.contexthandler,AbstractContextHandler,11,109,0,2,4,33,2,13,2,12
