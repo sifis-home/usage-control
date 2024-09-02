@@ -81,7 +81,7 @@ public class UCSClient {
         //       I can't figure out its purpose yet.
         TryAccessMessage message = new TryAccessMessage(pepId, pepProperties.getUri(), messageId);
         message.setRequest(request);
-//        message.setPolicy(policy);
+        message.setPolicy(policy);
         return message;
     }
 

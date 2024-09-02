@@ -60,8 +60,13 @@ public class PEPMessageManager {
 
         // make the actual try access request to the UCS
         String request = new String(Base64.getDecoder().decode(messageIn.getRequest()));
+
+        String policy = (messageIn.getPolicy() != null)
+                ? new String(Base64.getDecoder().decode(messageIn.getPolicy()))
+                : null;
+
         TryAccessResponseMessage response =
-                ucsClient.tryAccess(request, null, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
+                ucsClient.tryAccess(request, policy, getIdFromJson(jsonIn), getMessageIdFromJson(jsonIn));
 
         // build the json object
         JsonOut jsonOut = response == null ?
