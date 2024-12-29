@@ -95,19 +95,23 @@ public class PolicyWrapper implements PolicyWrapperInterface {
     public List<Attribute> getAttributesForCondition( String conditionName ) {
         Reject.ifBlank( conditionName );
         Reject.ifTrue( conditionName.length() > MAX_CONDITION_LENGTH );
+        List<Attribute> attributeList = new ArrayList<>();
         for( RuleType ruleType : policyType.getRuleTypeList() ) {
             List<ConditionType> conditionTypeList = ruleType.getCondition();
             if( conditionTypeList != null ) {
                 for( ConditionType conditionType : conditionTypeList ) {
-                    List<Attribute> attributeList = getAttributesFromCondition( conditionType, conditionName );
-                    if( !attributeList.isEmpty() ) {
-                        return attributeList;
-                    }
+                    attributeList.addAll(getAttributesFromCondition( conditionType, conditionName ));
+//                    List<Attribute> attributeList = getAttributesFromCondition( conditionType, conditionName );
+//                    if( !attributeList.isEmpty() ) {
+//                        return attributeList;
+//                    }
                 }
             }
         }
-        log.log( Level.WARNING, "Condition not found : {0}", conditionName );
-        return new ArrayList<>();
+        if (attributeList.isEmpty()) {
+            log.log( Level.WARNING, "No attributes found for {0} condition", conditionName );
+        }
+        return attributeList;
     }
 
     private List<Attribute> getAttributesFromCondition( ConditionType conditionType, String conditionName ) {
