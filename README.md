@@ -8,3 +8,19 @@ The repo on GitHub at [https://github.com/sifis-home/usage-control](https://gith
 
 Being a push mirror, all the changes have to be done at the repository hosted on the GitLab instance.
 
+# Building
+
+You need Java8 and [maven](https://maven.apache.org), you may install it using [sdkman](https://sdkman.io):
+
+```sh
+# Pick a java8 distribution
+$ sdk list java | grep 8.0
+$ sdk install java 8.0.{minor}-{dist}
+# The latest maven is fine to use
+$ sdk install maven
+```
+
+Then you may build the package normally
+```sh
+$ mvn clean package
+```
